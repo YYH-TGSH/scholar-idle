@@ -1,0 +1,3322 @@
+/* ==========================================================================
+   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.2.0)
+   純真點陣字型、雙層像素對話框、寶可夢血條與日系 RPG 建築島嶼
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+:root {
+  --font-pixel: "Press Start 2P", "Cubic 11", "Courier New", monospace;
+  --gba-blue-border: #182042;
+  --gba-blue-inner: #304878;
+  --gba-cream-bg: #f8f8f0;
+  --gba-dark-text: #1a1a24;
+}
+
+body {
+  font-family: var(--font-pixel), "Noto Sans TC", sans-serif;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+    /* ==========================================
+       蘋果高端極簡與液態玻璃 (Liquid Glassmorphism) 設計系統
+       ========================================== */
+    :root {
+      /* 蘋果風格高飽和色彩系統 */
+      --primary: #ff9f0a;
+      /* 活力橘黃 */
+      --secondary: #ff453a;
+      /* 櫻花櫻桃紅 */
+      --accent: #30d158;
+      /* 薄荷亮綠 */
+      --sky-blue: #0a84ff;
+      /* 活力寶藍 */
+      --purple: #bf5af2;
+      /* 薰衣草紫 */
+
+      /* 液態玻璃與磨砂背景 */
+      --glass-bg: rgba(255, 255, 255, 0.42);
+      --glass-border: rgba(255, 255, 255, 0.55);
+      --glass-highlight: rgba(255, 255, 255, 0.7);
+
+      --card-bg: rgba(255, 255, 255, 0.5);
+      --shadow-color: rgba(31, 38, 135, 0.06);
+      --border-color: rgba(255, 255, 255, 0.45);
+
+      /* 蘋果 San Francisco 字體色彩規格 */
+      --text-color: #1d1d1f;
+      --text-muted: #86868b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Inter', 'SF Pro Text', 'SF Pro Display', 'Noto Sans TC', -apple-system, sans-serif;
+      color: var(--text-color);
+      -webkit-tap-highlight-color: transparent;
+      letter-spacing: -0.2px;
+    }
+
+    /* 蘋果極光動態背景 (Aurora Fluid Gradient) */
+    @keyframes aurora {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes blink-eye {
+      0%, 9%, 11%, 100% { transform: scaleY(1); }
+      10% { transform: scaleY(0.1); }
+    }
+    .round-eye {
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: blink-eye 4s infinite;
+    }
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(-45deg, #e3f2fd, #fff3e0, #e8f5e9, #f3e5f5, #e0f7fa);
+      background-size: 400% 400%;
+      animation: aurora 25s ease infinite;
+      position: relative;
+      font-feature-settings: "palt";
+      /* 優雅中文排版 */
+    }
+
+    /* ==========================================
+       一屏盡覽六角聚落 (Single-Screen Viewport)
+       ========================================== */
+    .map-viewport {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+    }
+
+    /* 2.5D 柔和光暈景深 */
+    .map-viewport::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 45%, transparent 60%, rgba(0, 0, 0, 0.05) 100%);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    /* 960x540 緊湊六角等角聚落地圖舞台 */
+    .town-map {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      margin: 0 auto;
+      overflow: visible;
+      transform-origin: center center;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+
+    /* ==========================================
+       斜 45 度等角立體島嶼 (Isometric Diorama Blocks)
+       開羅遊戲 16-bit 像素工藝 + 暖色厚實地層
+       ========================================== */
+    .map-landmark,
+    .iso-island {
+      position: absolute;
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease;
+      transform-origin: bottom center;
+    }
+
+    .iso-island:hover {
+      transform: translateY(-4px) scale(1.02);
+      filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.16));
+    }
+
+    .iso-island.active-inside {
+      filter: drop-shadow(0 0 16px rgba(255, 159, 10, 0.55)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.14));
+    }
+
+    .iso-island.light-off {
+      filter: brightness(0.6) contrast(0.9) grayscale(0.5);
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .iso-island.light-off:hover {
+      transform: none;
+    }
+
+    /* 開羅經典 2.5D 正向點陣建築框架 (Kairosoft 2.5D Dollhouse) */
+    .island-platform {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background: #fbf5e8;
+      border: 3px solid #3c2415;
+      box-shadow: 0 5px 0 #23150b, 0 10px 16px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
+    }
+
+    .island-platform-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #ffffff;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+
+    /* 建築標籤 (開羅經典木牌標籤) */
+    .island-tag {
+      position: absolute;
+      bottom: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff9ed;
+      color: #3c2415;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border-radius: 6px;
+      padding: 2px 10px;
+      border: 2px solid #3c2415;
+      box-shadow: 0 2px 0 #23150b;
+      white-space: nowrap;
+      z-index: 28;
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .iso-island:hover .island-tag {
+      background: #fffaee;
+      border-color: #e67e22;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    /* 島嶼等級像素寶石徽章 */
+    .island-lv-badge {
+      position: absolute;
+      top: -8px;
+      right: -6px;
+      z-index: 30;
+      background: linear-gradient(135deg, #ffd32a, #ff9f1a);
+      color: #3c2415;
+      font-size: 0.68rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 2px solid #3c2415;
+      box-shadow: 0 3px 0 #23150b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .island-lv-badge:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 5px 0 #23150b;
+    }
+
+    .island-lv-badge:active {
+      transform: translate(1px, 2px);
+      box-shadow: none;
+    }
+
+    .island-lv-badge.is-max {
+      background: linear-gradient(135deg, #a55eea, #fc5c65);
+      color: #ffffff;
+      box-shadow: 0 3px 0 #1e0933;
+    }
+
+    /* 建築物 Lv.2 / Lv.3 視覺擴充浮動裝飾 */
+    .island-up-deco {
+      position: absolute;
+      pointer-events: none;
+      z-index: 18;
+      display: none;
+      animation: float-deco 2.5s ease-in-out infinite;
+    }
+
+    .island-up-deco.active {
+      display: block;
+    }
+
+    @keyframes float-deco {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    /* 咪咪小貓咪 (Lv.3 住家專屬) */
+    .pet-cat {
+      position: absolute;
+      left: 175px;
+      bottom: 18px;
+      width: 26px;
+      height: 26px;
+      z-index: 26;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      transition: transform 0.2s ease;
+      animation: cat-breathe 2.8s ease-in-out infinite;
+    }
+
+    .pet-cat:hover {
+      transform: scale(1.25) translateY(-3px);
+    }
+
+    @keyframes cat-breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08) translateY(-1px); }
+    }
+
+    /* 6 大建築固定座標 (960x540 Viewport - 開羅 2.5D 正向街區佈局) */
+    /* 上排 3 棟 */
+    .landmark-school {
+      left: 28px;
+      top: 25px;
+      width: 270px;
+      height: 185px;
+    }
+
+    .landmark-library {
+      left: 338px;
+      top: 25px;
+      width: 270px;
+      height: 185px;
+    }
+
+    .landmark-gym {
+      left: 648px;
+      top: 25px;
+      width: 284px;
+      height: 185px;
+    }
+
+    /* 下排 3 棟 */
+    .landmark-restaurant {
+      left: 28px;
+      top: 295px;
+      width: 270px;
+      height: 185px;
+    }
+
+    .landmark-store {
+      left: 338px;
+      top: 295px;
+      width: 270px;
+      height: 185px;
+    }
+
+    .landmark-home {
+      left: 648px;
+      top: 295px;
+      width: 284px;
+      height: 185px;
+    }
+
+    /* 屋頂透視與內部家具互動 */
+    .roof-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 6;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .active-inside .roof-cover {
+      opacity: 0.15;
+    }
+
+    /* ==========================================
+       ❗ 突發日常事件膠囊與選擇卡樣式
+       ========================================== */
+    .random-event-capsule {
+      position: fixed;
+      top: 78px;
+      right: 24px;
+      z-index: 90;
+      background: linear-gradient(135deg, #ff9f0a, #ff375f);
+      color: #fff;
+      border-radius: 24px;
+      padding: 8px 16px;
+      box-shadow: 0 8px 24px rgba(255, 55, 95, 0.38);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      animation: pulse-capsule 1.2s infinite ease-in-out;
+      overflow: hidden;
+    }
+
+    .random-event-capsule span {
+      color: #fff;
+    }
+
+    .random-event-capsule .event-timer-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.9);
+      width: 100%;
+      transition: width 0.2s linear;
+    }
+
+    @keyframes pulse-capsule {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.06) translateY(-2px); }
+    }
+
+    .event-choice-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.65);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .event-choice-btn:hover {
+      background: #ffffff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(255, 159, 10, 0.15);
+    }
+
+    .event-choice-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-color);
+    }
+
+    .event-choice-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* 🤝 好友卡片樣式 */
+    .friend-card {
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .friend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .friend-avatar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .friend-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .friend-lv-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: rgba(10, 132, 255, 0.12);
+      color: var(--sky-blue);
+    }
+
+    .friend-aff-bar {
+      width: 100%;
+      height: 8px;
+      background: #efe9e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 6px 0;
+    }
+
+    .friend-aff-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff9f0a, #ff2d55);
+      transition: width 0.3s ease;
+    }
+
+    .friend-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .friend-btn {
+      flex: 1;
+      padding: 5px 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      transition: all 0.15s;
+    }
+
+    .friend-btn:hover:not(:disabled) {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .friend-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ==========================================
+       室內家具擺設
+       ========================================== */
+    .furniture-bed-parents {
+      position: absolute;
+      bottom: 15px;
+      left: 45px;
+      width: 52px;
+      height: 45px;
+      background: #dcd6f7;
+      border: 2.5px solid #4a3728;
+      border-radius: 6px;
+    }
+
+    .furniture-sofa {
+      position: absolute;
+      left: 50px;
+      top: 45px;
+      width: 45px;
+      height: 28px;
+      background: #f7a072;
+      border: 2.5px solid #4a3728;
+      border-radius: 4px;
+    }
+
+    /* 頂部中央狀態膠囊 */
+    #stage-board {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-top: 6px;
+      padding: 3px 12px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4);
+      display: inline-block;
+      pointer-events: auto;
+    }
+
+    #stage-board span {
+      color: #e65c00;
+      font-weight: 800;
+    }
+
+    /* ==========================================
+       底部 RPG 控制 Dock 欄 (Kairosoft Parchment Dock)
+       ========================================== */
+    .bottom-dock {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: #fbf5e8;
+      border: 3px solid #3c2415;
+      border-radius: 10px;
+      box-shadow: 0 5px 0 #23150b, inset 2px 2px 0 #fffdf7;
+      max-width: 96vw;
+      user-select: none;
+    }
+
+    .dock-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      padding: 5px 8px;
+      border: 2px solid #5a3a22;
+      background: #fff8eb;
+      border-radius: 8px;
+      box-shadow: 0 3px 0 #3c2415;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      font-family: inherit;
+      color: #3c2415;
+      outline: none;
+    }
+
+    .dock-btn:hover {
+      background: #fffaee;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 #3c2415;
+    }
+
+    .dock-btn:active {
+      transform: translate(1px, 3px);
+      box-shadow: none;
+    }
+
+    .dock-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .dock-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================
+       🏛️ 島嶼建設抽屜 (#drawer-build - 開羅工坊)
+       ========================================== */
+    .build-summary-card {
+      background: #fcf8ee;
+      border: 2px solid #5a3a22;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 3px 0 #3c2415;
+    }
+
+    .build-summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .prosperity-progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #e6dfcc;
+      border: 2px solid #5a3a22;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .prosperity-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff9f1a, #20bf6b);
+      transition: width 0.4s ease;
+    }
+
+    .prosperity-perks {
+      font-size: 0.76rem;
+      color: #5a3a22;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .build-island-card {
+      background: #fff9ed;
+      border: 2px solid #5a3a22;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 3px 0 #3c2415;
+      transition: all 0.15s ease;
+    }
+
+    .build-island-card:hover {
+      background: #fffaee;
+      border-color: #e67e22;
+      box-shadow: 0 4px 0 #3c2415;
+    }
+
+    .build-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .build-card-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #3c2415;
+    }
+
+    .build-card-desc {
+      font-size: 0.76rem;
+      color: #7d593b;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .build-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-upgrade-island {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 2px solid #3c2415;
+      background: linear-gradient(135deg, #ff9f1a, #eb3b5a);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #23150b;
+      transition: all 0.1s ease;
+    }
+
+    .btn-upgrade-island:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 0 #23150b;
+    }
+
+    .btn-upgrade-island:active:not(:disabled) {
+      transform: translate(1px, 2px);
+      box-shadow: none;
+    }
+
+    .btn-upgrade-island:disabled {
+      background: #b2bec3;
+      box-shadow: 0 2px 0 #636e72;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+      /* 手機端抽屜適配 */
+      #drawer-status .drawer-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+      }
+
+      /* 手機端頂部懸浮控制列三行流式排版 */
+      .floating-header {
+        top: 8px !important;
+        left: 8px !important;
+        right: 8px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+      }
+
+      .header-left {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      .header-left .status-badge {
+        font-size: 0.72rem !important;
+        padding: 5px 8px !important;
+        border-radius: 12px !important;
+        flex: 1 !important;
+        justify-content: center !important;
+      }
+
+      .header-center {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+
+      /* 巨大垂直日曆改為橫排精緻狀態條 */
+      .calendar-badge {
+        width: 100% !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 5px 10px !important;
+        border-radius: 12px !important;
+        gap: 6px !important;
+        box-shadow: 0 4px 16px rgba(10, 132, 255, 0.08) !important;
+      }
+
+      .cal-day {
+        font-size: 0.7rem !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+      }
+
+      .cal-time {
+        font-size: 0.95rem !important;
+        margin: 0 4px !important;
+        white-space: nowrap !important;
+      }
+
+      .cal-mode {
+        font-size: 0.6rem !important;
+        margin: 0 !important;
+        padding: 1px 5px !important;
+        border-radius: 5px !important;
+        white-space: nowrap !important;
+      }
+
+      #stage-board {
+        font-size: 0.7rem !important;
+        margin: 0 !important;
+        padding: 2px 6px !important;
+        border-radius: 6px !important;
+        background: rgba(255, 255, 255, 0.25) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: none !important;
+        white-space: nowrap !important;
+      }
+
+      .header-right {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+
+      .speed-control-mini {
+        flex: 1 !important;
+        padding: 2px !important;
+        border-radius: 12px !important;
+      }
+
+      .speed-control-mini .speed-btn {
+        width: auto !important;
+        flex: 1 !important;
+        height: 26px !important;
+        font-size: 0.65rem !important;
+        border-radius: 10px !important;
+      }
+
+      .btn-exam-mini {
+        font-size: 0.72rem !important;
+        padding: 5px 12px !important;
+        border-radius: 12px !important;
+        white-space: nowrap !important;
+        height: 30px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      /* 手機下隱藏頁尾版號以防與底部選單重疊遮擋 */
+      .floating-footer {
+        display: none !important;
+      }
+
+      /* 確保 overlay 完全貼合視窗可視範圍，解決大寬度文檔引起的偏位跑出螢幕問題 */
+      .overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 99999 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      /* 限制 game-modal 在手機上的最大寬度與內邊距，防止跑出螢幕 */
+      .game-modal {
+        width: 90% !important;
+        max-width: 340px !important;
+        padding: 20px !important;
+        border-radius: 20px !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 針對說明書 Modal 的特別適配 */
+      #help-overlay .game-modal {
+        width: 92% !important;
+        max-width: 480px !important;
+        padding: 16px !important;
+      }
+
+      /* 限制說明書滾動區域高度，防止在矮螢幕手機上超出底部 */
+      #help-overlay .game-modal div[style*="max-height:300px"],
+      #help-overlay .game-modal div[style*="max-height: 300px"] {
+        max-height: 250px !important;
+      }
+
+      /* 說明書 Tab 在手機上的尺寸微調 */
+      .help-tab-btn {
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+      }
+
+      /* 手機端適配：衣櫃 Modal RWD */
+      #wardrobe-overlay .game-modal {
+        width: 95% !important;
+        height: 90vh !important;
+        max-height: 90vh !important;
+        padding: 12px !important;
+      }
+
+      #wardrobe-main-view {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+      }
+
+      #wardrobe-main-view>div:first-child {
+        flex: none !important;
+        max-height: 250px !important;
+      }
+
+      #wardrobe-main-view>div:last-child {
+        flex: none !important;
+        width: 100% !important;
+        margin-top: 10px;
+        padding: 10px !important;
+      }
+
+      #wardrobe-editor-view {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+      }
+
+      #wardrobe-editor-view>div:first-child {
+        flex: none !important;
+        width: 100% !important;
+        margin-bottom: 10px;
+      }
+
+      #pixel-canvas-container {
+        width: 216px !important;
+        height: 360px !important;
+      }
+
+      #wardrobe-editor-view>div:last-child {
+        flex: none !important;
+        width: 100% !important;
+      }
+    }
+
+    /* ==========================================
+       角色與小人 NPC
+       ========================================== */
+    /* ==========================================
+       角色與小人 NPC (開羅像素主角 - 始終頂層可見)
+       ========================================== */
+    .character-wrapper {
+      position: absolute;
+      width: 42px;
+      height: 70px;
+      z-index: 25;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      transition: left 2s linear, top 2s linear, transform 2s linear;
+      transform-origin: bottom center;
+      filter: drop-shadow(0 4px 3px rgba(0,0,0,0.35));
+    }
+
+    /* 2.5D 角色地面投影 */
+    .character-wrapper::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 7px;
+      background: radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* 繞戶外經典橢圓紅土操場跑道動畫軌跡 (960x540 右上角操場專屬) */
+    .character-wrapper.running-on-track {
+      animation: track-loop 2.4s infinite linear !important;
+      transition: none !important;
+    }
+
+    @keyframes track-loop {
+      /* 1. 頂部直道往右大步奔跑 (面向右邊 scaleX(1)) */
+      0% {
+        left: 710px;
+        top: 5px;
+        transform: scaleX(1);
+      }
+      22% {
+        left: 870px;
+        top: 5px;
+        transform: scaleX(1);
+      }
+      /* 2. 右側彎道順時針弧度過彎 */
+      28% {
+        left: 900px;
+        top: 26px;
+        transform: scaleX(1);
+      }
+      35% {
+        left: 902px;
+        top: 58px;
+        transform: scaleX(-1);
+      }
+      42% {
+        left: 885px;
+        top: 90px;
+        transform: scaleX(-1);
+      }
+      /* 3. 底部直道往左衝刺 (面向左邊 scaleX(-1)) */
+      50% {
+        left: 870px;
+        top: 99px;
+        transform: scaleX(-1);
+      }
+      72% {
+        left: 710px;
+        top: 99px;
+        transform: scaleX(-1);
+      }
+      /* 4. 左側彎道向上過彎折返 */
+      78% {
+        left: 680px;
+        top: 85px;
+        transform: scaleX(-1);
+      }
+      85% {
+        left: 676px;
+        top: 50px;
+        transform: scaleX(1);
+      }
+      92% {
+        left: 685px;
+        top: 20px;
+        transform: scaleX(1);
+      }
+      100% {
+        left: 710px;
+        top: 5px;
+        transform: scaleX(1);
+      }
+    }
+
+    .character-wrapper.flip-h #student-sprite {
+      transform: scaleX(-1);
+    }
+
+    .student-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 開羅像素對話氣泡 */
+    .bubble {
+      position: absolute;
+      top: -30px;
+      background: #fffdf7;
+      border: 2px solid #3c2415;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #3c2415;
+      white-space: nowrap;
+      box-shadow: 0 3px 0 #23150b;
+      z-index: 30;
+      animation: float-bubble 1.5s infinite alternate ease-in-out;
+    }
+
+    .bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 6px;
+      height: 6px;
+      background: #fffdf7;
+      border-right: 2px solid #3c2415;
+      border-bottom: 2px solid #3c2415;
+    }
+
+    /* NPC 小氣泡 */
+    .bubble-mini {
+      position: absolute;
+      top: -15px;
+      left: -5px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 6px;
+      font-size: 0.55rem;
+      padding: 2px 5px;
+      font-weight: 700;
+      white-space: nowrap;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    @keyframes float-bubble {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-3px);
+      }
+    }
+
+    .sleep-particle {
+      position: absolute;
+      font-size: 0.9rem;
+      font-weight: 900;
+      color: var(--purple);
+      opacity: 0;
+      animation: float-zzz 2s infinite linear;
+      z-index: 15;
+    }
+
+    @keyframes float-zzz {
+      0% {
+        transform: translate(5px, -10px) scale(0.7);
+        opacity: 0;
+      }
+
+      30% {
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translate(15px, -35px) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    .sweat-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #aedefc;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      animation: drip-sweat 1s infinite ease-in;
+      z-index: 15;
+    }
+
+    @keyframes drip-sweat {
+      0% {
+        transform: translate(0px, -20px) scale(0.5);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translate(8px, -5px) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* 像素抖動 */
+    .avatar-body-group {
+      transform-origin: 12px 20px;
+    }
+
+    .avatar-head-group {
+      transform-origin: 12px 14px;
+    }
+
+    .state-idle .avatar-body-group {
+      animation: pixel-breath 1.6s infinite ease-in-out;
+    }
+
+    .state-idle .avatar-head-group {
+      animation: pixel-head-tilt 3.2s infinite ease-in-out;
+    }
+
+    .state-studying .avatar-head-group {
+      animation: pixel-nod 0.8s infinite ease-in-out;
+    }
+
+    .state-studying .avatar-book {
+      display: block !important;
+    }
+
+    #student-sprite.state-sleeping {
+      transform: rotate(-90deg) translate(-2px, -5px);
+      transform-origin: center;
+      transition: transform 0.5s;
+    }
+
+    .state-sleeping .avatar-eyes-normal,
+    .state-sleeping .avatar-mouth-normal {
+      display: none !important;
+    }
+
+    .state-sleeping .avatar-eyes-sleeping,
+    .state-sleeping .avatar-mouth-sleeping,
+    .state-sleeping .avatar-zzz {
+      display: block !important;
+    }
+
+    .state-sports .avatar-body-group {
+      animation: pixel-jog 0.15s infinite alternate ease-in-out;
+    }
+
+    .state-sports .avatar-feet {
+      animation: pixel-foot-tap 0.08s infinite alternate linear;
+    }
+
+    .state-sports .avatar-headband,
+    .state-sports .avatar-sport-pattern {
+      display: block !important;
+    }
+
+    .state-eating .avatar-body-group {
+      animation: pixel-breath 0.8s infinite ease-in-out;
+    }
+
+    .state-eating .avatar-mouth-normal {
+      display: none !important;
+    }
+
+    .state-eating .avatar-mouth-eating {
+      display: block !important;
+      animation: pixel-chew 0.4s infinite alternate ease-in-out;
+    }
+
+    .state-eating .avatar-bowl {
+      display: block !important;
+    }
+
+    .state-angry .avatar-head-group {
+      animation: pixel-shake 0.4s infinite ease-in-out;
+    }
+
+    .state-angry .avatar-eyes-normal {
+      display: none !important;
+    }
+
+    .state-angry .avatar-eyes-angry {
+      display: block !important;
+    }
+
+    .state-commuting .avatar-body-group {
+      animation: pixel-jog 0.3s infinite alternate ease-in-out;
+    }
+
+    .state-commuting .avatar-feet {
+      animation: pixel-foot-tap 0.15s infinite alternate linear;
+    }
+
+    @keyframes pixel-breath {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(1px);
+      }
+    }
+
+    @keyframes pixel-head-tilt {
+
+      0%,
+      100% {
+        transform: rotate(0deg);
+      }
+
+      50% {
+        transform: rotate(3deg);
+      }
+    }
+
+    @keyframes pixel-nod {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(1px) rotate(1deg);
+      }
+    }
+
+    @keyframes pixel-jog {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-2px);
+      }
+    }
+
+    @keyframes pixel-foot-tap {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-1px);
+      }
+    }
+
+    @keyframes pixel-shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      50% {
+        transform: translateX(1px);
+      }
+    }
+
+    /* NPC 特有動畫 */
+    .npc-writing {
+      animation: pixel-write 0.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes pixel-write {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(2px) translateY(-1px);
+      }
+    }
+
+    .npc-chewing {
+      animation: pixel-chew 0.4s infinite alternate ease-in-out;
+    }
+
+    @keyframes pixel-chew {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(1px);
+      }
+    }
+
+    /* ==========================================
+       蘋果懸浮遊戲主介面 (Immersive Overlay UI)
+       ========================================== */
+    .floating-header {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 50;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .floating-header>* {
+      pointer-events: auto;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* 藥丸狀狀態面板 */
+    .status-badge {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 24px var(--shadow-color),
+        inset 0 10px 10px -5px var(--glass-highlight);
+    }
+
+    .status-badge span.val {
+      color: #e65c00;
+      font-weight: 800;
+    }
+
+    /* 蘋果 Widget 式日曆 */
+    .calendar-badge {
+      background: rgba(10, 132, 255, 0.12);
+      /* 亮藍磨砂 */
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(10, 132, 255, 0.35);
+      border-radius: 20px;
+      padding: 10px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(10, 132, 255, 0.08),
+        inset 0 12px 12px -6px rgba(255, 255, 255, 0.35);
+    }
+
+    .cal-day {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .cal-time {
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-color);
+    }
+
+    .cal-mode {
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      margin-top: 4px;
+      color: var(--text-color);
+    }
+
+    /* iOS Segmented Control 速度控制器 */
+    .speed-control-mini {
+      display: flex;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 4px;
+      box-shadow: 0 8px 24px var(--shadow-color),
+        inset 0 10px 10px -5px var(--glass-highlight);
+    }
+
+    .speed-control-mini .speed-btn {
+      background: transparent;
+      border: none;
+      width: 40px;
+      height: 32px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 16px;
+      color: var(--text-color);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .speed-control-mini .speed-btn.active {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      font-weight: 800;
+    }
+
+    .speed-control-mini .speed-btn:hover:not(.active) {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 蘋果彩虹果凍按鈕 */
+    .btn-exam-mini {
+      background: linear-gradient(135deg, #ff2d55, #ff3b30);
+      color: white;
+      font-size: 0.85rem;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3),
+        inset 0 10px 10px -5px rgba(255, 255, 255, 0.4);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-exam-mini:hover {
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 12px 28px rgba(255, 59, 48, 0.4),
+        inset 0 12px 12px -5px rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-exam-mini:active {
+      transform: scale(0.95) translateY(0);
+      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.2);
+    }
+
+    /* 懸浮控制 FAB 氣泡 */
+    .floating-controls {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .control-fab {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 12px 14px -6px var(--glass-highlight);
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      outline: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .control-fab:hover {
+      transform: scale(1.1) translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12),
+        inset 0 14px 16px -6px var(--glass-highlight);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .control-fab:active {
+      transform: scale(0.9) translateY(0);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .fab-lbl {
+      position: absolute;
+      bottom: -16px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-color);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ==========================================
+       蘋果磨砂玻璃側邊抽屜 (Drawer Panel)
+       ========================================== */
+    .drawer-panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 380px;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(30px) saturate(190%);
+      -webkit-backdrop-filter: blur(30px) saturate(190%);
+      border-left: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 32px 0 0 32px;
+      z-index: 100;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-panel.open {
+      transform: translateX(0);
+    }
+
+    @media (max-width: 480px) {
+      .drawer-panel {
+        width: 88%;
+        border-radius: 24px 0 0 24px;
+      }
+    }
+
+    .drawer-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawer-header h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-color);
+    }
+
+    .drawer-close {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-close:hover {
+      background: var(--secondary);
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .drawer-close:active {
+      transform: scale(0.9) rotate(90deg);
+    }
+
+    .drawer-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .drawer-section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      margin-top: 15px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-color);
+    }
+
+    /* 通用蘋果按鈕規範 */
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 14px;
+      font-weight: 700;
+      color: var(--text-color);
+      cursor: pointer;
+      outline: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05),
+        inset 0 6px 8px -4px rgba(255, 255, 255, 0.4);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08),
+        inset 0 8px 10px -4px rgba(255, 255, 255, 0.5);
+      opacity: 0.95;
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.96);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:disabled {
+      background-color: rgba(0, 0, 0, 0.05) !important;
+      color: var(--text-muted) !important;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .shop-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* 磨砂玻璃商品卡 */
+    .shop-item {
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04),
+        inset 0 8px 10px -5px rgba(255, 255, 255, 0.45);
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .shop-item:hover {
+      background: rgba(255, 255, 255, 0.55);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06),
+        inset 0 10px 12px -5px rgba(255, 255, 255, 0.5);
+    }
+
+    .shop-item-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .shop-item-icon {
+      font-size: 1.8rem;
+    }
+
+    .shop-item-name {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--text-color);
+    }
+
+    .shop-item-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .shop-item-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+
+    /* 背包道具計數 */
+    .item-count-badge {
+      background: rgba(191, 90, 242, 0.15);
+      /* 紫色透光 */
+      border: 1px solid rgba(191, 90, 242, 0.4);
+      color: var(--purple);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    /* 磨砂極簡版號頁尾 */
+    .floating-footer {
+      position: fixed;
+      bottom: 12px;
+      left: 18px;
+      z-index: 70;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ==========================================
+       進度條與生理數值條填充樣式 (iOS 漸層風格)
+       ========================================== */
+    .stat-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .stat-bar {
+      height: 14px;
+      background: rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.45) !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 16px;
+      background: rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.45) !important;
+      border-radius: 10px !important;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .fill-energy {
+      background: linear-gradient(90deg, #30d158, #34c759);
+      /* 蘋果薄荷綠 */
+      box-shadow: 0 0 8px rgba(48, 209, 88, 0.2);
+    }
+
+    .fill-hunger {
+      background: linear-gradient(90deg, #ff9f0a, #ff9500);
+      /* 蘋果橘 */
+      box-shadow: 0 0 8px rgba(255, 159, 10, 0.2);
+    }
+
+    .fill-stress {
+      background: linear-gradient(90deg, #ff453a, #ff3b30);
+      /* 蘋果紅 */
+      box-shadow: 0 0 8px rgba(255, 69, 58, 0.2);
+    }
+
+    /* ❓ 遊戲說明 CSS */
+    .help-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      opacity: 0.65;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .help-tab-btn:hover {
+      opacity: 0.9;
+    }
+
+    .help-tab-btn.active {
+      opacity: 1;
+      border-bottom: 2px solid var(--accent);
+      color: var(--accent);
+    }
+
+    .help-tab-content {
+      animation: helpFadeIn 0.3s ease;
+    }
+
+    @keyframes helpFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes chefCooking {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-2px) rotate(2deg);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .npc-cooking-anim {
+      animation: chefCooking 0.6s infinite ease-in-out;
+    }
+
+    @keyframes peerStudying {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      50% {
+        transform: rotate(-2deg) translateY(-1px);
+      }
+
+      100% {
+        transform: rotate(0deg);
+      }
+    }
+
+    .npc-studying-anim {
+      animation: peerStudying 1.5s infinite ease-in-out;
+    }
+
+    .progress-school {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd60a, #ffcc00);
+      /* 聽講黃 */
+      position: absolute;
+      left: 0;
+      top: 0;
+      transition: width 0.3s;
+      box-shadow: 0 0 6px rgba(255, 214, 10, 0.15);
+    }
+
+    .progress-home {
+      height: 100%;
+      background: linear-gradient(90deg, #34c759, #30d158);
+      /* 複習綠 */
+      position: absolute;
+      top: 0;
+      transition: width 0.3s, left 0.3s;
+      box-shadow: 0 0 6px rgba(48, 209, 88, 0.15);
+    }
+
+    /* ==========================================
+       升學考試挑戰 Modal (Glassmorphism Overlay)
+       ========================================== */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      /* 蘋果風半透明黑色遮罩 */
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      z-index: 200;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .game-modal {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 28px;
+      padding: 28px;
+      width: 340px;
+      max-width: 90%;
+      box-sizing: border-box;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1),
+        inset 0 14px 16px -8px var(--glass-highlight);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .overlay.active .game-modal {
+      transform: scale(1);
+    }
+
+    .game-modal-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-color);
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding-bottom: 10px;
+      display: block;
+    }
+
+    .game-modal-content {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* ==========================================
+       衣櫃換裝與手繪畫板 Modal 樣式
+       ========================================== */
+    .wardrobe-item-card {
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .wardrobe-item-card:hover {
+      background: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .wardrobe-item-card.equipped {
+      border-color: var(--primary);
+      background: rgba(255, 159, 10, 0.12);
+      box-shadow: 0 0 8px rgba(255, 159, 10, 0.2);
+    }
+
+    .wardrobe-item-card.equipped::after {
+      content: '✓';
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--primary);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: bold;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pixel-grid-cell {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border-right: 1px solid rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      cursor: crosshair;
+      transition: background-color 0.05s ease;
+    }
+
+    .pixel-grid-cell:nth-child(18n) {
+      border-right: none;
+    }
+
+    .palette-dot {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      border: 1.5px solid rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .palette-dot:hover,
+    .palette-dot.active {
+      transform: scale(1.15);
+      border-color: #1d1d1f;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 編輯器 18x24 格子半透明剪影提示 */
+    .pixel-grid-cell.silhouette-hair {
+      background-color: rgba(29, 29, 31, 0.06);
+    }
+
+    .pixel-grid-cell.silhouette-skin {
+      background-color: rgba(251, 209, 183, 0.25);
+    }
+
+    .pixel-grid-cell.silhouette-clothes {
+      background-color: rgba(10, 132, 255, 0.08);
+    }
+
+    .pixel-grid-cell.silhouette-feet {
+      background-color: rgba(74, 55, 40, 0.12);
+    }
+
+    .exam-progress-container {
+      width: 100%;
+      height: 16px;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .exam-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff453a, #ff9f0a);
+      box-shadow: 0 0 8px rgba(255, 69, 58, 0.3);
+      transition: width 0.15s linear;
+    }
+
+    /* ==========================================
+       漂浮文字動畫 (全域定義一次，避免重複插入 style 標籤)
+       ========================================== */
+    @keyframes float-up {
+      0% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(-50%, -40px);
+        opacity: 0;
+      }
+    }
+
+    @keyframes float-up-bouncy {
+      0% { opacity: 0; transform: translate(-50%, 20px) scale(0.5); }
+      20% { opacity: 1; transform: translate(-50%, 0px) scale(1.1); }
+      40% { transform: translate(-50%, 0px) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -30px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50px) scale(0.8); }
+    }
+
+    @keyframes shake {
+      0% { transform: translateZ(15px) translateX(0); }
+      25% { transform: translateZ(15px) translateX(-3px) rotate(-2deg); }
+      50% { transform: translateZ(15px) translateX(3px) rotate(2deg); }
+      75% { transform: translateZ(15px) translateX(-2px) rotate(-1deg); }
+      100% { transform: translateZ(15px) translateX(0); }
+    }
+
+    /* 彩花降落動畫 (升學 / 完結畫面) */
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* 危險警示條脈衝 */
+    @keyframes pulse-alert {
+      from {
+        box-shadow: 0 0 8px rgba(255, 69, 58, 0.5);
+      }
+
+      to {
+        box-shadow: 0 0 24px rgba(255, 69, 58, 0.9);
+      }
+    }
+
+    /* 頂部危險警示條 */
+    #alert-bar {
+      display: none;
+      position: absolute;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 69, 58, 0.92);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 6px 22px;
+      border-radius: 20px;
+      z-index: 60;
+      animation: pulse-alert 1s infinite alternate;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      pointer-events: none;
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+
+    /* 手動鎖定按鈕 */
+    #btn-lock-mode {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 24px var(--shadow-color),
+        inset 0 10px 10px -5px var(--glass-highlight);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      white-space: nowrap;
+    }
+
+    #btn-lock-mode:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    #btn-lock-mode.locked {
+      background: rgba(255, 69, 58, 0.18);
+      border-color: rgba(255, 69, 58, 0.5);
+      color: #ff3b30;
+    }
+
+    /* ==========================================
+       博士轉生完結畫面
+       ========================================== */
+    #clear-overlay {
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      z-index: 10000;
+      flex-direction: column;
+    }
+
+    .clear-content {
+      text-align: center;
+      padding: 40px 30px;
+      color: white;
+      max-width: 480px;
+      animation: clearFadeIn 1.2s ease forwards;
+    }
+
+    @keyframes clearFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .clear-planet {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      animation: planet-spin 6s linear infinite;
+      display: block;
+    }
+
+    @keyframes planet-spin {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+
+      50% {
+        transform: rotate(180deg) scale(1.1);
+      }
+
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+
+    .clear-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffd60a, #ff9f0a, #ff453a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .clear-subtitle {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+
+    .clear-stats {
+      font-size: 1rem;
+      opacity: 0.75;
+      margin-bottom: 12px;
+      line-height: 1.8;
+    }
+
+    .clear-desc {
+      font-size: 0.88rem;
+      opacity: 0.6;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .clear-subtitle,
+    .clear-subtitle *,
+    .clear-stats,
+    .clear-stats *,
+    .clear-desc,
+    .clear-desc * {
+      color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    #btn-reincarnate {
+      color: white !important;
+      display: none;
+      background: linear-gradient(135deg, #bf5af2, #0a84ff);
+      color: white;
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 14px 36px;
+      border: none;
+      border-radius: 28px;
+      cursor: pointer;
+      box-shadow: 0 12px 32px rgba(191, 90, 242, 0.5),
+        inset 0 12px 12px -5px rgba(255, 255, 255, 0.3);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: btn-appear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    #btn-reincarnate:hover {
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 20px 40px rgba(191, 90, 242, 0.7);
+    }
+
+    @keyframes btn-appear {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* 手機版 clear-overlay */
+    @media (max-width: 768px) {
+      .clear-content {
+        padding: 30px 20px;
+      }
+
+      .clear-title {
+        font-size: 1.6rem;
+      }
+
+      .clear-planet {
+        font-size: 3rem;
+      }
+    }
+
+    /* ==========================================
+       🏅 成就系統面板樣式
+       ========================================== */
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      padding: 10px 0;
+    }
+
+    .achievement-card {
+      background: rgba(255, 255, 255, 0.35);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 8px;
+      text-align: center;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .achievement-card.unlocked {
+      background: rgba(255, 215, 0, 0.12);
+      border-color: rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+    }
+
+    .achievement-card.locked {
+      filter: grayscale(0.6);
+      opacity: 0.6;
+    }
+
+    .achievement-card .ach-icon {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .achievement-card .ach-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: var(--text-color);
+    }
+
+    .achievement-card .ach-desc {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .achievement-card.locked .ach-icon {
+      filter: brightness(0.3);
+    }
+
+    /* 成就 Toast 通知 */
+    @keyframes achievement-toast-in {
+      0% {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+
+      15% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      85% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+
+    .achievement-toast {
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.92), rgba(255, 159, 10, 0.92));
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      padding: 12px 18px;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(255, 159, 10, 0.4);
+      animation: achievement-toast-in 3.5s ease forwards;
+      color: #1d1d1f;
+      max-width: 300px;
+    }
+
+    .achievement-toast .toast-icon {
+      font-size: 1.8rem;
+    }
+
+    .achievement-toast .toast-text {
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .achievement-toast .toast-sub {
+      font-size: 0.7rem;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    .ach-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0 4px;
+    }
+
+    .ach-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd60a, #ff9f0a);
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+
+    /* 成就分類 Tab */
+    .ach-category-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .ach-cat-btn {
+      background: transparent;
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .ach-cat-btn.active {
+      background: rgba(255, 215, 0, 0.2);
+      color: #e65c00;
+    }
+
+    /* ==========================================
+       🎮 小遊戲觸發圖示 (明顯閃爍脈衝)
+       ========================================== */
+    .minigame-trigger {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      cursor: pointer;
+      animation: minigame-pulse 1.2s infinite ease-in-out;
+      pointer-events: auto;
+      transition: all 0.3s;
+    }
+
+    .minigame-trigger .mg-badge {
+      background: linear-gradient(135deg, #ff2d55, #ff9f0a);
+      color: white;
+      font-size: 1rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(255, 45, 85, 0.5),
+        0 0 30px rgba(255, 159, 10, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .minigame-trigger .mg-badge::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(135deg, transparent 50%, #ff9f0a 50%);
+      border-right: 2px solid rgba(255, 255, 255, 0.6);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes minigame-pulse {
+
+      0%,
+      100% {
+        transform: translateX(-50%) scale(1) translateY(0);
+      }
+
+      50% {
+        transform: translateX(-50%) scale(1.1) translateY(-5px);
+        filter: drop-shadow(0 0 15px rgba(255, 45, 85, 0.6));
+      }
+    }
+
+    .minigame-trigger:hover {
+      animation: none;
+      transform: translateX(-50%) scale(1.15) translateY(-5px);
+    }
+
+    /* ==========================================
+       ✨ Buff / Debuff 指示器
+       ========================================== */
+    .buff-container {
+      position: absolute;
+      top: -48px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 3px;
+      z-index: 16;
+      pointer-events: none;
+    }
+
+    .buff-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 900;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .buff-icon.positive {
+      background: rgba(48, 209, 88, 0.85);
+      color: white;
+    }
+
+    .buff-icon.negative {
+      background: rgba(255, 69, 58, 0.85);
+      color: white;
+    }
+
+    /* ==========================================
+       🔄 輪迴加點面板
+       ========================================== */
+    .rebirth-alloc-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .rebirth-stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .rebirth-stat-row .rs-icon {
+      font-size: 1.2rem;
+    }
+
+    .rebirth-stat-row .rs-info {
+      flex: 1;
+    }
+
+    .rebirth-stat-row .rs-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .rebirth-stat-row .rs-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .rebirth-stat-row .rs-level {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-right: 8px;
+    }
+
+    .rebirth-stat-row button {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.5);
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+
+    .rebirth-stat-row button:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .rebirth-stat-row button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 🌍 世界變異標記 */
+    .world-mutation-badge {
+      background: rgba(191, 90, 242, 0.15);
+      border: 1px solid rgba(191, 90, 242, 0.4);
+      border-radius: 12px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--purple);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 2px;
+    }
+
+    /* ==========================================
+       🎲 小遊戲 Modal 內部樣式
+       ========================================== */
+    .mg-game-area {
+      min-height: 200px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .mg-timer-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .mg-timer-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #30d158, #ffd60a, #ff453a);
+      transition: width 0.1s linear;
+    }
+
+    /* 快問快答選項按鈕 */
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .quiz-option-btn {
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .quiz-option-btn:hover {
+      background: rgba(10, 132, 255, 0.15);
+      border-color: var(--sky-blue);
+      transform: translateY(-2px);
+    }
+
+    .quiz-option-btn.correct {
+      background: rgba(48, 209, 88, 0.3) !important;
+      border-color: var(--accent) !important;
+    }
+
+    .quiz-option-btn.wrong {
+      background: rgba(255, 69, 58, 0.3) !important;
+      border-color: var(--secondary) !important;
+    }
+
+    /* 記憶配對卡片 */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+
+    .memory-card {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, var(--sky-blue), var(--purple));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .memory-card.flipped {
+      background: rgba(255, 255, 255, 0.6);
+      border-color: var(--primary);
+    }
+
+    .memory-card.matched {
+      background: rgba(48, 209, 88, 0.3);
+      border-color: var(--accent);
+      pointer-events: none;
+    }
+
+    /* 節奏跑步環 */
+    .rhythm-ring {
+      width: 120px;
+      height: 120px;
+      border: 4px solid rgba(255, 69, 58, 0.3);
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rhythm-ring .ring-target {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 3px solid var(--secondary);
+      border-radius: 50%;
+      animation: rhythm-shrink 1.5s linear forwards;
+    }
+
+    @keyframes rhythm-shrink {
+      from {
+        transform: scale(2);
+        opacity: 0.3;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .rhythm-hit-zone {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 69, 58, 0.2);
+      border: 3px solid var(--secondary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .rhythm-hit-zone:active,
+    .rhythm-hit-zone.hit {
+      background: rgba(48, 209, 88, 0.5);
+      border-color: var(--accent);
+      transform: scale(0.9);
+    }
+
+    /* 鐵板料理食材 */
+    .cooking-belt {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cooking-item {
+      width: 55px;
+      height: 55px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .cooking-item:hover {
+      transform: scale(1.1);
+    }
+
+    .cooking-item.done {
+      background: rgba(48, 209, 88, 0.3);
+      border-color: var(--accent);
+    }
+
+    .cooking-item.wrong-order {
+      background: rgba(255, 69, 58, 0.3);
+      border-color: var(--secondary);
+      animation: shake-item 0.3s ease;
+    }
+
+    @keyframes shake-item {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    .cooking-item .order-num {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: var(--primary);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 900;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 數羊遊戲 */
+    .sheep-field {
+      width: 100%;
+      height: 160px;
+      background: rgba(168, 230, 207, 0.3);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(168, 230, 207, 0.5);
+    }
+
+    .sheep-sprite {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: sheep-run 3s linear forwards;
+      cursor: default;
+    }
+
+    @keyframes sheep-run {
+      from {
+        left: -40px;
+      }
+
+      to {
+        left: calc(100% + 40px);
+      }
+    }
+
+    /* 小遊戲結果 */
+    .mg-result {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .mg-result .result-icon {
+      font-size: 3rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .mg-result .result-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .mg-result .result-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ==========================================
+       💰 抽獎機樣式
+       ========================================== */
+    .gacha-reel {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .gacha-slot {
+      width: 60px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      overflow: hidden;
+    }
+
+    .gacha-slot.spinning {
+      animation: gacha-spin 0.15s infinite linear;
+    }
+
+    @keyframes gacha-spin {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+  </style>
+/* ==========================================================================
+   🎮 GBA POKEMON RPG PIXEL ART ENHANCEMENTS (v8.2.0)
+   雙層像素框、點陣字型、GBA 階梯血條、銳利 0 圓角與日系點陣佈局
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap");
+
+body, button, input, select, textarea {
+  font-family: "DotGothic16", "Press Start 2P", "Courier New", monospace !important;
+  image-rendering: pixelated !important;
+  image-rendering: crisp-edges !important;
+}
+
+/* 頂部 HUD：自適應於全螢幕置頂 */
+.floating-header {
+  position: fixed !important;
+  top: 16px !important;
+  left: 16px !important;
+  right: 16px !important;
+  z-index: 50 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.floating-header > * {
+  pointer-events: auto !important;
+}
+
+/* 一屏盡覽自適應聚落視窗舞台 */
+.map-viewport {
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+}
+
+.town-map {
+  width: 960px !important;
+  height: 540px !important;
+  position: relative !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+  transform-origin: center center !important;
+  user-select: none !important;
+}
+
+/* GBA 雙層像素徽章 (Status Badges) */
+.status-badge, .btn-help, .calendar-badge {
+  background: #f8f8f0 !important;
+  border: 3px solid #182042 !important;
+  box-shadow: inset -2px -2px 0 #485888, inset 2px 2px 0 #ffffff, 0 3px 0 rgba(0,0,0,0.3) !important;
+  border-radius: 0 !important;
+  color: #182042 !important;
+  font-weight: 900 !important;
+  font-size: 0.85rem !important;
+  padding: 4px 10px !important;
+}
+
+/* 狀態看板 (Stage Board) */
+#stage-board {
+  background: #e8eef8 !important;
+  border: 2px solid #304878 !important;
+  border-radius: 0 !important;
+  color: #182042 !important;
+  box-shadow: inset 1px 1px 0 #ffffff !important;
+  padding: 2px 8px !important;
+  font-size: 0.8rem !important;
+}
+#stage-board span {
+  color: #d63031 !important;
+}
+
+/* 速度切換鈕 (Speed Buttons) */
+.speed-btn {
+  background: #e8eef8 !important;
+  border: 2px solid #182042 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 2px 0 #0f1428 !important;
+  color: #182042 !important;
+  font-weight: 900 !important;
+}
+.speed-btn.active {
+  background: #ffd32a !important;
+  color: #182042 !important;
+  box-shadow: inset 1px 1px 0 #fff !important;
+}
+
+/* GBA 寶可夢 HP/EXP 階梯數值條 */
+.status-bar-wrap {
+  border: 3px solid #182042 !important;
+  border-radius: 0 !important;
+  background: #1e2029 !important;
+  box-shadow: inset 0 2px 0 #000, 0 2px 0 rgba(0,0,0,0.3) !important;
+  height: 14px !important;
+  overflow: hidden !important;
+}
+.status-bar-fill {
+  border-radius: 0 !important;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4) !important;
+}
+.status-bar-fill.energy { background: #2ed573 !important; }
+.status-bar-fill.hunger { background: #ffa502 !important; }
+.status-bar-fill.stress { background: #ff4757 !important; }
+
+/* 底部功能選單：GBA 雙層像素 Dock */
+.bottom-dock {
+  position: fixed !important;
+  bottom: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: #f8f8f0 !important;
+  border: 4px solid #182042 !important;
+  box-shadow: 
+    inset -3px -3px 0 #485888, 
+    inset 3px 3px 0 #ffffff, 
+    0 5px 0 rgba(0, 0, 0, 0.45) !important;
+  border-radius: 0 !important;
+  padding: 6px 14px !important;
+  z-index: 80 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.dock-btn {
+  background: #eef2f7 !important;
+  border: 2px solid #304878 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 2px 0 #182042 !important;
+  color: #182042 !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+  padding: 5px 8px !important;
+  transition: transform 0.05s ease, box-shadow 0.05s ease !important;
+}
+.dock-btn:active {
+  transform: translateY(2px) !important;
+  box-shadow: none !important;
+  background: #dce5ef !important;
+}
+
+/* 6 大島嶼建築底座：GBA 冒險小鎮純點陣方塊地基 */
+.island-platform {
+  border: 4px solid #182042 !important;
+  border-radius: 0 !important;
+  box-shadow: 
+    0 6px 0 #0f1428, 
+    inset -3px -3px 0 #485888, 
+    inset 3px 3px 0 #ffffff !important;
+  background: #fdfbf7 !important;
+}
+
+.island-tag {
+  border: 2px solid #182042 !important;
+  border-radius: 0 !important;
+  background: #ffd32a !important;
+  color: #182042 !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 0 #0f1428 !important;
+}
+
+.island-lv-badge {
+  border: 2px solid #182042 !important;
+  border-radius: 0 !important;
+  background: #2ed573 !important;
+  color: #182042 !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 0 #0f1428 !important;
+}
+
+/* GBA 寶可夢經典對話框與彈窗 (Game Modals) */
+.game-modal {
+  background: #f8f8f0 !important;
+  border: 4px solid #182042 !important;
+  border-radius: 0 !important;
+  box-shadow: 
+    inset -4px -4px 0 #485888, 
+    inset 4px 4px 0 #ffffff, 
+    0 8px 0 rgba(0, 0, 0, 0.55) !important;
+  color: #182042 !important;
+  padding: 22px !important;
+}
+.game-modal-title {
+  color: #182042 !important;
+  font-size: 1.1rem !important;
+  border-bottom: 2px solid #304878 !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+/* GBA 側邊抽屜面版 (Drawers) */
+.drawer {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  z-index: 90 !important;
+}
+.drawer-content {
+  background: #f8f8f0 !important;
+  border-left: 4px solid #182042 !important;
+  border-radius: 0 !important;
+  box-shadow: inset 3px 0 0 #ffffff, -4px 0 0 rgba(0,0,0,0.3) !important;
+  color: #182042 !important;
+}
+
+/* 懸浮 Footer 版號 */
+.floating-footer {
+  position: fixed !important;
+  bottom: 6px !important;
+  right: 16px !important;
+  z-index: 85 !important;
+  font-size: 0.72rem !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  text-shadow: 1px 1px 0 #182042 !important;
+  font-family: "DotGothic16", monospace !important;
+  pointer-events: none !important;
+}
+
+/* 浮動對話泡泡 (Pixel Speech Bubble) */
+.bubble {
+  background: #f8f8f0 !important;
+  border: 3px solid #182042 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 3px 0 #0f1428 !important;
+  color: #182042 !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+}
+.bubble::after {
+  border-radius: 0 !important;
+  border-right: 3px solid #182042 !important;
+  border-bottom: 3px solid #182042 !important;
+  background: #f8f8f0 !important;
+}
+
+/* 浮動提示字 (Floating Toast Text) */
+.floating-text-bubble {
+  background: #182042 !important;
+  color: #ffd32a !important;
+  border: 2px solid #ffd32a !important;
+  border-radius: 0 !important;
+  font-size: 0.85rem !important;
+  font-weight: 900 !important;
+  box-shadow: 0 4px 0 #000 !important;
+}
+
+/* ================= v8.2 修復層 ================= */
+/* 突發事件膠囊：補上 .active 顯示規則 (v8.1 缺這條，就算有元素也永遠看不見) */
+.random-event-capsule.active { display: flex !important; }
+
+/* 直式提示條 */
+#rotate-hint {
+  display: none; position: fixed; top: calc(6px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+  z-index: 55; background: rgba(20,24,40,.82); color: #fff; font-size: .8rem; font-weight: 700;
+  padding: 6px 14px; border-radius: 999px; pointer-events: none; white-space: nowrap;
+}
+@media (orientation: portrait) and (max-width: 640px) { #rotate-hint { display: block; } }
+
+/* 手機：FAB 由右側直列 7 顆 (540px 遮住地圖) 改為底部橫排小顆 + 安全區 */
+@media (max-width: 768px) {
+  .floating-controls {
+    flex-direction: row !important; flex-wrap: wrap; justify-content: center;
+    right: 8px !important; left: 8px; bottom: calc(8px + env(safe-area-inset-bottom)) !important; gap: 8px !important;
+  }
+  .control-fab { width: 46px !important; height: 46px !important; font-size: 1.05rem !important; }
+  .speed-btn { min-height: 40px; min-width: 40px; }
+  .drawer-close { min-width: 40px; min-height: 40px; }
+  .btn-exam-mini { min-height: 40px; }
+  .island-tag { font-size: .8rem !important; }
+  .island-lv-badge { font-size: .78rem !important; padding: 4px 8px !important; }
+  .random-event-capsule { top: auto; bottom: calc(120px + env(safe-area-inset-bottom)); right: 12px; }
+}
+
+/* 減少動態偏好：停掉常駐動畫 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; transition-duration: 0.01s !important; }
+}

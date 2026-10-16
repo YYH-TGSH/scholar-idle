@@ -1,0 +1,2194 @@
+/* ==========================================================================
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v8.2.0)
+   GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
+   ========================================================================== */
+
+    // ------------------------------------------
+    // 網頁元件快取
+    // ------------------------------------------
+    const elGradeTitle = document.getElementById("grade-title");
+    const elMoneyVal = document.getElementById("money-val");
+    const elCalendarDay = document.getElementById("calendar-day");
+    const elCalendarTime = document.getElementById("calendar-time");
+    const elCalendarMode = document.getElementById("calendar-mode");
+    const elExamRate = document.getElementById("exam-rate-lbl");
+    const elBtnExam = document.getElementById("btn-exam-trigger");
+
+    const elEnergyBar = document.getElementById("bar-energy");
+    const elEnergyLbl = document.getElementById("lbl-energy");
+    const elHungerBar = document.getElementById("bar-hunger");
+    const elHungerLbl = document.getElementById("lbl-hunger");
+    const elStressBar = document.getElementById("bar-stress");
+    const elStressLbl = document.getElementById("lbl-stress");
+
+    // 大地圖
+    const elMapViewport = document.getElementById("map-viewport");
+    const elTownMap = document.getElementById("town-map");
+    const elLandmarks = {
+      home: document.getElementById("landmark-home"),
+      school: document.getElementById("landmark-school"),
+      gym: document.getElementById("landmark-gym"),
+      restaurant: document.getElementById("landmark-restaurant"),
+      library: document.getElementById("landmark-library"),
+      store: document.getElementById("landmark-store")
+    };
+    const elStageBoard = document.getElementById("stage-board");
+    const elCharWrap = document.getElementById("char-wrap");
+    const elCharBubble = document.getElementById("char-bubble");
+    const elStudentSprite = document.getElementById("student-sprite");
+    const elParticleEmitter = document.getElementById("particle-emitter");
+
+    // 商店背包
+    const elBagChicken = document.getElementById("bag-chicken");
+    const elBagDrink = document.getElementById("bag-drink");
+    const elBagMentalbook = document.getElementById("bag-mentalbook");
+    const elUseChicken = document.getElementById("btn-use-chicken");
+    const elUseDrink = document.getElementById("btn-use-drink");
+    const elUseMentalbook = document.getElementById("btn-use-mentalbook");
+    const elBookOwned = document.getElementById("lbl-book-owned");
+    const elShoesOwned = document.getElementById("lbl-shoes-owned");
+    const elAlertBar = document.getElementById("alert-bar");
+    const elLockBtn = document.getElementById("btn-lock-mode");
+
+    // ------------------------------------------
+    // 側邊抽屜面版控制
+    // ------------------------------------------
+    function toggleDrawer(id) {
+      playSound('click');
+      const target = document.getElementById(`drawer-${id}`);
+      if (!target) return;
+      const isOpen = target.classList.contains("open");
+
+      closeAllDrawers();
+
+      if (!isOpen) {
+        target.classList.add("open");
+        if (id === 'friends' && typeof renderFriendsList === 'function') {
+          renderFriendsList();
+        }
+        if (id === 'build' && typeof renderBuildDrawer === 'function') {
+          renderBuildDrawer();
+        }
+      }
+    }
+
+    function closeAllDrawers() {
+      document.querySelectorAll(".drawer-panel").forEach(drawer => {
+        drawer.classList.remove("open");
+      });
+    }
+
+
+    // ==========================================
+    // 🚪 衣櫃換裝與像素編輯器核心邏輯
+    // ==========================================
+
+    // 16x16 自定義色彩簡寫解析
+    function parsePixelStr(str) {
+      const colorMap = {
+        '.': null,
+        'R': '#ff453a', 'O': '#ff9f0a', 'Y': '#ffd60a', 'G': '#30d158',
+        'B': '#0a84ff', 'P': '#bf5af2', 'W': '#ffffff', 'K': '#1d1d1f',
+        'N': '#fbd1b7', 'D': '#8b5a2b', 'E': '#4a3728', 'A': '#86868b',
+        'C': '#aedefc'
+      };
+      const lines = str.trim().split('\n').map(l => l.trim());
+      const pixels = [];
+      for (let y = 0; y < 30; y++) {
+        const line = lines[y] || '..................';
+        for (let x = 0; x < 18; x++) {
+          const char = line[x] || '.';
+          pixels.push(colorMap[char] || null);
+        }
+      }
+      return pixels;
+    }
+
+    // 預設服飾 (Preset Items)
+    const SKIN_PRESETS = {
+      hat: [
+        { id: "preset_hat_none", name: "脫下帽子", pixels: null },
+        {
+          id: "preset_hat_red_cap", name: "棒球便帽", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ......RRRRRR......
+          ....RRRRRRRRRR....
+          ...RRRRRRRRRRRR...
+          ..RRRRRRRRRRRRRR..
+          ..RRRRRRRRRRRR....
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+        `)
+        },
+        {
+          id: "preset_hat_yellow_band", name: "學霸頭帶", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ...YYYYYYYYYYYY...
+          ...YEEEEEEEEEEY...
+          ...YYYYYYYYYYYY...
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+        `)
+        },
+        {
+          id: "preset_hat_wizard", name: "魔法帽", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ........PP........
+          .......PPPP.......
+          ......PPPPPP......
+          ......PPPPPP......
+          .....PPPPPPPP.....
+          ....PPPPPPPPPP....
+          ...PPPPPPPPPPPP...
+          ..PPPPPPPPPPPPPP..
+          .PPPPPPPPPPPPPPPP.
+          .YYYYYYYYYYYYYYYY.
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+        `)
+        }
+      ],
+      clothes: [
+        { id: "preset_clothes_none", name: "預設藍衣", pixels: null },
+        {
+          id: "preset_clothes_red", name: "活力紅短袖", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ....RRRRRRRRRR....
+          ....RRRRRRRRRR....
+          ..RRRRRRRRRRRRRR..
+          ..RRRRRRRRRRRRRR..
+          ..RRRRRRRRRRRRRR..
+          ..RRRRRRRRRRRRRR..
+          ....RRRRRRRRRR....
+          ....RRRRRRRRRR....
+          ....RRRRRRRRRR....
+          ..................
+          ..................
+        `)
+        },
+        {
+          id: "preset_clothes_dino", name: "恐龍睡衣", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ....GGGGGGGGGG....
+          ....GGGGGGGGGG....
+          ..GGGGGGGGGGGGGG..
+          ..GGYGGGGGGGGYGG..
+          ..GGGGGGGGGGGGGG..
+          ..GGGGGGGGGGGGGG..
+          ....GGYGGGGYGG....
+          ....GGGGGGGGGG....
+          ....GGGGGGGGGG....
+          ..................
+          ..................
+        `)
+        },
+        {
+          id: "preset_clothes_scholar", name: "學霸金袍", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ....YYYYYYYYYY....
+          ....YYYYYYYYYY....
+          ..YYYYYYYYYYYYYY..
+          ..YYYYYYYYYYYYYY..
+          ..YYYYYYYYYYYYYY..
+          ..YYYYYYYYYYYYYY..
+          ....YYEYYYYEYY....
+          ....YYEYYYYEYY....
+          ....YYYYYYYYYY....
+          ..................
+          ..................
+        `)
+        }
+      ],
+      shoes: [
+        { id: "preset_shoes_none", name: "預設皮鞋", pixels: null },
+        {
+          id: "preset_shoes_red", name: "紅色運動鞋", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          .....RRR....RRR...
+          ....RWRR...RWRR...
+        `)
+        },
+        {
+          id: "preset_shoes_yellow", name: "黃色布鞋", pixels: parsePixelStr(`
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          ..................
+          .....YYY....YYY...
+          ....YEYY...YEYY...
+        `)
+        }
+      ]
+    };
+
+    // 將 18x30 pixels 轉換成 18x30 PNG DataURL
+    function pixelsToDataURL(pixels) {
+      if (!pixels) return "";
+      const canvas = document.createElement('canvas');
+      canvas.width = 18;
+      canvas.height = 30;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 18, 30);
+      for (let y = 0; y < 30; y++) {
+        for (let x = 0; x < 18; x++) {
+          const color = pixels[y * 18 + x];
+          if (color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+      return canvas.toDataURL('image/png');
+    }
+
+    // 應用當前穿搭至角色 (與預覽小人)
+    // 應用當前穿搭至角色
+    function applyEquippedSkins() {
+      const types = ['hat', 'clothes', 'shoes'];
+      types.forEach(type => {
+        const equippedId = gameState.equipped[type];
+        let pixels = null;
+
+        if (equippedId) {
+          if (equippedId.startsWith('preset_')) {
+            const preset = SKIN_PRESETS[type].find(item => item.id === equippedId);
+            if (preset) pixels = preset.pixels;
+          } else {
+            const custom = gameState.customSkins[type].find(item => item.id === equippedId);
+            if (custom) pixels = custom.pixels;
+          }
+        }
+
+        const dataUrl = pixels ? pixelsToDataURL(pixels) : "";
+        const mainEl = document.getElementById(`char-custom-${type}`);
+
+        if (mainEl) {
+          if (dataUrl) {
+            mainEl.setAttribute('src', dataUrl);
+            mainEl.setAttribute('href', dataUrl);
+            mainEl.style.display = 'block';
+          } else {
+            mainEl.style.display = 'none';
+          }
+        }
+      });
+
+      const mainClothes = document.querySelector('#student-sprite .clothes');
+      const mainSportPattern = document.querySelector('#student-sprite .pixel-sport-pattern');
+      const mainFootL = document.querySelector('#student-sprite .pixel-foot-l');
+      const mainFootR = document.querySelector('#student-sprite .pixel-foot-r');
+
+      const hasCustomClothes = !!gameState.equipped.clothes && gameState.equipped.clothes !== 'preset_clothes_none';
+      if (mainClothes) mainClothes.style.opacity = hasCustomClothes ? '0' : '1';
+      if (mainSportPattern) mainSportPattern.style.opacity = hasCustomClothes ? '0' : '1';
+
+      const hasCustomShoes = !!gameState.equipped.shoes && gameState.equipped.shoes !== 'preset_shoes_none';
+      if (mainFootL) mainFootL.style.opacity = hasCustomShoes ? '0' : '1';
+      if (mainFootR) mainFootR.style.opacity = hasCustomShoes ? '0' : '1';
+    }
+
+    let currentWardrobeTab = 'hat';
+    let editorTool = 'pencil';
+    let editorSelectedColor = '#ff453a';
+    let editorCanvasPixels = new Array(540).fill(null);
+    let isDrawingOnCanvas = false;
+
+    function openWardrobeModal(event) {
+      if (event) event.stopPropagation();
+      playSound('click');
+      document.getElementById('wardrobe-overlay').classList.add('active');
+      switchWardrobeTab(currentWardrobeTab);
+      applyEquippedSkins();
+    }
+
+    function closeWardrobeModal() {
+      playSound('click');
+      document.getElementById('wardrobe-overlay').classList.remove('active');
+      saveGameData();
+    }
+
+    function switchWardrobeTab(type) {
+      playSound('click');
+      currentWardrobeTab = type;
+
+      ['hat', 'clothes', 'shoes'].forEach(t => {
+        const btn = document.getElementById(`wardrobe-tab-${t}`);
+        if (btn) {
+          if (t === type) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+
+      renderWardrobeItems();
+    }
+
+    function renderWardrobeItems() {
+      const container = document.getElementById('wardrobe-items-list');
+      if (!container) return;
+      container.innerHTML = "";
+
+      const type = currentWardrobeTab;
+      const presets = SKIN_PRESETS[type] || [];
+      const customs = gameState.customSkins[type] || [];
+      const equippedId = gameState.equipped[type];
+
+      const allItems = [...presets, ...customs];
+
+      allItems.forEach(item => {
+        const isEquipped = (equippedId === item.id || (!equippedId && item.id.includes('_none')));
+
+        const card = document.createElement('div');
+        card.className = `wardrobe-item-card ${isEquipped ? 'equipped' : ''}`;
+
+        const dataUrl = item.pixels ? pixelsToDataURL(item.pixels) : "";
+        let previewHtml = "";
+
+        if (dataUrl) {
+          let imgH = '60px';
+          let imgW = '36px';
+          previewHtml = `<img src="${dataUrl}" style="width:${imgW}; height:${imgH}; image-rendering:pixelated; margin-bottom:5px; pointer-events:none;">`;
+        } else {
+          previewHtml = `<div style="font-size: 1.5rem; margin-bottom: 5px; pointer-events:none;">❌</div>`;
+        }
+
+        card.innerHTML = `
+          ${previewHtml}
+          <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--text-color); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div>
+          <div style="display:flex; gap:4px; width:100%;">
+            <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.65rem; padding:3px; border:none; border-radius:6px; background:var(--primary); color:white; font-weight:700; cursor:pointer;">裝備</button>
+            ${!item.id.startsWith('preset_') ? `<button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.65rem; padding:3px 6px; border:none; border-radius:6px; background:var(--secondary); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
+          </div>
+        `;
+
+        card.onclick = () => {
+          equipSkin(type, item.id);
+        };
+
+        container.appendChild(card);
+      });
+    }
+
+    function equipSkin(type, itemId, event) {
+      if (event) event.stopPropagation();
+      playSound('click');
+
+      if (itemId.includes('_none')) {
+        gameState.equipped[type] = null;
+      } else {
+        gameState.equipped[type] = itemId;
+      }
+
+      applyEquippedSkins();
+      renderWardrobeItems();
+      saveGameData();
+    }
+
+    function deleteCustomSkin(type, itemId, event) {
+      if (event) event.stopPropagation();
+      if (!confirm("確定要刪除這件自定義服飾嗎？")) return;
+      playSound('click');
+
+      if (gameState.equipped[type] === itemId) {
+        gameState.equipped[type] = null;
+      }
+
+      gameState.customSkins[type] = gameState.customSkins[type].filter(item => item.id !== itemId);
+
+      applyEquippedSkins();
+      renderWardrobeItems();
+      saveGameData();
+    }
+
+    function openPixelEditor() {
+      playSound('click');
+      document.getElementById('wardrobe-main-view').style.display = 'none';
+      document.getElementById('wardrobe-editor-view').style.display = 'flex';
+
+      const type = currentWardrobeTab;
+      const radio = document.querySelector(`input[name="editor-skin-type"][value="${type}"]`);
+      if (radio) {
+        radio.checked = true;
+        updateEditorTypeUI(type);
+      }
+
+      document.getElementById('editor-skin-name').value = "我的新設計";
+
+      initEditorCanvas();
+      initEditorPalette();
+    }
+
+    function closePixelEditor() {
+      playSound('click');
+      document.getElementById('wardrobe-editor-view').style.display = 'none';
+      document.getElementById('wardrobe-main-view').style.display = 'flex';
+      switchWardrobeTab(currentWardrobeTab);
+    }
+
+    function updateEditorTypeUI(type) {
+      ['hat', 'clothes', 'shoes'].forEach(t => {
+        const lbl = document.getElementById(`editor-type-lbl-${t}`);
+        if (lbl) {
+          if (t === type) lbl.classList.add('active');
+          else lbl.classList.remove('active');
+        }
+      });
+    }
+
+    function initEditorCanvas() {
+      const container = document.getElementById('pixel-canvas-container');
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (editorCanvasPixels.length !== 540) {
+        editorCanvasPixels = new Array(540).fill(null);
+      } else {
+        editorCanvasPixels.fill(null);
+      }
+
+      const silhouetteStr = `
+        ..................
+        ..................
+        ..................
+        ..................
+        ..................
+        ..................
+        ..................
+        ..................
+        ...HHHHHHHHHHHH...
+        ...HHHHHHHHHHHH...
+        ..HHHHSSSSSSSSHH..
+        ..HHHHSSSSSSSSHH..
+        ..HHHHSSSSSSSSHH..
+        ..HHHHSSSSSSSSHH..
+        ...HHSSSSSSSSHH...
+        ...HHSSSSSSSSHH...
+        ...HHSSSSSSSSHH...
+        ...HHSSSSSSSSHH...
+        ........SS........
+        ....CCCCCCCCCC....
+        ....CCCCCCCCCC....
+        ..SSCCCCCCCCCCSS..
+        ..SSCCCCCCCCCCSS..
+        ..SSCCCCCCCCCCSS..
+        ..SSCCCCCCCCCCSS..
+        ....CCCCCCCCCC....
+        ....CCCCCCCCCC....
+        ....CCCCCCCCCC....
+        .....FF....FF.....
+        .....FF....FF.....
+      `.trim().split('\n').map(l => l.trim()).join('');
+
+      for (let i = 0; i < 540; i++) {
+        const cell = document.createElement('div');
+        cell.className = "pixel-grid-cell";
+        cell.dataset.index = i;
+
+        // 套用剪影提示
+        const typeChar = silhouetteStr[i];
+        if (typeChar === 'H') cell.classList.add('silhouette-hair');
+        else if (typeChar === 'S') cell.classList.add('silhouette-skin');
+        else if (typeChar === 'C') cell.classList.add('silhouette-clothes');
+        else if (typeChar === 'F') cell.classList.add('silhouette-feet');
+
+        cell.onmousedown = (e) => {
+          e.preventDefault();
+          isDrawingOnCanvas = true;
+          drawPixel(cell);
+        };
+
+        cell.onmouseenter = () => {
+          if (isDrawingOnCanvas) {
+            drawPixel(cell);
+          }
+        };
+
+        container.appendChild(cell);
+      }
+
+      const stopDrawing = () => { isDrawingOnCanvas = false; };
+      document.addEventListener('mouseup', stopDrawing);
+    }
+
+    function initEditorPalette() {
+      const container = document.getElementById('palette-grid');
+      if (!container) return;
+      container.innerHTML = "";
+
+      const presetColors = [
+        '#ff453a', '#ff9f0a', '#ffd60a', '#30d158', '#0a84ff', '#bf5af2', '#ffffff', '#1d1d1f',
+        '#ff8a8a', '#ffd154', '#81c784', '#aedefc', '#dcd6f7', '#fbd1b7', '#8b5a2b', '#4a3728'
+      ];
+
+      presetColors.forEach(color => {
+        const dot = document.createElement('div');
+        dot.className = `palette-dot ${color === editorSelectedColor ? 'active' : ''}`;
+        dot.style.backgroundColor = color;
+        dot.onclick = () => {
+          selectPaletteColor(color);
+        };
+        container.appendChild(dot);
+      });
+    }
+
+    function selectPaletteColor(color) {
+      playSound('click');
+      editorSelectedColor = color;
+
+      const picker = document.getElementById('editor-custom-color');
+      if (picker) picker.value = color;
+
+      initEditorPalette();
+    }
+
+    // 著色筆工具
+    function setEditorTool(tool) {
+      playSound('click');
+      editorTool = tool;
+      document.getElementById('tool-pencil').classList.toggle('active', tool === 'pencil');
+      document.getElementById('tool-eraser').classList.toggle('active', tool === 'eraser');
+    }
+
+    function clearEditorCanvas() {
+      if (!confirm("確定要清空畫布嗎？")) return;
+      playSound('click');
+      editorCanvasPixels.fill(null);
+      document.querySelectorAll('.pixel-grid-cell').forEach(cell => {
+        cell.style.backgroundColor = 'transparent';
+      });
+    }
+
+    function drawPixel(cell) {
+      const idx = parseInt(cell.dataset.index);
+      if (editorTool === 'pencil') {
+        cell.style.backgroundColor = editorSelectedColor;
+        editorCanvasPixels[idx] = editorSelectedColor;
+      } else {
+        cell.style.backgroundColor = 'transparent';
+        editorCanvasPixels[idx] = null;
+      }
+    }
+
+    function saveCustomSkin() {
+      playSound('click');
+      const nameInput = document.getElementById('editor-skin-name');
+      const name = nameInput.value.trim() || "未命名服飾";
+
+      const typeRadio = document.querySelector('input[name="editor-skin-type"]:checked');
+      const type = typeRadio ? typeRadio.value : 'clothes';
+
+      const isAllTransparent = editorCanvasPixels.every(p => p === null);
+      if (isAllTransparent) {
+        alert("請在畫布上畫些東西再儲存喔！");
+        return;
+      }
+
+      const id = "custom_" + type + "_" + Date.now();
+      const newSkin = {
+        id: id,
+        name: name,
+        type: type,
+        pixels: [...editorCanvasPixels]
+      };
+
+      if (!gameState.customSkins[type]) {
+        gameState.customSkins[type] = [];
+      }
+      gameState.customSkins[type].push(newSkin);
+
+      gameState.equipped[type] = id;
+
+      applyEquippedSkins();
+      saveGameData();
+      queueFloatingText(`✨ 成功儲存並裝備：${name}`);
+
+      closePixelEditor();
+    }
+
+    function exportSkinPNG() {
+      playSound('click');
+      const nameInput = document.getElementById('editor-skin-name');
+      const name = nameInput.value.trim() || "custom_skin";
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 18;
+      canvas.height = 30;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 18, 30);
+
+      for (let y = 0; y < 30; y++) {
+        for (let x = 0; x < 18; x++) {
+          const color = editorCanvasPixels[y * 18 + x];
+          if (color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+
+      const link = document.createElement('a');
+      link.download = `${name}_18x30.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      queueFloatingText("📥 已經將 18x30 像素原圖匯出！");
+    }
+
+    function triggerImportSkinPNG() {
+      playSound('click');
+      document.getElementById('skin-import-file').click();
+    }
+
+    function importSkinPNG(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          canvas.width = 18;
+          canvas.height = 30;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, 18, 30);
+
+          let dx = 0, dy = 0;
+          const w = img.width;
+          const h = img.height;
+
+          if (w === 16 && h === 16) {
+            const typeRadio = document.querySelector('input[name="editor-skin-type"]:checked');
+            const type = typeRadio ? typeRadio.value : 'clothes';
+            dx = 1;
+            if (type === 'clothes') dy = 12;
+            else if (type === 'shoes') dy = 14;
+            else dy = 6; // hat
+            ctx.drawImage(img, dx, dy, 16, 16);
+          } else if (w === 18 && h === 24) {
+            ctx.drawImage(img, 0, 6, 18, 24);
+          } else {
+            ctx.drawImage(img, 0, 0, 18, 30);
+          }
+
+          const imgData = ctx.getImageData(0, 0, 18, 30).data;
+
+          for (let i = 0; i < 540; i++) {
+            const r = imgData[i * 4];
+            const g = imgData[i * 4 + 1];
+            const b = imgData[i * 4 + 2];
+            const a = imgData[i * 4 + 3];
+
+            if (a < 10) {
+              editorCanvasPixels[i] = null;
+            } else {
+              const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+              editorCanvasPixels[i] = hex;
+            }
+          }
+
+          const cells = document.querySelectorAll('.pixel-grid-cell');
+          cells.forEach(cell => {
+            const idx = parseInt(cell.dataset.index);
+            const color = editorCanvasPixels[idx];
+            cell.style.backgroundColor = color ? color : 'transparent';
+          });
+
+          let defaultName = file.name.replace(/\.[^/.]+$/, "");
+          defaultName = defaultName.replace('_18x30', '').replace('_18x24', '').replace('_16x16', '');
+          document.getElementById('editor-skin-name').value = defaultName + "_匯入";
+
+          queueFloatingText("📂 像素 PNG 匯入成功！");
+          playSound('levelUp');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      event.target.value = "";
+    }
+
+
+    // ------------------------------------------
+    // 升學與考試
+    // ------------------------------------------
+    function getExamSuccessRate() {
+      let totalScore = 0;
+      for (let key in gameState.subjects) {
+        totalScore += (gameState.subjects[key].school + gameState.subjects[key].home);
+      }
+      let baseRate = (totalScore / 500) * 100;
+      if (gameState.stress > 70) {
+        baseRate = Math.max(5, baseRate - (gameState.stress - 70));
+      }
+      if (gameState.energy < 30) {
+        baseRate = Math.max(5, baseRate - (30 - gameState.energy) * 0.6);
+      }
+      const examBonus = typeof getFriendBonus === 'function' ? getFriendBonus('exam_rate_add') : 0;
+      // v8.2 實裝承諾過的加成：學校 Lv.3 +5%、城鎮繁榮 18★ +5% (原本只寫在說明文字，公式沒讀)
+      let landmarkExamBonus = 0;
+      try {
+        if (typeof getLandmarkLevel === 'function' && getLandmarkLevel('school') >= 3) landmarkExamBonus += 5;
+        if (typeof getTownProsperityTotal === 'function' && getTownProsperityTotal() >= 18) landmarkExamBonus += 5;
+      } catch (e) { }
+      const examMut = typeof getMutationMult === 'function' ? getMutationMult('exam_rate') : 1.0;
+      return Math.min(100, Math.max(5, Math.round((baseRate + examBonus + landmarkExamBonus) * examMut)));
+    }
+
+    function getExamCooldownRemaining() {
+      if (!gameState.examCooldownEndDays) return 0;
+
+      const targetHours = (gameState.examCooldownEndDays * 24) + (gameState.examCooldownEndHour || 0) + ((gameState.examCooldownEndMinute || 0) / 60);
+      const currentHours = ((gameState.totalGameDays || 0) * 24) + gameState.hour + (gameState.minute / 60);
+
+      const diffHours = targetHours - currentHours;
+      return diffHours > 0 ? diffHours : 0;
+    }
+
+    function triggerExam() {
+      try {
+        // 點擊考試代表發出明確指令，立刻恢復相機追隨
+        userScrolling = false;
+        if (userScrollTimer) {
+          clearTimeout(userScrollTimer);
+          userScrollTimer = null;
+        }
+
+        const remainingHours = getExamCooldownRemaining();
+        if (remainingHours > 0) {
+          playSound('examFail');
+
+          const cdDays = Math.floor(remainingHours / 24);
+          const cdHours = Math.floor(remainingHours % 24);
+          const cdMinutes = Math.floor((remainingHours * 60) % 60);
+
+          let timeStr = "";
+          if (cdDays > 0) timeStr += `${cdDays}天`;
+          if (cdHours > 0 || cdDays > 0) timeStr += `${cdHours}小時`;
+          timeStr += `${cdMinutes}分鐘`;
+
+          createFloatingText(`❌ 考試冷卻中！剩餘等待時間：${timeStr}`);
+          return;
+        }
+
+        playSound('click');
+        const passRate = getExamSuccessRate();
+
+        const overlay = document.getElementById("exam-overlay");
+        const pb = document.getElementById("exam-pb");
+        const desc = document.getElementById("modal-desc");
+        const statusLbl = document.getElementById("modal-status-lbl");
+        const btnClose = document.getElementById("btn-modal-close");
+
+        if (overlay) {
+          overlay.classList.add("active");
+        }
+        if (pb) {
+          pb.style.width = "0%";
+        }
+        if (btnClose) {
+          btnClose.style.display = "none";
+        }
+
+        const currentGradeName = GRADES[gameState.gradeIndex].name;
+        const nextGradeName = gameState.gradeIndex < GRADES.length - 1 ? GRADES[gameState.gradeIndex + 1].name : "學無止境學神";
+
+        if (desc) {
+          desc.innerHTML = `正在進行 <b>${currentGradeName}</b> 的升學考試。<br>考取下一階段：<b>${nextGradeName}</b><br>成功率：<span style="color:red; font-weight:900;">${passRate}%</span>`;
+        }
+        if (statusLbl) {
+          statusLbl.innerText = "正在填寫試卷...";
+        }
+
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 5;
+          if (pb) {
+            pb.style.width = `${progress}%`;
+          }
+
+          if (statusLbl) {
+            if (progress === 30) statusLbl.innerText = "題目有點難！緊張！";
+            else if (progress === 60) statusLbl.innerText = "調動記憶力，努力作答中...";
+            else if (progress === 90) statusLbl.innerText = "檢查名字有沒有寫錯...";
+          }
+
+          if (progress >= 100) {
+            clearInterval(interval);
+            finishExam(passRate, nextGradeName);
+          }
+        }, 150);
+      } catch (e) {
+        console.error("觸發考試失敗:", e);
+      }
+    }
+
+    function finishExam(passRate, nextGradeName) {
+      const roll = Math.random() * 100;
+      const desc = document.getElementById("modal-desc");
+      const statusLbl = document.getElementById("modal-status-lbl");
+      const btnClose = document.getElementById("btn-modal-close");
+
+      if (roll <= passRate) {
+        playSound('examSuccess');
+        if (gameState.gradeIndex < GRADES.length - 1) {
+          gameState.gradeIndex += 1;
+        }
+        gameState.difficulty = parseFloat((gameState.difficulty + 0.15).toFixed(2));
+
+        for (let key in gameState.subjects) {
+          gameState.subjects[key].school = 0;
+          gameState.subjects[key].home = 0;
+        }
+
+        // 升學成功，清除冷卻
+        gameState.examCooldownEndDays = 0;
+        gameState.examCooldownEndHour = 0;
+        gameState.examCooldownEndMinute = 0;
+
+        desc.innerHTML = `🎉 恭喜你！升學成功！<br>你現在是：<b style="color:#2a9d8f; font-size:1.4rem;">${nextGradeName}</b><br><br><span style="font-size:0.85rem; color:var(--text-muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，但超商打工時薪也同步加薪！</span>`;
+        statusLbl.innerText = "繼續衝刺下一個學歷目標吧！";
+        // UX4：升學成功撒彩花
+        setTimeout(() => celebrateGraduation(), 300);
+        // 如果已是最高學歷，觸發完結畫面
+        if (gameState.gradeIndex === GRADES.length - 1) {
+          setTimeout(() => showGameClear(), 2500);
+        }
+      } else {
+        playSound('examFail');
+        desc.innerHTML = `😢 很遺憾，考試不合格...<br>再接再厲！提升科目分數，並維持精力、降低壓力再來挑戰。<br><br><span style="color:red; font-weight:800;">由於考試失敗，須等待 7 遊戲天後才能再次挑戰！</span>`;
+        statusLbl.innerText = "失敗為成功之母。";
+
+        // 設定 7 天冷卻結束時刻
+        gameState.examCooldownEndDays = (gameState.totalGameDays || 0) + 7;
+        gameState.examCooldownEndHour = gameState.hour;
+        gameState.examCooldownEndMinute = gameState.minute;
+      }
+
+      btnClose.style.display = "inline-block";
+      updateUI();
+      saveGameData();
+    }
+
+    function closeExamModal() {
+      playSound('click');
+      document.getElementById("exam-overlay").classList.remove("active");
+    }
+
+    // ❓ 說明 Modal 控制函數
+    function showHelpModal() {
+      try {
+        playSound('click');
+        const overlay = document.getElementById("help-overlay");
+        if (overlay) {
+          overlay.classList.add("active");
+        }
+      } catch (e) {
+        console.error("顯示說明失敗:", e);
+      }
+    }
+
+    function closeHelpModal() {
+      playSound('click');
+      document.getElementById("help-overlay").classList.remove("active");
+    }
+
+    // 👨‍👩‍👦 父母事件 Modal 控制
+    function showParentsEventModal(event) {
+      if (event) event.stopPropagation(); // 阻止地標點擊派遣事件冒泡！
+
+      const overlay = document.getElementById("parents-event-overlay");
+      const titleEl = document.getElementById("parents-modal-title");
+      const iconEl = document.getElementById("parents-modal-icon");
+      const reasonEl = document.getElementById("parents-modal-reason");
+
+      if (!overlay) return;
+      playSound('click');
+
+      if (gameState.parentsStatus !== 'alive') {
+        titleEl.innerText = "⚠️ 父母突發事件";
+        iconEl.innerText = "🪦";
+        reasonEl.innerText = gameState.parentsStatusReason || "父母離奇消失了...";
+      } else if (gameState.parentsRebornReason) {
+        titleEl.innerText = "✨ 父母光榮奇蹟";
+        iconEl.innerText = "📜";
+        reasonEl.innerText = gameState.parentsRebornReason || "父母平安回來了！";
+      }
+
+      overlay.classList.add("active");
+    }
+
+    function closeParentsEventModal() {
+      playSound('click');
+      const overlay = document.getElementById("parents-event-overlay");
+      if (overlay) {
+        overlay.classList.remove("active");
+      }
+    }
+
+    function switchHelpTab(tabId, btnEl) {
+      playSound('click');
+      document.querySelectorAll(".help-tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      if (btnEl) {
+        btnEl.classList.add("active");
+      } else if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add("active");
+      }
+
+      document.querySelectorAll(".help-tab-content").forEach(content => {
+        content.style.display = "none";
+      });
+      document.getElementById(tabId).style.display = "block";
+    }
+
+
+    // ------------------------------------------
+    // UI 刷新與小人及 NPC 視覺控制
+    function updateLocksUI() {
+      const landmarkHome = elLandmarks.home;
+      const landmarkSchool = elLandmarks.school;
+      const landmarkRestaurant = elLandmarks.restaurant;
+      const landmarkLibrary = elLandmarks.library;
+      const landmarkStore = elLandmarks.store;
+
+      if (homeLocked) landmarkHome.classList.add("light-off");
+      else landmarkHome.classList.remove("light-off");
+
+      if (schoolLocked) landmarkSchool.classList.add("light-off");
+      else landmarkSchool.classList.remove("light-off");
+
+      if (restaurantLocked) landmarkRestaurant.classList.add("light-off");
+      else landmarkRestaurant.classList.remove("light-off");
+
+      if (libraryLocked) landmarkLibrary.classList.add("light-off");
+      else landmarkLibrary.classList.remove("light-off");
+
+      if (landmarkStore) {
+        if (storeLocked) landmarkStore.classList.add("light-off");
+        else landmarkStore.classList.remove("light-off");
+      }
+    }
+
+    // ------------------------------------------
+    function updateUI() {
+      elGradeTitle.innerText = GRADES[gameState.gradeIndex].name;
+      elMoneyVal.innerText = '$' + gameState.money;
+
+      // 更新背包顯示（含心靈書）
+      elBagChicken.innerText = gameState.bag.chicken;
+      elBagDrink.innerText = gameState.bag.drink;
+      if (elBagMentalbook) elBagMentalbook.innerText = gameState.bag.mentalbook || 0;
+
+      // 新增道具背包顯示
+      const elBagBento = document.getElementById('bag-bento');
+      const elBagVitamin = document.getElementById('bag-vitamin');
+      if (elBagBento) elBagBento.innerText = gameState.bag.bento || 0;
+      if (elBagVitamin) elBagVitamin.innerText = gameState.bag.vitamin || 0;
+
+      elUseChicken.disabled = (gameState.bag.chicken <= 0);
+      elUseDrink.disabled = (gameState.bag.drink <= 0);
+      if (elUseMentalbook) elUseMentalbook.disabled = ((gameState.bag.mentalbook || 0) <= 0);
+
+      // 新增道具使用按鈕
+      const elUseBento = document.getElementById('btn-use-bento');
+      const elUseVitamin = document.getElementById('btn-use-vitamin');
+      if (elUseBento) elUseBento.disabled = ((gameState.bag.bento || 0) <= 0);
+      if (elUseVitamin) elUseVitamin.disabled = ((gameState.bag.vitamin || 0) <= 0);
+
+      elBookOwned.innerText = `已擁有: ${gameState.passive.book}`;
+      elShoesOwned.innerText = `已擁有: ${gameState.passive.shoes}`;
+
+      // 新增被動裝備顯示
+      const elHeadphoneOwned = document.getElementById('lbl-headphone-owned');
+      const elTabletOwned = document.getElementById('lbl-tablet-owned');
+      if (elHeadphoneOwned) elHeadphoneOwned.innerText = `已擁有: ${gameState.passive.headphone || 0}`;
+      if (elTabletOwned) elTabletOwned.innerText = `已擁有: ${gameState.passive.tablet || 0}`;
+
+      // 如果好友面板開啟中，同步更新按鈕與好感度狀態
+      const friendsDrawer = document.getElementById('drawer-friends');
+      if (friendsDrawer && friendsDrawer.classList.contains('open') && typeof renderFriendsList === 'function') {
+        renderFriendsList();
+      }
+
+      // 存檔時間戳
+      updateSaveTimestamp();
+
+      // 更新住家內部的父母事件牌子/獎狀顯示狀態
+      const elGrave = document.getElementById("prop-parents-grave");
+      const elCert = document.getElementById("prop-parents-certificate");
+      if (elGrave && elCert) {
+        if (gameState.parentsStatus !== 'alive') {
+          elGrave.style.display = "block";
+          elCert.style.display = "none";
+        } else if (gameState.parentsRebornReason) {
+          elGrave.style.display = "none";
+          elCert.style.display = "block";
+        } else {
+          elGrave.style.display = "none";
+          elCert.style.display = "none";
+        }
+      }
+
+      updateLocksUI();
+      updateCalendarUI();
+      updateStatusBars();
+      updateSubjectBars();
+      updateExamProgress();
+    }
+
+    // 存檔時間戳顯示
+    function updateSaveTimestamp() {
+      const footerEls = document.querySelectorAll(".floating-footer");
+      if (footerEls) {
+        const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v8.2.0) | 上次存檔：${ts}`);
+      }
+    }
+
+    // 效能優化：髒檢查快取
+    const uiCache = {};
+
+    function updateCalendarUI() {
+      const days = ["", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"];
+      const isWeekend = (gameState.dayOfWeek === 6 || gameState.dayOfWeek === 7);
+      const dayStr = `${days[gameState.dayOfWeek]} (${isWeekend ? '假日' : '平日'})`;
+
+      const padHour = String(gameState.hour).padStart(2, '0');
+      const padMin = String(Math.floor(gameState.minute)).padStart(2, '0');
+      const timeStr = `${padHour}:${padMin}`;
+
+      if (uiCache.dayStr !== dayStr) {
+        uiCache.dayStr = dayStr;
+        elCalendarDay.innerText = dayStr;
+      }
+      
+      if (uiCache.timeStr !== timeStr) {
+        uiCache.timeStr = timeStr;
+        elCalendarTime.innerText = timeStr;
+      }
+
+      // 動態晝夜光影濾鏡 (開羅復古地圖光影變化)
+      const overlayEl = document.getElementById("map-night-overlay");
+      if (overlayEl) {
+        const hour = gameState.hour;
+        let overlayBg = "rgba(0, 0, 0, 0)";
+        if (hour >= 17 && hour < 19) {
+          overlayBg = "rgba(243, 156, 18, 0.16)"; // 黃昏暖橘夕陽光
+        } else if (hour >= 19 || hour < 5) {
+          overlayBg = "rgba(15, 23, 42, 0.36)"; // 深夜靜謐藏青星空光影
+        } else if (hour >= 5 && hour < 7) {
+          overlayBg = "rgba(255, 177, 66, 0.10)"; // 清晨朝霞柔光
+        }
+        if (overlayEl.style.background !== overlayBg) {
+          overlayEl.style.background = overlayBg;
+        }
+      }
+    }
+
+    function updateStatusBars() {
+      const energyDisp = parseFloat(gameState.energy.toFixed(1));
+      const hungerDisp = parseFloat(gameState.hunger.toFixed(1));
+      const stressDisp = parseFloat(gameState.stress.toFixed(1));
+
+      if (uiCache.energy !== energyDisp) {
+        uiCache.energy = energyDisp;
+        elEnergyBar.style.width = `${gameState.energy}%`;
+        elEnergyLbl.innerText = `${energyDisp} / 100`;
+      }
+
+      if (uiCache.hunger !== hungerDisp) {
+        uiCache.hunger = hungerDisp;
+        elHungerBar.style.width = `${gameState.hunger}%`;
+        elHungerLbl.innerText = `${hungerDisp} / 100`;
+      }
+
+      if (uiCache.stress !== stressDisp) {
+        uiCache.stress = stressDisp;
+        elStressBar.style.width = `${gameState.stress}%`;
+        elStressLbl.innerText = `${stressDisp} / 100`;
+      }
+
+      // UX3：危險警示條更新
+      let alertMsg = '';
+      let alertColor = '';
+      if (gameState.stress >= 80) {
+        alertMsg = '🤯 壓力爆表！快去運動場跑步！';
+        alertColor = 'rgba(255, 69, 58, 0.92)';
+      } else if (gameState.energy < 20) {
+        alertMsg = '🔋 精力耗盡！讀書效率大幅下降！';
+        alertColor = 'rgba(10, 132, 255, 0.88)';
+      } else if (gameState.hunger < 20) {
+        alertMsg = '🍗 快餓扁了！去吃點東西吧！';
+        alertColor = 'rgba(255, 159, 10, 0.92)';
+      }
+
+      const alertKey = alertMsg + alertColor;
+      if (uiCache.alert !== alertKey) {
+        uiCache.alert = alertKey;
+        if (alertMsg) {
+          elAlertBar.style.display = 'block';
+          elAlertBar.innerText = alertMsg;
+          elAlertBar.style.background = alertColor;
+        } else {
+          elAlertBar.style.display = 'none';
+        }
+      }
+    }
+
+    function updateSubjectBars() {
+      let allMaxed = true;
+      const keys = ['cn', 'en', 'ma', 'sc', 'so'];
+      
+      if (!uiCache.subjects) uiCache.subjects = {};
+
+      keys.forEach(k => {
+        const sub = gameState.subjects[k];
+        const total = sub.school + sub.home;
+        if (total < 100) allMaxed = false;
+
+        const subKey = `${total}-${sub.school}-${sub.home}`;
+        if (uiCache.subjects[k] !== subKey) {
+          uiCache.subjects[k] = subKey;
+          
+          document.getElementById(`score-${k}`).innerText = `${total} / 100`;
+
+          const schoolPercent = (sub.school / 100) * 100;
+          document.getElementById(`pb-${k}-school`).style.width = `${schoolPercent}%`;
+
+          const homeBar = document.getElementById(`pb-${k}-home`);
+          homeBar.style.left = `${schoolPercent}%`;
+          homeBar.style.width = `${(sub.home / 100) * 100}%`;
+        }
+      });
+
+      if (uiCache.allMaxed !== allMaxed) {
+        uiCache.allMaxed = allMaxed;
+        if (allMaxed) elBtnExam.classList.add("ready");
+        else elBtnExam.classList.remove("ready");
+      }
+    }
+
+    // UX2：考試按鈕冷卻計時顯示
+    function updateExamProgress() {
+      const rate = getExamSuccessRate();
+      elExamRate.innerText = `考取合格率: ${rate}%`;
+
+      const remaining = getExamCooldownRemaining();
+      if (remaining > 0) {
+        const cdDays = Math.floor(remaining / 24);
+        const cdHours = Math.floor(remaining % 24);
+        let timeStr = cdDays > 0 ? `${cdDays}天` : '';
+        timeStr += `${cdHours}小時`;
+        elBtnExam.innerText = `⏳ 冷卻中 ${timeStr}`;
+        elBtnExam.disabled = true;
+        elBtnExam.style.opacity = '0.55';
+        elBtnExam.style.cursor = 'not-allowed';
+        elBtnExam.style.background = 'linear-gradient(135deg, #86868b, #636366)';
+      } else {
+        elBtnExam.innerText = (gameState.examAttempts || 0) === 0 ? '參加考試（首次免費）' : '參加考試（$50）';
+        elBtnExam.disabled = false;
+        elBtnExam.style.opacity = '1';
+        elBtnExam.style.cursor = 'pointer';
+        elBtnExam.style.background = 'linear-gradient(135deg, #ff2d55, #ff3b30)';
+      }
+    }
+
+    let zzzTimer = null;
+    let sweatTimer = null;
+    // v8.2 效能：舞台看板髒檢查 (原本每 100ms 無條件重寫 innerHTML)
+    function setStageBoard(html) {
+      if (uiCache._stageHtml === html) return;
+      uiCache._stageHtml = html;
+      elStageBoard.innerHTML = html;
+    }
+
+    function updateCharacterAnimation() {
+      // 1. 地標房屋掀頂 (active-inside)
+      for (let key in elLandmarks) {
+        if (!elLandmarks[key]) continue;
+        if (key === currentLoc && !gameState.isCommuting) {
+          elLandmarks[key].classList.add("active-inside");
+        } else {
+          elLandmarks[key].classList.remove("active-inside");
+        }
+
+        const targetLoc = gameState.isCommuting ? gameState.commuteTarget : currentLoc;
+        if (key === targetLoc) {
+          elLandmarks[key].classList.add("active-highlight");
+        } else {
+          elLandmarks[key].classList.remove("active-highlight");
+        }
+      }
+
+      // 2. 清除小人身上的表情與家具 CSS 模式 (只保留住家陪睡控制)
+      const elHome = elLandmarks.home;
+      elHome.classList.remove("mode-sleeping");
+      document.getElementById("prop-bed-parents").style.display = "none";
+      document.getElementById("npc-parents-sleep").style.display = "none";
+
+      elStudentSprite.setAttribute("class", "sprite-pixel");
+
+      // 3. 處理運動場繞操場跑步動畫切換 (CSS Animation 接管)
+      if (currentState === 'sports' && !gameState.isCommuting) {
+        elCharWrap.classList.add("running-on-track");
+        stopZzzParticles();
+        startSweatParticles();
+      } else {
+        elCharWrap.classList.remove("running-on-track");
+
+        // 常規就位坐標對齊
+        if (!gameState.isCommuting) {
+          const destCoords = getCharacterCoords(currentLoc, currentState);
+          const isFlipped = ((currentLoc === 'school' || currentLoc === 'library') && currentState === 'studying') || (currentLoc === 'store' && currentState === 'working');
+          updateCharacterPositionAndScale(destCoords.x, destCoords.y, isFlipped);
+        }
+      }
+
+      // 4. 根據狀態變更 class 與 NPC 的顯示
+      switch (currentState) {
+        case 'commuting':
+          elStudentSprite.classList.add("state-commuting");
+          let targetName = "目的地";
+          if (gameState.commuteTarget === 'home') targetName = '住家';
+          else if (gameState.commuteTarget === 'school') targetName = '學校';
+          else if (gameState.commuteTarget === 'gym') targetName = '運動場';
+          else if (gameState.commuteTarget === 'restaurant') targetName = '餐廳';
+          else if (gameState.commuteTarget === 'library') targetName = '圖書館';
+          else if (gameState.commuteTarget === 'store') targetName = '便利商店';
+
+          setStageBoard(`正在趕路：<span>前往${targetName} (${parseFloat(gameState.commuteMinutesLeft.toFixed(1))}m)</span>`);
+          elCharBubble.innerText = "趕路中！🏃‍♂️💨";
+          stopZzzParticles();
+          startSweatParticles();
+          break;
+
+        case 'sleeping':
+          elStudentSprite.classList.add("state-sleeping");
+
+          // 啟用住家睡覺模式，顯示雙人床與大床睡覺的爸媽
+          if (currentLoc === 'home') {
+            elHome.classList.add("mode-sleeping");
+            if (gameState.parentsStatus === 'alive') {
+              document.getElementById("prop-bed-parents").style.display = "block";
+              document.getElementById("npc-parents-sleep").style.display = "block";
+            } else {
+              // 爸媽不在，大雙人床空無一人 (保留空大床，顯得極具黑色幽默與寂寞)
+              document.getElementById("prop-bed-parents").style.display = "block";
+              document.getElementById("npc-parents-sleep").style.display = "none";
+            }
+          }
+
+          setStageBoard(`住家：<span>睡覺休息中 💤</span>`);
+          elCharBubble.innerText = "Zzz...";
+          startZzzParticles();
+          stopSweatParticles();
+          break;
+
+        case 'eating':
+          elStudentSprite.classList.add("state-eating");
+          setStageBoard(`餐廳：<span>享用鐵板燒補充體力 🍽️</span>`);
+          elCharBubble.innerText = "好吃！炒麵炒肉... 🥩";
+          stopZzzParticles();
+          stopSweatParticles();
+          break;
+
+        case 'sports':
+          elStudentSprite.classList.add("state-sports");
+          setStageBoard(`運動場：<span>跑步減壓中 🏃</span>`);
+          elCharBubble.innerText = "呼哈！呼哈！💦";
+          break;
+
+        case 'working':
+          elStudentSprite.classList.add("state-studying");
+          setStageBoard(`便利商店：<span>站櫃檯打工賺錢中 💰</span>`);
+          elCharBubble.innerText = "歡迎光臨！請問需要載具嗎？🏪";
+          stopZzzParticles();
+          stopSweatParticles();
+          break;
+
+        case 'studying':
+          elStudentSprite.classList.add("state-studying");
+          if (currentLoc === "school") {
+            setStageBoard(`學校：<span>課堂聽講中 🏫</span>`);
+            elCharBubble.innerText = "認真聽講 ✍️";
+          } else if (currentLoc === "library") {
+            setStageBoard(`圖書館：<span>自修複習課業 📚</span>`);
+            elCharBubble.innerText = "好好複習！💡";
+          } else {
+            setStageBoard(`住家：<span>發呆放鬆中 🍃</span>`);
+            elCharBubble.innerText = "放空一下下～";
+          }
+          stopZzzParticles();
+          stopSweatParticles();
+          break;
+
+        case 'angry':
+          elStudentSprite.classList.add("state-angry");
+          setStageBoard(`警戒：<span>壓力爆表！拒絕讀書</span>`);
+          elCharBubble.innerText = "煩死了！好想去運動！🤯";
+          stopZzzParticles();
+          stopSweatParticles();
+          break;
+
+        case 'idle':
+        default:
+          elStudentSprite.classList.add("state-idle");
+          setStageBoard(`空閒：<span>發呆放鬆中 🍃</span>`);
+          elCharBubble.innerText = "放空一下下～";
+          stopZzzParticles();
+          stopSweatParticles();
+          break;
+      }
+
+      // 如果有搞笑說話覆蓋，優先顯示覆蓋的文字
+      if (bubbleOverrideText) {
+        elCharBubble.innerText = bubbleOverrideText;
+      }
+
+      // 5. 控制學校老師 (Teacher) 的出沒
+      const elTeacher = document.getElementById("npc-teacher");
+      if (currentState === 'studying' && currentLoc === 'school') {
+        elTeacher.style.display = "block";
+      } else {
+        elTeacher.style.display = "none";
+      }
+
+      // 6. 控制操場教練 (Coach) 的出沒
+      const elCoach = document.getElementById("npc-coach");
+      if (currentState === 'sports' && currentLoc === 'gym') {
+        elCoach.style.display = "block";
+      } else {
+        elCoach.style.display = "none";
+      }
+
+      // 7. 控制餐廳廚師 (Chef) 的出沒
+      const elChef = document.getElementById("npc-chef");
+      if (!restaurantLocked) {
+        elChef.style.display = "block";
+      } else {
+        elChef.style.display = "none";
+      }
+
+      // 8. 控制圖書館同儕 (Peer) 的出沒
+      const elPeer = document.getElementById("npc-peer");
+      if (!libraryLocked) {
+        elPeer.style.display = "block";
+      } else {
+        elPeer.style.display = "none";
+      }
+
+      // 9. 控制便利商店店員/客人 (Clerk) 的出沒
+      const elClerk = document.getElementById("npc-clerk");
+      if (elClerk) {
+        elClerk.style.display = storeLocked ? "none" : "block";
+      }
+    }
+
+    // 粒子
+    function startZzzParticles() {
+      if (zzzTimer) return;
+      zzzTimer = setInterval(() => {
+        const p = document.createElement("div");
+        p.className = "sleep-particle";
+        p.innerText = "Z";
+        p.style.left = `${20 + (Math.random() * 10 - 5)}px`;
+        p.style.top = `${39 + (Math.random() * 10 - 5)}px`;
+        elParticleEmitter.appendChild(p);
+        setTimeout(() => p.remove(), 2000);
+      }, 1000);
+    }
+
+    function stopZzzParticles() {
+      if (zzzTimer) {
+        clearInterval(zzzTimer);
+        zzzTimer = null;
+      }
+    }
+
+    function startSweatParticles() {
+      if (sweatTimer) return;
+      sweatTimer = setInterval(() => {
+        const p = document.createElement("div");
+        p.className = "sweat-particle";
+        p.style.left = `${20 + (Math.random() * 10 - 5)}px`;
+        p.style.top = `${49 + (Math.random() * 6 - 3)}px`;
+        elParticleEmitter.appendChild(p);
+        setTimeout(() => p.remove(), 1000);
+      }, 300);
+    }
+
+    function stopSweatParticles() {
+      if (sweatTimer) {
+        clearInterval(sweatTimer);
+        sweatTimer = null;
+      }
+    }
+
+    // Bug1 修正：移除 style 標籤注入（@keyframes float-up 已全域定義在 CSS 區塊）
+    function createFloatingText(txt, onDone) {
+      const floatTxt = document.createElement("div");
+      floatTxt.style.position = "absolute";
+      floatTxt.style.bottom = "60px";
+      floatTxt.style.left = "50%";
+      floatTxt.style.transform = "translateX(-50%)";
+      floatTxt.style.background = "rgba(74, 55, 40, 0.95)";
+      floatTxt.style.color = "#ffd154";
+      floatTxt.style.border = "2px solid #4a3728";
+      floatTxt.style.borderRadius = "8px";
+      floatTxt.style.padding = "4px 10px";
+      floatTxt.style.fontSize = "0.8rem";
+      floatTxt.style.fontWeight = "900";
+      floatTxt.style.zIndex = "30";
+      floatTxt.style.pointerEvents = "none";
+      floatTxt.style.boxShadow = "2px 2px 0px #4a3728";
+      floatTxt.style.animation = "float-up 1.2s forwards ease-out";
+      // 移除心了：const style = ... / document.head.appendChild(style)
+      floatTxt.innerText = txt;
+      elCharWrap.appendChild(floatTxt);
+      setTimeout(() => {
+        floatTxt.remove();
+        if (onDone) onDone(); // 佇列回調
+      }, 1200);
+    }
+
+    // UX1：浮字訊息佇列（防止重疊展示）
+    function queueFloatingText(txt) {
+      if (floatQueue.length >= 5) return; // 佇列最多 5 則
+      floatQueue.push(txt);
+      if (!isShowingFloat) processFloatQueue();
+    }
+
+    function processFloatQueue() {
+      if (floatQueue.length === 0) {
+        isShowingFloat = false;
+        return;
+      }
+      isShowingFloat = true;
+      const txt = floatQueue.shift();
+      createFloatingText(txt, processFloatQueue);
+    }
+
+
+    // ==========================================
+    // 🎮 小遊戲系統 (含第 6 站：🏪 收銀刷條碼)
+    // ==========================================
+    const MG_COOLDOWN_MINUTES = 30; // 每 30 遊戲分鐘可玩一次
+    let currentMinigame = null;
+    let mgTimerInterval = null;
+
+    function tickMiniGameCooldowns(progressMinutes) {
+      if (!gameState.miniGameCooldowns) return;
+      for (let loc in gameState.miniGameCooldowns) {
+        if (gameState.miniGameCooldowns[loc] > 0) {
+          gameState.miniGameCooldowns[loc] = Math.max(0, gameState.miniGameCooldowns[loc] - progressMinutes);
+        }
+      }
+      updateMiniGameTriggers();
+    }
+
+    function updateMiniGameTriggers() {
+      const locations = ['school', 'restaurant', 'gym', 'library', 'store', 'home'];
+      locations.forEach(loc => {
+        const landmark = document.getElementById(`landmark-${loc}`);
+        if (!landmark) return;
+        let trigger = landmark.querySelector('.minigame-trigger');
+
+        const isReady = (gameState.miniGameCooldowns[loc] || 0) <= 0 && currentLoc === loc && !gameState.isCommuting;
+
+        if (isReady) {
+          if (!trigger) {
+            trigger = document.createElement('div');
+            trigger.className = 'minigame-trigger';
+            trigger.innerHTML = '<div class="mg-badge">🎮 玩小遊戲!</div>';
+            trigger.onclick = (e) => { e.stopPropagation(); startMinigame(loc); };
+            landmark.appendChild(trigger);
+          }
+          trigger.style.display = 'block';
+        } else {
+          if (trigger) trigger.style.display = 'none';
+        }
+      });
+    }
+
+    function startMinigame(loc) {
+      playSound('click');
+      currentMinigame = loc;
+      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES;
+      if (!gameState.miniGamePlays) gameState.miniGamePlays = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
+      gameState.miniGamePlays[loc] = (gameState.miniGamePlays[loc] || 0) + 1;
+
+      const overlay = document.getElementById('minigame-overlay');
+      overlay.classList.add('active');
+      document.getElementById('mg-close-btn').style.display = 'none';
+
+      switch (loc) {
+        case 'school': startQuizGame(); break;
+        case 'restaurant': startCookingGame(); break;
+        case 'gym': startRhythmGame(); break;
+        case 'library': startMemoryGame(); break;
+        case 'store': startStoreGame(); break;
+        case 'home': startSheepGame(); break;
+      }
+      updateMiniGameTriggers();
+    }
+
+    function closeMinigame() {
+      playSound('click');
+      document.getElementById('minigame-overlay').classList.remove('active');
+      if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+      currentMinigame = null;
+    }
+
+    function showMinigameResult(win, loc) {
+      if (!gameState.miniGameWins) gameState.miniGameWins = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
+      if (win) gameState.miniGameWins[loc] = (gameState.miniGameWins[loc] || 0) + 1;
+
+      const area = document.getElementById('mg-game-area');
+      const closeBtn = document.getElementById('mg-close-btn');
+      closeBtn.style.display = 'block';
+
+      const buffConfigs = {
+        school: { type: 'study_boost', winMult: 1.5, loseMult: 0.7, winMin: 30, loseMin: 15, icon: '📚', desc: '學科增長' },
+        restaurant: { type: 'eat_boost', winMult: 1.5, loseMult: 0.8, winMin: 30, loseMin: 15, icon: '🍔', desc: '飽足恢復' },
+        gym: { type: 'sport_boost', winMult: 2.0, loseMult: 0.5, winMin: 30, loseMin: 15, icon: '🏃', desc: '壓力降低' },
+        library: { type: 'review_boost', winMult: 1.5, loseMult: 0.7, winMin: 30, loseMin: 15, icon: '📖', desc: '複習效率' },
+        store: { type: 'work_boost', winMult: 1.8, loseMult: 0.8, winMin: 30, loseMin: 15, icon: '🏪', desc: '打工時薪' },
+        home: { type: 'sleep_boost', winMult: 1.5, loseMult: 0.8, winMin: 30, loseMin: 15, icon: '😴', desc: '睡眠恢復' }
+      };
+
+      const cfg = buffConfigs[loc];
+      if (win) {
+        addBuff(cfg.type, cfg.winMult, cfg.winMin, cfg.icon, true, `${cfg.desc} x${cfg.winMult}`);
+        area.innerHTML = `<div class="mg-result">
+          <span class="result-icon">🎉</span>
+          <div class="result-title" style="color:var(--accent);">勝利！</div>
+          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 分鐘！</div>
+        </div>`;
+        playSound('examSuccess');
+      } else {
+        addBuff(cfg.type, cfg.loseMult, cfg.loseMin, cfg.icon, false, `${cfg.desc} x${cfg.loseMult}`);
+        area.innerHTML = `<div class="mg-result">
+          <span class="result-icon">😅</span>
+          <div class="result-title" style="color:var(--secondary);">失敗...</div>
+          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 分鐘</div>
+        </div>`;
+        playSound('examFail');
+      }
+      saveGameData();
+    }
+
+    // ---- 🏫 快問快答 ----
+    const QUIZ_QUESTIONS = [
+      { q: "台灣最高的山是？", opts: ["玉山", "阿里山", "雪山", "合歡山"], ans: 0, subject: "so" },
+      { q: "1 + 1 × 2 = ?", opts: ["3", "4", "2", "6"], ans: 0, subject: "ma" },
+      { q: "水的化學式是？", opts: ["H2O", "CO2", "NaCl", "O2"], ans: 0, subject: "sc" },
+      { q: "「床前明月光」的作者是？", opts: ["李白", "杜甫", "蘇軾", "白居易"], ans: 0, subject: "cn" },
+      { q: "Apple 的中文是？", opts: ["蘋果", "香蕉", "橘子", "葡萄"], ans: 0, subject: "en" },
+      { q: "地球繞太陽一圈約需？", opts: ["365天", "30天", "24小時", "7天"], ans: 0, subject: "sc" },
+      { q: "三角形內角和是？", opts: ["180度", "360度", "90度", "270度"], ans: 0, subject: "ma" },
+      { q: "「論語」是誰的弟子所記？", opts: ["孔子", "老子", "莊子", "墨子"], ans: 0, subject: "cn" },
+      { q: "Thank you 的日文是？", opts: ["ありがとう", "こんにちは", "さようなら", "すみません"], ans: 0, subject: "en" },
+      { q: "台灣的首都是？", opts: ["台北", "高雄", "台中", "台南"], ans: 0, subject: "so" },
+      { q: "光合作用需要什麼氣體？", opts: ["二氧化碳", "氧氣", "氮氣", "氫氣"], ans: 0, subject: "sc" },
+      { q: "12 × 12 = ?", opts: ["144", "124", "154", "134"], ans: 0, subject: "ma" },
+    ];
+
+    function startQuizGame() {
+      document.getElementById('mg-title').innerText = '🏫 快問快答';
+      document.getElementById('mg-desc').innerText = '限時 10 秒！選出正確答案';
+      const area = document.getElementById('mg-game-area');
+      const timerFill = document.getElementById('mg-timer-fill');
+      timerFill.style.width = '100%';
+
+      const q = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)];
+      // 隨機打亂選項
+      const shuffled = q.opts.map((opt, i) => ({ text: opt, isCorrect: i === q.ans }));
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      area.innerHTML = `
+        <div style="font-size:1.05rem; font-weight:800; margin-bottom:15px; text-align:center;">${q.q}</div>
+        <div class="quiz-options">
+          ${shuffled.map((opt, i) => `<button class="quiz-option-btn" data-correct="${opt.isCorrect}" onclick="handleQuizAnswer(this)">${opt.text}</button>`).join('')}
+        </div>
+      `;
+
+      let timeLeft = 100;
+      mgTimerInterval = setInterval(() => {
+        timeLeft -= 1;
+        timerFill.style.width = `${timeLeft}%`;
+        if (timeLeft <= 0) {
+          clearInterval(mgTimerInterval);
+          // 時間到，判為失敗
+          document.querySelectorAll('.quiz-option-btn').forEach(btn => { btn.disabled = true; });
+          showMinigameResult(false, 'school');
+        }
+      }, 100);
+    }
+
+    function handleQuizAnswer(btn) {
+      if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+      const isCorrect = btn.dataset.correct === 'true';
+      document.querySelectorAll('.quiz-option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.correct === 'true') b.classList.add('correct');
+        else b.classList.add('wrong');
+      });
+      setTimeout(() => showMinigameResult(isCorrect, 'school'), 800);
+    }
+
+    // ---- 🍔 鐵板料理 ----
+    function startCookingGame() {
+      document.getElementById('mg-title').innerText = '🍔 鐵板料理';
+      document.getElementById('mg-desc').innerText = '按照數字順序翻轉食材！';
+      const area = document.getElementById('mg-game-area');
+      const timerFill = document.getElementById('mg-timer-fill');
+      timerFill.style.width = '100%';
+
+      const foods = ['🥩', '🍳', '🥦', '🌽', '🍤', '🧅'];
+      const selected = foods.sort(() => Math.random() - 0.5).slice(0, 5);
+
+      area.innerHTML = `
+        <div style="font-size:0.85rem; margin-bottom:10px; font-weight:700;">按 1→2→3→4→5 的順序翻轉食材！</div>
+        <div class="cooking-belt" id="cooking-belt">
+          ${selected.map((food, i) => `
+            <div class="cooking-item" data-order="${i}" onclick="handleCookingClick(this, ${i})">
+              ${food}
+              <span class="order-num">${i + 1}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // 2 秒後隱藏順序提示
+      setTimeout(() => {
+        document.querySelectorAll('.order-num').forEach(n => n.style.display = 'none');
+      }, 2000);
+
+      let timeLeft = 100;
+      mgTimerInterval = setInterval(() => {
+        timeLeft -= 0.8;
+        timerFill.style.width = `${Math.max(0, timeLeft)}%`;
+        if (timeLeft <= 0) {
+          clearInterval(mgTimerInterval);
+          showMinigameResult(false, 'restaurant');
+        }
+      }, 100);
+
+      window._cookingNextIndex = 0;
+    }
+
+    function handleCookingClick(el, order) {
+      if (order === window._cookingNextIndex) {
+        el.classList.add('done');
+        el.style.pointerEvents = 'none';
+        window._cookingNextIndex++;
+        playSound('click');
+        if (window._cookingNextIndex >= 5) {
+          if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+          setTimeout(() => showMinigameResult(true, 'restaurant'), 500);
+        }
+      } else {
+        el.classList.add('wrong-order');
+        setTimeout(() => el.classList.remove('wrong-order'), 300);
+        playSound('examFail');
+      }
+    }
+
+    // ---- 🏃 狂點吹氣球 ----
+    function startRhythmGame() {
+      document.getElementById('mg-title').innerText = '🎈 狂點吹氣球';
+      document.getElementById('mg-desc').innerText = '瘋狂點擊吹破氣球！速度就是力量！';
+      const area = document.getElementById('mg-game-area');
+      const timerFill = document.getElementById('mg-timer-fill');
+      timerFill.style.width = '100%';
+
+      const balloonColors = [
+        'linear-gradient(135deg, #ff453a, #ff6b6b)',
+        'linear-gradient(135deg, #0a84ff, #5ac8fa)',
+        'linear-gradient(135deg, #30d158, #8ded9f)',
+        'linear-gradient(135deg, #ff9f0a, #ffd60a)',
+        'linear-gradient(135deg, #bf5af2, #da8aff)'
+      ];
+      const totalBalloons = 3;
+      let currentBalloonIdx = 0;
+      let poppedCount = 0;
+      let clickCount = 0;
+      let clickTarget = 0;
+      let gameOver = false;
+
+      area.innerHTML = `
+        <div style="font-weight:700; margin-bottom:8px;">吹破氣球：<span id="balloon-popped">0</span> / ${totalBalloons}</div>
+        <div id="balloon-zone" style="width:100%; height:180px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; user-select:none;" onclick="handleBalloonClick()">
+          <div id="balloon-body" style="width:60px; height:70px; border-radius:50% 50% 50% 50% / 55% 55% 45% 45%; display:flex; align-items:center; justify-content:center; font-size:2rem; transition: width 0.08s, height 0.08s; position:relative;">
+            🎈
+            <div style="position:absolute; bottom:-15px; font-size:0.7rem; font-weight:700; color:var(--text-muted);" id="balloon-clicks">0 / ?</div>
+          </div>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">瘋狂點擊氣球！也可以按空白鍵！</div>
+      `;
+
+      function spawnBalloon() {
+        if (currentBalloonIdx >= totalBalloons || gameOver) return;
+        clickTarget = 8 + Math.floor(Math.random() * 8); // 8~15 次
+        clickCount = 0;
+        const balloon = document.getElementById('balloon-body');
+        const color = balloonColors[currentBalloonIdx % balloonColors.length];
+        balloon.style.background = color;
+        balloon.style.width = '60px';
+        balloon.style.height = '70px';
+        balloon.style.opacity = '1';
+        balloon.style.borderRadius = '50% 50% 50% 50% / 55% 55% 45% 45%';
+        balloon.innerHTML = `🎈<div style="position:absolute; bottom:-15px; font-size:0.7rem; font-weight:700; color:var(--text-muted);" id="balloon-clicks">0 / ${clickTarget}</div>`;
+      }
+
+      window.handleBalloonClick = function () {
+        if (gameOver || currentBalloonIdx >= totalBalloons) return;
+        clickCount++;
+        playSound('click');
+
+        const balloon = document.getElementById('balloon-body');
+        const progress = clickCount / clickTarget;
+        const baseSize = 60;
+        const maxSize = 140;
+        const size = baseSize + (maxSize - baseSize) * Math.min(progress, 1);
+        balloon.style.width = `${size}px`;
+        balloon.style.height = `${size * 1.15}px`;
+
+        // 更新計數
+        const clicksEl = document.getElementById('balloon-clicks');
+        if (clicksEl) clicksEl.innerText = `${clickCount} / ${clickTarget}`;
+
+        // 微震動
+        balloon.style.transform = `rotate(${(Math.random() - 0.5) * 8}deg)`;
+        setTimeout(() => { if (balloon) balloon.style.transform = 'rotate(0deg)'; }, 60);
+
+        if (clickCount >= clickTarget) {
+          // 氣球破裂！
+          poppedCount++;
+          currentBalloonIdx++;
+          document.getElementById('balloon-popped').innerText = poppedCount;
+          playSound('levelUp');
+
+          // 破裂動畫
+          balloon.style.transform = 'scale(1.5)';
+          balloon.style.opacity = '0';
+          balloon.innerHTML = '💥';
+          balloon.style.fontSize = '3rem';
+
+          setTimeout(() => {
+            if (currentBalloonIdx < totalBalloons && !gameOver) {
+              spawnBalloon();
+            }
+            if (currentBalloonIdx >= totalBalloons && !gameOver) {
+              gameOver = true;
+              document.removeEventListener('keydown', balloonKeyHandler);
+              if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+              showMinigameResult(true, 'gym');
+            }
+          }, 400);
+        }
+      };
+
+      const balloonKeyHandler = (e) => {
+        if (e.code === 'Space' && document.getElementById('minigame-overlay').classList.contains('active')) {
+          e.preventDefault();
+          window.handleBalloonClick();
+        }
+      };
+      document.addEventListener('keydown', balloonKeyHandler);
+
+      // 限時 8 秒
+      let timeLeft = 100;
+      mgTimerInterval = setInterval(() => {
+        timeLeft -= 1.25; // 8 秒 = 100 / 1.25 = 80 次 * 100ms
+        timerFill.style.width = `${Math.max(0, timeLeft)}%`;
+        if (timeLeft <= 0) {
+          gameOver = true;
+          clearInterval(mgTimerInterval);
+          document.removeEventListener('keydown', balloonKeyHandler);
+          const win = poppedCount >= 2; // 至少破 2 顆
+          showMinigameResult(win, 'gym');
+        }
+      }, 100);
+
+      spawnBalloon();
+    }
+
+    // ---- 📖 記憶配對 ----
+    function startMemoryGame() {
+      document.getElementById('mg-title').innerText = '📖 記憶配對';
+      document.getElementById('mg-desc').innerText = '翻開卡片找到配對的學科符號！';
+      const area = document.getElementById('mg-game-area');
+      const timerFill = document.getElementById('mg-timer-fill');
+      timerFill.style.width = '100%';
+
+      const symbols = ['📖', '🔠', '➕', '🔬', '🌍', '📖', '🔠', '➕', '🔬', '🌍', '📝', '📝'];
+      // 打亂
+      for (let i = symbols.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [symbols[i], symbols[j]] = [symbols[j], symbols[i]];
+      }
+
+      let flipped = [];
+      let matched = 0;
+      let canFlip = true;
+      const totalPairs = 6;
+
+      area.innerHTML = `
+        <div class="memory-grid" id="memory-grid">
+          ${symbols.map((s, i) => `<div class="memory-card" data-sym="${s}" data-idx="${i}" onclick="handleMemoryFlip(this)">❓</div>`).join('')}
+        </div>
+      `;
+
+      let timeLeft = 100;
+      mgTimerInterval = setInterval(() => {
+        timeLeft -= 0.3;
+        timerFill.style.width = `${Math.max(0, timeLeft)}%`;
+        if (timeLeft <= 0) {
+          clearInterval(mgTimerInterval);
+          showMinigameResult(false, 'library');
+        }
+      }, 100);
+
+      window.handleMemoryFlip = function (card) {
+        if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+        playSound('click');
+        card.classList.add('flipped');
+        card.innerText = card.dataset.sym;
+        flipped.push(card);
+
+        if (flipped.length === 2) {
+          canFlip = false;
+          const [c1, c2] = flipped;
+          if (c1.dataset.sym === c2.dataset.sym) {
+            c1.classList.add('matched');
+            c2.classList.add('matched');
+            matched++;
+            playSound('levelUp');
+            flipped = [];
+            canFlip = true;
+            if (matched >= totalPairs) {
+              if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+              setTimeout(() => showMinigameResult(true, 'library'), 500);
+            }
+          } else {
+            setTimeout(() => {
+              c1.classList.remove('flipped'); c1.innerText = '❓';
+              c2.classList.remove('flipped'); c2.innerText = '❓';
+              flipped = [];
+              canFlip = true;
+            }, 600);
+          }
+        }
+      };
+    }
+
+    // ---- 🏪 便利商店：收銀刷條碼小遊戲 ----
+    function startStoreGame() {
+      document.getElementById('mg-title').innerText = '🏪 收銀刷條碼';
+      document.getElementById('mg-desc').innerText = '點擊掃描全部 6 件商品條碼，千萬別點到「💣 奧客地雷」！';
+      const area = document.getElementById('mg-game-area');
+      const timerFill = document.getElementById('mg-timer-fill');
+      timerFill.style.width = '100%';
+
+      const goodPool = ['🍙 御飯糰', '🍱 國民便當', '🥤 冰拿鐵', '🍞 菠蘿麵包', '🍵 無糖綠茶', '🍫 巧克力', '🍜 泡麵', '🥚 茶葉蛋'];
+      const pickedGoods = goodPool.sort(() => Math.random() - 0.5).slice(0, 6).map(item => ({ label: item, isBomb: false }));
+      const bombs = [
+        { label: '💣 奧客退貨', isBomb: true },
+        { label: '💣 沒帶錢包', isBomb: true }
+      ];
+      const allItems = [...pickedGoods, ...bombs].sort(() => Math.random() - 0.5);
+      let scannedCount = 0;
+      const targetScan = 6;
+      let ended = false;
+
+      area.innerHTML = `
+        <div style="font-weight:800; font-size:0.9rem; margin-bottom:10px; text-align:center;">
+          已刷條碼：<span id="store-scan-count" style="color:var(--accent);">0</span> / ${targetScan}
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; width:100%;">
+          ${allItems.map((it, idx) => `
+            <button class="quiz-option-btn" data-bomb="${it.isBomb}" onclick="handleStoreScan(this)"
+              style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; font-size:0.88rem;">
+              <span>${it.label}</span>
+              <span style="font-family:monospace; font-size:0.75rem; opacity:0.65;">|||||</span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      window.handleStoreScan = function (btn) {
+        if (ended || btn.disabled) return;
+        const isBomb = btn.dataset.bomb === 'true';
+        btn.disabled = true;
+
+        if (isBomb) {
+          ended = true;
+          btn.classList.add('wrong');
+          btn.innerHTML = `<span>💥 遇到奧客糾纏！</span><span>✕</span>`;
+          playSound('examFail');
+          if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+          setTimeout(() => showMinigameResult(false, 'store'), 600);
+        } else {
+          scannedCount++;
+          btn.classList.add('correct');
+          btn.innerHTML = `<span>✅ 嗶！結帳完成</span><span>+$</span>`;
+          playSound('buy');
+          const countEl = document.getElementById('store-scan-count');
+          if (countEl) countEl.innerText = scannedCount;
+
+          if (scannedCount >= targetScan) {
+            ended = true;
+            if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+            setTimeout(() => showMinigameResult(true, 'store'), 450);
+          }
+        }
+      };
+
+      let timeLeft = 100;
+      mgTimerInterval = setInterval(() => {
+        timeLeft -= 1.1; // 約 9 秒
+        timerFill.style.width = `${Math.max(0, timeLeft)}%`;
+        if (timeLeft <= 0 && !ended) {
+          ended = true;
+          clearInterval(mgTimerInterval);
+          showMinigameResult(false, 'store');
+        }
+      }, 100);
+    }
+
+    // ---- 🏠 數羊入睡 ----
+    function startSheepGame() {
+      document.getElementById('mg-title').innerText = '🏠 數羊入睡';
+      document.getElementById('mg-desc').innerText = '數數看有幾隻羊跑過去？小心別數錯！';
+      const area = document.getElementById('mg-game-area');
+      const timerFill = document.getElementById('mg-timer-fill');
+      timerFill.style.width = '100%';
+
+      const sheepCount = 3 + Math.floor(Math.random() * 5); // 3~7
+      const decoys = 1 + Math.floor(Math.random() * 3); // 1~3 干擾物
+      const animals = [];
+      for (let i = 0; i < sheepCount; i++) animals.push('🐑');
+      for (let i = 0; i < decoys; i++) animals.push(['🐷', '🐄', '🐔'][Math.floor(Math.random() * 3)]);
+
+      area.innerHTML = `
+        <div class="sheep-field" id="sheep-field"></div>
+        <div style="margin-top:12px; font-weight:700; font-size:0.9rem;">跑過去幾隻 🐑 羊？</div>
+        <div style="display:flex; gap:6px; margin-top:8px; justify-content:center;" id="sheep-answers"></div>
+      `;
+
+      const field = document.getElementById('sheep-field');
+      let spawnIndex = 0;
+
+      // 隨機打亂動物順序
+      for (let i = animals.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [animals[i], animals[j]] = [animals[j], animals[i]];
+      }
+
+      const spawnInterval = setInterval(() => {
+        if (spawnIndex >= animals.length) {
+          clearInterval(spawnInterval);
+          // 顯示答案選項
+          setTimeout(() => {
+            const answers = document.getElementById('sheep-answers');
+            if (!answers) return;
+            const options = new Set();
+            options.add(sheepCount);
+            while (options.size < 4) {
+              options.add(Math.max(1, sheepCount + Math.floor(Math.random() * 5) - 2));
+            }
+            const optArr = [...options].sort(() => Math.random() - 0.5);
+            answers.innerHTML = optArr.map(n =>
+              `<button class="quiz-option-btn" style="width:50px;" onclick="handleSheepAnswer(${n}, ${sheepCount})">${n}</button>`
+            ).join('');
+          }, 500);
+          return;
+        }
+        const sprite = document.createElement('div');
+        sprite.className = 'sheep-sprite';
+        sprite.innerText = animals[spawnIndex];
+        sprite.style.top = `${20 + Math.random() * 100}px`;
+        sprite.style.animationDuration = `${2 + Math.random() * 1.5}s`;
+        field.appendChild(sprite);
+        setTimeout(() => sprite.remove(), 4000);
+        spawnIndex++;
+      }, 600);
+    }
+
+    window.handleSheepAnswer = function (chosen, correct) {
+      showMinigameResult(chosen === correct, 'home');
+    };
+

@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#70b848">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v8.2.0)</title>
+
+  <!-- 引入 Google Fonts 經典點陣字型 (DotGothic16 支援繁體漢字與日文, Press Start 2P 支援經典像素英數) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- 引入寶可夢 RPG 雙層像素樣式 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- 一屏盡覽自適應聚落視窗 (全螢幕自適應等比縮放舞台) -->
+  <div class="map-viewport" id="map-viewport">
+    <div class="town-map" id="town-map">
+
+      <!-- ==========================================================================
+           🏞️ GBA 寶可夢經典小鎮純點陣地景 (960 x 540 Pure Pixel Art Terrain)
+           ========================================================================== -->
+      <svg class="map-decorations" viewBox="0 0 960 540" shape-rendering="crispEdges"
+        style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; image-rendering:pixelated;">
+        
+        <!-- 寶可夢翡翠綠草皮底色 (Emerald Turf) -->
+        <rect width="960" height="540" fill="#70b848" />
+
+        <!-- 點陣草皮微深淺網格 (Pixel Grass Grid & Tufts) -->
+        <g fill="#5fa038">
+          <!-- 規則排列的經典 16-bit 點陣草叢小花屑 -->
+          <rect x="15" y="225" width="6" height="4" /><rect x="17" y="223" width="2" height="2" />
+          <rect x="75" y="240" width="6" height="4" /><rect x="77" y="238" width="2" height="2" />
+          <rect x="135" y="220" width="6" height="4" />
+          <rect x="235" y="245" width="6" height="4" />
+          <rect x="360" y="225" width="6" height="4" />
+          <rect x="580" y="240" width="6" height="4" />
+          <rect x="720" y="230" width="6" height="4" />
+          <rect x="850" y="245" width="6" height="4" />
+          <rect x="915" y="220" width="6" height="4" />
+          <rect x="35" y="495" width="6" height="4" />
+          <rect x="180" y="490" width="6" height="4" />
+          <rect x="420" y="500" width="6" height="4" />
+          <rect x="750" y="495" width="6" height="4" />
+          <rect x="900" y="490" width="6" height="4" />
+        </g>
+
+        <!-- 淺綠點陣高光草塊 (Grass Highlights) -->
+        <g fill="#80c858">
+          <rect x="40" y="230" width="4" height="2" />
+          <rect x="110" y="215" width="4" height="2" />
+          <rect x="260" y="235" width="4" height="2" />
+          <rect x="680" y="220" width="4" height="2" />
+          <rect x="880" y="235" width="4" height="2" />
+          <rect x="120" y="495" width="4" height="2" />
+          <rect x="550" y="505" width="4" height="2" />
+          <rect x="820" y="500" width="4" height="2" />
+        </g>
+
+        <!-- 寶可夢經典泥土街道網 (GBA Stepped Cobblestone Dirt Road) -->
+        <!-- 街道陰影深色底層 (Dirt Path Shadow Border) -->
+        <g fill="#9c7040">
+          <!-- 上下貫穿主幹道 1 (左側：學校至食堂) -->
+          <rect x="156" y="105" width="32" height="305" />
+          <!-- 上下貫穿主幹道 2 (右側：操場至住家) -->
+          <rect x="772" y="105" width="32" height="305" />
+          <!-- 上下貫穿主幹道 3 (中間：圖書館至超商) -->
+          <rect x="464" y="105" width="32" height="305" />
+          <!-- 橫貫主幹道 (貫穿中央噴水廣場) -->
+          <rect x="156" y="242" width="648" height="32" />
+        </g>
+
+        <!-- 街道本體金黃泥土層 (Main Dirt Path) -->
+        <g fill="#deb876">
+          <rect x="160" y="109" width="24" height="297" />
+          <rect x="776" y="109" width="24" height="297" />
+          <rect x="468" y="109" width="24" height="297" />
+          <rect x="160" y="246" width="640" height="24" />
+        </g>
+
+        <!-- 街道邊緣階梯點陣泥土顆粒 (Path Edge Stepped Pixels) -->
+        <g fill="#c49852">
+          <rect x="156" y="215" width="4" height="4" /><rect x="184" y="215" width="4" height="4" />
+          <rect x="156" y="295" width="4" height="4" /><rect x="184" y="295" width="4" height="4" />
+          <rect x="772" y="215" width="4" height="4" /><rect x="800" y="215" width="4" height="4" />
+          <rect x="772" y="295" width="4" height="4" /><rect x="800" y="295" width="4" height="4" />
+          <rect x="300" y="242" width="4" height="4" /><rect x="300" y="270" width="4" height="4" />
+          <rect x="640" y="242" width="4" height="4" /><rect x="640" y="270" width="4" height="4" />
+          <!-- 道路中心碎石 (Gravel specks) -->
+          <rect x="170" y="254" width="4" height="4" fill="#a47838" />
+          <rect x="250" y="258" width="4" height="4" fill="#a47838" />
+          <rect x="390" y="252" width="4" height="4" fill="#a47838" />
+          <rect x="560" y="258" width="4" height="4" fill="#a47838" />
+          <rect x="700" y="252" width="4" height="4" fill="#a47838" />
+          <rect x="786" y="256" width="4" height="4" fill="#a47838" />
+        </g>
+
+        <!-- 中央方形點陣石砌噴泉廣場 (Central Square Pixel Fountain) -->
+        <!-- 外層階梯石板廣場 -->
+        <rect x="432" y="220" width="96" height="76" fill="#8892a0" stroke="#182042" stroke-width="3" />
+        <rect x="436" y="224" width="88" height="68" fill="#b0bac8" />
+        <rect x="440" y="228" width="80" height="60" fill="#96a2b4" />
+        <!-- 噴泉外池石壁 -->
+        <rect x="446" y="234" width="68" height="48" fill="#586478" stroke="#182042" stroke-width="2" />
+        <!-- 噴泉清澈藍色水池 -->
+        <rect x="450" y="238" width="60" height="40" fill="#2980b9" />
+        <rect x="454" y="242" width="52" height="32" fill="#3498db" />
+        <rect x="458" y="246" width="44" height="24" fill="#5dade2" />
+        <!-- 中央石雕噴水柱 -->
+        <rect x="472" y="250" width="16" height="16" fill="#ecf0f1" stroke="#182042" stroke-width="2" />
+        <rect x="476" y="246" width="8" height="6" fill="#bdc3c7" />
+        <rect x="478" y="242" width="4" height="6" fill="#ffffff" />
+        <!-- 動態噴水水花粒子 (Animated Water Sprays) -->
+        <g fill="#ffffff">
+          <rect x="474" y="244" width="3" height="3" class="pixel-spray-1" />
+          <rect x="483" y="244" width="3" height="3" class="pixel-spray-2" />
+          <rect x="472" y="258" width="3" height="3" class="pixel-spray-1" />
+          <rect x="485" y="258" width="3" height="3" class="pixel-spray-2" />
+        </g>
+
+        <!-- 歐風復古點陣路燈 (4 座交叉口) -->
+        <!-- 路燈 1 (西北) -->
+        <rect x="204" y="230" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
+        <rect x="202" y="224" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
+        <rect x="204" y="226" width="6" height="4" fill="#ffffff" />
+        <!-- 路燈 2 (東北) -->
+        <rect x="750" y="230" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
+        <rect x="748" y="224" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
+        <rect x="750" y="226" width="6" height="4" fill="#ffffff" />
+        <!-- 路燈 3 (西南) -->
+        <rect x="204" y="268" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
+        <rect x="202" y="262" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
+        <rect x="204" y="264" width="6" height="4" fill="#ffffff" />
+        <!-- 路燈 4 (東南) -->
+        <rect x="750" y="268" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
+        <rect x="748" y="262" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
+        <rect x="750" y="264" width="6" height="4" fill="#ffffff" />
+
+        <!-- 廣場木長椅 (Park Benches) -->
+        <!-- 左長椅 -->
+        <rect x="390" y="234" width="28" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" />
+        <rect x="392" y="236" width="24" height="3" fill="#b3783e" />
+        <rect x="392" y="244" width="4" height="6" fill="#2c3e50" /><rect x="412" y="244" width="4" height="6" fill="#2c3e50" />
+        <!-- 右長椅 -->
+        <rect x="542" y="234" width="28" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" />
+        <rect x="544" y="236" width="24" height="3" fill="#b3783e" />
+        <rect x="544" y="244" width="4" height="6" fill="#2c3e50" /><rect x="564" y="244" width="4" height="6" fill="#2c3e50" />
+
+        <!-- 繽紛小花叢 (Flower Clumps) -->
+        <g>
+          <!-- 紅花 -->
+          <rect x="240" y="222" width="4" height="4" fill="#e74c3c" /><rect x="241" y="223" width="2" height="2" fill="#ffd32a" />
+          <rect x="246" y="220" width="4" height="4" fill="#e74c3c" /><rect x="247" y="221" width="2" height="2" fill="#ffd32a" />
+          <!-- 黃花 -->
+          <rect x="700" y="222" width="4" height="4" fill="#f1c40f" /><rect x="701" y="223" width="2" height="2" fill="#ffffff" />
+          <rect x="706" y="220" width="4" height="4" fill="#f1c40f" /><rect x="707" y="221" width="2" height="2" fill="#ffffff" />
+          <!-- 藍花 -->
+          <rect x="240" y="290" width="4" height="4" fill="#3498db" /><rect x="241" y="291" width="2" height="2" fill="#ffffff" />
+          <rect x="700" y="290" width="4" height="4" fill="#9b59b6" /><rect x="701" y="291" width="2" height="2" fill="#ffffff" />
+        </g>
+
+        <!-- 晝夜動態光影覆蓋層 (Day/Night Light Overlay) -->
+        <rect id="map-night-overlay" width="960" height="540" fill="rgba(0,0,0,0)" style="transition: fill 1.5s ease; pointer-events: none;" />
+      </svg>
+
+      <!-- ==========================================================================
+           🏫 1. 學校 (School Island - 左上) - 純點陣寶可夢訓練家學院教室
+           ========================================================================== -->
+      <div class="iso-island landmark-school" id="landmark-school" onclick="landmarkClick('school')">
+        <div class="island-platform">
+          <div class="island-platform-top">
+            <svg class="school-room" viewBox="0 0 284 185" shape-rendering="crispEdges"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated;">
+              <!-- 階梯瓦片紅磚屋頂 (Stepped Slate Roof) -->
+              <rect x="0" y="0" width="284" height="22" fill="#c0392b" stroke="#182042" stroke-width="3" />
+              <rect x="0" y="22" width="284" height="5" fill="#962d22" />
+              <!-- 金色校鐘樓 (Bell Tower) -->
+              <rect x="124" y="2" width="36" height="18" fill="#ffd32a" stroke="#182042" stroke-width="2" />
+              <rect x="136" y="6" width="12" height="10" fill="#d35400" />
+              <text x="140" y="14" font-size="8" fill="#ffffff" font-family="'Press Start 2P', monospace">🔔</text>
+
+              <!-- 教室後牆：暖調米黃點陣磚紋 (Brick Wall) -->
+              <rect x="8" y="27" width="268" height="97" fill="#fdf8e6" stroke="#182042" stroke-width="2" />
+              <!-- 水平磚縫線 -->
+              <line x1="8" y1="50" x2="276" y2="50" stroke="#ecdcc3" stroke-width="2" />
+              <line x1="8" y1="75" x2="276" y2="75" stroke="#ecdcc3" stroke-width="2" />
+              <line x1="8" y1="100" x2="276" y2="100" stroke="#ecdcc3" stroke-width="2" />
+
+              <!-- 正統大黑板 (Classic Classroom Blackboard) -->
+              <rect x="65" y="34" width="154" height="64" fill="#2d5a3c" stroke="#182042" stroke-width="3" />
+              <rect x="68" y="37" width="148" height="58" fill="#1b4d2e" />
+              <!-- 黑板粉筆字標語 (Chalk Motto) -->
+              <text x="75" y="52" font-size="8" fill="#ffd32a" font-family="'DotGothic16', monospace" font-weight="900">📚 天道酬勤 • 必上第一志願！</text>
+              <text x="75" y="66" font-size="7" fill="#ffffff" font-family="'Press Start 2P', monospace">E = mc²  |  100% PASS</text>
+              <line x1="75" y1="72" x2="210" y2="72" stroke="#48b570" stroke-width="1.5" />
+              <text x="75" y="86" font-size="6.5" fill="#a8ff78" font-family="'Press Start 2P', monospace">TODAY: CHINESE & MATH</text>
+              <!-- 粉筆槽與粉筆板擦 -->
+              <rect x="85" y="93" width="114" height="4" fill="#d4a373" stroke="#182042" stroke-width="1" />
+              <rect x="95" y="91" width="8" height="2" fill="#ffffff" /><rect x="110" y="91" width="8" height="2" fill="#ffd32a" /><rect x="130" y="90" width="14" height="3" fill="#34495e" />
+
+              <!-- 牆面圓形時鐘 (Wall Clock) -->
+              <rect x="22" y="36" width="28" height="28" fill="#ffffff" stroke="#182042" stroke-width="2" />
+              <rect x="25" y="39" width="22" height="22" fill="#f8fafc" />
+              <rect x="35" y="44" width="2" height="6" fill="#c0392b" /><rect x="35" y="48" width="6" height="2" fill="#182042" />
+
+              <!-- 正向實木拼花地板 (Hardwood Floor) -->
+              <rect x="8" y="124" width="268" height="57" fill="#deb887" stroke="#182042" stroke-width="2" />
+              <line x1="8" y1="143" x2="276" y2="143" stroke="#c49a6c" stroke-width="2" />
+              <line x1="8" y1="162" x2="276" y2="162" stroke="#c49a6c" stroke-width="2" />
+              <line x1="55" y1="124" x2="55" y2="181" stroke="#c49a6c" stroke-width="2" />
+              <line x1="110" y1="124" x2="110" y2="181" stroke="#c49a6c" stroke-width="2" />
+              <line x1="165" y1="124" x2="165" y2="181" stroke="#c49a6c" stroke-width="2" />
+              <line x1="220" y1="124" x2="220" y2="181" stroke="#c49a6c" stroke-width="2" />
+
+              <!-- 老師實木講桌 (Teacher Podium - 左側) -->
+              <rect x="18" y="132" width="48" height="32" fill="#8d5a2c" stroke="#182042" stroke-width="2" />
+              <rect x="20" y="134" width="44" height="6" fill="#b0743e" />
+              <!-- 講桌上的紅色蘋果與教案書堆 -->
+              <rect x="24" y="126" width="10" height="7" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="28" y="124" width="2" height="2" fill="#27ae60" />
+              <rect x="40" y="125" width="18" height="8" fill="#3498db" stroke="#182042" stroke-width="1" />
+              <rect x="42" y="123" width="14" height="3" fill="#f1c40f" />
+
+              <!-- 學生專屬大課桌椅 (Student Desks - 雙人排) -->
+              <!-- 課桌 1 (小學霸座位) -->
+              <rect x="85" y="136" width="70" height="28" fill="#b0743e" stroke="#182042" stroke-width="2" />
+              <rect x="87" y="138" width="66" height="6" fill="#d2965c" />
+              <rect x="92" y="130" width="16" height="7" fill="#ffffff" stroke="#182042" stroke-width="1" />
+              <rect x="115" y="132" width="14" height="5" fill="#f1c40f" stroke="#182042" stroke-width="1" />
+              <rect x="94" y="164" width="14" height="12" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              
+              <!-- 課桌 2 (同儕座位) -->
+              <rect x="175" y="136" width="60" height="28" fill="#b0743e" stroke="#182042" stroke-width="2" />
+              <rect x="177" y="138" width="56" height="6" fill="#d2965c" />
+              <rect x="185" y="130" width="16" height="7" fill="#9b59b6" stroke="#182042" stroke-width="1" />
+              <rect x="187" y="164" width="14" height="12" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+            </svg>
+
+            <!-- 老師 NPC (Teacher) -->
+            <div class="npc-teacher" id="npc-teacher"
+              style="display:block; position:absolute; right:25px; bottom:28px; width:40px; height:56px; z-index:18;">
+              <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
+                <rect x="3" y="11" width="10" height="10" fill="#2c3e50" />
+                <rect x="6" y="11" width="4" height="9" fill="#ffffff" />
+                <rect x="7" y="12" width="2" height="6" fill="#c0392b" />
+                <rect x="4" y="4" width="8" height="7" fill="#fed7aa" />
+                <rect x="3" y="2" width="10" height="4" fill="#2c1810" />
+                <rect x="5" y="6" width="2" height="2" fill="#182042" /><rect x="9" y="6" width="2" height="2" fill="#182042" />
+                <rect x="4" y="5" width="8" height="2" fill="none" stroke="#f1c40f" stroke-width="0.8" />
+                <line x1="2" y1="12" x2="0" y2="4" stroke="#8d5a2c" stroke-width="1.5" />
+              </svg>
+              <div class="bubble-mini" style="font-size:0.75rem;">上課認真！👨‍🏫</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="island-up-deco" id="school-up-lv2" style="left:12px; top:-10px; background:#3498db; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏫 現代多媒體校舍</div>
+        <div class="island-up-deco" id="school-up-lv3" style="left:12px; top:-10px; background:linear-gradient(135deg, #ffd32a, #ff4757); color:#182042; font-size:0.65rem; font-weight:900; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏛️ 智慧名校科學閣 MAX</div>
+
+        <div class="island-lv-badge" id="school-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('school');">Lv.1 基礎</div>
+        <div class="island-tag">🏫 育才名校</div>
+      </div>
+
+      <!-- ==========================================================================
+           📖 2. 圖書館 (Library Island - 中上) - 純點陣皇家典藏智慧藏書閣
+           ========================================================================== -->
+      <div class="iso-island landmark-library" id="landmark-library" onclick="landmarkClick('library')">
+        <div class="island-platform">
+          <div class="island-platform-top">
+            <svg class="library-room" viewBox="0 0 284 185" shape-rendering="crispEdges"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated;">
+              <!-- 皇家藍階梯瓦片屋頂 (Sapphire Roof) -->
+              <rect x="0" y="0" width="284" height="22" fill="#2980b9" stroke="#182042" stroke-width="3" />
+              <rect x="0" y="22" width="284" height="5" fill="#1f3a93" />
+              <!-- 金色采光天窗 (Skylight) -->
+              <rect x="110" y="4" width="64" height="15" fill="#f1c40f" stroke="#182042" stroke-width="2" />
+              <rect x="114" y="6" width="56" height="11" fill="#ecf0f1" />
+              <line x1="132" y1="6" x2="132" y2="17" stroke="#182042" stroke-width="1.5" />
+              <line x1="150" y1="6" x2="150" y2="17" stroke="#182042" stroke-width="1.5" />
+
+              <!-- 室內後牆：溫暖胡桃木書房護牆板 (Walnut Wall) -->
+              <rect x="8" y="27" width="268" height="97" fill="#f5ede0" stroke="#182042" stroke-width="2" />
+
+              <!-- 頂天立地三層實木大書櫃 (Giant 3-Tier Bookshelf) -->
+              <rect x="18" y="32" width="248" height="88" fill="#6d4c41" stroke="#182042" stroke-width="2.5" />
+              <!-- 書架橫隔層板 -->
+              <rect x="20" y="60" width="244" height="5" fill="#8d5a2c" />
+              <rect x="20" y="88" width="244" height="5" fill="#8d5a2c" />
+              <rect x="20" y="115" width="244" height="5" fill="#8d5a2c" />
+
+              <!-- 第一層精裝書籍 (彩色密集書脊) -->
+              <g>
+                <rect x="24" y="38" width="7" height="22" fill="#c0392b" /><rect x="32" y="40" width="6" height="20" fill="#2980b9" />
+                <rect x="39" y="37" width="8" height="23" fill="#27ae60" /><rect x="48" y="41" width="7" height="19" fill="#f39c12" />
+                <rect x="56" y="39" width="6" height="21" fill="#8e44ad" /><rect x="63" y="37" width="8" height="23" fill="#d35400" />
+                <rect x="72" y="42" width="6" height="18" fill="#16a085" /><rect x="79" y="38" width="7" height="22" fill="#c0392b" />
+                <rect x="87" y="40" width="8" height="20" fill="#2c3e50" /><rect x="96" y="37" width="7" height="23" fill="#f1c40f" />
+                <rect x="104" y="39" width="8" height="21" fill="#27ae60" /><rect x="113" y="38" width="7" height="22" fill="#e74c3c" />
+                <rect x="121" y="41" width="6" height="19" fill="#3498db" /><rect x="128" y="37" width="8" height="23" fill="#8e44ad" />
+                <rect x="137" y="40" width="7" height="20" fill="#f39c12" /><rect x="145" y="38" width="8" height="22" fill="#16a085" />
+                <rect x="154" y="42" width="6" height="18" fill="#c0392b" /><rect x="161" y="37" width="7" height="23" fill="#2980b9" />
+                <rect x="169" y="39" width="8" height="21" fill="#2c3e50" /><rect x="178" y="38" width="7" height="22" fill="#f1c40f" />
+                <rect x="186" y="40" width="6" height="20" fill="#27ae60" /><rect x="193" y="37" width="8" height="23" fill="#8e44ad" />
+                <rect x="202" y="41" width="7" height="19" fill="#d35400" /><rect x="210" y="38" width="8" height="22" fill="#3498db" />
+                <rect x="219" y="39" width="6" height="21" fill="#c0392b" /><rect x="226" y="37" width="8" height="23" fill="#2c3e50" />
+                <rect x="235" y="40" width="7" height="20" fill="#f1c40f" /><rect x="243" y="38" width="8" height="22" fill="#27ae60" />
+              </g>
+
+              <!-- 第二層百科全書與卷軸 -->
+              <g>
+                <rect x="24" y="66" width="9" height="22" fill="#34495e" /><rect x="34" y="68" width="8" height="20" fill="#e67e22" />
+                <rect x="43" y="65" width="8" height="23" fill="#9b59b6" /><rect x="52" y="69" width="7" height="19" fill="#2ecc71" />
+                <rect x="60" y="67" width="8" height="21" fill="#e74c3c" /><rect x="69" y="65" width="9" height="23" fill="#1abc9c" />
+                <rect x="79" y="70" width="6" height="18" fill="#f39c12" /><rect x="86" y="66" width="8" height="22" fill="#3498db" />
+                <rect x="95" y="68" width="9" height="20" fill="#e74c3c" /><rect x="105" y="65" width="8" height="23" fill="#2ecc71" />
+                <rect x="114" y="67" width="8" height="21" fill="#9b59b6" /><rect x="123" y="66" width="9" height="22" fill="#34495e" />
+                <rect x="133" y="69" width="7" height="19" fill="#f1c40f" /><rect x="141" y="65" width="9" height="23" fill="#e67e22" />
+                <rect x="151" y="68" width="8" height="20" fill="#1abc9c" /><rect x="160" y="66" width="9" height="22" fill="#3498db" />
+                <rect x="170" y="70" width="6" height="18" fill="#e74c3c" /><rect x="177" y="65" width="8" height="23" fill="#2ecc71" />
+                <rect x="186" y="67" width="9" height="21" fill="#f39c12" /><rect x="196" y="66" width="8" height="22" fill="#34495e" />
+                <rect x="205" y="68" width="8" height="20" fill="#9b59b6" /><rect x="214" y="65" width="9" height="23" fill="#e67e22" />
+                <rect x="224" y="69" width="7" height="19" fill="#3498db" /><rect x="232" y="66" width="9" height="22" fill="#e74c3c" />
+                <rect x="242" y="67" width="9" height="21" fill="#1abc9c" />
+              </g>
+
+              <!-- 第三層典藏檔案夾與金箔厚本 -->
+              <g>
+                <rect x="24" y="94" width="10" height="21" fill="#c0392b" /><rect x="35" y="96" width="9" height="19" fill="#f1c40f" />
+                <rect x="45" y="93" width="9" height="22" fill="#2980b9" /><rect x="55" y="97" width="8" height="18" fill="#27ae60" />
+                <rect x="64" y="95" width="10" height="20" fill="#8e44ad" /><rect x="75" y="93" width="9" height="22" fill="#d35400" />
+                <rect x="85" y="96" width="8" height="19" fill="#2c3e50" /><rect x="94" y="94" width="10" height="21" fill="#16a085" />
+                <rect x="105" y="97" width="9" height="18" fill="#f39c12" /><rect x="115" y="93" width="9" height="22" fill="#c0392b" />
+                <rect x="125" y="95" width="10" height="20" fill="#3498db" /><rect x="136" y="94" width="9" height="21" fill="#27ae60" />
+                <rect x="146" y="96" width="8" height="19" fill="#8e44ad" /><rect x="155" y="93" width="10" height="22" fill="#2c3e50" />
+                <rect x="166" y="97" width="9" height="18" fill="#f1c40f" /><rect x="176" y="94" width="9" height="21" fill="#e67e22" />
+                <rect x="186" y="95" width="10" height="20" fill="#1abc9c" /><rect x="197" y="93" width="9" height="22" fill="#3498db" />
+                <rect x="207" y="96" width="8" height="19" fill="#c0392b" /><rect x="216" y="94" width="10" height="21" fill="#27ae60" />
+                <rect x="227" y="97" width="9" height="18" fill="#f39c12" /><rect x="237" y="93" width="9" height="22" fill="#8e44ad" />
+              </g>
+
+              <!-- 正向橡木地板 (Oak Floor) -->
+              <rect x="8" y="124" width="268" height="57" fill="#cda882" stroke="#182042" stroke-width="2" />
+              <line x1="8" y1="143" x2="276" y2="143" stroke="#b08d68" stroke-width="2" />
+              <line x1="8" y1="162" x2="276" y2="162" stroke="#b08d68" stroke-width="2" />
+
+              <!-- 高級胡桃木自習長桌 (Reading Table - 左中) -->
+              <rect x="35" y="136" width="145" height="30" fill="#5d4037" stroke="#182042" stroke-width="2" />
+              <rect x="37" y="138" width="141" height="6" fill="#795548" />
+              <!-- 經典綠罩銀行家檯燈 (Green Banker Lamps) -->
+              <rect x="52" y="125" width="16" height="6" fill="#27ae60" stroke="#182042" stroke-width="1" />
+              <rect x="58" y="131" width="4" height="6" fill="#f1c40f" />
+              <rect x="125" y="125" width="16" height="6" fill="#27ae60" stroke="#182042" stroke-width="1" />
+              <rect x="131" y="131" width="4" height="6" fill="#f1c40f" />
+              <!-- 桌面開啟的厚重古籍 (Open Book) -->
+              <rect x="75" y="129" width="18" height="8" fill="#ecf0f1" stroke="#182042" stroke-width="1" />
+              <line x1="84" y1="129" x2="84" y2="137" stroke="#7f8c8d" stroke-width="1" />
+              <rect x="148" y="129" width="18" height="8" fill="#ecf0f1" stroke="#182042" stroke-width="1" />
+              <line x1="157" y1="129" x2="157" y2="137" stroke="#7f8c8d" stroke-width="1" />
+            </svg>
+
+            <!-- 同儕 NPC (Peer Student) -->
+            <div class="npc-peer" id="npc-peer"
+              style="display:block; position:absolute; right:35px; bottom:28px; width:38px; height:52px; z-index:18;">
+              <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
+                <rect x="3" y="12" width="10" height="9" fill="#16a085" />
+                <rect x="4" y="5" width="8" height="7" fill="#fed7aa" />
+                <rect x="3" y="2" width="10" height="5" fill="#d35400" />
+                <rect x="5" y="7" width="2" height="2" fill="#182042" /><rect x="9" y="7" width="2" height="2" fill="#182042" />
+                <rect x="4" y="14" width="8" height="6" fill="#ffffff" stroke="#182042" stroke-width="0.8" />
+              </svg>
+              <div class="bubble-mini" style="font-size:0.75rem;">安靜自習 🤫</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="island-up-deco" id="library-up-lv2" style="left:12px; top:-10px; background:#2980b9; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">📖 數位國家藏書閣</div>
+        <div class="island-up-deco" id="library-up-lv3" style="left:12px; top:-10px; background:linear-gradient(135deg, #ffd32a, #2980b9); color:#182042; font-size:0.65rem; font-weight:900; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏛️ 大英帝國級圖書館 MAX</div>
+
+        <div class="island-lv-badge" id="library-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('library');">Lv.1 基礎</div>
+        <div class="island-tag">📖 智慧藏書閣</div>
+      </div>
+
+      <!-- ==========================================================================
+           🏃 3. 運動場 (Gym Island - 右上) - 純點陣經典橢圓紅土競賽操場
+           ========================================================================== -->
+      <div class="iso-island landmark-gym" id="landmark-gym" onclick="landmarkClick('gym')">
+        <div class="island-platform">
+          <div class="island-platform-top">
+            <svg class="gym-track-field" viewBox="0 0 284 185" shape-rendering="crispEdges"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated;">
+              <!-- 操場整體背景草皮 (Green Turf Base) -->
+              <rect x="0" y="0" width="284" height="185" fill="#58a038" stroke="#182042" stroke-width="3" />
+
+              <!-- 經典階梯狀紅土橢圓外跑道 (Outer Red Clay Track) -->
+              <!-- 跑道外圈深紅土層 -->
+              <rect x="12" y="10" width="260" height="145" fill="#c0392b" stroke="#182042" stroke-width="3" />
+              <!-- 45度階梯切角 (Stepped Rounded Corners) -->
+              <rect x="12" y="10" width="25" height="18" fill="#58a038" />
+              <rect x="247" y="10" width="25" height="18" fill="#58a038" />
+              <rect x="12" y="137" width="25" height="18" fill="#58a038" />
+              <rect x="247" y="137" width="25" height="18" fill="#58a038" />
+              <!-- 跑道外圍階梯斜邊 -->
+              <rect x="20" y="16" width="16" height="12" fill="#c0392b" stroke="#182042" stroke-width="1.5" />
+              <rect x="248" y="16" width="16" height="12" fill="#c0392b" stroke="#182042" stroke-width="1.5" />
+              <rect x="20" y="137" width="16" height="12" fill="#c0392b" stroke="#182042" stroke-width="1.5" />
+              <rect x="248" y="137" width="16" height="12" fill="#c0392b" stroke="#182042" stroke-width="1.5" />
+
+              <!-- 第 1 跑道與第 2 跑道白色點陣分道線 (Lanes 1 & 2 White Lines) -->
+              <rect x="22" y="20" width="240" height="125" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="8,6" />
+              <rect x="34" y="32" width="216" height="101" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="8,6" />
+
+              <!-- 操場中央足球茵草內場 (Inner Pitch) -->
+              <rect x="46" y="44" width="192" height="77" fill="#68b840" stroke="#182042" stroke-width="2" />
+              <!-- 足球場點陣白線 -->
+              <rect x="52" y="50" width="180" height="65" fill="none" stroke="#ffffff" stroke-width="1.5" />
+              <line x1="142" y1="50" x2="142" y2="115" stroke="#ffffff" stroke-width="1.5" />
+              <rect x="134" y="74" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="1.5" />
+              <!-- 左右球門禁區 (Goal Box) -->
+              <rect x="52" y="65" width="16" height="35" fill="none" stroke="#ffffff" stroke-width="1.5" />
+              <rect x="216" y="65" width="16" height="35" fill="none" stroke="#ffffff" stroke-width="1.5" />
+
+              <!-- 起跑線與跑道號碼 1 & 2 (Start/Finish Line) -->
+              <rect x="68" y="10" width="4" height="34" fill="#ffffff" />
+              <rect x="74" y="10" width="4" height="34" fill="#ffffff" />
+              <text x="52" y="24" font-size="9" fill="#ffd32a" font-family="'Press Start 2P', monospace" font-weight="900">1</text>
+              <text x="52" y="38" font-size="9" fill="#ffd32a" font-family="'Press Start 2P', monospace" font-weight="900">2</text>
+
+              <!-- 右上角觀禮台 / 器材箱 -->
+              <rect x="225" y="8" width="48" height="24" fill="#8d5a2c" stroke="#182042" stroke-width="2" />
+              <rect x="227" y="10" width="44" height="6" fill="#f39c12" />
+              <text x="231" y="25" font-size="7" fill="#ffffff" font-family="'DotGothic16', monospace" font-weight="900">體育器材</text>
+
+              <!-- 左上角碼表計時看板 -->
+              <rect x="10" y="8" width="40" height="22" fill="#202028" stroke="#182042" stroke-width="2" />
+              <text x="14" y="23" font-size="8" fill="#2ed573" font-family="'Press Start 2P', monospace" font-weight="900">00:00</text>
+            </svg>
+
+            <!-- 教練 NPC (Coach) -->
+            <div class="npc-coach" id="npc-coach"
+              style="display:block; position:absolute; right:20px; top:36px; width:36px; height:50px; z-index:18;">
+              <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
+                <rect x="3" y="11" width="10" height="10" fill="#f39c12" />
+                <rect x="4" y="4" width="8" height="7" fill="#fed7aa" />
+                <rect x="3" y="2" width="10" height="4" fill="#2c3e50" />
+                <rect x="5" y="6" width="2" height="2" fill="#182042" /><rect x="9" y="6" width="2" height="2" fill="#182042" />
+                <rect x="7" y="9" width="3" height="2" fill="#ffd32a" stroke="#182042" stroke-width="0.5" />
+              </svg>
+              <div class="bubble-mini" id="coach-whistle" style="font-size:0.75rem;">逼逼！快跑！📣</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="island-up-deco" id="gym-up-lv2" style="left:12px; top:-10px; background:#ff9f0a; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏃 專業 PU 競賽跑道</div>
+        <div class="island-up-deco" id="gym-up-lv3" style="left:12px; top:-10px; background:linear-gradient(135deg, #ffd32a, #ff4757); color:#182042; font-size:0.65rem; font-weight:900; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏅 奧運級水療綜合運動場 MAX</div>
+
+        <div class="island-lv-badge" id="gym-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('gym');">Lv.1 基礎</div>
+        <div class="island-tag">🏃 活力操場</div>
+      </div>
+
+      <!-- ==========================================================================
+           🍔 4. 餐廳 (Restaurant Island - 左下) - 純點陣熱騰騰日式拉麵食堂亭
+           ========================================================================== -->
+      <div class="iso-island landmark-restaurant" id="landmark-restaurant" onclick="landmarkClick('restaurant')">
+        <div class="island-platform">
+          <div class="island-platform-top">
+            <svg class="restaurant-room" viewBox="0 0 284 185" shape-rendering="crispEdges"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated;">
+              <!-- 橙紅階梯日式瓦片屋頂 (Ramen Roof) -->
+              <rect x="0" y="0" width="284" height="22" fill="#c0392b" stroke="#182042" stroke-width="3" />
+              <rect x="0" y="22" width="284" height="5" fill="#962d22" />
+
+              <!-- 日式拉麵暖簾 (Noren Curtains) -->
+              <rect x="25" y="26" width="45" height="24" fill="#ffffff" stroke="#182042" stroke-width="2" />
+              <text x="38" y="44" font-size="14" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">麵</text>
+              <rect x="85" y="26" width="45" height="24" fill="#ffffff" stroke="#182042" stroke-width="2" />
+              <text x="98" y="44" font-size="14" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">食</text>
+              <rect x="145" y="26" width="45" height="24" fill="#ffffff" stroke="#182042" stroke-width="2" />
+              <text x="158" y="44" font-size="14" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">堂</text>
+              <rect x="205" y="26" width="45" height="24" fill="#ffffff" stroke="#182042" stroke-width="2" />
+              <text x="218" y="44" font-size="14" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">亭</text>
+
+              <!-- 左/右紅燈籠 (Red Lanterns) -->
+              <rect x="6" y="24" width="16" height="24" fill="#e74c3c" stroke="#182042" stroke-width="2" />
+              <text x="9" y="41" font-size="10" fill="#ffd32a" font-family="'DotGothic16', monospace" font-weight="900">拉</text>
+              <rect x="262" y="24" width="16" height="24" fill="#e74c3c" stroke="#182042" stroke-width="2" />
+              <text x="265" y="41" font-size="10" fill="#ffd32a" font-family="'DotGothic16', monospace" font-weight="900">麵</text>
+
+              <!-- 食堂後牆：暖米色木紋竹板壁紙 (Bamboo Wall) -->
+              <rect x="8" y="27" width="268" height="97" fill="#fdf8ec" stroke="#182042" stroke-width="2" />
+              <!-- 木條竹牌菜單 (Menu Strips) -->
+              <rect x="20" y="56" width="18" height="34" fill="#d4a373" stroke="#182042" stroke-width="1.5" />
+              <text x="22" y="68" font-size="6.5" fill="#182042" font-family="'DotGothic16', monospace" font-weight="900">豚骨</text>
+              <text x="22" y="82" font-size="6.5" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">$80</text>
+              
+              <rect x="42" y="56" width="18" height="34" fill="#d4a373" stroke="#182042" stroke-width="1.5" />
+              <text x="44" y="68" font-size="6.5" fill="#182042" font-family="'DotGothic16', monospace" font-weight="900">醬油</text>
+              <text x="44" y="82" font-size="6.5" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">$75</text>
+
+              <rect x="64" y="56" width="18" height="34" fill="#d4a373" stroke="#182042" stroke-width="1.5" />
+              <text x="66" y="68" font-size="6.5" fill="#182042" font-family="'DotGothic16', monospace" font-weight="900">叉燒</text>
+              <text x="66" y="82" font-size="6.5" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">$95</text>
+
+              <rect x="86" y="56" width="18" height="34" fill="#d4a373" stroke="#182042" stroke-width="1.5" />
+              <text x="88" y="68" font-size="6.5" fill="#182042" font-family="'DotGothic16', monospace" font-weight="900">煎餃</text>
+              <text x="88" y="82" font-size="6.5" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">$40</text>
+
+              <!-- 右側大廚房熱炒料理台 (Kitchen Wok Station) -->
+              <rect x="175" y="52" width="94" height="46" fill="#2c3e50" stroke="#182042" stroke-width="2" />
+              <text x="185" y="70" font-size="8.5" fill="#ffd32a" font-family="'DotGothic16', monospace" font-weight="900">🔥 現煮熱出餐口</text>
+              <rect x="185" y="76" width="74" height="18" fill="#474787" stroke="#182042" stroke-width="1.5" />
+              <!-- 鐵板爐火紅橙光 -->
+              <rect x="195" y="80" width="12" height="8" fill="#ff793f" />
+              <rect x="215" y="80" width="14" height="8" fill="#ffb142" />
+              <rect x="237" y="80" width="12" height="8" fill="#ff793f" />
+
+              <!-- 正向棋盤格木紋拼花地板 (Terracotta Floor) -->
+              <rect x="8" y="124" width="268" height="57" fill="#ecd9b6" stroke="#182042" stroke-width="2" />
+              <line x1="8" y1="143" x2="276" y2="143" stroke="#d5b88a" stroke-width="2" />
+              <line x1="8" y1="162" x2="276" y2="162" stroke="#d5b88a" stroke-width="2" />
+
+              <!-- 實木拉麵吧台長桌 (Ramen Dining Bar) -->
+              <rect x="18" y="136" width="148" height="26" fill="#8d5a2c" stroke="#182042" stroke-width="2" />
+              <rect x="20" y="138" width="144" height="6" fill="#b0743e" />
+              <!-- 拉麵碗 1 (紅碗) -->
+              <rect x="42" y="130" width="16" height="8" fill="#e74c3c" stroke="#182042" stroke-width="1.2" />
+              <rect x="44" y="128" width="12" height="3" fill="#f1c40f" />
+              <!-- 拉麵碗 2 (白瓷碗) -->
+              <rect x="90" y="130" width="16" height="8" fill="#ffffff" stroke="#182042" stroke-width="1.2" />
+              <rect x="92" y="128" width="12" height="3" fill="#f1c40f" />
+              <line x1="102" y1="126" x2="110" y2="134" stroke="#182042" stroke-width="1.5" />
+              <!-- 拉麵碗 3 (藍瓷碗) -->
+              <rect x="136" y="130" width="16" height="8" fill="#3498db" stroke="#182042" stroke-width="1.2" />
+              <rect x="138" y="128" width="12" height="3" fill="#f1c40f" />
+
+              <!-- 吧台圓椅 (Stools) -->
+              <rect x="44" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="40" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="92" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="88" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="138" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="134" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+            </svg>
+
+            <!-- 大廚 NPC (Chef) -->
+            <div class="npc-chef" id="npc-chef"
+              style="display:none; position:absolute; right:35px; bottom:28px; width:40px; height:54px; z-index:18;">
+              <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
+                <rect x="3" y="11" width="10" height="10" fill="#ffffff" stroke="#182042" stroke-width="1" />
+                <rect x="4" y="15" width="8" height="6" fill="#c0392b" />
+                <rect x="4" y="5" width="8" height="6" fill="#fed7aa" />
+                <rect x="4" y="0" width="8" height="6" fill="#ffffff" stroke="#182042" stroke-width="1" />
+                <rect x="5" y="7" width="2" height="2" fill="#182042" /><rect x="9" y="7" width="2" height="2" fill="#182042" />
+                <!-- 鍋鏟 -->
+                <line x1="12" y1="14" x2="16" y2="10" stroke="#7f8c8d" stroke-width="2" />
+              </svg>
+              <div class="bubble-mini" style="font-size:0.75rem;">拉麵現煮中！🍜🔥</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="island-up-deco" id="restaurant-up-lv2" style="left:12px; top:-10px; background:#e74c3c; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🍱 美食街特選定食</div>
+        <div class="island-up-deco" id="restaurant-up-lv3" style="left:12px; top:-10px; background:linear-gradient(135deg, #ffd32a, #c0392b); color:#182042; font-size:0.65rem; font-weight:900; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">⭐ 米其林星級 Buffet MAX</div>
+
+        <div class="island-lv-badge" id="restaurant-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('restaurant');">Lv.1 基礎</div>
+        <div class="island-tag">🍔 活力食堂</div>
+      </div>
+
+      <!-- ==========================================================================
+           🏪 5. 便利商店 (Store Island - 中下) - 純點陣寶可夢友誼商店 24H MART
+           ========================================================================== -->
+      <div class="iso-island landmark-store" id="landmark-store" onclick="landmarkClick('store')">
+        <div class="island-platform">
+          <div class="island-platform-top">
+            <svg class="store-room" viewBox="0 0 284 185" shape-rendering="crispEdges"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated;">
+              <!-- 經典 24H 招牌三色條紋雨棚 (Mart Awning) -->
+              <rect x="0" y="0" width="284" height="24" fill="#ffffff" stroke="#182042" stroke-width="3" />
+              <rect x="0" y="4" width="284" height="6" fill="#2ed573" />
+              <rect x="0" y="11" width="284" height="6" fill="#ffa502" />
+              <rect x="0" y="18" width="284" height="6" fill="#ff4757" />
+              <!-- 招牌燈箱 24H MART -->
+              <rect x="85" y="2" width="114" height="20" fill="#ffffff" stroke="#182042" stroke-width="2" />
+              <text x="96" y="16" font-size="11" fill="#2ed573" font-family="'Press Start 2P', monospace" font-weight="900">24H</text>
+              <text x="142" y="16" font-size="10" fill="#ffa502" font-family="'Press Start 2P', monospace" font-weight="900">MART</text>
+
+              <!-- 超商後牆 (Clean Mart Wall) -->
+              <rect x="8" y="27" width="268" height="97" fill="#f8fafc" stroke="#182042" stroke-width="2" />
+
+              <!-- 大型發光雙門飲料冷藏展示冰櫃 (Drink Coolers - 左後) -->
+              <rect x="18" y="32" width="110" height="90" fill="#bae6fd" stroke="#182042" stroke-width="2.5" />
+              <rect x="22" y="34" width="102" height="6" fill="#e0f2fe" />
+              <line x1="73" y1="34" x2="73" y2="120" stroke="#182042" stroke-width="2" />
+              <!-- 冰櫃層架線 -->
+              <line x1="22" y1="62" x2="124" y2="62" stroke="#182042" stroke-width="1.5" />
+              <line x1="22" y1="90" x2="124" y2="90" stroke="#182042" stroke-width="1.5" />
+
+              <!-- 第一排飲料罐 (可樂/綠茶/能量飲) -->
+              <rect x="26" y="46" width="9" height="15" fill="#e74c3c" /><rect x="38" y="46" width="9" height="15" fill="#2ed573" />
+              <rect x="50" y="46" width="9" height="15" fill="#f1c40f" /><rect x="62" y="46" width="9" height="15" fill="#3498db" />
+              <rect x="76" y="46" width="9" height="15" fill="#9b59b6" /><rect x="88" y="46" width="9" height="15" fill="#e74c3c" />
+              <rect x="100" y="46" width="9" height="15" fill="#2ed573" /><rect x="112" y="46" width="9" height="15" fill="#ffa502" />
+
+              <!-- 第二排果汁與礦泉水 -->
+              <rect x="26" y="73" width="10" height="16" fill="#ffa502" /><rect x="39" y="73" width="10" height="16" fill="#2ecc71" />
+              <rect x="52" y="73" width="10" height="16" fill="#3498db" /><rect x="65" y="73" width="10" height="16" fill="#e67e22" />
+              <rect x="77" y="73" width="10" height="16" fill="#9b59b6" /><rect x="90" y="73" width="10" height="16" fill="#1abc9c" />
+              <rect x="103" y="73" width="10" height="16" fill="#e74c3c" /><rect x="114" y="73" width="8" height="16" fill="#f1c40f" />
+
+              <!-- 第三排便當與三角飯糰 -->
+              <rect x="26" y="102" width="20" height="16" fill="#f1c40f" stroke="#182042" stroke-width="1" />
+              <rect x="50" y="102" width="20" height="16" fill="#ffffff" stroke="#182042" stroke-width="1" />
+              <rect x="76" y="102" width="20" height="16" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="100" y="102" width="20" height="16" fill="#2ecc71" stroke="#182042" stroke-width="1" />
+
+              <!-- 零食與洋芋片貨架 (Snack Gondola - 中間) -->
+              <rect x="135" y="42" width="75" height="80" fill="#fef08a" stroke="#182042" stroke-width="2.5" />
+              <rect x="135" y="42" width="75" height="10" fill="#facc15" />
+              <text x="144" y="50" font-size="6.5" fill="#182042" font-family="'Press Start 2P', monospace" font-weight="900">SNACKS</text>
+              <line x1="135" y1="70" x2="210" y2="70" stroke="#182042" stroke-width="1.5" />
+              <line x1="135" y1="94" x2="210" y2="94" stroke="#182042" stroke-width="1.5" />
+              <!-- 零食方塊包裝 -->
+              <rect x="140" y="55" width="12" height="12" fill="#e74c3c" /><rect x="156" y="55" width="12" height="12" fill="#3498db" />
+              <rect x="172" y="55" width="12" height="12" fill="#2ecc71" /><rect x="188" y="55" width="12" height="12" fill="#f39c12" />
+              <rect x="140" y="78" width="13" height="14" fill="#9b59b6" /><rect x="157" y="78" width="13" height="14" fill="#e84393" />
+              <rect x="174" y="78" width="13" height="14" fill="#00cec9" /><rect x="191" y="78" width="13" height="14" fill="#f1c40f" />
+
+              <!-- 正向超商白磁磚地板 (Tile Floor) -->
+              <rect x="8" y="124" width="268" height="57" fill="#e8edf2" stroke="#182042" stroke-width="2" />
+              <line x1="8" y1="143" x2="276" y2="143" stroke="#cbd5e1" stroke-width="2" />
+              <line x1="8" y1="162" x2="276" y2="162" stroke="#cbd5e1" stroke-width="2" />
+
+              <!-- 收銀台 Counter 櫃台與 POS 結帳機 (Checkout Counter) -->
+              <rect x="150" y="132" width="120" height="36" fill="#ffffff" stroke="#182042" stroke-width="2.5" />
+              <rect x="152" y="138" width="116" height="5" fill="#2ed573" />
+              <rect x="152" y="144" width="116" height="4" fill="#ffa502" />
+              <!-- 關東煮蒸鍋 (Hot Oden Pot) -->
+              <rect x="160" y="121" width="34" height="12" fill="#d97706" stroke="#182042" stroke-width="1.5" />
+              <text x="162" y="130" font-size="6" fill="#fef08a" font-family="'DotGothic16', monospace" font-weight="900">🍢關東煮</text>
+              <!-- POS 電腦螢幕 -->
+              <rect x="210" y="117" width="18" height="16" fill="#334155" stroke="#182042" stroke-width="1.5" />
+              <rect x="212" y="119" width="14" height="11" fill="#38bdf8" />
+              <line x1="219" y1="133" x2="219" y2="136" stroke="#182042" stroke-width="2" />
+            </svg>
+
+            <!-- 店長 NPC (Clerk) -->
+            <div class="npc-clerk" id="npc-clerk"
+              style="display:block; position:absolute; right:35px; bottom:28px; width:40px; height:54px; z-index:18;">
+              <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
+                <rect x="3" y="11" width="10" height="10" fill="#2ed573" stroke="#182042" stroke-width="1" />
+                <rect x="6" y="11" width="4" height="10" fill="#ffffff" />
+                <rect x="4" y="5" width="8" height="6" fill="#fed7aa" />
+                <rect x="3" y="2" width="10" height="4" fill="#2ed573" stroke="#182042" stroke-width="1" />
+                <rect x="5" y="7" width="2" height="2" fill="#182042" /><rect x="9" y="7" width="2" height="2" fill="#182042" />
+              </svg>
+              <div class="bubble-mini" style="font-size:0.75rem;">叮咚！歡迎光臨 🏪</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="island-up-deco" id="store-up-lv2" style="left:12px; top:-10px; background:#2ed573; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">⚡ 24H 旗艦超商</div>
+        <div class="island-up-deco" id="store-up-lv3" style="left:12px; top:-10px; background:linear-gradient(135deg, #ffa502, #9b59b6); color:#182042; font-size:0.65rem; font-weight:900; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">💎 金牌科技超商 MAX</div>
+
+        <div class="island-lv-badge" id="store-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('store');">Lv.1 基礎</div>
+        <div class="island-tag">🏪 24H 超商</div>
+      </div>
+
+      <!-- ==========================================================================
+           🏠 6. 住家 (Home Island - 右下) - 純點陣寶可夢真新鎮主角溫馨小屋
+           ========================================================================== -->
+      <div class="iso-island landmark-home" id="landmark-home" onclick="landmarkClick('home')">
+        <div class="island-platform">
+          <div class="island-platform-top">
+            <svg class="house-room" viewBox="0 0 284 185" shape-rendering="crispEdges"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated;">
+              <!-- 暖棕色階梯瓦簷與實木橫樑 (Pallet Town Cedar Roof) -->
+              <rect x="0" y="0" width="284" height="22" fill="#d35400" stroke="#182042" stroke-width="3" />
+              <rect x="0" y="22" width="284" height="5" fill="#a04000" />
+              <!-- 磚紅小煙囪 (Chimney) -->
+              <rect x="235" y="2" width="20" height="20" fill="#c0392b" stroke="#182042" stroke-width="2" />
+              <rect x="240" y="0" width="10" height="4" fill="#ffffff" opacity="0.8" />
+
+              <!-- 臥室後牆：暖黃直條紋復古點陣壁紙 (Wallpaper) -->
+              <rect x="8" y="27" width="268" height="97" fill="#fffdf5" stroke="#182042" stroke-width="2" />
+              <line x1="35" y1="27" x2="35" y2="124" stroke="#fef3c7" stroke-width="3" />
+              <line x1="70" y1="27" x2="70" y2="124" stroke="#fef3c7" stroke-width="3" />
+              <line x1="105" y1="27" x2="105" y2="124" stroke="#fef3c7" stroke-width="3" />
+              <line x1="140" y1="27" x2="140" y2="124" stroke="#fef3c7" stroke-width="3" />
+              <line x1="175" y1="27" x2="175" y2="124" stroke="#fef3c7" stroke-width="3" />
+              <line x1="210" y1="27" x2="210" y2="124" stroke="#fef3c7" stroke-width="3" />
+              <line x1="245" y1="27" x2="245" y2="124" stroke="#fef3c7" stroke-width="3" />
+
+              <!-- 溫馨採光大窗戶與蕾絲窗簾 (Window) -->
+              <rect x="150" y="38" width="50" height="44" fill="#74b9ff" stroke="#182042" stroke-width="2.5" />
+              <line x1="175" y1="38" x2="175" y2="82" stroke="#182042" stroke-width="2" />
+              <line x1="150" y1="60" x2="200" y2="60" stroke="#182042" stroke-width="2" />
+              <!-- 窗外白雲 -->
+              <rect x="156" y="44" width="12" height="6" fill="#ffffff" />
+              <!-- 鵝黃蕾絲窗簾 -->
+              <rect x="146" y="36" width="10" height="46" fill="#ffeaa7" stroke="#182042" stroke-width="1.2" />
+              <rect x="194" y="36" width="10" height="46" fill="#ffeaa7" stroke="#182042" stroke-width="1.2" />
+
+              <!-- 全家福金色相框 (Family Photo) -->
+              <rect x="105" y="44" width="30" height="24" fill="#ffd154" stroke="#182042" stroke-width="2" />
+              <rect x="108" y="47" width="24" height="18" fill="#a29bfe" />
+              <rect x="114" y="52" width="4" height="4" fill="#ffffff" />
+              <rect x="122" y="52" width="4" height="4" fill="#fd79a8" />
+
+              <!-- 原木拼花實木地板 (Wood Floor) -->
+              <rect x="8" y="124" width="268" height="57" fill="#dfb180" stroke="#182042" stroke-width="2" />
+              <line x1="8" y1="143" x2="276" y2="143" stroke="#b08968" stroke-width="2" />
+              <line x1="8" y1="162" x2="276" y2="162" stroke="#b08968" stroke-width="2" />
+            </svg>
+
+            <!-- 學生單人床 (prop-bed) -->
+            <div class="furniture-bed" id="prop-bed"
+              style="position:absolute; left:20px; bottom:22px; width:60px; height:46px; z-index:12; pointer-events:none;">
+              <svg viewBox="0 0 42 34" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="0" y="0" width="42" height="34" fill="#795548" stroke="#182042" stroke-width="2" />
+                <rect x="3" y="3" width="36" height="28" fill="#ffffff" />
+                <!-- 蓬鬆白色枕頭 -->
+                <rect x="5" y="5" width="10" height="24" fill="#e0f2fe" stroke="#182042" stroke-width="1.5" />
+                <!-- 藍色格紋被褥 -->
+                <rect x="18" y="3" width="21" height="28" fill="#3498db" stroke="#182042" stroke-width="1.5" />
+                <line x1="25" y1="3" x2="25" y2="31" stroke="#2980b9" stroke-width="2" />
+                <line x1="32" y1="3" x2="32" y2="31" stroke="#2980b9" stroke-width="2" />
+              </svg>
+            </div>
+
+            <!-- 爸媽雙人床 (prop-bed-parents - 睡覺時顯示) -->
+            <div class="furniture-bed-parents" id="prop-bed-parents"
+              style="display:none; position:absolute; left:82px; bottom:22px; width:60px; height:54px; z-index:12; pointer-events:none;">
+              <svg viewBox="0 0 42 38" shape-rendering="crispEdges" style="width:100%; height:100%;">
+                <rect x="0" y="0" width="42" height="38" fill="#795548" stroke="#182042" stroke-width="2" />
+                <rect x="3" y="3" width="36" height="32" fill="#ffffff" />
+                <!-- 雙人枕頭 -->
+                <rect x="5" y="5" width="8" height="12" fill="#ffd154" stroke="#182042" stroke-width="1.5" />
+                <rect x="5" y="21" width="8" height="12" fill="#ff8a8a" stroke="#182042" stroke-width="1.5" />
+                <!-- 紫色印花棉被 -->
+                <rect x="16" y="3" width="23" height="32" fill="#9b59b6" stroke="#182042" stroke-width="1.5" />
+              </svg>
+            </div>
+
+            <!-- NPC 爸媽睡覺形態 (npc-parents-sleep) -->
+            <div class="npc-parents-sleep" id="npc-parents-sleep"
+              style="display:none; position:absolute; left:84px; bottom:26px; width:54px; height:44px; z-index:13;">
+              <svg viewBox="0 0 32 24" shape-rendering="crispEdges" style="width:100%; height:100%; overflow: visible;">
+                <rect x="0" y="10" width="32" height="14" fill="#dcd6f7" stroke="#182042" stroke-width="2" />
+                <rect x="8" y="4" width="8" height="8" fill="#fed7aa" stroke="#182042" stroke-width="1.5" />
+                <rect x="7" y="2" width="10" height="4" fill="#222222" />
+                <rect x="20" y="4" width="8" height="8" fill="#fed7aa" stroke="#182042" stroke-width="1.5" />
+                <rect x="19" y="2" width="10" height="4" fill="#a06cd5" />
+                <text x="27" y="3" font-size="7" fill="#182042" font-family="'Press Start 2P', monospace" font-weight="bold">Z</text>
+              </svg>
+            </div>
+
+            <!-- 父母出事木牌 (prop-parents-grave) -->
+            <div id="prop-parents-grave"
+              style="display:none; position:absolute; left:142px; bottom:22px; width:52px; text-align:center; z-index:16; cursor:pointer;"
+              onclick="showParentsEventModal(event)">
+              <svg viewBox="0 0 24 28" shape-rendering="crispEdges" style="width:24px; height:28px; margin:0 auto; display:block;">
+                <rect x="6" y="2" width="12" height="18" fill="#a8a29e" stroke="#182042" stroke-width="2" />
+                <rect x="2" y="6" width="20" height="4" fill="#a8a29e" stroke="#182042" stroke-width="2" />
+                <rect x="9" y="20" width="6" height="8" fill="#78716c" stroke="#182042" stroke-width="2" />
+                <rect x="11" y="6" width="2" height="6" fill="#ef4444" />
+              </svg>
+              <div style="font-size:7px; color:#fff; background:#e74c3c; border:1px solid #182042; padding:1px 3px; border-radius:0; display:inline-block; font-family:'DotGothic16', monospace;">出事原因</div>
+            </div>
+
+            <!-- 父母復活獎狀 (prop-parents-certificate) -->
+            <div id="prop-parents-certificate"
+              style="display:none; position:absolute; left:142px; bottom:22px; width:52px; text-align:center; z-index:16; cursor:pointer;"
+              onclick="showParentsEventModal(event)">
+              <svg viewBox="0 0 24 28" shape-rendering="crispEdges" style="width:24px; height:28px; margin:0 auto; display:block;">
+                <rect x="2" y="2" width="20" height="24" fill="#fef08a" stroke="#ca8a04" stroke-width="2" />
+                <rect x="10" y="16" width="4" height="6" fill="#ef4444" />
+                <rect x="6" y="8" width="12" height="2" fill="#854d0e" />
+              </svg>
+              <div style="font-size:7px; color:#182042; background:#ffd154; border:1px solid #182042; padding:1px 3px; border-radius:0; display:inline-block; font-family:'DotGothic16', monospace;">復活原因</div>
+            </div>
+
+            <!-- 實木大衣櫃 (prop-wardrobe - 點擊換裝) -->
+            <div id="prop-wardrobe"
+              style="position:absolute; right:18px; bottom:22px; width:36px; height:62px; z-index:15; cursor:pointer;"
+              onclick="openWardrobeModal(event)">
+              <svg viewBox="0 0 22 40" shape-rendering="crispEdges" style="width:100%; height:100%; display:block;">
+                <rect x="0" y="0" width="22" height="40" fill="#8d5a2c" stroke="#182042" stroke-width="2" />
+                <rect x="2" y="2" width="18" height="36" fill="#a36936" />
+                <line x1="11" y1="2" x2="11" y2="38" stroke="#182042" stroke-width="2" />
+                <!-- 金色門把 -->
+                <rect x="8" y="19" width="2" height="3" fill="#ffd700" stroke="#182042" stroke-width="0.8" />
+                <rect x="12" y="19" width="2" height="3" fill="#ffd700" stroke="#182042" stroke-width="0.8" />
+                <line x1="2" y1="30" x2="20" y2="30" stroke="#182042" stroke-width="1.5" />
+              </svg>
+              <div style="font-size:7.5px; font-weight:900; color:#182042; background:#ffd154; border:1px solid #182042; padding:1px 3px; border-radius:0; display:inline-block; margin-top:2px; font-family:'DotGothic16', monospace;">衣櫃</div>
+            </div>
+
+            <!-- 咪咪小貓咪 (pet-cat - Lv.3 住家專屬) -->
+            <div class="pet-cat" id="pet-cat" style="display:none;" onclick="event.stopPropagation(); petCat();" title="點擊摸摸咪咪 (減壓 -5)">
+              🐱
+              <div class="bubble-mini" id="cat-bubble" style="bottom:22px; font-size:0.75rem;">喵~ 🐾</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="island-up-deco" id="home-up-lv2" style="left:12px; top:-10px; background:#ff9f0a; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏡 溫馨現代美宅</div>
+        <div class="island-up-deco" id="home-up-lv3" style="left:12px; top:-10px; background:linear-gradient(135deg, #ffd32a, #2ecc71); color:#182042; font-size:0.65rem; font-weight:900; padding:2px 8px; border:2px solid #182042; box-shadow:0 3px 0 #0f1428;">🏰 豪華景觀莊園 MAX</div>
+
+        <div class="island-lv-badge" id="home-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('home');">Lv.1 基礎</div>
+        <div class="island-tag">🏠 溫馨小屋</div>
+      </div>
+
+            <!-- ==========================================================================
+           🌟 學生主角 (Student Character Avatar - GBA 寶可夢訓練家純點陣人偶)
+           ========================================================================== -->
+      <div class="character-wrapper" id="char-wrap" style="left: 775px; top: 385px; z-index: 25;">
+        <div class="bubble" id="char-bubble">休息中... 🏡</div>
+        <div id="particle-emitter" style="position: absolute; width: 100%; height: 100%;"></div>
+
+        <!-- 32x50 雙倍放大純點陣學生人偶 (Pure SVG Pixel Art, Crisp Edges, Scaled 2x) -->
+        <svg id="student-sprite" class="sprite-pixel student-svg state-idle" viewBox="0 0 16 25" shape-rendering="crispEdges"
+          style="position:relative; width:32px; height:50px; transform-origin:bottom center; image-rendering:pixelated; overflow:visible;">
+          
+          <!-- 支援衣櫃換裝的自定義貼圖層 -->
+          <image id="char-custom-shoes" x="0" y="0" width="16" height="25" style="display:none; pointer-events:none;" />
+          <image id="char-custom-clothes" x="0" y="0" width="16" height="25" style="display:none; pointer-events:none;" />
+          <image id="char-custom-hat" x="0" y="0" width="16" height="25" style="display:none; pointer-events:none;" />
+
+          <!-- 地面微陰影 -->
+          <rect x="2" y="24" width="12" height="1" fill="rgba(0,0,0,0.25)" />
+
+          <!-- 雙腳與經典紅色球鞋組 (Shoes & Feet) -->
+          <g class="avatar-feet pixel-feet">
+            <!-- 左鞋 -->
+            <rect class="pixel-foot-l" x="3" y="21" width="4" height="3" fill="#e74c3c" stroke="#182042" stroke-width="0.8" />
+            <rect x="2" y="22" width="1" height="2" fill="#c0392b" />
+            <rect x="4" y="23" width="3" height="1" fill="#ffffff" />
+            <!-- 右鞋 -->
+            <rect class="pixel-foot-r" x="9" y="21" width="4" height="3" fill="#e74c3c" stroke="#182042" stroke-width="0.8" />
+            <rect x="13" y="22" width="1" height="2" fill="#c0392b" />
+            <rect x="9" y="23" width="3" height="1" fill="#ffffff" />
+          </g>
+
+          <!-- 身體組 (Body & Clothes) -->
+          <g class="avatar-body-group pixel-body-group clothes">
+            <!-- 藍色短褲 (Shorts) -->
+            <rect x="4" y="17" width="8" height="4" fill="#2980b9" stroke="#182042" stroke-width="0.8" />
+            <rect x="7" y="19" width="2" height="2" fill="#1f3a93" />
+            
+            <!-- 經典紅色訓練家外套 (Red Trainer Jacket) -->
+            <rect x="3" y="11" width="10" height="7" fill="#e74c3c" stroke="#182042" stroke-width="0.8" />
+            <rect x="5" y="11" width="6" height="7" fill="#ffffff" />
+            <rect x="7" y="11" width="2" height="7" fill="#2c3e50" />
+            
+            <!-- 黃色雙肩背包肩帶 (Backpack Straps) -->
+            <rect x="4" y="11" width="2" height="7" fill="#f1c40f" />
+            <rect x="10" y="11" width="2" height="7" fill="#f1c40f" />
+
+            <!-- 運動條紋 (Sport Pattern) -->
+            <rect class="pixel-sport-pattern avatar-sport-pattern" x="7" y="11" width="2" height="7" fill="#ff8a8a" style="display:none;" />
+
+            <!-- 雙手手臂 (Hands & Arms) -->
+            <rect class="pixel-hand-l" x="2" y="12" width="2" height="5" fill="#e74c3c" />
+            <rect x="2" y="16" width="2" height="2" fill="#fed7aa" />
+            <rect class="pixel-hand-r" x="12" y="12" width="2" height="5" fill="#e74c3c" />
+            <rect x="12" y="16" width="2" height="2" fill="#fed7aa" />
+
+            <!-- 讀書手持課本 (Studying state) -->
+            <g class="avatar-book pixel-book" style="display:none;">
+              <rect x="5" y="14" width="6" height="4" fill="#3498db" stroke="#182042" stroke-width="0.8" />
+              <rect x="6" y="15" width="4" height="2" fill="#ffffff" />
+            </g>
+            
+            <!-- 餐廳手持拉麵碗 (Eating state) -->
+            <g class="avatar-bowl pixel-bowl" style="display:none;">
+              <rect x="5" y="14" width="6" height="4" fill="#e67e22" stroke="#182042" stroke-width="0.8" />
+              <rect x="6" y="13" width="4" height="1" fill="#f1c40f" />
+            </g>
+          </g>
+
+          <!-- 頭部組 (Head & Face & Cap) -->
+          <g class="avatar-head-group pixel-head-group head">
+            <!-- 棕色後髮 (Hair back) -->
+            <rect x="4" y="5" width="8" height="6" fill="#3c2415" />
+
+            <!-- 臉部膚色 (Peach Skin) -->
+            <rect x="4" y="6" width="8" height="5" fill="#fed7aa" />
+            <rect x="3" y="7" width="1" height="3" fill="#fed7aa" />
+            <rect x="12" y="7" width="1" height="3" fill="#fed7aa" />
+            <!-- 臉頰粉紅腮紅 (Blush) -->
+            <rect x="4" y="9" width="1" height="1" fill="#fca5a5" />
+            <rect x="11" y="9" width="1" height="1" fill="#fca5a5" />
+
+            <!-- 運動頭巾 (Sports Headband) -->
+            <rect class="avatar-headband pixel-headband" x="3" y="6" width="10" height="2" fill="#ffd154" stroke="#182042" stroke-width="0.8" style="display:none;" />
+
+            <!-- 一般大眼睛 (Normal Eyes) -->
+            <g class="avatar-eyes-normal pixel-eyes-normal eyes">
+              <rect x="5" y="7" width="2" height="2" fill="#1a1a24" />
+              <rect x="5" y="7" width="1" height="1" fill="#ffffff" />
+              <rect x="9" y="7" width="2" height="2" fill="#1a1a24" />
+              <rect x="9" y="7" width="1" height="1" fill="#ffffff" />
+            </g>
+
+            <!-- 一般嘴巴微笑 (Smile) -->
+            <g class="avatar-mouth-normal pixel-mouth-normal">
+              <rect x="7" y="10" width="2" height="1" fill="#c0392b" />
+            </g>
+
+            <!-- 睡覺閉眼 (Sleeping Eyes) -->
+            <g class="avatar-eyes-sleeping pixel-eyes-sleeping" style="display:none;">
+              <rect x="5" y="8" width="2" height="1" fill="#1a1a24" />
+              <rect x="9" y="8" width="2" height="1" fill="#1a1a24" />
+            </g>
+
+            <!-- 睡覺嘴巴 (Sleeping Mouth) -->
+            <g class="avatar-mouth-sleeping pixel-mouth-sleeping" style="display:none;">
+              <rect x="7" y="10" width="2" height="1" fill="#2c3e50" />
+            </g>
+
+            <!-- 飲食咀嚼嘴巴 (Eating Mouth) -->
+            <g class="avatar-mouth-eating pixel-mouth-eating" style="display:none;">
+              <rect x="6" y="10" width="4" height="2" fill="#c0392b" />
+            </g>
+
+            <!-- 生氣/壓力大眼神 (Angry Eyes) -->
+            <g class="avatar-eyes-angry pixel-eyes-angry" style="display:none;">
+              <rect x="5" y="7" width="2" height="2" fill="#c0392b" />
+              <rect x="9" y="7" width="2" height="2" fill="#c0392b" />
+              <line x1="4" y1="6" x2="7" y2="7" stroke="#1a1a24" stroke-width="1" />
+              <line x1="12" y1="6" x2="9" y2="7" stroke="#1a1a24" stroke-width="1" />
+            </g>
+
+            <!-- 前額棕色瀏海 (Bangs) -->
+            <rect x="4" y="5" width="2" height="2" fill="#3c2415" />
+            <rect x="7" y="5" width="2" height="2" fill="#3c2415" />
+            <rect x="10" y="5" width="2" height="2" fill="#3c2415" />
+
+            <!-- 經典紅色寶可夢訓練家棒球帽 (Trainer Cap) -->
+            <rect x="3" y="1" width="10" height="4" fill="#e74c3c" stroke="#182042" stroke-width="0.8" />
+            <rect x="2" y="3" width="12" height="2" fill="#c0392b" />
+            <rect x="1" y="4" width="14" height="1" fill="#962d22" />
+            <!-- 帽子正中央白色半圓徽章 (Cap Logo) -->
+            <rect x="7" y="2" width="2" height="2" fill="#ffffff" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 螢幕頂部 HUD 與危險狀態警示條 -->
+  <!-- 1. 頂部懸浮狀態與控制列 -->
+  <div class="floating-header">
+    <div class="header-left">
+      <div class="status-badge" id="grade-title">🎓 幼兒園神童</div>
+      <div class="status-badge">💰 <span id="money-val">$0</span></div>
+      <button class="status-badge btn-help" onclick="showHelpModal()"
+        style="cursor: pointer; border: none; font-family: inherit;">❓ 說明</button>
+    </div>
+
+    <div class="header-center">
+      <div class="calendar-badge">
+        <span class="cal-day" id="calendar-day">星期一</span>
+        <span class="cal-time" id="calendar-time">08:00</span>
+        <!-- 狀態看板完美融入頂部 Widget，不再隨地圖滾動 -->
+        <div id="stage-board">正在上學：<span>國文上課中</span></div>
+        <span class="cal-mode" id="calendar-mode">自動作息模式</span>
+      </div>
+      <!-- 手動鎖定按鈕 -->
+      <button id="btn-lock-mode" onclick="toggleLockMode()">🤖 自動</button>
+    </div>
+
+    <div class="header-right">
+      <div class="speed-control-mini">
+        <button class="speed-btn active" id="speed-1x" onclick="setSpeed(1)">1x</button>
+        <button class="speed-btn" id="speed-10x" onclick="setSpeed(10)">10x</button>
+        <button class="speed-btn" id="speed-60x" onclick="setSpeed(60)">60x</button>
+        <button class="speed-btn" id="speed-240x" onclick="setSpeed(240)">240x</button>
+        <button class="speed-btn" id="speed-720x" onclick="setSpeed(720)">720x</button>
+      </div>
+      <button id="btn-exam-trigger" class="btn-exam-mini" onclick="triggerExam()">參加考試</button>
+    </div>
+  </div>
+
+  <!-- 危險狀態警示條 -->
+  <div id="alert-bar"></div>
+
+  
+
+  <!-- 2. 右側懸浮控制小圓鈕 -->
+
+  <!-- 2. 右側懸浮控制小圓鈕 -->
+  <div class="floating-controls">
+    <button class="control-fab" onclick="toggleDrawer('status')" style="background-color: var(--sky-blue);" title="查看能力 (S)">
+      📊 <span class="fab-lbl">能力</span>
+    </button>
+    <button class="control-fab" onclick="toggleDrawer('build')" style="background-color: #ff9f0a;" title="城鎮建設 (B)">
+      🏛️ <span class="fab-lbl">建設</span>
+    </button>
+    <button class="control-fab" onclick="toggleDrawer('shop')" style="background-color: var(--accent);" title="零用錢商店 (P)">
+      🛒 <span class="fab-lbl">商店</span>
+    </button>
+    <button class="control-fab" onclick="toggleDrawer('friends')" style="background-color: #30d158;" title="好友通訊 (F)">
+      🤝 <span class="fab-lbl">好友</span>
+    </button>
+    <button class="control-fab" onclick="openAchievementPanel()" style="background-color: #ffd60a;" title="成就殿堂 (A)">
+      🏅 <span class="fab-lbl">成就</span>
+    </button>
+    <button class="control-fab" onclick="openWardrobeModal()" style="background-color: #bf5af2;" title="學生衣櫃 (W)">
+      🚪 <span class="fab-lbl">衣櫃</span>
+    </button>
+    <button class="control-fab" onclick="toggleDrawer('settings')" style="background-color: var(--purple);" title="系統設定">
+      ⚙️ <span class="fab-lbl">系統</span>
+    </button>
+  </div>
+
+
+  <!-- ==========================================
+       滑出式側邊抽屜面板 (Drawers)
+       ========================================== -->
+<!-- 常駐屬性面板 (左側) -->
+  <div class="drawer-panel fixed-status-panel" id="drawer-status">
+    <div class="drawer-header" style="padding: 16px 20px; background: rgba(255, 255, 255, 0.15);">
+      <h3 style="font-size: 1rem; display: flex; align-items: center; gap: 6px;">📊 學科與生理狀態</h3>
+      <button class="drawer-close" onclick="toggleDrawer('status')"
+        style="width: 24px; height: 24px; font-size: 0.75rem;">✕</button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="status-section-group">
+        <!-- 生理狀態 -->
+        <h4 class="drawer-section-title">⚡ 生理狀態</h4>
+        <div style="padding: 10px 0;">
+          <div class="stat-item" style="margin-bottom: 15px;">
+            <div class="subject-label"
+              style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+              <span>🔋 精力 (Energy)</span>
+              <span id="lbl-energy" style="font-size:0.8rem;">100 / 100</span>
+            </div>
+            <div class="stat-bar"
+              style="height:14px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; overflow:hidden;">
+              <div class="stat-fill fill-energy" id="bar-energy"
+                style="height:100%; width:100%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+
+          <div class="stat-item" style="margin-bottom: 15px;">
+            <div class="subject-label"
+              style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+              <span>🍗 飽足感 (Satiety)</span>
+              <span id="lbl-hunger" style="font-size:0.8rem;">100 / 100</span>
+            </div>
+            <div class="stat-bar"
+              style="height:14px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; overflow:hidden;">
+              <div class="stat-fill fill-hunger" id="bar-hunger"
+                style="height:100%; width:100%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+
+          <div class="stat-item" style="margin-bottom: 15px;">
+            <div class="subject-label"
+              style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+              <span>🤯 壓力值 (Stress)</span>
+              <span id="lbl-stress" style="font-size:0.8rem;">0 / 100</span>
+            </div>
+            <div class="stat-bar"
+              style="height:14px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; overflow:hidden;">
+              <div class="stat-fill fill-stress" id="bar-stress" style="height:100%; width:0%; transition:width 0.3s;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="academic-section-group">
+        <!-- 學科能力 -->
+        <h4 class="drawer-section-title">📚 學科能力</h4>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px; line-height:1.3;">
+          * 聽講上限 60 分（虛線左側黃色），必須在放學/週末點擊「圖書館」複習解鎖剩餘 40 分（虛線右側綠色）。
+        </p>
+
+        <!-- 國文 -->
+        <div class="subject-item" style="margin-bottom:12px;">
+          <div class="subject-label"
+            style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+            <span>📖 國文 (Chinese)</span>
+            <span id="score-cn">0 / 100</span>
+          </div>
+          <div class="progress-bar-container"
+            style="width:100%; height:16px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; position:relative; overflow:hidden;">
+            <div class="progress-school" id="pb-cn-school" style="width: 0%"></div>
+            <div class="progress-home" id="pb-cn-home" style="width: 0%"></div>
+            <div class="progress-ceiling"
+              style="position:absolute; left:60%; top:0; bottom:0; width:2px; border-left:2px dashed var(--border-color); z-index:5;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 英文 -->
+        <div class="subject-item" style="margin-bottom:12px;">
+          <div class="subject-label"
+            style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+            <span>🔠 英文 (English)</span>
+            <span id="score-en">0 / 100</span>
+          </div>
+          <div class="progress-bar-container"
+            style="width:100%; height:16px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; position:relative; overflow:hidden;">
+            <div class="progress-school" id="pb-en-school" style="width: 0%"></div>
+            <div class="progress-home" id="pb-en-home" style="width: 0%"></div>
+            <div class="progress-ceiling"
+              style="position:absolute; left:60%; top:0; bottom:0; width:2px; border-left:2px dashed var(--border-color); z-index:5;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 數學 -->
+        <div class="subject-item" style="margin-bottom:12px;">
+          <div class="subject-label"
+            style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+            <span>➕ 數學 (Math)</span>
+            <span id="score-ma">0 / 100</span>
+          </div>
+          <div class="progress-bar-container"
+            style="width:100%; height:16px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; position:relative; overflow:hidden;">
+            <div class="progress-school" id="pb-ma-school" style="width: 0%"></div>
+            <div class="progress-home" id="pb-ma-home" style="width: 0%"></div>
+            <div class="progress-ceiling"
+              style="position:absolute; left:60%; top:0; bottom:0; width:2px; border-left:2px dashed var(--border-color); z-index:5;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 自然 -->
+        <div class="subject-item" style="margin-bottom:12px;">
+          <div class="subject-label"
+            style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+            <span>🔬 自然 (Science)</span>
+            <span id="score-sc">0 / 100</span>
+          </div>
+          <div class="progress-bar-container"
+            style="width:100%; height:16px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; position:relative; overflow:hidden;">
+            <div class="progress-school" id="pb-sc-school" style="width: 0%"></div>
+            <div class="progress-home" id="pb-sc-home" style="width: 0%"></div>
+            <div class="progress-ceiling"
+              style="position:absolute; left:60%; top:0; bottom:0; width:2px; border-left:2px dashed var(--border-color); z-index:5;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 社會 -->
+        <div class="subject-item" style="margin-bottom:12px;">
+          <div class="subject-label"
+            style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:4px;">
+            <span>🌍 社會 (Society)</span>
+            <span id="score-so">0 / 100</span>
+          </div>
+          <div class="progress-bar-container"
+            style="width:100%; height:16px; background:#efe9e0; border:2px solid var(--border-color); border-radius:8px; position:relative; overflow:hidden;">
+            <div class="progress-school" id="pb-so-school" style="width: 0%"></div>
+            <div class="progress-home" id="pb-so-home" style="width: 0%"></div>
+            <div class="progress-ceiling"
+              style="position:absolute; left:60%; top:0; bottom:0; width:2px; border-left:2px dashed var(--border-color); z-index:5;">
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 15px;" id="exam-rate-lbl">考取合格率: 0%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 抽屜 2: 商店與背包 -->
+  <div class="drawer-panel" id="drawer-shop">
+    <div class="drawer-header">
+      <h3>🛒 零用錢商店 & 背包</h3>
+      <button class="drawer-close" onclick="closeAllDrawers()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="shop-list">
+
+        <!-- 雞排 -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🍗</span>
+            <div>
+              <span class="shop-item-name">美味雞排</span>
+              <div class="shop-item-desc">飽足全滿，且壓力降低 15</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--primary);"
+              onclick="buyItem('chicken', 20)">$20 購買</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:0.75rem; font-weight:900;">持有:</span>
+              <div class="item-count-badge" id="bag-chicken">0</div>
+            </div>
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+              onclick="useItem('chicken')" id="btn-use-chicken" disabled>使用</button>
+          </div>
+        </div>
+
+        <!-- 提神飲料 -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🥤</span>
+            <div>
+              <span class="shop-item-name">提神飲料</span>
+              <div class="shop-item-desc">精力恢復 30，但會增加 5 點壓力</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--primary);"
+              onclick="buyItem('drink', 15)">$15 購買</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:0.75rem; font-weight:900;">持有:</span>
+              <div class="item-count-badge" id="bag-drink">0</div>
+            </div>
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+              onclick="useItem('drink')" id="btn-use-drink" disabled>使用</button>
+          </div>
+        </div>
+
+        <!-- 參考書 -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">📚</span>
+            <div>
+              <span class="shop-item-name">精裝參考書 (被動)</span>
+              <div class="shop-item-desc">永久提升「回家複習」效率 20%</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" id="btn-buy-book"
+              onclick="buyPassive('book', 50)">$50 購買</button>
+            <span style="font-size:0.8rem; font-weight:900;" id="lbl-book-owned">已擁有: 0</span>
+          </div>
+        </div>
+
+        <!-- 跑鞋 -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">👟</span>
+            <div>
+              <span class="shop-item-name">高級跑鞋 (被動)</span>
+              <div class="shop-item-desc">提升運動減壓 20% 且縮短 15% 通勤時間</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" id="btn-buy-shoes"
+              onclick="buyPassive('shoes', 80)">$80 購買</button>
+            <span style="font-size:0.8rem; font-weight:900;" id="lbl-shoes-owned">已擁有: 0</span>
+          </div>
+        </div>
+
+        <!-- 心靈勵志書 -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">📗</span>
+            <div>
+              <span class="shop-item-name">心靈勵志書</span>
+              <div class="shop-item-desc">壓力降低 30，但精力 -10（讀了一晚上）</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--purple);"
+              onclick="buyItem('mentalbook', 30)">$30 購買</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:0.75rem; font-weight:900;">持有:</span>
+              <div class="item-count-badge" id="bag-mentalbook">0</div>
+            </div>
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+              onclick="useItem('mentalbook')" id="btn-use-mentalbook" disabled>使用</button>
+          </div>
+        </div>
+
+        <!-- 🍱 高級便當 (新增) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🍱</span>
+            <div>
+              <span class="shop-item-name">高級便當</span>
+              <div class="shop-item-desc">飽足全滿 + 壓力 -20 + 精力 +10</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--sky-blue);"
+              onclick="buyItem('bento', 50)">$50 購買</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:0.75rem; font-weight:900;">持有:</span>
+              <div class="item-count-badge" id="bag-bento">0</div>
+            </div>
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+              onclick="useItem('bento')" id="btn-use-bento" disabled>使用</button>
+          </div>
+        </div>
+
+        <!-- 💊 綜合維他命 (新增) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">💊</span>
+            <div>
+              <span class="shop-item-name">綜合維他命</span>
+              <div class="shop-item-desc">精力、飽足、壓力各回復 20 點</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: #ff9f0a;"
+              onclick="buyItem('vitamin', 80)">$80 購買</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:0.75rem; font-weight:900;">持有:</span>
+              <div class="item-count-badge" id="bag-vitamin">0</div>
+            </div>
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+              onclick="useItem('vitamin')" id="btn-use-vitamin" disabled>使用</button>
+          </div>
+        </div>
+
+        <!-- 🎧 降噪耳機 (新增被動) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🎧</span>
+            <div>
+              <span class="shop-item-name">降噪耳機 (被動)</span>
+              <div class="shop-item-desc">永久提升學校聽講效率 10%</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" onclick="buyPassive('headphone', 200)">$200
+              購買</button>
+            <span style="font-size:0.8rem; font-weight:900;" id="lbl-headphone-owned">已擁有: 0</span>
+          </div>
+        </div>
+
+        <!-- 📱 學習平板 (新增被動) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">📱</span>
+            <div>
+              <span class="shop-item-name">學習平板 (被動)</span>
+              <div class="shop-item-desc">永久提升圖書館複習效率 30%（高階裝備）</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" onclick="buyPassive('tablet', 200)">$200
+              購買</button>
+            <span style="font-size:0.8rem; font-weight:900;" id="lbl-tablet-owned">已擁有: 0</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- 抽屜 4: 島嶼建設抽屜 (#drawer-build - 開羅工坊) -->
+  <div class="drawer-panel" id="drawer-build">
+    <div class="drawer-header">
+      <h3 style="font-size: 1rem; display: flex; align-items: center; gap: 6px;">🏛️ 城鎮建設與升級</h3>
+      <button class="drawer-close" onclick="closeAllDrawers()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="build-summary-card">
+        <div class="build-summary-header">
+          <div id="town-prosperity-title" style="font-weight:900; color:#3c2415;">🏕️ 初興小鎮 (6★)</div>
+          <div id="town-prosperity-stars" style="color:#f39c12; font-size:0.8rem;">⭐⭐⭐⭐⭐⭐</div>
+        </div>
+        <div class="prosperity-progress-bar">
+          <div class="prosperity-fill" id="town-prosperity-fill" style="width: 33%;"></div>
+        </div>
+        <div class="prosperity-perks" id="town-prosperity-perks">每日小鎮紅利：尚未解鎖（島嶼累計達 10★ 解鎖）</div>
+      </div>
+      <div id="build-island-list">
+        <!-- JS 動態渲染 6 大島嶼卡片 -->
+      </div>
+    </div>
+  </div>
+
+
+  <div class="drawer-panel" id="drawer-friends">
+    <div class="drawer-header">
+      <h3>🤝 校園好友與好感度</h3>
+      <button class="drawer-close" onclick="closeAllDrawers()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px; line-height:1.4;">
+        💡 與夥伴在同一場所活動會<strong>自動增加好感</strong>！也可消耗 5 精力聊天（每日 1 次）或贈送背包裡的點心快速拉近距離，解鎖超強專屬加成！
+      </p>
+      <div id="friends-list-container">
+        <!-- JS 動態渲染 4 位好友卡片 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 抽屜 3: 系統設定 -->
+
+  <div class="drawer-panel" id="drawer-settings">
+    <div class="drawer-header">
+      <h3>⚙️ 系統設定</h3>
+      <button class="drawer-close" onclick="closeAllDrawers()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div style="padding: 10px 0;">
+        <p style="font-size:0.85rem; line-height:1.6; margin-bottom:15px; color:var(--text-muted);">
+          歡迎來到學霸養成記！本遊戲會自動在本地存檔。當你關閉網頁再次打開時，會自動幫你計算這期間的掛機收益喔！（離線最多結算 12 小時）
+        </p>
+        <button class="btn" id="btn-sound-toggle" style="width:100%; margin-bottom:10px;" onclick="toggleSound()">🔊 音效：開</button>
+        <button class="btn" style="width:100%; background-color:#ff8a8a;" onclick="resetGameData()">⚠️ 重置所有進度</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 升學考試挑戰 Modal -->
+
+  <!-- ==========================================
+       遊戲彈出視窗與互動視窗 (Modals & Overlays)
+       ========================================== -->
+  <!-- ❗ v8.2 補回遺失的突發事件膠囊 (v8.1 只有 CSS/JS，HTML 元素不存在，事件抉擇永遠點不到) -->
+  <div class="random-event-capsule" id="random-event-capsule" onclick="openRandomEventModal()" role="button" aria-label="突發事件，點擊抉擇">
+    <span>❗</span><span id="random-event-capsule-text">突發事件 (點擊抉擇)</span>
+    <div class="event-timer-bar" id="random-event-timer-bar"></div>
+  </div>
+
+  <div class="overlay" id="random-event-overlay">
+    <div class="game-modal" style="width: 440px; max-width: 92%; text-align: left; padding: 22px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="game-modal-title" id="re-modal-title" style="margin:0; border:none; padding:0;">❗ 校園突發事件</div>
+        <span id="re-modal-badge" style="font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:12px; background:rgba(255,159,10,0.15); color:var(--primary);">日常奇遇</span>
+      </div>
+      <div style="text-align:center; font-size:2.8rem; margin: 6px 0;" id="re-modal-icon">🎲</div>
+      <p id="re-modal-desc" style="font-size:0.9rem; font-weight:600; line-height:1.55; margin-bottom:14px; color:var(--text-color);"></p>
+      <div id="re-modal-choices">
+        <!-- 動態渲染 2~3 個選項按鈕 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 升學考試挑戰 Modal -->
+
+  <div class="overlay" id="exam-overlay">
+    <div class="game-modal">
+      <div class="game-modal-title" id="modal-title">📝 升學考試挑戰</div>
+      <div class="game-modal-content">
+        <p id="modal-desc">正在進行升學考試...</p>
+        <div class="exam-progress-container">
+          <div class="exam-progress-bar" id="exam-pb"></div>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);" id="modal-status-lbl">正在答題中...</p>
+      </div>
+      <button class="btn" id="btn-modal-close" style="display: none;" onclick="closeExamModal()">確定</button>
+    </div>
+  </div>
+
+  <!-- ❓ 遊戲說明彈出視窗 -->
+
+  <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
+    <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v8.2.0)</span>
+        <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-color);">✕</button>
+      </div>
+      <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
+        <button class="help-tab-btn active" onclick="switchHelpTab('tab-daily', this)">⏰ 基本作息</button>
+        <button class="help-tab-btn" onclick="switchHelpTab('tab-status', this)">⚡ 生理指標</button>
+        <button class="help-tab-btn" onclick="switchHelpTab('tab-study', this)">🎓 學科與考試</button>
+        <button class="help-tab-btn" onclick="switchHelpTab('tab-parents', this)">👨‍👩‍👦 父母事件</button>
+        <button class="help-tab-btn" onclick="switchHelpTab('tab-wardrobe', this)">👕 衣櫃換裝</button>
+      </div>
+      
+      <div style="max-height:300px; overflow-y:auto; line-height:1.6; font-size:0.9rem; color:var(--text-color);">
+        <!-- 基本作息 -->
+        <div id="tab-daily" class="help-tab-content">
+          <h4 style="margin-top:0; color:var(--sky-blue); font-size:1rem; margin-bottom: 8px;">🌅 學霸的一天是怎麼過的？</h4>
+          <p>小學霸會自動根據時間調度起居作息，你也可以點擊地圖上的建築手動進行<strong>派遣</strong>（一次派遣將持續 2 小時）：</p>
+          <ul style="padding-left:16px; margin: 8px 0;">
+            <li><strong>🏠 住家 (僅睡覺)</strong>：半夜與深夜的歸宿，提供安穩的睡眠。爸媽會在旁邊陪睡喔！</li>
+            <li><strong>🏫 學校 (平日 8:00~16:00)</strong>：上課時間會在此吸收知識，提升各學科的<strong>聽講分數</strong>上限。</li>
+            <li><strong>🏃 運動場 (常規開放)</strong>：讀書累了、壓力爆表時，來跑步可以大幅降低壓力。</li>
+            <li><strong>🍔 餐廳 (7:00~22:00)</strong>：肚子餓時，自動或手動派遣至此享用鐵板燒，迅速恢復<strong>飽足感</strong>！去餐廳時還可以看到廚師在鐵板前炒菜喔！</li>
+            <li><strong>📖 圖書館 (8:00~21:00)</strong>：複習的重要場所，當學科複習度不足時，來此與同儕一起自修。</li>
+          </ul>
+          <p style="font-size:0.8rem; opacity: 0.8; background:rgba(0,0,0,0.03); padding:8px; border-radius:6px; border-left:3px solid var(--accent); margin:0;">
+            💡 <strong>防卡死小技巧</strong>：半夜建築關門時，小人若在外面會自動折返住家；平日上課時也會強制留在學校。
+          </p>
+        </div>
+
+        <!-- 生理指標 -->
+        <div id="tab-status" class="help-tab-content" style="display:none;">
+          <h4 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom: 8px;">⚡ 生理平衡是學霸的基礎</h4>
+          <p>保持健康的生理狀態，才能高效學習：</p>
+          <table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.82rem;">
+            <thead>
+              <tr style="border-bottom:2px solid rgba(0,0,0,0.08); text-align:left;">
+                <th style="padding:4px; width:80px;">指標</th>
+                <th style="padding:4px;">影響與如何恢復</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(0,0,0,0.04); vertical-align:top;">
+                <td style="padding:6px 4px; font-weight:700; color:#4caf50;">🔋 精力</td>
+                <td style="padding:6px 4px;">讀書、運動皆會消耗。精力過低會大幅降低讀書效率！請回<strong>住家睡覺</strong>或在商店購買<strong>精力飲料</strong>來恢復。</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(0,0,0,0.04); vertical-align:top;">
+                <td style="padding:6px 4px; font-weight:700; color:#ff9800;">🍗 飽足感</td>
+                <td style="padding:6px 4px;">隨時間持續減少。飢餓值過低會使讀書效率減半！請到<strong>餐廳用餐</strong>或在商店買<strong>香雞排</strong>填飽肚子。</td>
+              </tr>
+              <tr style="vertical-align:top;">
+                <td style="padding:6px 4px; font-weight:700; color:#f44336;">🤯 壓力</td>
+                <td style="padding:6px 4px;">讀書、上課皆會使壓力上升。當壓力高於 85 時小人會暴走拒絕讀書！請前往<strong>運動場跑步</strong>以釋放壓力。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 學科與考試 -->
+        <div id="tab-study" class="help-tab-content" style="display:none;">
+          <h4 style="margin-top:0; color:var(--purple); font-size:1rem; margin-bottom: 8px;">🎓 學科累積與升學大考</h4>
+          <p>點擊左側「能力」面板，可以看到國、英、數、自、社五個學科的進度條。每個科目都包含：</p>
+          <ul style="padding-left:16px; margin:8px 0;">
+            <li><span style="color:#2a9d8f; font-weight:bold;">● 聽講進度</span>：在<strong>學校</strong>上課獲得，上限為 60 分。</li>
+            <li><span style="color:#a06cd5; font-weight:bold;">● 複習進度</span>：在<strong>圖書館</strong>自修獲得，上限為 40 分。</li>
+          </ul>
+          <p>兩者相加即為學科總分 (滿分 100)。<strong>你隨時都可以挑戰考試</strong>（報名費 $50，第一次免費），考取合格率與你的學科分數高低有關。學校升級 Lv.3 與全鎮繁榮 18★ 各再 +5% 合格率。但要注意，如果<strong>挑戰失敗將會進入 7 遊戲天的冷卻時間</strong>，這段期間無法再次挑戰！</p>
+          <p>點擊「參加考試」會進入升學考畫面。答對考題即可解鎖更高學歷（如明星國小、全國榜首國中等），每日結算的零用錢也會增加喔！</p>
+        </div>
+
+        <!-- 父母事件 -->
+        <div id="tab-parents" class="help-tab-content" style="display:none;">
+          <h4 style="margin-top:0; color:#ff453a; font-size:1rem; margin-bottom: 8px;">👨‍👩‍👦 隨機父母彩蛋事件與陪睡壓力</h4>
+          <p>遊戲中，父母的狀態會顯著影響你的睡眠與壓力恢復：</p>
+          <ul style="padding-left:16px; margin:8px 0; font-size:0.85rem;">
+            <li><strong>🛌 爸媽陪睡壓力大</strong>：當父母健在時，在住家睡覺每小時壓力僅減少 <strong>-3</strong>（因為被爸媽死盯著）。</li>
+            <li><strong>🛌 爸媽出事壓力釋放</strong>：當父母因為事件不在時，在住家睡覺大床空無一人，壓力每小時大幅減少 <strong>-8</strong>（沒有爸媽盯著，睡得極為自由）。</li>
+          </ul>
+          
+          <h5 style="margin: 8px 0 4px 0; font-size:0.9rem; color:var(--text-color);">📅 每週日 00:00 隨機彩蛋機率：</h5>
+          <p style="font-size:0.82rem; line-height: 1.4;">
+            <strong>【父母出事事件】</strong>（若父母健在時）：<br>
+            出事機率隨著玩家教育程度提升（年級變高）而大幅上升。可能發生的慘劇有：自然老死👵👴、吵架離婚💔、離家出走尋求真理🏃‍♂️🏃‍♀️、過馬路被撞🚗💨、因為算不出微積分作業太笨被笨死🧠❌。<br>
+            • 幼兒園神童：<strong>5%</strong><br>
+            • 明星國小生：<strong>19%</strong><br>
+            • 全國榜首國中生：<strong>33%</strong><br>
+            • 精英高中生：<strong>47%</strong><br>
+            • 頂尖大學生：<strong>61%</strong><br>
+            • 傳奇研究生：<strong>75%</strong><br>
+            • 宇宙終極博士：<strong>89%</strong>（年紀很大了，不需要父母陪睡）
+          </p>
+          <p style="font-size:0.82rem; line-height: 1.4; margin-top:8px;">
+            <strong>【奇蹟復活事件】</strong>（若父母不在時）：<br>
+            每週日有固定 <strong>35%</strong> 的機率觸發復活彩蛋！可能發生的奇蹟有：爸媽破鏡重圓再婚💍、遇到耶穌顯靈復活⛪✨、或是以前只是假死自己爬出棺材⚰️😂。<br>
+            <em>* 當父母出事時，家裡會立起「告示牌（🪦）」，復活後則掛起「光榮獎狀（📜）」，點擊皆可查看具體原因。</em>
+          </p>
+        </div>
+
+        <!-- 衣櫃換裝 -->
+        <div id="tab-wardrobe" class="help-tab-content" style="display:none;">
+          <h4 style="margin-top:0; color:var(--primary); font-size:1rem; margin-bottom: 8px;">👕 換上你的專屬穿搭！</h4>
+          <p>點擊住家內的<strong>實體衣櫃 (🚪)</strong>，即可打開更衣間！你可以裝備現成的精美帽子、衣服與皮鞋，或是發揮創意繪製專屬作品：</p>
+          <ul style="padding-left:16px; margin:8px 0; font-size:0.85rem;">
+            <li><strong>🎨 18x30 手繪畫板</strong>：提供 ✏️鉛筆、🧽橡皮擦、與精選 16 色常用色票（支援自定義 RGB 調色），頭頂上方特意留白 6 排以利繪製各式高聳、華麗的帽子！</li>
+            <li><strong>📤 匯出 PNG</strong>：一鍵導出為 18x30 像素原圖，方便存檔或與他人分享。</li>
+            <li><strong>📥 匯入 PNG</strong>：可以匯入自己或他人繪製 of 18x30 PNG 圖片（支援舊版 16x16 與 18x24 格式無縫轉換對齊），在畫板中還原並修改。</li>
+            <li><strong>🪦 告示牌與獎狀屋外展示</strong>：父母出事時，屋外左側院子會立起小木牌 (🪦)；奇蹟復活後則掛上榮譽證書 (📜)，點擊即可查看原因。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+        <button class="btn-exam-mini ready" onclick="closeHelpModal()" style="border:none; cursor:pointer; padding: 6px 20px; font-size: 0.85rem; border-radius: 20px;">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="overlay" id="parents-event-overlay" onclick="if(event.target===this) closeParentsEventModal()">
+    <div class="game-modal" style="width: 380px; text-align: center; padding: 24px;">
+      <div class="game-modal-title" id="parents-modal-title">👨‍👩‍👦 父母事件紀錄</div>
+      <div class="game-modal-content">
+        <div id="parents-modal-icon" style="font-size: 3.5rem; margin-bottom: 12px;">🪦</div>
+        <p id="parents-modal-reason" style="font-size: 0.95rem; font-weight: 700; line-height: 1.6; color: var(--text-color);"></p>
+      </div>
+      <button class="btn-exam-mini ready" onclick="closeParentsEventModal()" style="border:none; cursor:pointer; padding: 6px 24px; font-size: 0.85rem; border-radius: 20px;">我知道了</button>
+    </div>
+  </div>
+
+
+  <div class="overlay" id="wardrobe-overlay" onclick="if(event.target===this) closeWardrobeModal()">
+    <div class="game-modal" style="width: 750px; max-width: 95%; height: 580px; max-height: 90vh; display: flex; flex-direction: column; padding: 20px;">
+      <!-- 標題與關閉 -->
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-bottom:15px; flex-shrink:0;">
+        <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">🚪 學生衣櫃與試衣間</h3>
+        <button onclick="closeWardrobeModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      
+      <!-- 試衣間主要內容 (雙欄 layout: 左側是分類與裝備列表，右側是當前小人預覽與開啟畫板) -->
+      <div id="wardrobe-main-view" style="display: flex; flex: 1; gap: 20px; overflow: hidden;">
+        
+        <!-- 左側：分類與列表 -->
+        <div style="flex: 1.2; display: flex; flex-direction: column; overflow: hidden;">
+          <!-- 分類 Tab -->
+          <div style="display: flex; gap: 6px; margin-bottom: 10px; flex-shrink:0;">
+            <button class="help-tab-btn active" id="wardrobe-tab-hat" onclick="switchWardrobeTab('hat')">🎩 帽子</button>
+            <button class="help-tab-btn" id="wardrobe-tab-clothes" onclick="switchWardrobeTab('clothes')">👕 衣服</button>
+            <button class="help-tab-btn" id="wardrobe-tab-shoes" onclick="switchWardrobeTab('shoes')">👟 鞋子</button>
+          </div>
+          <!-- 裝備列表滾動區 -->
+          <div id="wardrobe-items-list" style="flex: 1; overflow-y: auto; padding-right: 5px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; align-content: start;">
+            <!-- 動態渲染裝備卡片 -->
+          </div>
+        </div>
+        
+        <!-- 右側：當前穿搭預覽與操作 -->
+        <div style="flex: 0.8; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.25); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; flex-shrink:0;">
+          <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 15px;">當前穿搭預覽</div>
+          
+          <!-- 預覽用的 SVG (與 student-sprite 一致) -->
+          <div style="width: 100px; height: 130px; background: rgba(255,255,255,0.4); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; position: relative;">
+            <svg id="preview-student-sprite" viewBox="0 0 18 30" shape-rendering="crispEdges" style="width: 72px; height: 120px;">
+              <!-- 鞋子 -->
+              <g class="pixel-feet">
+                <rect x="5" y="28" width="3" height="2" fill="#4a3728" class="pixel-foot-l"/>
+                <rect x="10" y="28" width="3" height="2" fill="#4a3728" class="pixel-foot-r"/>
+                <image id="preview-custom-shoes" x="0" y="0" width="18" height="30" style="display:none; pointer-events:none;"/>
+              </g>
+              <!-- 身體 -->
+              <g class="pixel-body-group">
+                <rect class="clothes" x="4" y="19" width="10" height="9" fill="#aedefc" stroke="#4a3728" stroke-width="1"></rect>
+                <image id="preview-custom-clothes" x="0" y="0" width="18" height="30" style="display:none; pointer-events:none;"/>
+                <rect x="2" y="21" width="2" height="4" fill="#fbd1b7" stroke="#4a3728" stroke-width="1"></rect>
+                <rect x="14" y="21" width="2" height="4" fill="#fbd1b7" stroke="#4a3728" stroke-width="1"></rect>
+              </g>
+              <!-- 頭部 -->
+              <g class="pixel-head-group">
+                <rect x="8" y="18" width="2" height="1" fill="#fbd1b7"></rect>
+                <rect x="3" y="10" width="12" height="8" fill="#fbd1b7" stroke="#4a3728" stroke-width="1"></rect>
+                <rect x="3" y="8" width="12" height="3" fill="#4a3728"></rect>
+                <rect x="2" y="10" width="2" height="4" fill="#4a3728"></rect>
+                <rect x="14" y="10" width="2" height="4" fill="#4a3728"></rect>
+                <image id="preview-custom-hat" x="0" y="0" width="18" height="30" style="display:none; pointer-events:none;"/>
+                
+                <rect x="4" y="15" width="2" height="1" fill="#ff8a8a" opacity="0.8"></rect>
+                <rect x="12" y="15" width="2" height="1" fill="#ff8a8a" opacity="0.8"></rect>
+                <rect x="5" y="13" width="2" height="2" fill="#4a3728"></rect>
+                <rect x="11" y="13" width="2" height="2" fill="#4a3728"></rect>
+                <rect x="8" y="16" width="2" height="1" fill="#4a3728"></rect>
+              </g>
+            </svg>
+          </div>
+          
+          <button class="btn-exam-mini ready" onclick="openPixelEditor()" style="width: 100%; border: none; cursor: pointer; padding: 10px; border-radius: 12px; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 6px;">
+            🎨 設計新服飾 (像素畫布)
+          </button>
+        </div>
+        
+      </div>
+
+      <!-- 像素畫畫板介面 (隱藏，點擊 "設計新服飾" 時顯示) -->
+      <div id="wardrobe-editor-view" style="display: none; flex: 1; gap: 20px; overflow: hidden;">
+        <!-- 左側：畫布本體 -->
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div id="pixel-canvas-container" style="background: rgba(255,255,255,0.4); border: 2px solid var(--border-color); border-radius: 12px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(18, 1fr); width: 270px; height: 450px; gap: 1px; user-select: none; -webkit-user-select: none;">
+            <!-- 18x30 格子，用 JS 動態生成 -->
+          </div>
+          <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">格線僅作編輯輔助，背景為透明</div>
+        </div>
+        
+        <!-- 右側：調色盤與工具 -->
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; padding-right: 5px;">
+          <div>
+            <!-- 服飾名稱 -->
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">服飾名稱</label>
+              <input type="text" id="editor-skin-name" value="我的新服飾" placeholder="輸入服飾名稱..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.6); font-family: inherit; font-size: 0.85rem; font-weight: 700; color: var(--text-color);">
+            </div>
+            
+            <!-- 設計種類 -->
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">服飾類別</label>
+              <div style="display: flex; gap: 6px;">
+                <label class="help-tab-btn active" id="editor-type-lbl-hat" style="flex:1; text-align:center; padding: 6px; cursor:pointer;"><input type="radio" name="editor-skin-type" value="hat" checked style="display:none;" onchange="updateEditorTypeUI('hat')">🎩 帽子</label>
+                <label class="help-tab-btn" id="editor-type-lbl-clothes" style="flex:1; text-align:center; padding: 6px; cursor:pointer;"><input type="radio" name="editor-skin-type" value="clothes" style="display:none;" onchange="updateEditorTypeUI('clothes')">👕 衣服</label>
+                <label class="help-tab-btn" id="editor-type-lbl-shoes" style="flex:1; text-align:center; padding: 6px; cursor:pointer;"><input type="radio" name="editor-skin-type" value="shoes" style="display:none;" onchange="updateEditorTypeUI('shoes')">👟 鞋子</label>
+              </div>
+            </div>
+            
+            <!-- 工具列 -->
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">編輯工具</label>
+              <div style="display: flex; gap: 6px;">
+                <button class="speed-btn active" id="tool-pencil" onclick="setEditorTool('pencil')" style="flex: 1; height: 32px;">✏️ 鉛筆</button>
+                <button class="speed-btn" id="tool-eraser" onclick="setEditorTool('eraser')" style="flex: 1; height: 32px;">🧽 橡皮擦</button>
+                <button class="speed-btn" onclick="clearEditorCanvas()" style="flex: 1; height: 32px;">🗑️ 清空</button>
+              </div>
+            </div>
+            
+            <!-- 常用色票與調色盤 -->
+            <div style="margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label style="font-weight: 700; font-size: 0.85rem;">調色盤</label>
+                <input type="color" id="editor-custom-color" value="#ff453a" onchange="selectPaletteColor(this.value)" style="border: none; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; background: transparent;">
+              </div>
+              <div id="palette-grid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;">
+                <!-- JS 動態生成常用顏色 -->
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+              <button class="status-badge" onclick="exportSkinPNG()" style="flex: 1; padding: 8px; font-size: 0.75rem; border: none; cursor: pointer; background: var(--sky-blue); color: white; display: flex; justify-content: center; align-items: center; gap: 4px; font-family: inherit;">
+                📤 匯出 PNG
+              </button>
+              <button class="status-badge" onclick="triggerImportSkinPNG()" style="flex: 1; padding: 8px; font-size: 0.75rem; border: none; cursor: pointer; background: var(--accent); color: white; display: flex; justify-content: center; align-items: center; gap: 4px; font-family: inherit;">
+                📥 匯入 PNG
+              </button>
+              <input type="file" id="skin-import-file" accept="image/png" style="display: none;" onchange="importSkinPNG(event)">
+            </div>
+            
+            <div style="display: flex; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; flex-shrink: 0;">
+              <button class="btn-exam-mini" onclick="closePixelEditor()" style="flex: 1; border: none; cursor: pointer; padding: 8px; border-radius: 10px; background: rgba(0,0,0,0.05); font-weight: 700; color: var(--text-color);">
+                返回
+              </button>
+              <button class="btn-exam-mini ready" onclick="saveCustomSkin()" style="flex: 1; border: none; cursor: pointer; padding: 8px; border-radius: 10px; font-weight: 700;">
+                儲存並裝備
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="overlay" id="achievement-overlay" onclick="if(event.target===this) closeAchievementPanel()">
+    <div class="game-modal"
+      style="width: 600px; max-width: 95%; max-height: 85vh; text-align: left; padding: 20px; display: flex; flex-direction: column;">
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,0,0,0.08); padding-bottom:10px; margin-bottom:12px; flex-shrink:0;">
+        <h3 style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">🏅 成就殿堂</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="ach-progress-text" style="font-size:0.8rem; font-weight:700; color:var(--primary);">0 / 0</span>
+          <button onclick="closeAchievementPanel()"
+            style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <div class="ach-progress-bar" style="flex-shrink:0;">
+        <div class="ach-progress-fill" id="ach-progress-fill" style="width:0%"></div>
+      </div>
+      <!-- 世界變異展示 -->
+      <div id="world-mutations-display" style="margin-bottom:8px; flex-shrink:0;"></div>
+      <!-- 分類 Tab -->
+      <div class="ach-category-tabs" style="flex-shrink:0;">
+        <button class="ach-cat-btn active" onclick="filterAchievements('all', this)">🌟 全部</button>
+        <button class="ach-cat-btn" onclick="filterAchievements('academic', this)">📚 學業</button>
+        <button class="ach-cat-btn" onclick="filterAchievements('life', this)">🏃 生活</button>
+        <button class="ach-cat-btn" onclick="filterAchievements('economy', this)">💰 經濟</button>
+        <button class="ach-cat-btn" onclick="filterAchievements('event', this)">👨‍👩‍👦 彩蛋</button>
+        <button class="ach-cat-btn" onclick="filterAchievements('rebirth', this)">🔄 輪迴</button>
+        <button class="ach-cat-btn" onclick="filterAchievements('hidden', this)">🏆 隱藏</button>
+      </div>
+      <!-- 成就卡片列表 -->
+      <div id="achievement-list" class="achievement-grid" style="flex:1; overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- 🎮 通用小遊戲 Modal -->
+
+  <div class="overlay" id="minigame-overlay">
+    <div class="game-modal" style="width: 420px; max-width: 92%; padding: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span class="game-modal-title" id="mg-title" style="margin:0; border:none; padding:0;">🎮 小遊戲</span>
+        <button id="mg-close-btn" onclick="closeMinigame()"
+          style="background:none; border:none; font-size:1.2rem; cursor:pointer; display:none;">✕</button>
+      </div>
+      <p id="mg-desc" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;"></p>
+      <div class="mg-timer-bar">
+        <div class="mg-timer-fill" id="mg-timer-fill" style="width:100%"></div>
+      </div>
+      <div class="mg-game-area" id="mg-game-area">
+        <!-- 動態渲染小遊戲內容 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔄 輪迴加點面板 (投胎前彈出) -->
+
+  <div class="overlay" id="rebirth-overlay">
+    <div class="game-modal" style="width: 480px; max-width: 92%; padding: 24px; text-align: left;">
+      <div class="game-modal-title" style="text-align:center;">🔄 轉世加點 — 選擇永久加成</div>
+      <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-bottom:8px;">
+        根據上一世的表現，你獲得了轉世點數！將點數分配到永久加成上吧。
+      </p>
+      <div style="text-align:center; margin-bottom:12px;">
+        <span style="font-size:1.3rem; font-weight:900; color:var(--primary);">可用點數：<span
+            id="rebirth-points-display">0</span></span>
+      </div>
+      <div class="rebirth-alloc-grid" id="rebirth-alloc-grid">
+        <!-- 動態渲染加點選項 -->
+      </div>
+      <!-- 世界變異預覽 -->
+      <div
+        style="margin-top:12px; padding:10px; background:rgba(191,90,242,0.08); border-radius:12px; border:1px solid rgba(191,90,242,0.2);">
+        <div style="font-size:0.85rem; font-weight:700; margin-bottom:6px;">🌍 下一世的世界變異：</div>
+        <div id="rebirth-mutations-preview"></div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn-exam-mini" onclick="confirmRebirth()"
+          style="flex:1; border:none; cursor:pointer; padding:12px; border-radius:14px; font-weight:800; font-size:0.95rem;">
+          ✨ 確認投胎！開啟新的一世
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="overlay" id="clear-overlay">
+    <div class="clear-content">
+      <span class="clear-planet">🌌</span>
+      <div class="clear-title">恭喜！學神降世！</div>
+      <div class="clear-subtitle">你已成為宇宙終極博士 🎓</div>
+      <p class="clear-stats" id="clear-stats"></p>
+      <p class="clear-desc">
+        學無止境，宇宙深處還有更多知識等你探索...<br>
+        是時候投胎重來，再創巔峰了。
+      </p>
+      <button id="btn-reincarnate" onclick="startRebirthAllocation()">✨ 投胎重來！成為新的幼兒園神童</button>
+    </div>
+  </div>
+
+
+  <!-- 懸浮 Footer 版號 -->
+  <div class="floating-footer">
+    Copyright © 2026 葉大帥. All rights reserved. (v8.2.0)
+  </div>
+
+  <!-- ==========================================================================
+       🎮 模組化 JavaScript 遊戲引擎 (純原生無編譯，相容 file:// 離線雙擊運行)
+       ========================================================================== -->
+  <!-- 🎓 v8.2 新手引導 (只對全新玩家顯示一次) -->
+  <div class="overlay" id="onboarding-overlay">
+    <div class="game-modal" style="width:440px; max-width:92%; text-align:left; padding:22px;">
+      <div class="game-modal-title" style="margin-bottom:12px;">🎓 歡迎來到學霸養成記！</div>
+      <p style="line-height:1.9; font-size:0.95rem;">
+        你的目標：<b>一路升學，成為宇宙終極博士！</b><br>
+        ① 小人會自動作息：白天上課、晚上去圖書館複習<br>
+        ② 五科分數 = 學校聽講 (60) + 圖書館複習 (40)，填得越滿，考試合格率越高<br>
+        ③ 注意<b>精力 / 飽足 / 壓力</b>：太累或壓力爆表會讀不進去，該吃就吃、該睡就睡、該運動就運動<br>
+        ④ 錢不夠？週末去便利商店打工；有錢就升級小鎮建築，效果是永久的<br>
+        ⑤ 覺得慢？右上角可以調速度，推薦 60x
+      </p>
+      <button class="btn-exam-mini ready" onclick="closeOnboarding()" style="width:100%; border:none; cursor:pointer; padding:10px; border-radius:12px; font-weight:800; margin-top:10px;">開始養成！</button>
+    </div>
+  </div>
+  <div id="rotate-hint">📱 橫放手機，地圖看得更清楚喔！</div>
+
+  <script src="js/state.js"></script>
+  <script src="js/coords.js"></script>
+  <script src="js/town.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+
+</html>
