@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - STATE & CORE DATA ENGINE (v8.2.0)
+   🎮 GBA SCHOLAR IDLE - STATE & CORE DATA ENGINE (v8.3.0)
    音效、台詞、等級、全域狀態、存讀檔、增益、成就、好友與輪迴
    ========================================================================== */
 
@@ -1427,12 +1427,12 @@
             gameState.landmarkLevels = { school: 1, restaurant: 1, gym: 1, library: 1, store: 1, home: 1 };
           }
 
-          // 自動將舊的 16x16 或 18x24 自定義服飾升級為 18x30 格式
+          // v8.3：舊自訂服飾 (18x30/18x24/16x16) 一律轉成真角色格 16x25
           ['hat', 'clothes', 'shoes'].forEach(type => {
             if (gameState.customSkins[type]) {
               gameState.customSkins[type].forEach(skin => {
-                if (skin.pixels && skin.pixels.length !== 540) {
-                  skin.pixels = upgradePixelsTo18x30(skin.pixels, type);
+                if (skin.pixels && skin.pixels.length !== 400 && typeof normalizeSkinPixels === 'function') {
+                  skin.pixels = normalizeSkinPixels(skin.pixels);
                 }
               });
             }

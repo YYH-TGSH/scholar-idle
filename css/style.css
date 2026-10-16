@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.2.0)
+   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.3.0)
    純真點陣字型、雙層像素對話框、寶可夢血條與日系 RPG 建築島嶼
    ========================================================================== */
 
@@ -959,8 +959,8 @@ body {
       }
 
       #pixel-canvas-container {
-        width: 216px !important;
-        height: 360px !important;
+        width: 256px !important;
+        height: 400px !important;
       }
 
       #wardrobe-editor-view>div:last-child {
@@ -2080,7 +2080,7 @@ body {
       transition: background-color 0.05s ease;
     }
 
-    .pixel-grid-cell:nth-child(18n) {
+    .pixel-grid-cell:nth-child(16n) {
       border-right: none;
     }
 
@@ -3033,7 +3033,7 @@ body {
     }
   </style>
 /* ==========================================================================
-   🎮 GBA POKEMON RPG PIXEL ART ENHANCEMENTS (v8.2.0)
+   🎮 GBA POKEMON RPG PIXEL ART ENHANCEMENTS (v8.3.0)
    雙層像素框、點陣字型、GBA 階梯血條、銳利 0 圓角與日系點陣佈局
    ========================================================================== */
 
@@ -3320,3 +3320,11 @@ body, button, input, select, textarea {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; transition-duration: 0.01s !important; }
 }
+
+/* ================= v8.3 紙娃娃修復層 ================= */
+#pixel-canvas-container { touch-action: none; }
+#pixel-canvas-container.hide-guide .silhouette-hair,
+#pixel-canvas-container.hide-guide .silhouette-skin,
+#pixel-canvas-container.hide-guide .silhouette-clothes,
+#pixel-canvas-container.hide-guide .silhouette-feet { background-color: transparent !important; }
+#wardrobe-preview-slot svg, #editor-preview-slot svg { display: block; }
