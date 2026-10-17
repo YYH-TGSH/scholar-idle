@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v8.8.2)
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v8.9.0)
    GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
    ========================================================================== */
 
@@ -613,7 +613,7 @@
       saveGameData();
     }
 
-    // v8.8.2 服飾名稱會進 innerHTML (含朋友分享碼帶入的名字)，渲染前一律跳脫
+    // v8.9.0 服飾名稱會進 innerHTML (含朋友分享碼帶入的名字)，渲染前一律跳脫
     function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
     function sanitizeSkinName(s) { return String(s || '').replace(/[<>&"']/g, '').slice(0, 24); }
 
@@ -1391,7 +1391,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v8.8.2) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v8.9.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1862,9 +1862,9 @@
 
     function startMinigame(loc) {
       playSound('click');
-      if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; } // v8.8.2 防舊計時器殘留
+      if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; } // v8.9.0 防舊計時器殘留
       currentMinigame = loc;
-      // v8.8.2 冷卻改到「打完出結果」才起算：中途被打斷 (切換App/來電) 不再白白燒掉冷卻
+      // v8.9.0 冷卻改到「打完出結果」才起算：中途被打斷 (切換App/來電) 不再白白燒掉冷卻
       if (!gameState.miniGamePlays) gameState.miniGamePlays = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
       gameState.miniGamePlays[loc] = (gameState.miniGamePlays[loc] || 0) + 1;
 
@@ -1891,7 +1891,7 @@
     }
 
     function showMinigameResult(win, loc) {
-      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES; // v8.8.2 完成才起算冷卻
+      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES; // v8.9.0 完成才起算冷卻
       if (!gameState.miniGameWins) gameState.miniGameWins = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
       if (win) gameState.miniGameWins[loc] = (gameState.miniGameWins[loc] || 0) + 1;
 

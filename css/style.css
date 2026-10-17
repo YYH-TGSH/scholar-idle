@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.8.2)
+   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.9.0)
    純真點陣字型、雙層像素對話框、寶可夢血條與日系 RPG 建築島嶼
    ========================================================================== */
 
@@ -3236,7 +3236,7 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* 房間快捷導覽列 (手機)：44px+ 膠囊鈕，保證點得到；點了把房間滑到中央 */
 #room-nav { display: none; }
-@media (max-width: 820px) {
+@media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
   #room-nav {
     display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
     position: fixed; left: 8px; right: 8px; z-index: 75;
@@ -3267,7 +3267,7 @@ input, select, textarea { border-radius: 14px !important; }
 @media (orientation: portrait) and (max-width: 640px) { #rotate-hint { display: block; } }
 
 /* 手機：FAB 由右側直列 7 顆 (540px 遮住地圖) 改為底部橫排小顆 + 安全區 */
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 520px) {
   .floating-controls {
     flex-direction: row !important; flex-wrap: wrap; justify-content: center;
     right: 8px !important; left: 8px; bottom: calc(8px + env(safe-area-inset-bottom)) !important; gap: 8px !important;
@@ -3298,7 +3298,7 @@ input, select, textarea { border-radius: 14px !important; }
 #pixel-canvas-container { aspect-ratio: 16 / 25; }
 
 /* ================= v8.6 地圖舞台適應層 ================= */
-@media (max-width: 820px) {
+@media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
   .map-viewport {
     top: var(--chrome-top, 0px) !important;
     bottom: var(--chrome-bottom, 0px) !important;
@@ -3324,7 +3324,7 @@ input, select, textarea { border-radius: 14px !important; }
 /* ================= v8.8 全面體檢修復層 ================= */
 /* 1) 頂部中列溢出：行事曆徽章 + 自動按鈕在 390px 寬會互相擠爆 (左邊星期被切、右邊按鈕出界)。
    徽章改可伸縮，狀態看板文字超長自動省略，按鈕固定不縮。 */
-@media (max-width: 820px) {
+@media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
   .header-center { gap: 6px !important; }
   .header-center .calendar-badge { flex: 1 1 auto !important; width: auto !important; min-width: 0; }
   #stage-board { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -3337,10 +3337,10 @@ input, select, textarea { border-radius: 14px !important; }
   #room-nav { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%); mask-image: linear-gradient(to right, #000 88%, transparent 100%); }
 }
 
-/* ================= v8.8.2 體檢第二批 (逐項驗證後修復) ================= */
+/* ================= v8.9.0 體檢第二批 (逐項驗證後修復) ================= */
 /* 輪迴加點的 +/- 是主要操作鈕，28px 太小 → 40px */
 .rebirth-stat-row button { width: 40px !important; height: 40px !important; }
-@media (max-width: 820px) {
+@media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
   /* 所有彈窗在手機上限制高度可捲動 (輪迴彈窗內容 ~900px，矮螢幕原本會切掉確認鈕) */
   .overlay .game-modal { max-height: 92dvh !important; overflow-y: auto !important; }
   /* 突發事件膠囊原本 bottom:120px 會壓到房間導覽列 (96~146px 帶) → 抬到導覽列上方 */
@@ -3350,4 +3350,49 @@ input, select, textarea { border-radius: 14px !important; }
   .achievement-toast { top: calc(var(--chrome-top, 150px) + 8px) !important; right: 12px !important; left: 12px; max-width: none !important; z-index: 99998 !important; }
   /* 分頁鈕/成就分類鈕補足 40px 點擊高度 */
   .help-tab-btn, .ach-cat-btn { min-height: 40px; }
+}
+
+/* ================= v8.9 地圖對位根治 + 日期置頂 + 橫向緊湊版面 ================= */
+/* 根因：.town-map 是 .map-viewport (flex) 的子元素，被 flex-shrink 壓成容器寬
+   (直向 390 / 橫向 844，而非 960)，底圖 SVG (width:100%) 跟著被壓縮，
+   但絕對定位的建築用的是真 960 座標 → 底圖永遠對不齊建築。禁止地圖本體被壓縮。 */
+.town-map { flex: none !important; }
+
+@media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
+  /* 日期列置中置頂：行事曆整列排到最上面 */
+  .header-center { order: -1; }
+  /* 「自動作息模式」文字 pill 在小螢幕拿掉 (模式看 🤖 按鈕即可)，把空間還給狀態文字 */
+  .cal-mode { display: none !important; }
+}
+
+/* 橫向矮螢幕 (手機打橫)：桌面版標頭會攤開蓋住地圖 → 改成一列緊湊標頭 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .floating-header {
+    top: calc(6px + env(safe-area-inset-top)) !important;
+    left: 8px !important; right: 8px !important;
+    flex-direction: row !important; align-items: center !important; gap: 6px !important;
+  }
+  .header-left, .header-right { flex: none !important; width: auto !important; }
+  .header-center { order: 0 !important; flex: 1 1 auto !important; width: auto !important; min-width: 0; }
+  .calendar-badge {
+    flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important;
+    justify-content: center !important; flex: 1 1 auto !important; min-width: 0;
+    width: auto !important; padding: 5px 12px !important; gap: 8px !important;
+  }
+  .header-left { gap: 5px !important; }
+  .header-right { gap: 5px !important; }
+  .speed-control-mini .speed-btn { padding: 0 5px !important; font-size: .62rem !important; }
+  .btn-exam-mini { padding: 6px 8px !important; font-size: .68rem !important; }
+  .cal-day { font-size: .72rem !important; white-space: nowrap; margin: 0 !important; }
+  .cal-time { font-size: 1.02rem !important; margin: 0 !important; white-space: nowrap; }
+  #stage-board { font-size: .72rem !important; margin: 0 !important; padding: 2px 8px !important; white-space: nowrap; }
+  #btn-lock-mode { flex: none; padding: 6px 10px !important; font-size: .75rem !important; min-height: 38px; white-space: nowrap; }
+  .header-left .status-badge, .status-badge { font-size: .72rem !important; padding: 5px 9px !important; white-space: nowrap; }
+  .speed-control-mini { padding: 2px !important; }
+  .speed-control-mini .speed-btn { height: 30px !important; font-size: .68rem !important; padding: 0 7px !important; width: auto !important; }
+  .btn-exam-mini { font-size: .72rem !important; padding: 6px 10px !important; height: 34px !important; white-space: nowrap; }
+  .floating-footer { display: none !important; }
+  #rotate-hint { display: none !important; }
+  /* 狀態文字 pill 在橫向會被擠成一個字 → 隱藏 (小人在哪間教室直接看地圖) */
+  #stage-board { display: none !important; }
 }
