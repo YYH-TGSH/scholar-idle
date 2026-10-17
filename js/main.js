@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v8.9.0)
+   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v8.9.1)
    作息大腦、主循環、房租結算、版本控制與啟動初始化
    ========================================================================== */
 
@@ -17,124 +17,13 @@
       const isFlipped = (currentLoc === 'school' || currentLoc === 'library') && currentState === 'studying';
       updateCharacterPositionAndScale(initialCoords.x, initialCoords.y, isFlipped);
 
-      setTimeout(() => {
-        const computedStyle = window.getComputedStyle(elCharWrap);
-        const charLeft = parseFloat(computedStyle.left) || gameState.currentX || 0;
-        elMapViewport.scrollLeft = charLeft - elMapViewport.clientWidth / 2;
-      }, 100);
 
       updateUI();
 
-      // 監聽手動滾動事件
-      elMapViewport.addEventListener('scroll', () => {
-        // 100ms 內由程式碼自動滾動引起的，忽略
-        if (Date.now() - lastAutoScrollTime < 100) return;
-        userScrolling = true;
-        if (userScrollTimer) clearTimeout(userScrollTimer);
-        userScrollTimer = setTimeout(() => {
-          userScrolling = false;
-        }, 10000); // 10秒沒移動，恢復相機自動追隨
-      });
-
-      const handleUserInteraction = () => {
-        userScrolling = true;
-        if (userScrollTimer) clearTimeout(userScrollTimer);
-        userScrollTimer = setTimeout(() => {
-          userScrolling = false;
-        }, 10000);
-      };
-
-      // 實作滑鼠拖曳左右滑動與慣性 (Momentum Drag)
-      let isDraggingMap = false;
-      let mapStartX;
-      let mapScrollLeftPos;
-      let mapIsMoved = false;
-      let dragVelocity = 0;
-      let lastDragTime = 0;
-      let lastDragX = 0;
-      let inertiaFrame;
-
-      const applyInertia = () => {
-        if (!isDraggingMap && Math.abs(dragVelocity) > 0.1) {
-          elMapViewport.scrollLeft -= dragVelocity;
-          dragVelocity *= 0.95; // 摩擦力減速
-          inertiaFrame = requestAnimationFrame(applyInertia);
-        }
-      };
-
-      elMapViewport.addEventListener('mousedown', (e) => {
-        isDraggingMap = true;
-        mapIsMoved = false;
-        mapStartX = e.pageX - elMapViewport.offsetLeft;
-        mapScrollLeftPos = elMapViewport.scrollLeft;
-        lastDragX = mapStartX;
-        lastDragTime = performance.now();
-        dragVelocity = 0;
-        if (inertiaFrame) cancelAnimationFrame(inertiaFrame);
-        elMapViewport.style.cursor = 'grabbing';
-        handleUserInteraction();
-      });
-
-      // 攔截點擊事件，如果在拖曳中則禁止點擊地標
-      elMapViewport.addEventListener('click', (e) => {
-        if (mapIsMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }, true);
-
-      elMapViewport.addEventListener('mouseleave', () => {
-        if (isDraggingMap) {
-          isDraggingMap = false;
-          elMapViewport.style.cursor = '';
-          applyInertia();
-        }
-      });
-
-      elMapViewport.addEventListener('mouseup', () => {
-        isDraggingMap = false;
-        elMapViewport.style.cursor = '';
-        applyInertia();
-      });
-
-      elMapViewport.addEventListener('mousemove', (e) => {
-        if (!isDraggingMap) return;
-        e.preventDefault(); // 防止反白或拖曳其他元素
-        const currentX = e.pageX - elMapViewport.offsetLeft;
-        const walk = (currentX - mapStartX) * 1.5; 
-        
-        if (Math.abs(currentX - mapStartX) > 5) {
-          mapIsMoved = true; // 標記為拖曳狀態，禁止點擊
-        }
-
-        const now = performance.now();
-        const dt = now - lastDragTime;
-        if (dt > 0) {
-          dragVelocity = (currentX - lastDragX) * 1.5 / dt * 16; // 計算速度 (每幀)
-        }
-        lastDragX = currentX;
-        lastDragTime = now;
-
-        elMapViewport.scrollLeft = mapScrollLeftPos - walk;
-        handleUserInteraction();
-      });
-
-      elMapViewport.addEventListener('touchstart', handleUserInteraction, { passive: true });
-      elMapViewport.addEventListener('wheel', handleUserInteraction, { passive: true });
 
       startTicker();
-      // v8.2：移除每幀把 scroll 歸零的 updateCameraFollow rAF (與拖曳/觸控平移互打且耗電)
+      // v8.9.1：舊捲動相機 (開機/resize 自動捲到小人 + 滑鼠拖曳捲動) 全面退役——它與 transform 相機互打，會把置中的地圖整張捲走。相機只由 resizeMapScale/手勢引擎 (transform) 管理。
 
-      // 當視窗縮放時，立即對齊小人中心 (利用 window.getComputedStyle 讀取實時 transition 與 keyframe 動態座標)
-      window.addEventListener('resize', () => {
-        const computedStyle = window.getComputedStyle(elCharWrap);
-        const charLeft = parseFloat(computedStyle.left) || elCharWrap.offsetLeft || 0;
-        const charWidth = elCharWrap.clientWidth || 42;
-        const viewportWidth = elMapViewport.clientWidth;
-        const targetScroll = charLeft + charWidth / 2 - viewportWidth / 2;
-        const maxScroll = elTownMap.clientWidth - viewportWidth;
-        elMapViewport.scrollLeft = Math.max(0, Math.min(maxScroll, targetScroll));
-      });
     }
 
     function startTicker() {
@@ -186,7 +75,11 @@
       const controls = document.querySelector('.floating-controls');
       const nav = document.getElementById('room-nav');
       const top = header ? header.offsetHeight + 14 : 0;
-      const bottom = (controls ? controls.offsetHeight : 0) + (nav ? nav.offsetHeight : 0) + 30;
+      // v8.9.1: 改用實際螢幕位置量測 (rect.top)：取功能鈕列與房間膠囊列中較高者的上緣，
+      // 地圖可用區保證不被任何一列遮住 (舊版用 offsetHeight 相加，橫向會算漏而壓到地圖)
+      let bottom = 0;
+      if (controls) bottom = Math.max(bottom, Math.round(window.innerHeight - controls.getBoundingClientRect().top) + 10);
+      if (nav && getComputedStyle(nav).display !== 'none') bottom = Math.max(bottom, Math.round(window.innerHeight - nav.getBoundingClientRect().top) + 10);
       rootEl.style.setProperty('--chrome-top', top + 'px');
       rootEl.style.setProperty('--chrome-bottom', bottom + 'px');
     }
@@ -196,13 +89,15 @@
       const vp = document.getElementById("map-viewport");
       const map = document.getElementById("town-map");
       if (!vp || !map) return;
+      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v8.9.1)
+      if (vp.scrollTop !== 0) vp.scrollTop = 0;
       const availW = vp.clientWidth;
       const availH = vp.clientHeight;
       if (!availW || !availH) return;
       // v8.7 預設視角 = 嚴格 contain：整個校園在可用矩形裡一次看完、跟著螢幕尺寸縮放定位，
       // 不再放大溢出。想看細節用雙指縮放，或點底部房間膠囊直接放大跳到那一間。
       const fit = Math.min(availW / 980, availH / 560, 1.25);
-      let scale = Math.max(Math.min(fit, 1.25), 0.32);
+      let scale = Math.max(Math.min(fit, 1.25), 0.15); // v8.9.1: 下限改 0.15——舊下限 0.32 在矮螢幕會大於 fit 本人，反而保證溢出遮擋
       window.__baseMapScale = scale;
       try { if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; } } catch (e) { }
       if (typeof clampMapPan === 'function') clampMapPan();
@@ -293,12 +188,6 @@
       vp.addEventListener('dblclick', () => { mapZoom = 1; mapPanX = 0; mapPanY = 0; applyMapZoom(); });
     }
 
-    // 相機循環（一屏盡覽模式下維持邊界重置）
-    function updateCameraFollow() {
-      if (elMapViewport.scrollLeft !== 0) elMapViewport.scrollLeft = 0;
-      if (elMapViewport.scrollTop !== 0) elMapViewport.scrollTop = 0;
-      requestAnimationFrame(updateCameraFollow);
-    }
 
     // 遊戲時間推進 (推進 speed / 10 分鐘，1x 速度下 1 秒(10次tick) = 1 遊戲分鐘)
     function tick() {
@@ -1032,7 +921,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v8.9.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v8.9.1) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

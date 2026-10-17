@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.9.0)
+   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.9.1)
    純真點陣字型、雙層像素對話框、寶可夢血條與日系 RPG 建築島嶼
    ========================================================================== */
 
@@ -3337,7 +3337,7 @@ input, select, textarea { border-radius: 14px !important; }
   #room-nav { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%); mask-image: linear-gradient(to right, #000 88%, transparent 100%); }
 }
 
-/* ================= v8.9.0 體檢第二批 (逐項驗證後修復) ================= */
+/* ================= v8.9.1 體檢第二批 (逐項驗證後修復) ================= */
 /* 輪迴加點的 +/- 是主要操作鈕，28px 太小 → 40px */
 .rebirth-stat-row button { width: 40px !important; height: 40px !important; }
 @media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
@@ -3395,4 +3395,6 @@ input, select, textarea { border-radius: 14px !important; }
   #rotate-hint { display: none !important; }
   /* 狀態文字 pill 在橫向會被擠成一個字 → 隱藏 (小人在哪間教室直接看地圖) */
   #stage-board { display: none !important; }
+  /* 房間膠囊列在橫向寬度夠 → 整列置中 */
+  #room-nav { justify-content: center; }
 }
