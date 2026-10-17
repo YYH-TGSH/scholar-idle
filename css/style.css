@@ -120,7 +120,7 @@ body {
 
     /* 960x540 緊湊六角等角聚落地圖舞台 */
     .town-map {
-      width: 960px;
+      width: 1920px;
       height: 540px;
       position: relative;
       margin: 0 auto;
@@ -297,21 +297,21 @@ body {
     /* 6 大建築固定座標 (960x540 Viewport - 開羅 2.5D 正向街區佈局) */
     /* 上排 3 棟 */
     .landmark-school {
-      left: 28px;
+      left: 970px;
       top: 25px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-library {
-      left: 338px;
+      left: 1280px;
       top: 25px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-gym {
-      left: 648px;
+      left: 1590px;
       top: 25px;
       width: 284px;
       height: 185px;
@@ -319,22 +319,22 @@ body {
 
     /* 下排 3 棟 */
     .landmark-restaurant {
-      left: 28px;
-      top: 295px;
+      left: 660px;
+      top: 25px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-store {
-      left: 338px;
-      top: 295px;
+      left: 350px;
+      top: 25px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-home {
-      left: 648px;
-      top: 295px;
+      left: 40px;
+      top: 25px;
       width: 284px;
       height: 185px;
     }
@@ -1002,60 +1002,60 @@ body {
     @keyframes track-loop {
       /* 1. 頂部直道往右大步奔跑 (面向右邊 scaleX(1)) */
       0% {
-        left: 710px;
+        left: 1652px;
         top: 5px;
         transform: scaleX(1);
       }
       22% {
-        left: 870px;
+        left: 1812px;
         top: 5px;
         transform: scaleX(1);
       }
       /* 2. 右側彎道順時針弧度過彎 */
       28% {
-        left: 900px;
+        left: 1842px;
         top: 26px;
         transform: scaleX(1);
       }
       35% {
-        left: 902px;
+        left: 1844px;
         top: 58px;
         transform: scaleX(-1);
       }
       42% {
-        left: 885px;
+        left: 1827px;
         top: 90px;
         transform: scaleX(-1);
       }
       /* 3. 底部直道往左衝刺 (面向左邊 scaleX(-1)) */
       50% {
-        left: 870px;
+        left: 1812px;
         top: 99px;
         transform: scaleX(-1);
       }
       72% {
-        left: 710px;
+        left: 1652px;
         top: 99px;
         transform: scaleX(-1);
       }
       /* 4. 左側彎道向上過彎折返 */
       78% {
-        left: 680px;
+        left: 1622px;
         top: 85px;
         transform: scaleX(-1);
       }
       85% {
-        left: 676px;
+        left: 1618px;
         top: 50px;
         transform: scaleX(1);
       }
       92% {
-        left: 685px;
+        left: 1627px;
         top: 20px;
         transform: scaleX(1);
       }
       100% {
-        left: 710px;
+        left: 1652px;
         top: 5px;
         transform: scaleX(1);
       }
@@ -1202,11 +1202,7 @@ body {
       display: block !important;
     }
 
-    #student-sprite.state-sleeping {
-      transform: rotate(-90deg) translate(-2px, -5px);
-      transform-origin: center;
-      transition: transform 0.5s;
-    }
+    /* v9.0：睡覺不再把站著的小人硬轉 -90 度 (很醜)；改用床上入睡形態圖層，本體藏進被窩 */
 
     .state-sleeping .avatar-eyes-normal,
     .state-sleeping .avatar-mouth-normal {
@@ -3397,4 +3393,26 @@ input, select, textarea { border-radius: 14px !important; }
   #stage-board { display: none !important; }
   /* 房間膠囊列在橫向寬度夠 → 整列置中 */
   #room-nav { justify-content: center; }
+}
+
+/* ================= v9.0 睡覺動畫精緻化 ================= */
+/* 本體小人藏進被窩：只隱藏 sprite 本身與影子，氣泡/Zzz 粒子沿用 char-wrap 位置 (床位) */
+.character-wrapper.in-bed #student-sprite { visibility: hidden; }
+.character-wrapper.in-bed::after { visibility: hidden; }
+/* 棉被呼吸起伏 */
+.breath { transform-box: fill-box; transform-origin: 50% 100%; animation: breath-bob 2.6s ease-in-out infinite; }
+@keyframes breath-bob { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.05); } }
+/* 漂浮 Zzz */
+.zzz-float {
+  position: absolute; font-family: 'Press Start 2P', monospace; font-weight: bold;
+  color: #26324b; font-size: 11px; opacity: 0; pointer-events: none;
+  animation: zzz-rise 3.2s ease-in infinite;
+}
+.zzz-float.z2 { animation-delay: 1.05s; font-size: 9px; }
+.zzz-float.z3 { animation-delay: 2.1s; font-size: 7px; }
+@keyframes zzz-rise {
+  0% { opacity: 0; transform: translateY(4px) translateX(0) rotate(-6deg); }
+  25% { opacity: 1; }
+  70% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-17px) translateX(4px) rotate(8deg); }
 }

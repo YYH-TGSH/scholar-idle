@@ -1,28 +1,28 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - COORDINATES & MOVEMENT ENGINE (v8.9.1)
-   960x540 六角小鎮與 2.5D 正向透視室內互動座標
+   🎮 GBA SCHOLAR IDLE - COORDINATES & MOVEMENT ENGINE (v9.0.0)
+   1920x540 橫向捲軸街道小鎮：六棟建築沿主街一字排開 (西→東：住家/超商/餐廳/學校/圖書館/操場)
    ========================================================================== */
 
-    // 960x540 六角聚落座標定位 (各島 2.5D 正向透視屋室內互動點)
+    // 世界與街道常數 (通勤路徑/相機/地面共用同一套座標)
+    const WORLD_W = 1920, WORLD_H = 540;
+    const WALK_Y = 296; // 主街馬路中央的步行線
+    const DOOR_X = { home: 175, store: 485, restaurant: 795, school: 1105, library: 1415, gym: 1732 }; // 各建築門口 x
+    const DOOR_OUT_Y = 230; // 走出大門後、踏上馬路前的門前點 y
+
+    // 各室內互動點 (由舊 960 佈局的島內相對座標平移而來，室內陳設不變)
     const COORDS = {
-      // 學校 (左上)
-      'school-class': { x: 125, y: 195 },
-      'school-idle': { x: 165, y: 195 },
-      // 餐廳 (左下)
-      'restaurant-eat': { x: 115, y: 460 },
-      'restaurant-idle': { x: 160, y: 465 },
-      // 活力操場 (右上)
-      'gym-run': { x: 710, y: 75 },
-      'gym-idle': { x: 785, y: 180 },
-      // 圖書館 (中上)
-      'library-study': { x: 385, y: 195 },
-      'library-idle': { x: 445, y: 195 },
-      // 便利商店 (中下)
-      'store-work': { x: 440, y: 460 },
-      'store-idle': { x: 485, y: 465 },
-      // 住家 (右下)
-      'home-sleep': { x: 685, y: 460 },
-      'home-idle': { x: 775, y: 460 }
+      'school-class': { x: 1067, y: 195 },
+      'school-idle': { x: 1107, y: 195 },
+      'restaurant-eat': { x: 747, y: 190 },
+      'restaurant-idle': { x: 792, y: 195 },
+      'gym-run': { x: 1652, y: 75 },
+      'gym-idle': { x: 1727, y: 180 },
+      'library-study': { x: 1327, y: 195 },
+      'library-idle': { x: 1387, y: 195 },
+      'store-work': { x: 452, y: 190 },
+      'store-idle': { x: 497, y: 195 },
+      'home-sleep': { x: 90, y: 175 },
+      'home-idle': { x: 167, y: 190 }
     };
 
     // 統一更新角色位置、朝向與縮放

@@ -22,6 +22,7 @@
 
 
       startTicker();
+      snapCameraToChar(); // v9.0 開機鏡頭直接落在小人所在地
       // v8.9.1：舊捲動相機 (開機/resize 自動捲到小人 + 滑鼠拖曳捲動) 全面退役——它與 transform 相機互打，會把置中的地圖整張捲走。相機只由 resizeMapScale/手勢引擎 (transform) 管理。
 
     }
@@ -47,19 +48,176 @@
       const activeBtn = document.getElementById(`speed-${sp}x`);
       if (activeBtn) activeBtn.classList.add("active");
 
-      updateCommuteTransitionSpeed();
       startTicker();
     }
 
-    function updateCommuteTransitionSpeed() {
-      if (gameState.isCommuting) {
-        // 新流速下，通勤實際所需時間 (秒) 為：剩餘分鐘 / speed
-        const durationSec = gameState.commuteMinutesLeft / gameState.speed;
-        elCharWrap.style.transition = `left ${durationSec}s linear, top ${durationSec}s linear`;
-      } else {
-        elCharWrap.style.transition = `left 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)`;
-      }
+    // v9.0：人物移動改由 tick 沿路徑積分 (不再靠 CSS transition 猜時間)，
+    // transition 只負責把每 100ms 一步的位移銜接順滑；倒數與腳步共用同一個剩餘距離，永不脫節。
+    function updateCharTransition() {
+      if (!elCharWrap) return;
+      elCharWrap.style.transition = gameState.isCommuting
+        ? 'left 0s, top 0s' // 通勤中由 rAF 逐格寫位置，不需要 (也不能有) CSS 過渡
+        : 'left 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)';
     }
+
+    // ---------- v9.0 通勤路徑引擎：出門 → 上馬路 → 沿路 → 進門 ----------
+    const WALK_PX_PER_MIN = 80; // 步行速度 (世界像素/遊戲分鐘)：跨鎮約 24 分鐘、鄰棟約 7 分鐘
+    let _camHoldUntil = 0;
+    function buildCommutePath(fromLoc, toLoc) {
+      const fromIdle = COORDS[fromLoc + '-idle'] || COORDS['home-idle'];
+      const start = { x: gameState.currentX || fromIdle.x, y: gameState.currentY || fromIdle.y };
+      const end = COORDS[toLoc + '-idle'] || COORDS['home-idle'];
+      const fx = DOOR_X[fromLoc] || start.x, tx = DOOR_X[toLoc] || end.x;
+      const raw = [start, { x: fx, y: DOOR_OUT_Y }, { x: fx, y: WALK_Y }, { x: tx, y: WALK_Y }, { x: tx, y: DOOR_OUT_Y }, end];
+      const pts = [raw[0]];
+      for (let i = 1; i < raw.length; i++) {
+        const p = raw[i], q = pts[pts.length - 1];
+        if (Math.abs(p.x - q.x) > 0.5 || Math.abs(p.y - q.y) > 0.5) pts.push(p);
+      }
+      return pts;
+    }
+    function pathTotalLength(pts) {
+      let L = 0;
+      for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+      return L;
+    }
+    function sampleCommutePath(pts, dist) {
+      let d = dist;
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i];
+        const seg = Math.hypot(b.x - a.x, b.y - a.y);
+        if (d <= seg || i === pts.length - 1) {
+          const t = seg === 0 ? 0 : Math.min(1, d / seg);
+          return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, dx: b.x - a.x };
+        }
+        d -= seg;
+      }
+      const last = pts[pts.length - 1];
+      return { x: last.x, y: last.y, dx: 0 };
+    }
+    function commutePxPerMin() { return WALK_PX_PER_MIN / (gameState.commuteSpeedMult || 1); }
+    function startCommuteTo(targetLoc) {
+      const pts = buildCommutePath(currentLoc, targetLoc);
+      const total = pathTotalLength(pts);
+      const shoesBonus = Math.max(0.4, 1 - (gameState.passive.shoes * 0.15));
+      const speedsterMult = typeof getRebirthReduction === 'function' ? Math.max(0.3, 1 - ((rebirthData && rebirthData.bonuses ? rebirthData.bonuses.speedster : 0) || 0) * 0.10) : 1.0;
+      gameState.commuteSpeedMult = shoesBonus * speedsterMult;
+      gameState.commutePath = pts;
+      gameState.commuteTotalPx = total;
+      gameState.commuteDonePx = 0;
+      gameState.isCommuting = true;
+      gameState.commuteStart = currentLoc;
+      gameState.commuteTarget = targetLoc;
+      gameState.commuteMinutesTotal = total / WALK_PX_PER_MIN * gameState.commuteSpeedMult;
+      gameState.commuteMinutesLeft = gameState.commuteMinutesTotal;
+      currentState = 'commuting';
+      _camAnchor = null; // 通勤開始：鏡頭改跟人
+      _prevTickPos = { x: gameState.currentX || pts[0].x, y: gameState.currentY || pts[0].y, flip: false };
+      _lastTickPos = { x: pts[0].x, y: pts[0].y, flip: false };
+      _lastTickAt = performance.now();
+      updateCharTransition();
+      queueFloatingText('趕路中！🏃‍♂️💨');
+    }
+    function advanceCommute(progressMinutes) {
+      if (!gameState.commutePath || !gameState.commutePath.length) { // 舊存檔中途讀取：重建路徑並以剩餘比例接續
+        gameState.commutePath = buildCommutePath(gameState.commuteStart || currentLoc, gameState.commuteTarget || 'home');
+        gameState.commuteTotalPx = pathTotalLength(gameState.commutePath);
+        const ratio = gameState.commuteMinutesTotal ? 1 - (gameState.commuteMinutesLeft / gameState.commuteMinutesTotal) : 0;
+        gameState.commuteDonePx = Math.max(0, Math.min(1, ratio)) * gameState.commuteTotalPx;
+        if (!gameState.commuteSpeedMult) gameState.commuteSpeedMult = 1;
+      }
+      gameState.commuteDonePx += commutePxPerMin() * progressMinutes;
+      const remainPx = Math.max(0, gameState.commuteTotalPx - gameState.commuteDonePx);
+      gameState.commuteMinutesLeft = remainPx / commutePxPerMin(); // 倒數 = 剩餘距離換算，與腳步同源
+      const s = sampleCommutePath(gameState.commutePath, gameState.commuteDonePx);
+      // 只記 tick 快照；實際畫面由 rAF 在兩次快照間內插 (60fps)，邏輯與畫面永不超前/脫節
+      _prevTickPos = _lastTickPos;
+      _lastTickPos = { x: s.x, y: s.y, flip: s.dx < -0.5 };
+      _lastTickAt = performance.now();
+      return remainPx <= 0;
+    }
+    // ---------- v9.0.1 物理相機：Apple 式彈簧 (response/dampingFraction) + rAF 渲染迴圈 ----------
+    // 舊版跟隨在 100ms 的遊戲 tick 上做 lerp，畫面只有 10fps 的階梯感。
+    // 現在：tick 只負責邏輯與快照，rAF (60fps) 負責一切畫面運動——人物在快照間內插，
+    // 鏡頭用帶速度的彈簧積分追趕目標 (有慣性、會自然減速，就像 iOS 的 spring 動畫)。
+    let _prevTickPos = null, _lastTickPos = null, _lastTickAt = 0;
+    let _camAnchor = null;     // 膠囊聚焦的世界座標錨點；null = 跟隨角色
+    let _camZoomTarget = null; // 程式化縮放目標 (膠囊/雙擊)；null = 不介入
+    let _camVX = 0, _camVY = 0, _camZV = 0;
+    const CAM_RESPONSE = 0.5, CAM_ZETA = 0.86; // 0.5s 響應、近臨界阻尼：滑順、幾乎不超調
+    function springStep(cur, vel, target, dt) {
+      const k = Math.pow(2 * Math.PI / CAM_RESPONSE, 2);
+      const c = 2 * CAM_ZETA * Math.sqrt(k);
+      vel += (k * (target - cur) - c * vel) * dt;
+      cur += vel * dt;
+      if (Math.abs(target - cur) < 0.05 && Math.abs(vel) < 1.5) { cur = target; vel = 0; }
+      return [cur, vel];
+    }
+    function snapCameraToChar() {
+      const s = (window.__baseMapScale || 1) * mapZoom;
+      _camAnchor = null; _camVX = 0; _camVY = 0;
+      mapPanX = -((gameState.currentX || 175) - WORLD_W / 2) * s;
+      mapPanY = -((gameState.currentY || 190) - WORLD_H / 2) * s;
+      clampMapPan(); applyMapZoom();
+    }
+    let _renderPrevT = 0;
+    function renderLoop(now) {
+      requestAnimationFrame(renderLoop);
+      const dt = Math.min(0.05, _renderPrevT ? (now - _renderPrevT) / 1000 : 0.016);
+      _renderPrevT = now;
+      const vp = document.getElementById('map-viewport');
+      if (!vp || typeof gameState === 'undefined') return;
+      // 1) 人物視覺位置：tick 快照間線性內插 (永不超前邏輯位置，所以倒數與腳步仍同源)
+      if (gameState.isCommuting && _prevTickPos && _lastTickPos) {
+        const t = Math.min(1, (performance.now() - _lastTickAt) / 100);
+        const x = _prevTickPos.x + (_lastTickPos.x - _prevTickPos.x) * t;
+        const y = _prevTickPos.y + (_lastTickPos.y - _prevTickPos.y) * t;
+        updateCharacterPositionAndScale(Math.round(x), Math.round(y), _lastTickPos.flip);
+      }
+      if (_pointers.size > 0) return; // 玩家手指在控制鏡頭：彈簧讓路 (位置由手勢直接寫入)
+      // 2) 決定鏡頭目標
+      const s = (window.__baseMapScale || 1) * mapZoom;
+      let tx, ty, hasTarget = false;
+      if (_camAnchor) {
+        tx = -(_camAnchor.x - WORLD_W / 2) * s; ty = -(_camAnchor.y - WORLD_H / 2) * s; hasTarget = true;
+      } else {
+        const cx = gameState.currentX || WORLD_W / 2, cy = gameState.currentY || WORLD_H / 2;
+        // 速度前饋：瞄準小人「即將到達」的位置，剛好抵銷彈簧追蹤等速目標時的穩態落後 (2ζ/ω 秒)
+        let leadX = 0, leadY = 0;
+        if (gameState.isCommuting && _prevTickPos && _lastTickPos) {
+          const LEAD = 2 * CAM_ZETA / (2 * Math.PI / CAM_RESPONSE);
+          // 起步/抵達 300px 內把前饋漸漸收掉：起步不暴衝、抵達不衝過頭再回彈
+          const edge = Math.min(gameState.commuteDonePx || 0, Math.max(0, (gameState.commuteTotalPx || 0) - (gameState.commuteDonePx || 0)));
+          const taper = Math.max(0, Math.min(1, edge / 300));
+          leadX = (_lastTickPos.x - _prevTickPos.x) * 10 * LEAD * taper;
+          leadY = (_lastTickPos.y - _prevTickPos.y) * 10 * LEAD * taper;
+        }
+        tx = -(cx + leadX - WORLD_W / 2) * s; ty = -(cy + leadY - WORLD_H / 2) * s;
+        if (gameState.isCommuting) hasTarget = true;
+        else if (Date.now() >= _camHoldUntil) {
+          // 閒置跟隨：人物還在畫面中央 60% 內就不動，漂出去才跟
+          const vx = vp.clientWidth / 2 + (cx - WORLD_W / 2) * s + mapPanX;
+          const vy = vp.clientHeight / 2 + (cy - WORLD_H / 2) * s + mapPanY;
+          hasTarget = Math.abs(vx - vp.clientWidth / 2) > vp.clientWidth * 0.3 || Math.abs(vy - vp.clientHeight / 2) > vp.clientHeight * 0.3;
+        }
+      }
+      // 3) 彈簧積分 (pan 與程式化 zoom)，有變動才寫 transform
+      let dirty = false;
+      if (hasTarget) {
+        const ox = mapPanX, oy = mapPanY;
+        [mapPanX, _camVX] = springStep(mapPanX, _camVX, tx, dt);
+        [mapPanY, _camVY] = springStep(mapPanY, _camVY, ty, dt);
+        if (Math.abs(mapPanX - ox) > 0.01 || Math.abs(mapPanY - oy) > 0.01) dirty = true;
+      }
+      if (_camZoomTarget !== null) {
+        const oz = mapZoom;
+        [mapZoom, _camZV] = springStep(mapZoom, _camZV, _camZoomTarget, dt);
+        if (Math.abs(mapZoom - _camZoomTarget) < 0.002) { mapZoom = _camZoomTarget; _camZV = 0; _camZoomTarget = null; }
+        if (Math.abs(mapZoom - oz) > 0.0005) dirty = true;
+      }
+      if (dirty) { clampMapPan(); applyMapZoom(); }
+    }
+    requestAnimationFrame(renderLoop);
 
     // 一屏盡覽自動縮放適配
     // v8.6 量測頂部 HUD 與底部操作區的實際高度，把地圖舞台塞進中間的可用矩形，
@@ -96,8 +254,9 @@
       if (!availW || !availH) return;
       // v8.7 預設視角 = 嚴格 contain：整個校園在可用矩形裡一次看完、跟著螢幕尺寸縮放定位，
       // 不再放大溢出。想看細節用雙指縮放，或點底部房間膠囊直接放大跳到那一間。
-      const fit = Math.min(availW / 980, availH / 560, 1.25);
-      let scale = Math.max(Math.min(fit, 1.25), 0.15); // v8.9.1: 下限改 0.15——舊下限 0.32 在矮螢幕會大於 fit 本人，反而保證溢出遮擋
+      // v9.0 橫向捲軸：基準縮放讓畫面約涵蓋 720px 寬的世界 (約 2.3 棟建築)，其餘靠跟隨相機/拖曳探索
+      const fit = Math.min(availW / 720, availH / 560, 1.25);
+      let scale = Math.max(Math.min(fit, 1.25), 0.15);
       window.__baseMapScale = scale;
       try { if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; } } catch (e) { }
       if (typeof clampMapPan === 'function') clampMapPan();
@@ -120,23 +279,24 @@
       const vp = document.getElementById('map-viewport');
       if (!vp) return;
       const s = (window.__baseMapScale || 1) * mapZoom;
-      const mx = Math.max(0, (960 * s - vp.clientWidth) / 2) + 30;
-      const my = Math.max(0, (540 * s - vp.clientHeight) / 2) + 30;
+      const mx = Math.max(0, (WORLD_W * s - vp.clientWidth) / 2) + 30;
+      const my = Math.max(0, (WORLD_H * s - vp.clientHeight) / 2) + 30;
       mapPanX = Math.max(-mx, Math.min(mx, mapPanX));
       mapPanY = Math.max(-my, Math.min(my, mapPanY));
     }
     function centerMapOn(mapX, mapY) {
       const s = (window.__baseMapScale || 1) * mapZoom;
-      mapPanX = -(mapX - 480) * s;
-      mapPanY = -(mapY - 270) * s;
+      _camAnchor = { x: mapX, y: mapY }; // v9.0.1：不瞬移，交給彈簧鏡頭滑過去
+      _camVX = 0; _camVY = 0;
       clampMapPan(); applyMapZoom();
     }
     // 房間快捷導覽 (手機底部膠囊列)：把該房間滑到畫面中央並脈衝提示，玩家再點大房間派遣
     function focusLandmark(loc) {
-      const centers = { school: [163, 117], library: [473, 117], gym: [790, 117], restaurant: [163, 387], store: [473, 387], home: [790, 387] };
+      const centers = { home: [175, 118], store: [485, 118], restaurant: [795, 118], school: [1105, 118], library: [1415, 118], gym: [1732, 118] };
       const c = centers[loc];
       if (!c) return;
-      if (mapZoom < 1.7) mapZoom = 1.7; // v8.7 膠囊 = 放大跳轉到該房間，不只是平移
+      if (mapZoom < 1.7) _camZoomTarget = 1.7; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間
+      _camHoldUntil = Date.now() + 4000; // 暫停跟隨 4 秒，不要跟玩家搶鏡頭
       centerMapOn(c[0], c[1]);
       const el = document.getElementById('landmark-' + loc);
       if (el) { el.classList.remove('nav-pulse'); void el.offsetWidth; el.classList.add('nav-pulse'); }
@@ -148,6 +308,8 @@
       if (!vp) return;
       _mapSetupDone = true;
       vp.addEventListener('pointerdown', (e) => {
+        _camHoldUntil = Date.now() + 4000; // 玩家手動看地圖時，跟隨相機先讓路
+        _camAnchor = null; _camZoomTarget = null; _camVX = 0; _camVY = 0;
         _pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (_pointers.size === 2) {
           const [a, b] = [..._pointers.values()];
@@ -166,7 +328,6 @@
           const [a, b] = [..._pointers.values()];
           const d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d > 0) mapZoom = Math.max(1, Math.min(3, _pinchZoom0 * (d / _pinchDist0)));
-          if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; }
           clampMapPan(); applyMapZoom();
         }
       });
@@ -181,11 +342,13 @@
       }, true);
       vp.addEventListener('wheel', (e) => {
         e.preventDefault();
+        _camHoldUntil = Date.now() + 4000; _camAnchor = null; _camZoomTarget = null; _camVX = 0; _camVY = 0;
         mapZoom = Math.max(1, Math.min(3, mapZoom * (e.deltaY < 0 ? 1.12 : 0.89)));
-        if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; }
         clampMapPan(); applyMapZoom();
       }, { passive: false });
-      vp.addEventListener('dblclick', () => { mapZoom = 1; mapPanX = 0; mapPanY = 0; applyMapZoom(); });
+      vp.addEventListener('dblclick', () => { // v9.0.1：雙擊 = 彈簧滑回小人身上 (zoom 1)
+        _camAnchor = null; _camZoomTarget = 1; _camHoldUntil = 0;
+      });
     }
 
 
@@ -193,11 +356,14 @@
     function tick() {
       const progressMinutes = gameState.speed / 10;
 
-      // 1. 處理通勤
+      // 1. 處理通勤 (v9.0 路徑積分：位置與倒數同源，抵達與歸零同一刻)
       if (gameState.isCommuting) {
-        gameState.commuteMinutesLeft -= progressMinutes;
-        if (gameState.commuteMinutesLeft <= 0) {
+        if (advanceCommute(progressMinutes)) {
           gameState.isCommuting = false;
+          gameState.commutePath = null;
+          // 抵達瞬間把視覺位置定稿在終點快照 (rAF 內插的最後一小段直接收尾)，currentX/Y 不留半路值
+          if (_lastTickPos) updateCharacterPositionAndScale(Math.round(_lastTickPos.x), Math.round(_lastTickPos.y), _lastTickPos.flip);
+          _prevTickPos = null; _lastTickPos = null;
           currentLoc = gameState.commuteTarget;
           playSound('click');
 
@@ -207,7 +373,7 @@
           const emoji = locEmoji[currentLoc] || '📍';
           createFloatingText(`抵達 ${name} ${emoji}`);
 
-          updateCommuteTransitionSpeed();
+          updateCharTransition();
         }
       }
 
@@ -448,41 +614,9 @@
         }
       }
       else {
-        // 計算站數差 * 10 分鐘 (6 大地標順序)
-        const locIndex = { school: 1, restaurant: 2, gym: 3, library: 4, store: 5, home: 6 };
-        const idx1 = locIndex[currentLoc] || 6;
-        const idx2 = locIndex[targetLoc] || 6;
-        const baseMinutes = Math.abs(idx1 - idx2) * 10;
-
-        const shoesBonus = Math.max(0.4, 1 - (gameState.passive.shoes * 0.15));
-        // 飛毛腿輪迴加成：每級 -10% 通勤時間
-        const speedsterMult = typeof getRebirthReduction === 'function' ? Math.max(0.3, 1 - ((rebirthData && rebirthData.bonuses ? rebirthData.bonuses.speedster : 0) || 0) * 0.10) : 1.0;
-        const finalMinutes = Math.max(3, Math.round(baseMinutes * shoesBonus * speedsterMult));
-
-        gameState.isCommuting = true;
-        gameState.commuteStart = currentLoc;
-        gameState.commuteTarget = targetLoc;
-        gameState.commuteMinutesTotal = finalMinutes;
-        gameState.commuteMinutesLeft = finalMinutes;
-        currentState = "commuting";
-
-        startCharCommuteAnimation(currentLoc, targetLoc, finalMinutes);
+        // v9.0：通勤時間由真實路徑長度決定 (出門→馬路→進門)，見 startCommuteTo
+        startCommuteTo(targetLoc);
       }
-    }
-
-    function startCharCommuteAnimation(start, target, minutes) {
-      const targetIdleKey = `${target}-idle`;
-      const targetCoords = COORDS[targetIdleKey] || COORDS['home-idle'];
-
-      const startCoords = COORDS[`${start}-idle`] || { x: 650 };
-      const isFlipped = targetCoords.x < startCoords.x;
-      updateCommuteTransitionSpeed();
-
-      requestAnimationFrame(() => {
-        updateCharacterPositionAndScale(targetCoords.x, targetCoords.y, isFlipped);
-      });
-
-      queueFloatingText("趕路中！🏃‍♂️💨");
     }
 
     function getCharacterCoords(loc, state) {
@@ -510,7 +644,7 @@
         if (state === 'working') return COORDS['store-work'];
         return COORDS['store-idle'];
       }
-      return { x: 650, y: 250 };
+      return COORDS['home-idle'];
     }
 
     function processHourlyState() {

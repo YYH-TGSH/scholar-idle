@@ -1429,8 +1429,8 @@
         } else if (hour >= 5 && hour < 7) {
           overlayBg = "rgba(255, 177, 66, 0.10)"; // 清晨朝霞柔光
         }
-        if (overlayEl.style.background !== overlayBg) {
-          overlayEl.style.background = overlayBg;
+        if (overlayEl.style.fill !== overlayBg) {
+          overlayEl.style.fill = overlayBg; // v9.0 修正：SVG rect 要改 fill，寫 background 永遠不會上色 (夜間色調一直沒生效)
         }
       }
     }
@@ -1575,6 +1575,9 @@
       elHome.classList.remove("mode-sleeping");
       document.getElementById("prop-bed-parents").style.display = "none";
       document.getElementById("npc-parents-sleep").style.display = "none";
+      const _playerSleepEl = document.getElementById("npc-player-sleep");
+      if (_playerSleepEl) _playerSleepEl.style.display = "none";
+      elCharWrap.classList.remove("in-bed");
 
       elStudentSprite.setAttribute("class", "sprite-pixel");
 
@@ -1626,6 +1629,10 @@
               document.getElementById("prop-bed-parents").style.display = "block";
               document.getElementById("npc-parents-sleep").style.display = "none";
             }
+            // v9.0 自己也要躺好：顯示床上入睡形態、本體小人藏進被窩 (氣泡與 Zzz 粒子仍從床位發出)
+            const _ps = document.getElementById("npc-player-sleep");
+            if (_ps) _ps.style.display = "block";
+            elCharWrap.classList.add("in-bed");
           }
 
           setStageBoard(`住家：<span>睡覺休息中 💤</span>`);
@@ -1788,6 +1795,7 @@
       floatTxt.style.padding = "4px 10px";
       floatTxt.style.fontSize = "0.8rem";
       floatTxt.style.fontWeight = "900";
+      floatTxt.style.whiteSpace = "nowrap"; // v9.0：不加 nowrap 會被 42px 的 char-wrap 擠成直式柱子
       floatTxt.style.zIndex = "30";
       floatTxt.style.pointerEvents = "none";
       floatTxt.style.boxShadow = "2px 2px 0px #4a3728";
