@@ -1,9 +1,9 @@
 /* ==========================================================================
-   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.3.0)
+   🎮 GBA POKEMON RPG RETRO PIXEL ART STYLES (v8.8.2)
    純真點陣字型、雙層像素對話框、寶可夢血條與日系 RPG 建築島嶼
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap");
 
 :root {
   --font-pixel: "Press Start 2P", "Cubic 11", "Courier New", monospace;
@@ -116,18 +116,7 @@ body {
       pointer-events: auto;
     }
 
-    /* 2.5D 柔和光暈景深 */
-    .map-viewport::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 50% 45%, transparent 60%, rgba(0, 0, 0, 0.05) 100%);
-      pointer-events: none;
-      z-index: 20;
-    }
+    /* v8.8 移除 viewport 暈影：它讓地圖舞台邊界變成一圈可見長方形 */
 
     /* 960x540 緊湊六角等角聚落地圖舞台 */
     .town-map {
@@ -767,7 +756,7 @@ body {
 
       /* 手機端頂部懸浮控制列三行流式排版 */
       .floating-header {
-        top: 8px !important;
+        top: calc(8px + env(safe-area-inset-top)) !important;
         left: 8px !important;
         right: 8px !important;
         flex-direction: column !important;
@@ -959,8 +948,9 @@ body {
       }
 
       #pixel-canvas-container {
-        width: 256px !important;
-        height: 400px !important;
+        width: min(320px, calc(100vw - 40px)) !important;
+        height: auto !important;
+        aspect-ratio: 16 / 25;
       }
 
       #wardrobe-editor-view>div:last-child {
@@ -2080,7 +2070,7 @@ body {
       transition: background-color 0.05s ease;
     }
 
-    .pixel-grid-cell:nth-child(16n) {
+    .pixel-grid-cell:nth-child(32n) {
       border-right: none;
     }
 
@@ -3031,262 +3021,237 @@ body {
         transform: translateY(0);
       }
     }
-  </style>
 /* ==========================================================================
-   🎮 GBA POKEMON RPG PIXEL ART ENHANCEMENTS (v8.3.0)
-   雙層像素框、點陣字型、GBA 階梯血條、銳利 0 圓角與日系點陣佈局
+   🟡 v8.4 SCHOLAR ROUNDED — 圓潤現代 UI (向使用者的數獨看齊)
+   數獨 DNA: 亮黃 #ffcc00 主色 + 深藍灰粗框 + 硬式偏移陰影 + 大圓角膠囊鈕 + 粗圓字
+   像素小人與房間插圖是遊戲本體，保留 crisp 點陣；只有 UI 外殼換成圓潤現代風。
+   (此層取代 v8.3 以前的 GBA 方角覆蓋層：border-radius:0 與點陣字全面廢除)
    ========================================================================== */
-
-@import url("https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap");
-
+:root {
+  --font-pixel: "Nunito", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --ink: #26324b;
+  --ink-soft: rgba(38, 50, 75, 0.55);
+  --accent-yellow: #ffcc00;
+  --paper: #fffdf5;
+}
 body, button, input, select, textarea {
-  font-family: "DotGothic16", "Press Start 2P", "Courier New", monospace !important;
-  image-rendering: pixelated !important;
-  image-rendering: crisp-edges !important;
+  font-family: "Nunito", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif !important;
 }
+.town-map svg, #student-sprite, .skin-thumb, canvas { image-rendering: pixelated; }
 
-/* 頂部 HUD：自適應於全螢幕置頂 */
-.floating-header {
-  position: fixed !important;
-  top: 16px !important;
-  left: 16px !important;
-  right: 16px !important;
-  z-index: 50 !important;
-  pointer-events: none !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-}
-.floating-header > * {
-  pointer-events: auto !important;
-}
+/* 全域按鈕統一膠囊形 + 按壓回饋 (不再方圓混雜) */
+button { border-radius: 999px !important; }
+input, select, textarea { border-radius: 14px !important; }
 
-/* 一屏盡覽自適應聚落視窗舞台 */
-.map-viewport {
-  width: 100vw !important;
-  height: 100vh !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 1 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  pointer-events: auto !important;
-}
+.map-viewport { touch-action: none; }
 
-.town-map {
-  width: 960px !important;
-  height: 540px !important;
-  position: relative !important;
-  margin: 0 auto !important;
-  overflow: visible !important;
-  transform-origin: center center !important;
-  user-select: none !important;
-}
-
-/* GBA 雙層像素徽章 (Status Badges) */
-.status-badge, .btn-help, .calendar-badge {
-  background: #f8f8f0 !important;
-  border: 3px solid #182042 !important;
-  box-shadow: inset -2px -2px 0 #485888, inset 2px 2px 0 #ffffff, 0 3px 0 rgba(0,0,0,0.3) !important;
-  border-radius: 0 !important;
-  color: #182042 !important;
-  font-weight: 900 !important;
+/* 頂部 HUD 徽章 */
+.status-badge, .btn-help {
+  background: #fffdf5 !important;
+  border: 2.5px solid #26324b !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.85) !important;
+  border-radius: 999px !important;
+  color: #26324b !important;
+  font-weight: 800 !important;
   font-size: 0.85rem !important;
-  padding: 4px 10px !important;
+  padding: 5px 12px !important;
 }
-
-/* 狀態看板 (Stage Board) */
+.calendar-badge {
+  background: #fffdf5 !important;
+  border: 2.5px solid #26324b !important;
+  box-shadow: 3px 3px 0 rgba(38,50,75,.85) !important;
+  border-radius: 22px !important;
+  color: #26324b !important;
+  font-weight: 800 !important;
+}
 #stage-board {
-  background: #e8eef8 !important;
-  border: 2px solid #304878 !important;
-  border-radius: 0 !important;
-  color: #182042 !important;
-  box-shadow: inset 1px 1px 0 #ffffff !important;
-  padding: 2px 8px !important;
+  background: #fff !important;
+  border: 2px solid #26324b !important;
+  border-radius: 999px !important;
+  color: #26324b !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.7) !important;
+  padding: 3px 10px !important;
   font-size: 0.8rem !important;
+  font-weight: 800 !important;
 }
-#stage-board span {
-  color: #d63031 !important;
-}
+#stage-board span { color: #e03131 !important; }
 
-/* 速度切換鈕 (Speed Buttons) */
+/* 速度鈕 */
 .speed-btn {
-  background: #e8eef8 !important;
-  border: 2px solid #182042 !important;
-  border-radius: 0 !important;
-  box-shadow: 0 2px 0 #0f1428 !important;
-  color: #182042 !important;
-  font-weight: 900 !important;
+  background: #fff !important;
+  border: 2.5px solid #26324b !important;
+  border-radius: 999px !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.85) !important;
+  color: #26324b !important;
+  font-weight: 800 !important;
+  transition: transform .08s ease, box-shadow .08s ease, background .15s ease !important;
 }
-.speed-btn.active {
-  background: #ffd32a !important;
-  color: #182042 !important;
-  box-shadow: inset 1px 1px 0 #fff !important;
-}
+.speed-btn:active { transform: translate(1px, 2px) !important; box-shadow: none !important; }
+.speed-btn.active { background: #ffcc00 !important; color: #26324b !important; }
 
-/* GBA 寶可夢 HP/EXP 階梯數值條 */
+/* 狀態條：圓角膠囊 */
 .status-bar-wrap {
-  border: 3px solid #182042 !important;
-  border-radius: 0 !important;
-  background: #1e2029 !important;
-  box-shadow: inset 0 2px 0 #000, 0 2px 0 rgba(0,0,0,0.3) !important;
+  border: 2.5px solid #26324b !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  box-shadow: none !important;
   height: 14px !important;
   overflow: hidden !important;
 }
-.status-bar-fill {
-  border-radius: 0 !important;
-  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4) !important;
-}
+.status-bar-fill { border-radius: 999px !important; box-shadow: inset 0 2px 0 rgba(255,255,255,.45) !important; }
 .status-bar-fill.energy { background: #2ed573 !important; }
 .status-bar-fill.hunger { background: #ffa502 !important; }
 .status-bar-fill.stress { background: #ff4757 !important; }
 
-/* 底部功能選單：GBA 雙層像素 Dock */
+/* 底部 Dock (若有使用) */
 .bottom-dock {
-  position: fixed !important;
-  bottom: 12px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  background: #f8f8f0 !important;
-  border: 4px solid #182042 !important;
-  box-shadow: 
-    inset -3px -3px 0 #485888, 
-    inset 3px 3px 0 #ffffff, 
-    0 5px 0 rgba(0, 0, 0, 0.45) !important;
-  border-radius: 0 !important;
-  padding: 6px 14px !important;
-  z-index: 80 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+  background: rgba(255,253,245,.96) !important;
+  border: 3px solid #26324b !important;
+  box-shadow: 4px 4px 0 rgba(38,50,75,.85) !important;
+  border-radius: 999px !important;
+  padding: 8px 14px !important;
 }
-
 .dock-btn {
-  background: #eef2f7 !important;
-  border: 2px solid #304878 !important;
-  border-radius: 0 !important;
-  box-shadow: 0 2px 0 #182042 !important;
-  color: #182042 !important;
-  font-size: 0.75rem !important;
-  font-weight: 900 !important;
-  padding: 5px 8px !important;
-  transition: transform 0.05s ease, box-shadow 0.05s ease !important;
+  background: #fff !important;
+  border: 2px solid #26324b !important;
+  border-radius: 999px !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.85) !important;
+  color: #26324b !important;
+  font-weight: 800 !important;
+  padding: 6px 12px !important;
 }
-.dock-btn:active {
-  transform: translateY(2px) !important;
-  box-shadow: none !important;
-  background: #dce5ef !important;
+.dock-btn:active { transform: translate(1px, 2px) !important; box-shadow: none !important; background: #ffe98a !important; }
+
+/* 右下功能 FAB：圓鈕 + 粗框硬陰影，與全站統一 */
+.control-fab {
+  border: 2.5px solid #26324b !important;
+  box-shadow: 3px 3px 0 rgba(38,50,75,.8) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.control-fab:active { transform: scale(.92) !important; box-shadow: 1px 1px 0 rgba(38,50,75,.8) !important; }
+.fab-lbl {
+  border: 2px solid #26324b !important;
+  border-radius: 999px !important;
+  background: #fffdf5 !important;
+  font-weight: 800 !important;
+  color: #26324b !important;
+  box-shadow: 1px 1px 0 rgba(38,50,75,.7) !important;
 }
 
-/* 6 大島嶼建築底座：GBA 冒險小鎮純點陣方塊地基 */
+/* 建築底座：圓角 + 柔和深色框 (像素房間內容不變) */
 .island-platform {
-  border: 4px solid #182042 !important;
-  border-radius: 0 !important;
-  box-shadow: 
-    0 6px 0 #0f1428, 
-    inset -3px -3px 0 #485888, 
-    inset 3px 3px 0 #ffffff !important;
-  background: #fdfbf7 !important;
+  border: 3px solid #374151 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 12px 24px rgba(31,41,55,.22), 0 4px 0 rgba(31,41,55,.45) !important;
+  background: #fffdf7 !important;
 }
-
 .island-tag {
-  border: 2px solid #182042 !important;
-  border-radius: 0 !important;
-  background: #ffd32a !important;
-  color: #182042 !important;
-  font-size: 0.75rem !important;
+  border: 2.5px solid #26324b !important;
+  border-radius: 999px !important;
+  background: #ffcc00 !important;
+  color: #26324b !important;
   font-weight: 900 !important;
-  box-shadow: 0 2px 0 #0f1428 !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.85) !important;
+  padding: 3px 12px !important;
 }
-
 .island-lv-badge {
-  border: 2px solid #182042 !important;
-  border-radius: 0 !important;
-  background: #2ed573 !important;
-  color: #182042 !important;
-  font-size: 0.72rem !important;
+  border: 2.5px solid #26324b !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #26324b !important;
   font-weight: 900 !important;
-  box-shadow: 0 2px 0 #0f1428 !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.85) !important;
+}
+.iso-island.nav-pulse { animation: navPulse .5s ease 3; }
+@keyframes navPulse {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 18px rgba(255,204,0,.95)) brightness(1.1); }
+}
+/* 觸控裝置關閉 hover 抬升 (iOS 會把第一下點按吃去做 hover，造成「點不到」) */
+@media (hover: none) {
+  .iso-island:hover { transform: none !important; filter: none !important; }
 }
 
-/* GBA 寶可夢經典對話框與彈窗 (Game Modals) */
+/* 彈窗 / 抽屜 */
 .game-modal {
-  background: #f8f8f0 !important;
-  border: 4px solid #182042 !important;
-  border-radius: 0 !important;
-  box-shadow: 
-    inset -4px -4px 0 #485888, 
-    inset 4px 4px 0 #ffffff, 
-    0 8px 0 rgba(0, 0, 0, 0.55) !important;
-  color: #182042 !important;
+  background: #fffdf5 !important;
+  border: 3px solid #26324b !important;
+  border-radius: 28px !important;
+  box-shadow: 6px 6px 0 rgba(38,50,75,.85), 0 24px 48px rgba(0,0,0,.18) !important;
+  color: #26324b !important;
   padding: 22px !important;
 }
 .game-modal-title {
-  color: #182042 !important;
-  font-size: 1.1rem !important;
-  border-bottom: 2px solid #304878 !important;
+  color: #26324b !important;
+  border-bottom: 3.5px solid #ffcc00 !important;
   padding-bottom: 8px !important;
   margin-bottom: 14px !important;
-}
-
-/* GBA 側邊抽屜面版 (Drawers) */
-.drawer {
-  position: fixed !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  z-index: 90 !important;
-}
-.drawer-content {
-  background: #f8f8f0 !important;
-  border-left: 4px solid #182042 !important;
-  border-radius: 0 !important;
-  box-shadow: inset 3px 0 0 #ffffff, -4px 0 0 rgba(0,0,0,0.3) !important;
-  color: #182042 !important;
-}
-
-/* 懸浮 Footer 版號 */
-.floating-footer {
-  position: fixed !important;
-  bottom: 6px !important;
-  right: 16px !important;
-  z-index: 85 !important;
-  font-size: 0.72rem !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  text-shadow: 1px 1px 0 #182042 !important;
-  font-family: "DotGothic16", monospace !important;
-  pointer-events: none !important;
-}
-
-/* 浮動對話泡泡 (Pixel Speech Bubble) */
-.bubble {
-  background: #f8f8f0 !important;
-  border: 3px solid #182042 !important;
-  border-radius: 0 !important;
-  box-shadow: 0 3px 0 #0f1428 !important;
-  color: #182042 !important;
-  font-size: 0.78rem !important;
   font-weight: 900 !important;
+}
+.drawer-content, .drawer-panel {
+  background: #fffdf5 !important;
+  border-left: 3px solid #26324b !important;
+  border-radius: 28px 0 0 28px !important;
+  box-shadow: -12px 0 32px rgba(0,0,0,.15) !important;
+  color: #26324b !important;
+}
+.btn-exam-mini {
+  border: 2.5px solid #26324b !important;
+  border-radius: 999px !important;
+  box-shadow: 2px 2px 0 rgba(38,50,75,.85) !important;
+  font-weight: 800 !important;
+}
+.btn-exam-mini:active { transform: translate(1px, 2px) !important; box-shadow: none !important; }
+.help-tab-btn { border-radius: 999px !important; border: 2px solid #26324b !important; font-weight: 800 !important; }
+
+/* 對話泡泡 / 浮動提示 */
+.bubble {
+  background: #fffdf5 !important;
+  border: 2.5px solid #26324b !important;
+  border-radius: 18px !important;
+  box-shadow: 3px 3px 0 rgba(38,50,75,.8) !important;
+  color: #26324b !important;
+  font-weight: 800 !important;
 }
 .bubble::after {
-  border-radius: 0 !important;
-  border-right: 3px solid #182042 !important;
-  border-bottom: 3px solid #182042 !important;
-  background: #f8f8f0 !important;
+  border-radius: 4px !important;
+  border-right: 2.5px solid #26324b !important;
+  border-bottom: 2.5px solid #26324b !important;
+  background: #fffdf5 !important;
+}
+.floating-text-bubble {
+  background: #26324b !important;
+  color: #ffcc00 !important;
+  border: none !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25) !important;
+}
+.floating-footer {
+  color: rgba(38,50,75,.75) !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
 }
 
-/* 浮動提示字 (Floating Toast Text) */
-.floating-text-bubble {
-  background: #182042 !important;
-  color: #ffd32a !important;
-  border: 2px solid #ffd32a !important;
-  border-radius: 0 !important;
-  font-size: 0.85rem !important;
-  font-weight: 900 !important;
-  box-shadow: 0 4px 0 #000 !important;
+/* 房間快捷導覽列 (手機)：44px+ 膠囊鈕，保證點得到；點了把房間滑到中央 */
+#room-nav { display: none; }
+@media (max-width: 820px) {
+  #room-nav {
+    display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+    position: fixed; left: 8px; right: 8px; z-index: 75;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    padding: 2px; -webkit-overflow-scrolling: touch;
+  }
+  #room-nav::-webkit-scrollbar { display: none; }
+  .room-chip {
+    flex: none; min-height: 44px; padding: 8px 16px;
+    font-size: .88rem; font-weight: 800; font-family: inherit;
+    background: #fffdf5; color: #26324b;
+    border: 2.5px solid #26324b; border-radius: 999px;
+    box-shadow: 2px 2px 0 rgba(38,50,75,.85); cursor: pointer;
+  }
+  .room-chip:active { transform: translate(1px, 2px); box-shadow: none; background: #ffcc00; }
 }
 
 /* ================= v8.2 修復層 ================= */
@@ -3328,3 +3293,61 @@ body, button, input, select, textarea {
 #pixel-canvas-container.hide-guide .silhouette-clothes,
 #pixel-canvas-container.hide-guide .silhouette-feet { background-color: transparent !important; }
 #wardrobe-preview-slot svg, #editor-preview-slot svg { display: block; }
+
+/* ================= v8.5 衣櫃高解析層 ================= */
+#pixel-canvas-container { aspect-ratio: 16 / 25; }
+
+/* ================= v8.6 地圖舞台適應層 ================= */
+@media (max-width: 820px) {
+  .map-viewport {
+    top: var(--chrome-top, 0px) !important;
+    bottom: var(--chrome-bottom, 0px) !important;
+    height: auto !important;
+  }
+  #rotate-hint { top: calc(var(--chrome-top, 0px) + 8px); }
+}
+
+/* ================= v8.7 抽屜陰影外洩修復 ================= */
+/* 5 個關閉中的抽屜面板藏在右側螢幕外 (translateX(100%))，但 box-shadow 會往左洩進螢幕，
+   5 層疊起來變成右緣一條黑影。關閉時拔掉陰影並 visibility:hidden，開啟時才恢復。 */
+.drawer-panel {
+  visibility: hidden;
+  box-shadow: none !important;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1), visibility 0s linear .4s, box-shadow .3s ease !important;
+}
+.drawer-panel.open {
+  visibility: visible;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, .15) !important;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1), visibility 0s, box-shadow .3s ease !important;
+}
+
+/* ================= v8.8 全面體檢修復層 ================= */
+/* 1) 頂部中列溢出：行事曆徽章 + 自動按鈕在 390px 寬會互相擠爆 (左邊星期被切、右邊按鈕出界)。
+   徽章改可伸縮，狀態看板文字超長自動省略，按鈕固定不縮。 */
+@media (max-width: 820px) {
+  .header-center { gap: 6px !important; }
+  .header-center .calendar-badge { flex: 1 1 auto !important; width: auto !important; min-width: 0; }
+  #stage-board { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  #btn-lock-mode { flex: none; min-height: 40px; padding: 6px 12px; }
+  .header-left .status-badge { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  /* 2) FAB 文字標籤是絕對定位懸在按鈕下方 16px，原本不算進容器高度，
+     地圖舞台量測底部空間時會少算。把標籤高度收進容器內。 */
+  .floating-controls { padding-bottom: 18px; }
+  /* 3) 房間導覽列右緣加漸隱，提示後面還有 (超商/住家) 可以滑 */
+  #room-nav { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%); mask-image: linear-gradient(to right, #000 88%, transparent 100%); }
+}
+
+/* ================= v8.8.2 體檢第二批 (逐項驗證後修復) ================= */
+/* 輪迴加點的 +/- 是主要操作鈕，28px 太小 → 40px */
+.rebirth-stat-row button { width: 40px !important; height: 40px !important; }
+@media (max-width: 820px) {
+  /* 所有彈窗在手機上限制高度可捲動 (輪迴彈窗內容 ~900px，矮螢幕原本會切掉確認鈕) */
+  .overlay .game-modal { max-height: 92dvh !important; overflow-y: auto !important; }
+  /* 突發事件膠囊原本 bottom:120px 會壓到房間導覽列 (96~146px 帶) → 抬到導覽列上方 */
+  .random-event-capsule { bottom: calc(154px + env(safe-area-inset-bottom)) !important; }
+  /* 警示條/成就吐司原本 top:72/80px 會蓋進三行高的手機頂欄 → 改到頂欄下方 */
+  #alert-bar { top: calc(var(--chrome-top, 150px) + 6px) !important; }
+  .achievement-toast { top: calc(var(--chrome-top, 150px) + 8px) !important; right: 12px !important; left: 12px; max-width: none !important; z-index: 99998 !important; }
+  /* 分頁鈕/成就分類鈕補足 40px 點擊高度 */
+  .help-tab-btn, .ach-cat-btn { min-height: 40px; }
+}

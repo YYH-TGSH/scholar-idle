@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v8.3.0)
+   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v8.8.2)
    作息大腦、主循環、房租結算、版本控制與啟動初始化
    ========================================================================== */
 
@@ -173,55 +173,124 @@
     }
 
     // 一屏盡覽自動縮放適配
+    // v8.6 量測頂部 HUD 與底部操作區的實際高度，把地圖舞台塞進中間的可用矩形，
+    // 校園就 center 在「看得到的空位」裡，不再對著整個螢幕置中、上下留兩大片空白。
+    function layoutMapInsets() {
+      const rootEl = document.documentElement;
+      if (window.innerWidth > 820) {
+        rootEl.style.setProperty('--chrome-top', '0px');
+        rootEl.style.setProperty('--chrome-bottom', '0px');
+        return;
+      }
+      const header = document.querySelector('.floating-header');
+      const controls = document.querySelector('.floating-controls');
+      const nav = document.getElementById('room-nav');
+      const top = header ? header.offsetHeight + 14 : 0;
+      const bottom = (controls ? controls.offsetHeight : 0) + (nav ? nav.offsetHeight : 0) + 30;
+      rootEl.style.setProperty('--chrome-top', top + 'px');
+      rootEl.style.setProperty('--chrome-bottom', bottom + 'px');
+    }
+
     function resizeMapScale() {
+      layoutMapInsets();
       const vp = document.getElementById("map-viewport");
       const map = document.getElementById("town-map");
       if (!vp || !map) return;
       const availW = vp.clientWidth;
-      const availH = vp.clientHeight - 80; // 預留頂部 Widget 與底部 Dock
-      const scale = Math.max(Math.min(availW / 980, availH / 560, 1.25), 0.32);
+      const availH = vp.clientHeight;
+      if (!availW || !availH) return;
+      // v8.7 預設視角 = 嚴格 contain：整個校園在可用矩形裡一次看完、跟著螢幕尺寸縮放定位，
+      // 不再放大溢出。想看細節用雙指縮放，或點底部房間膠囊直接放大跳到那一間。
+      const fit = Math.min(availW / 980, availH / 560, 1.25);
+      let scale = Math.max(Math.min(fit, 1.25), 0.32);
       window.__baseMapScale = scale;
+      try { if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; } } catch (e) { }
+      if (typeof clampMapPan === 'function') clampMapPan();
       if (typeof applyMapZoom === 'function') applyMapZoom();
       else map.style.transform = `scale(${scale})`;
     }
     window.addEventListener('resize', resizeMapScale);
 
-    // 🔍 v8.2 雙指捏合縮放 + 放大後單指拖曳平移 (v8.1 手機只能看 0.4 倍縮圖，完全沒救)
+    // 🗺️ v8.4 地圖手勢引擎：單指/滑鼠拖曳平移 (任何縮放下都可以，不必先捏合放大)、
+    // 雙指捏合縮放、桌機滾輪縮放、雙擊重置；拖曳超過門檻會吞掉隨後的 click，避免拖完誤點房間。
     let mapZoom = 1, mapPanX = 0, mapPanY = 0;
-    let _pinchDist0 = 0, _pinchZoom0 = 1, _panStart = null, _pinchSetupDone = false;
+    let _pointers = new Map(), _pinchDist0 = 0, _pinchZoom0 = 1, _dragMoved = 0, _suppressClickUntil = 0, _mapSetupDone = false;
     function applyMapZoom() {
       const map = document.getElementById('town-map');
       if (!map) return;
       const base = window.__baseMapScale || 1;
       map.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${base * mapZoom})`;
     }
-    function setupMapPinchZoom() {
-      if (_pinchSetupDone) return;
+    function clampMapPan() {
       const vp = document.getElementById('map-viewport');
       if (!vp) return;
-      _pinchSetupDone = true;
-      vp.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-          _pinchDist0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-          _pinchZoom0 = mapZoom; _panStart = null;
-        } else if (e.touches.length === 1 && mapZoom > 1.02) {
-          _panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, px: mapPanX, py: mapPanY };
-        }
-      }, { passive: true });
-      vp.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2 && _pinchDist0 > 0) {
-          const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-          mapZoom = Math.max(1, Math.min(2.5, _pinchZoom0 * (d / _pinchDist0)));
+      const s = (window.__baseMapScale || 1) * mapZoom;
+      const mx = Math.max(0, (960 * s - vp.clientWidth) / 2) + 30;
+      const my = Math.max(0, (540 * s - vp.clientHeight) / 2) + 30;
+      mapPanX = Math.max(-mx, Math.min(mx, mapPanX));
+      mapPanY = Math.max(-my, Math.min(my, mapPanY));
+    }
+    function centerMapOn(mapX, mapY) {
+      const s = (window.__baseMapScale || 1) * mapZoom;
+      mapPanX = -(mapX - 480) * s;
+      mapPanY = -(mapY - 270) * s;
+      clampMapPan(); applyMapZoom();
+    }
+    // 房間快捷導覽 (手機底部膠囊列)：把該房間滑到畫面中央並脈衝提示，玩家再點大房間派遣
+    function focusLandmark(loc) {
+      const centers = { school: [163, 117], library: [473, 117], gym: [790, 117], restaurant: [163, 387], store: [473, 387], home: [790, 387] };
+      const c = centers[loc];
+      if (!c) return;
+      if (mapZoom < 1.7) mapZoom = 1.7; // v8.7 膠囊 = 放大跳轉到該房間，不只是平移
+      centerMapOn(c[0], c[1]);
+      const el = document.getElementById('landmark-' + loc);
+      if (el) { el.classList.remove('nav-pulse'); void el.offsetWidth; el.classList.add('nav-pulse'); }
+      if (typeof playSound === 'function') playSound('click');
+    }
+    function setupMapPinchZoom() {
+      if (_mapSetupDone) return;
+      const vp = document.getElementById('map-viewport');
+      if (!vp) return;
+      _mapSetupDone = true;
+      vp.addEventListener('pointerdown', (e) => {
+        _pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (_pointers.size === 2) {
+          const [a, b] = [..._pointers.values()];
+          _pinchDist0 = Math.hypot(a.x - b.x, a.y - b.y); _pinchZoom0 = mapZoom; _dragMoved = 99;
+        } else if (_pointers.size === 1) { _dragMoved = 0; }
+      });
+      vp.addEventListener('pointermove', (e) => {
+        if (!_pointers.has(e.pointerId)) return;
+        const prev = _pointers.get(e.pointerId);
+        const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+        _pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (_pointers.size === 1) {
+          _dragMoved += Math.abs(dx) + Math.abs(dy);
+          if (_dragMoved > 6) { mapPanX += dx; mapPanY += dy; clampMapPan(); applyMapZoom(); }
+        } else if (_pointers.size === 2 && _pinchDist0 > 0) {
+          const [a, b] = [..._pointers.values()];
+          const d = Math.hypot(a.x - b.x, a.y - b.y);
+          if (d > 0) mapZoom = Math.max(1, Math.min(3, _pinchZoom0 * (d / _pinchDist0)));
           if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; }
-          applyMapZoom();
-          if (e.cancelable) e.preventDefault();
-        } else if (_panStart && e.touches.length === 1) {
-          mapPanX = Math.max(-320, Math.min(320, _panStart.px + (e.touches[0].clientX - _panStart.x)));
-          mapPanY = Math.max(-200, Math.min(200, _panStart.py + (e.touches[0].clientY - _panStart.y)));
-          applyMapZoom();
+          clampMapPan(); applyMapZoom();
         }
+      });
+      const endPointer = (e) => {
+        if (_pointers.delete(e.pointerId) && _dragMoved > 10) _suppressClickUntil = Date.now() + 350;
+        if (_pointers.size < 2) _pinchDist0 = 0;
+      };
+      vp.addEventListener('pointerup', endPointer);
+      vp.addEventListener('pointercancel', endPointer);
+      vp.addEventListener('click', (e) => {
+        if (Date.now() < _suppressClickUntil) { e.stopPropagation(); e.preventDefault(); }
+      }, true);
+      vp.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        mapZoom = Math.max(1, Math.min(3, mapZoom * (e.deltaY < 0 ? 1.12 : 0.89)));
+        if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; }
+        clampMapPan(); applyMapZoom();
       }, { passive: false });
-      vp.addEventListener('touchend', () => { _pinchDist0 = 0; _panStart = null; }, { passive: true });
+      vp.addEventListener('dblclick', () => { mapZoom = 1; mapPanX = 0; mapPanY = 0; applyMapZoom(); });
     }
 
     // 相機循環（一屏盡覽模式下維持邊界重置）
@@ -963,7 +1032,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v8.3.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v8.8.2) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

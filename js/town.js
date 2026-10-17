@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - TOWN & LANDMARK ENGINE (v8.3.0)
+   🎮 GBA SCHOLAR IDLE - TOWN & LANDMARK ENGINE (v8.8.2)
    6 大島嶼建設升級、城鎮繁榮度、咪咪小貓與地標派遣
    ========================================================================== */
 
@@ -112,7 +112,7 @@
       const cost = getUpgradeCost(loc);
       if (gameState.money < cost) {
         playSound('examFail');
-        queueFloatingText(`零用錢不足！升級需要 $${cost}（目前拥有 $${gameState.money}）`);
+        queueFloatingText(`零用錢不足！升級需要 $${cost}（目前擁有 $${gameState.money}）`);
         return;
       }
       gameState.money -= cost;

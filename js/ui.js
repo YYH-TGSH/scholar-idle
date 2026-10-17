@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v8.3.0)
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v8.8.2)
    GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
    ========================================================================== */
 
@@ -84,31 +84,56 @@
     // ==========================================
 
     // ==========================================
-    // 🎨 v8.3 紙娃娃系統：全面統一為「真角色」座標 16x25
+    // 🎨 紙娃娃系統：v8.3 統一為真角色座標；v8.5 再把繪圖格細分為 32x50 HD。
     // v8.2 以前角色是 16x25、編輯器/預設/預覽卻是 18x30 的另一隻假人，
     // 貼圖被壓進 16x25 後帽子蓋到臉上、衣服全錯位 — 這是風格不一致的根因。
     // ==========================================
-    const SKIN_W = 16, SKIN_H = 25, SKIN_N = 400;
+    // v8.5 高解析紙娃娃：角色邏輯座標仍是 16x25，但實際顯示為 32x50。
+    // 編輯與自訂貼圖改用 32x50 (每 1 個角色格切成 2x2 細格)，共 1,600 格、4 倍細節。
+    const SKIN_W = 32, SKIN_H = 50, SKIN_N = 1600;
+    const SKIN_SRC_W = 16, SKIN_SRC_H = 25;
 
-    // 任何舊格式 (18x30 / 18x24 / 16x16) → 16x25 最近鄰重採樣
+    function skinSourceSize(length) {
+      const known = {
+        1600: [32, 50],
+        400: [16, 25],
+        540: [18, 30],
+        432: [18, 24],
+        256: [16, 16]
+      };
+      if (known[length]) return known[length];
+      // 未知舊格式：找最接近角色長寬比的因數組合，避免直接毀掉資料
+      let best = null;
+      for (let w = 1; w <= Math.sqrt(length); w++) {
+        if (length % w !== 0) continue;
+        const h = length / w;
+        const score = Math.abs((w / h) - (SKIN_W / SKIN_H));
+        if (!best || score < best.score) best = { size: [w, h], score };
+      }
+      return best ? best.size : null;
+    }
+
+    // 任何舊格式 (16x25 / 18x30 / 18x24 / 16x16) → 32x50 置中取樣重採樣。
+    // 16x25 升級時每個舊像素會正好變成 2x2，不會歪位或遺失。
     function normalizeSkinPixels(pixels) {
       if (!pixels || !pixels.length) return null;
       if (pixels.length === SKIN_N) return pixels.slice();
-      const srcW = pixels.length === 256 ? 16 : 18;
-      const srcH = Math.floor(pixels.length / srcW);
-      if (srcH < 1) return null;
+      const size = skinSourceSize(pixels.length);
+      if (!size) return null;
+      const [srcW, srcH] = size;
       const out = new Array(SKIN_N).fill(null);
       for (let y = 0; y < SKIN_H; y++) {
-        const sy = Math.min(srcH - 1, Math.round(y * (srcH - 1) / (SKIN_H - 1)));
+        const sy = Math.min(srcH - 1, Math.floor((y + 0.5) * srcH / SKIN_H));
         for (let x = 0; x < SKIN_W; x++) {
-          const sx = Math.min(srcW - 1, Math.round(x * (srcW - 1) / (SKIN_W - 1)));
+          const sx = Math.min(srcW - 1, Math.floor((x + 0.5) * srcW / SKIN_W));
           out[y * SKIN_W + x] = pixels[sy * srcW + sx] || null;
         }
       }
       return out;
     }
 
-    // 像素字串解析 (16 寬 x 25 高，色票與真角色同一套)
+    // 像素字串解析：預設美術以 16x25 角色格作畫，再等倍放大到 32x50 HD 格。
+    // 這保留 v8.3 已校準的位置，同時讓預設與自訂服飾回到同一個資料格式。
     function parsePixelStr(str) {
       const colorMap = {
         '.': null,
@@ -119,11 +144,17 @@
         'C': '#aedefc', 'D': '#8b5a2b', 'E': '#4a3728'
       };
       const lines = str.trim().split('\n').map(l => l.trim());
-      const pixels = [];
-      for (let y = 0; y < SKIN_H; y++) {
-        const line = lines[y] || '';
-        for (let x = 0; x < SKIN_W; x++) {
-          pixels.push(colorMap[line[x]] !== undefined ? colorMap[line[x]] : null);
+      const pixels = new Array(SKIN_N).fill(null);
+      for (let sy = 0; sy < SKIN_SRC_H; sy++) {
+        const line = lines[sy] || '';
+        for (let sx = 0; sx < SKIN_SRC_W; sx++) {
+          const color = colorMap[line[sx]] !== undefined ? colorMap[line[sx]] : null;
+          if (!color) continue;
+          for (let dy = 0; dy < 2; dy++) {
+            for (let dx = 0; dx < 2; dx++) {
+              pixels[(sy * 2 + dy) * SKIN_W + (sx * 2 + dx)] = color;
+            }
+          }
         }
       }
       return pixels;
@@ -358,7 +389,7 @@
       ]
     };
 
-    // 將 pixels 正規化後轉成 16x25 PNG DataURL
+    // 將 pixels 正規化後轉成 32x50 HD PNG DataURL
     function pixelsToDataURL(pixels) {
       const px = normalizeSkinPixels(pixels);
       if (!px) return "";
@@ -536,10 +567,10 @@
 
         card.innerHTML = `
           ${previewHtml}
-          <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--text-color); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div>
+          <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--text-color); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</div>
           <div style="display:flex; gap:4px; width:100%;">
-            <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.65rem; padding:3px; border:none; border-radius:6px; background:var(--primary); color:white; font-weight:700; cursor:pointer;">裝備</button>
-            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.65rem; padding:3px 6px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.65rem; padding:3px 6px; border:none; border-radius:6px; background:#30d158; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.65rem; padding:3px 6px; border:none; border-radius:6px; background:var(--secondary); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
+            <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.7rem; padding:9px 3px; border:none; border-radius:6px; background:var(--primary); color:white; font-weight:700; cursor:pointer;">裝備</button>
+            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#30d158; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--secondary); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
           </div>
         `;
 
@@ -581,6 +612,10 @@
       renderWardrobeItems();
       saveGameData();
     }
+
+    // v8.8.2 服飾名稱會進 innerHTML (含朋友分享碼帶入的名字)，渲染前一律跳脫
+    function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
+    function sanitizeSkinName(s) { return String(s || '').replace(/[<>&"']/g, '').slice(0, 24); }
 
     function getEditorType() {
       const r = document.querySelector('input[name="editor-skin-type"]:checked');
@@ -697,8 +732,8 @@
       container.innerHTML = "";
       if (editorCanvasPixels.length !== SKIN_N) editorCanvasPixels = new Array(SKIN_N).fill(null);
 
-      // v8.3 剪影 = 真角色本人的輪廓 (16x25 同座標)：H 頭/帽、S 膚、 C 衣、F 鞋
-      const silhouetteStr = [
+      // 剪影仍以真角色 16x25 輪廓為準，展開成 32x50：H 頭/帽、S 膚、C 衣、F 鞋
+      const silhouetteRows = [
         "................",
         "...HHHHHHHHHH...",
         "...HHHHHHHHHH...",
@@ -724,7 +759,11 @@
         "..FFFFF..FFFFF..",
         "...FFFF..FFFF...",
         "................"
-      ].join('');
+      ];
+      const silhouetteStr = silhouetteRows.flatMap(row => {
+        const expanded = row.split('').map(ch => ch + ch).join('');
+        return [expanded, expanded];
+      }).join('');
 
       for (let i = 0; i < SKIN_N; i++) {
         const cell = document.createElement('div');
@@ -853,7 +892,7 @@
       if (editorEditingId) {
         // v8.3 編輯既有作品：覆蓋原設計，不新增一件
         const item = gameState.customSkins[type].find(i => i.id === editorEditingId);
-        if (item) { item.pixels = [...editorCanvasPixels]; item.name = name; }
+        if (item) { item.pixels = [...editorCanvasPixels]; item.name = sanitizeSkinName(name) || item.name; }
         gameState.equipped[type] = editorEditingId;
         queueFloatingText(`✨ 已更新並裝備：${name}`);
       } else {
@@ -868,11 +907,11 @@
       closePixelEditor();
     }
 
-    // 📤 下載 PNG (16x25 原格放大 12 倍 = 192x300，分享給朋友匯入即可還原)
+    // 📤 下載 PNG (32x50 HD 原格放大 10 倍 = 320x500，分享給朋友匯入即可還原)
     function pixelsToSharePNG(pixels, name) {
       const px = normalizeSkinPixels(pixels);
       if (!px) return;
-      const scale = 12;
+      const scale = 10;
       const canvas = document.createElement('canvas');
       canvas.width = SKIN_W * scale; canvas.height = SKIN_H * scale;
       const ctx = canvas.getContext('2d');
@@ -883,7 +922,7 @@
         if (c) { ctx.fillStyle = c; ctx.fillRect(x * scale, y * scale, scale, scale); }
       }
       const link = document.createElement('a');
-      link.download = `${name}_16x25.png`;
+      link.download = `${name}_32x50.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
@@ -935,9 +974,9 @@
           pushEditorHistory();
           editorCanvasPixels = sampleImageToPixels(img);
           refreshEditorCanvas(); refreshEditorPreview();
-          const defaultName = file.name.replace(/\.[^/.]+$/, "").replace('_16x25', '').replace('_18x30', '').replace('_18x24', '').replace('_16x16', '');
+          const defaultName = file.name.replace(/\.[^/.]+$/, "").replace('_32x50', '').replace('_16x25', '').replace('_18x30', '').replace('_18x24', '').replace('_16x16', '');
           document.getElementById('editor-skin-name').value = defaultName + "_匯入";
-          queueFloatingText("📂 PNG 匯入成功！已自動對齊 16x25 角色格");
+          queueFloatingText("📂 PNG 匯入成功！已自動轉成 32x50 高解析畫格");
           playSound('levelUp');
         };
         img.src = e.target.result;
@@ -962,7 +1001,7 @@
           if (pixels.every(p => p === null)) { alert("這張圖讀不到像素內容，換一張試試"); return; }
           const type = currentWardrobeTab;
           if (!gameState.customSkins[type]) gameState.customSkins[type] = [];
-          const name = file.name.replace(/\.[^/.]+$/, "").replace('_16x25', '') || "上傳服飾";
+          const name = file.name.replace(/\.[^/.]+$/, "").replace('_32x50', '').replace('_16x25', '') || "上傳服飾";
           const id = "custom_" + type + "_" + Date.now();
           gameState.customSkins[type].push({ id: id, name: name, type: type, pixels: pixels });
           gameState.equipped[type] = id;
@@ -984,7 +1023,7 @@
       if (editorCanvasPixels.every(p => p === null)) { alert("畫布是空的，先畫點東西再分享喔！"); return; }
       const colors = [...new Set(editorCanvasPixels.filter(Boolean))];
       const payload = { t: type, n: name, c: colors, p: editorCanvasPixels.map(px => px ? colors.indexOf(px) + 1 : 0) };
-      const code = 'SK83.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const code = 'SK85.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
       const done = () => queueFloatingText("📋 分享碼已複製！傳給朋友，他在衣櫃按「輸入分享碼」貼上即可");
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(code).then(done).catch(() => prompt("複製這串分享碼給朋友：", code));
@@ -994,16 +1033,18 @@
     }
     function importSkinShareCode() {
       playSound('click');
-      const raw = prompt("貼上朋友給你的服飾分享碼 (SK83. 開頭)：");
+      const raw = prompt("貼上朋友給你的服飾分享碼 (SK85. 或舊版 SK83. 開頭)：");
       if (!raw) return;
       try {
-        const payload = JSON.parse(decodeURIComponent(escape(atob(raw.trim().replace(/^SK83\./, '')))));
-        if (!payload.p || payload.p.length !== SKIN_N || !Array.isArray(payload.c)) throw new Error('bad');
+        const payload = JSON.parse(decodeURIComponent(escape(atob(raw.trim().replace(/^SK8[35]\./, '')))));
+        if (!payload.p || !Array.isArray(payload.c)) throw new Error('bad');
+        const rawPixels = payload.p.map(i => i ? payload.c[i - 1] : null);
+        const pixels = normalizeSkinPixels(rawPixels);
+        if (!pixels) throw new Error('bad');
         const type = ['hat', 'clothes', 'shoes'].includes(payload.t) ? payload.t : 'clothes';
-        const pixels = payload.p.map(i => i ? payload.c[i - 1] : null);
         if (!gameState.customSkins[type]) gameState.customSkins[type] = [];
         const id = "custom_" + type + "_" + Date.now();
-        const name = String(payload.n || '分享服飾').slice(0, 24);
+        const name = sanitizeSkinName(payload.n) || '分享服飾';
         gameState.customSkins[type].push({ id: id, name: name, type: type, pixels: pixels });
         gameState.equipped[type] = id;
         currentWardrobeTab = type;
@@ -1100,7 +1141,7 @@
         const nextGradeName = gameState.gradeIndex < GRADES.length - 1 ? GRADES[gameState.gradeIndex + 1].name : "學無止境學神";
 
         if (desc) {
-          desc.innerHTML = `正在進行 <b>${currentGradeName}</b> 的升學考試。<br>考取下一階段：<b>${nextGradeName}</b><br>成功率：<span style="color:red; font-weight:900;">${passRate}%</span>`;
+          desc.innerHTML = `正在進行 <b>${currentGradeName}</b> 的升學考試。<br>考取下一階段：<b>${nextGradeName}</b><br>成功率：<span style="color:red; font-weight:900;">${passRate}%</span><br>報名費：<b>$50</b>（首次應考免費）`;
         }
         if (statusLbl) {
           statusLbl.innerText = "正在填寫試卷...";
@@ -1171,7 +1212,7 @@
         gameState.examCooldownEndMinute = gameState.minute;
       }
 
-      btnClose.style.display = "inline-block";
+      if (btnClose) btnClose.style.display = "inline-block";
       updateUI();
       saveGameData();
     }
@@ -1350,7 +1391,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v8.3.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v8.8.2) | 上次存檔：${ts}`);
       }
     }
 
@@ -1821,8 +1862,9 @@
 
     function startMinigame(loc) {
       playSound('click');
+      if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; } // v8.8.2 防舊計時器殘留
       currentMinigame = loc;
-      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES;
+      // v8.8.2 冷卻改到「打完出結果」才起算：中途被打斷 (切換App/來電) 不再白白燒掉冷卻
       if (!gameState.miniGamePlays) gameState.miniGamePlays = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
       gameState.miniGamePlays[loc] = (gameState.miniGamePlays[loc] || 0) + 1;
 
@@ -1849,6 +1891,7 @@
     }
 
     function showMinigameResult(win, loc) {
+      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES; // v8.8.2 完成才起算冷卻
       if (!gameState.miniGameWins) gameState.miniGameWins = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
       if (win) gameState.miniGameWins[loc] = (gameState.miniGameWins[loc] || 0) + 1;
 

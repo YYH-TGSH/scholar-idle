@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v8.3.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v8.8.2)</title>
 
   <!-- 引入 Google Fonts 經典點陣字型 (DotGothic16 支援繁體漢字與日文, Press Start 2P 支援經典像素英數) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,83 +29,53 @@
       <svg class="map-decorations" viewBox="0 0 960 540" shape-rendering="crispEdges"
         style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; image-rendering:pixelated;">
         
-        <!-- 寶可夢翡翠綠草皮底色 (Emerald Turf) -->
-        <rect width="960" height="540" fill="#70b848" />
+                <!-- ===== v8.8 校園地面重畫：每棟建築有自己的基地，石板步道把六個門口接上主街與中央噴泉廣場 ===== -->
+        <!-- 草皮底 + 雙色棋盤紋理 (低對比) -->
+        <defs>
+          <pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse">
+            <rect width="48" height="48" fill="#79c25a" />
+            <rect width="24" height="24" fill="#74bc55" />
+            <rect x="24" y="24" width="24" height="24" fill="#74bc55" />
+          </pattern>
+        </defs>
+        <rect width="960" height="540" fill="url(#grassPat)" />
 
-        <!-- 點陣草皮微深淺網格 (Pixel Grass Grid & Tufts) -->
-        <g fill="#5fa038">
-          <!-- 規則排列的經典 16-bit 點陣草叢小花屑 -->
-          <rect x="15" y="225" width="6" height="4" /><rect x="17" y="223" width="2" height="2" />
-          <rect x="75" y="240" width="6" height="4" /><rect x="77" y="238" width="2" height="2" />
-          <rect x="135" y="220" width="6" height="4" />
-          <rect x="235" y="245" width="6" height="4" />
-          <rect x="360" y="225" width="6" height="4" />
-          <rect x="580" y="240" width="6" height="4" />
-          <rect x="720" y="230" width="6" height="4" />
-          <rect x="850" y="245" width="6" height="4" />
-          <rect x="915" y="220" width="6" height="4" />
-          <rect x="35" y="495" width="6" height="4" />
-          <rect x="180" y="490" width="6" height="4" />
-          <rect x="420" y="500" width="6" height="4" />
-          <rect x="750" y="495" width="6" height="4" />
-          <rect x="900" y="490" width="6" height="4" />
+        <!-- 六棟建築各自的基地 (建築坐落在自己的庭院/鋪面裡，不再是卡片浮在草地上) -->
+        <g stroke-width="2">
+          <rect x="16" y="16" width="298" height="214" rx="16" fill="#d8dfe3" stroke="#aebac0" /><!-- 學校：石板校園庭 -->
+          <rect x="331" y="16" width="298" height="214" rx="16" fill="#69b157" stroke="#4c8a3e" /><!-- 圖書館：靜謐綠庭 -->
+          <rect x="646" y="16" width="298" height="214" rx="16" fill="#da8f80" stroke="#b5524a" /><!-- 操場：跑道紅土外圍 -->
+          <rect x="16" y="310" width="298" height="214" rx="16" fill="#eed9b4" stroke="#d3af7d" /><!-- 餐廳：暖陶露台 -->
+          <rect x="331" y="310" width="298" height="214" rx="16" fill="#aeb7be" stroke="#8b959e" /><!-- 超商：柏油鋪面 -->
+          <rect x="646" y="310" width="298" height="214" rx="16" fill="#93d374" stroke="#6faf52" /><!-- 住家：花園草坪 -->
+        </g>
+        <rect x="646" y="310" width="298" height="214" rx="16" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="7 5" opacity="0.85" /><!-- 住家白色尖籬 -->
+
+        <!-- 石板步道網：三條直向步道 (對齊三欄建築門口 x=165/480/795) + 中央主街 -->
+        <g fill="#ded3ba" stroke="#b3a077" stroke-width="2">
+          <rect x="147" y="96" width="36" height="318" />
+          <rect x="462" y="96" width="36" height="318" />
+          <rect x="777" y="96" width="36" height="318" />
+          <rect x="56" y="240" width="848" height="36" rx="8" />
+        </g>
+        <!-- 六個門口的迎賓石階 (建築前緣 -> 步道) -->
+        <g fill="#e7dcc2" stroke="#b3a077" stroke-width="2">
+          <rect x="137" y="206" width="56" height="40" rx="6" /><rect x="452" y="206" width="56" height="40" rx="6" /><rect x="767" y="206" width="56" height="40" rx="6" />
+          <rect x="137" y="270" width="56" height="40" rx="6" /><rect x="452" y="270" width="56" height="40" rx="6" /><rect x="767" y="270" width="56" height="40" rx="6" />
+        </g>
+        <!-- 步道碎石點綴 -->
+        <g fill="#c9b98f">
+          <rect x="168" y="252" width="5" height="5" /><rect x="300" y="262" width="5" height="5" /><rect x="620" y="250" width="5" height="5" />
+          <rect x="760" y="262" width="5" height="5" /><rect x="472" y="330" width="5" height="5" /><rect x="160" y="350" width="5" height="5" /><rect x="786" y="330" width="5" height="5" />
+        </g>
+        <!-- 主街兩端的迎賓石 (校門口意象) -->
+        <g fill="#c9b184" stroke="#a78f5f" stroke-width="2">
+          <rect x="56" y="240" width="16" height="36" /><rect x="888" y="240" width="16" height="36" />
         </g>
 
-        <!-- 淺綠點陣高光草塊 (Grass Highlights) -->
-        <g fill="#80c858">
-          <rect x="40" y="230" width="4" height="2" />
-          <rect x="110" y="215" width="4" height="2" />
-          <rect x="260" y="235" width="4" height="2" />
-          <rect x="680" y="220" width="4" height="2" />
-          <rect x="880" y="235" width="4" height="2" />
-          <rect x="120" y="495" width="4" height="2" />
-          <rect x="550" y="505" width="4" height="2" />
-          <rect x="820" y="500" width="4" height="2" />
-        </g>
-
-        <!-- 寶可夢經典泥土街道網 (GBA Stepped Cobblestone Dirt Road) -->
-        <!-- 街道陰影深色底層 (Dirt Path Shadow Border) -->
-        <g fill="#9c7040">
-          <!-- 上下貫穿主幹道 1 (左側：學校至食堂) -->
-          <rect x="156" y="105" width="32" height="305" />
-          <!-- 上下貫穿主幹道 2 (右側：操場至住家) -->
-          <rect x="772" y="105" width="32" height="305" />
-          <!-- 上下貫穿主幹道 3 (中間：圖書館至超商) -->
-          <rect x="464" y="105" width="32" height="305" />
-          <!-- 橫貫主幹道 (貫穿中央噴水廣場) -->
-          <rect x="156" y="242" width="648" height="32" />
-        </g>
-
-        <!-- 街道本體金黃泥土層 (Main Dirt Path) -->
-        <g fill="#deb876">
-          <rect x="160" y="109" width="24" height="297" />
-          <rect x="776" y="109" width="24" height="297" />
-          <rect x="468" y="109" width="24" height="297" />
-          <rect x="160" y="246" width="640" height="24" />
-        </g>
-
-        <!-- 街道邊緣階梯點陣泥土顆粒 (Path Edge Stepped Pixels) -->
-        <g fill="#c49852">
-          <rect x="156" y="215" width="4" height="4" /><rect x="184" y="215" width="4" height="4" />
-          <rect x="156" y="295" width="4" height="4" /><rect x="184" y="295" width="4" height="4" />
-          <rect x="772" y="215" width="4" height="4" /><rect x="800" y="215" width="4" height="4" />
-          <rect x="772" y="295" width="4" height="4" /><rect x="800" y="295" width="4" height="4" />
-          <rect x="300" y="242" width="4" height="4" /><rect x="300" y="270" width="4" height="4" />
-          <rect x="640" y="242" width="4" height="4" /><rect x="640" y="270" width="4" height="4" />
-          <!-- 道路中心碎石 (Gravel specks) -->
-          <rect x="170" y="254" width="4" height="4" fill="#a47838" />
-          <rect x="250" y="258" width="4" height="4" fill="#a47838" />
-          <rect x="390" y="252" width="4" height="4" fill="#a47838" />
-          <rect x="560" y="258" width="4" height="4" fill="#a47838" />
-          <rect x="700" y="252" width="4" height="4" fill="#a47838" />
-          <rect x="786" y="256" width="4" height="4" fill="#a47838" />
-        </g>
-
-        <!-- 中央方形點陣石砌噴泉廣場 (Central Square Pixel Fountain) -->
-        <!-- 外層階梯石板廣場 -->
-        <rect x="432" y="220" width="96" height="76" fill="#8892a0" stroke="#182042" stroke-width="3" />
-        <rect x="436" y="224" width="88" height="68" fill="#b0bac8" />
-        <rect x="440" y="228" width="80" height="60" fill="#96a2b4" />
+        <!-- 中央噴泉廣場 (石板廣場包住噴泉，四角花圃) -->
+        <rect x="404" y="202" width="152" height="112" rx="18" fill="#d9c9a6" stroke="#b39d6d" stroke-width="2" />
+        <rect x="412" y="210" width="136" height="96" rx="12" fill="#e2d5b4" />
         <!-- 噴泉外池石壁 -->
         <rect x="446" y="234" width="68" height="48" fill="#586478" stroke="#182042" stroke-width="2" />
         <!-- 噴泉清澈藍色水池 -->
@@ -123,49 +93,53 @@
           <rect x="472" y="258" width="3" height="3" class="pixel-spray-1" />
           <rect x="485" y="258" width="3" height="3" class="pixel-spray-2" />
         </g>
-
-        <!-- 歐風復古點陣路燈 (4 座交叉口) -->
-        <!-- 路燈 1 (西北) -->
-        <rect x="204" y="230" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
-        <rect x="202" y="224" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
-        <rect x="204" y="226" width="6" height="4" fill="#ffffff" />
-        <!-- 路燈 2 (東北) -->
-        <rect x="750" y="230" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
-        <rect x="748" y="224" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
-        <rect x="750" y="226" width="6" height="4" fill="#ffffff" />
-        <!-- 路燈 3 (西南) -->
-        <rect x="204" y="268" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
-        <rect x="202" y="262" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
-        <rect x="204" y="264" width="6" height="4" fill="#ffffff" />
-        <!-- 路燈 4 (東南) -->
-        <rect x="750" y="268" width="6" height="22" fill="#2c3e50" stroke="#182042" stroke-width="1.5" />
-        <rect x="748" y="262" width="10" height="8" fill="#f1c40f" stroke="#182042" stroke-width="1.5" />
-        <rect x="750" y="264" width="6" height="4" fill="#ffffff" />
-
-        <!-- 廣場木長椅 (Park Benches) -->
-        <!-- 左長椅 -->
-        <rect x="390" y="234" width="28" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" />
-        <rect x="392" y="236" width="24" height="3" fill="#b3783e" />
-        <rect x="392" y="244" width="4" height="6" fill="#2c3e50" /><rect x="412" y="244" width="4" height="6" fill="#2c3e50" />
-        <!-- 右長椅 -->
-        <rect x="542" y="234" width="28" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" />
-        <rect x="544" y="236" width="24" height="3" fill="#b3783e" />
-        <rect x="544" y="244" width="4" height="6" fill="#2c3e50" /><rect x="564" y="244" width="4" height="6" fill="#2c3e50" />
-
-        <!-- 繽紛小花叢 (Flower Clumps) -->
+        <!-- 廣場四角花圃 -->
         <g>
-          <!-- 紅花 -->
-          <rect x="240" y="222" width="4" height="4" fill="#e74c3c" /><rect x="241" y="223" width="2" height="2" fill="#ffd32a" />
-          <rect x="246" y="220" width="4" height="4" fill="#e74c3c" /><rect x="247" y="221" width="2" height="2" fill="#ffd32a" />
-          <!-- 黃花 -->
-          <rect x="700" y="222" width="4" height="4" fill="#f1c40f" /><rect x="701" y="223" width="2" height="2" fill="#ffffff" />
-          <rect x="706" y="220" width="4" height="4" fill="#f1c40f" /><rect x="707" y="221" width="2" height="2" fill="#ffffff" />
-          <!-- 藍花 -->
-          <rect x="240" y="290" width="4" height="4" fill="#3498db" /><rect x="241" y="291" width="2" height="2" fill="#ffffff" />
-          <rect x="700" y="290" width="4" height="4" fill="#9b59b6" /><rect x="701" y="291" width="2" height="2" fill="#ffffff" />
+          <rect x="418" y="216" width="4" height="4" fill="#e74c3c" /><rect x="424" y="214" width="4" height="4" fill="#f1c40f" /><rect x="420" y="222" width="4" height="4" fill="#9b59b6" />
+          <rect x="534" y="216" width="4" height="4" fill="#f1c40f" /><rect x="528" y="222" width="4" height="4" fill="#e74c3c" /><rect x="538" y="222" width="4" height="4" fill="#3498db" />
+          <rect x="418" y="292" width="4" height="4" fill="#3498db" /><rect x="424" y="294" width="4" height="4" fill="#e74c3c" /><rect x="420" y="286" width="4" height="4" fill="#f1c40f" />
+          <rect x="534" y="292" width="4" height="4" fill="#9b59b6" /><rect x="528" y="288" width="4" height="4" fill="#f1c40f" /><rect x="538" y="288" width="4" height="4" fill="#e74c3c" />
+        </g>
+        <!-- 廣場木長椅 (主街南北側) -->
+        <rect x="352" y="246" width="40" height="11" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" />
+        <rect x="354" y="248" width="36" height="3" fill="#b3783e" />
+        <rect x="568" y="246" width="40" height="11" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" />
+        <rect x="570" y="248" width="36" height="3" fill="#b3783e" />
+        <!-- 路燈 (廣場四角 + 主街兩盞) -->
+        <g stroke="#182042" stroke-width="1.5">
+          <rect x="394" y="212" width="5" height="16" fill="#2c3e50" /><rect x="392" y="206" width="9" height="7" fill="#f1c40f" />
+          <rect x="561" y="212" width="5" height="16" fill="#2c3e50" /><rect x="559" y="206" width="9" height="7" fill="#f1c40f" />
+          <rect x="394" y="290" width="5" height="16" fill="#2c3e50" /><rect x="392" y="284" width="9" height="7" fill="#f1c40f" />
+          <rect x="561" y="290" width="5" height="16" fill="#2c3e50" /><rect x="559" y="284" width="9" height="7" fill="#f1c40f" />
+          <rect x="248" y="222" width="5" height="16" fill="#2c3e50" /><rect x="246" y="216" width="9" height="7" fill="#f1c40f" />
+          <rect x="707" y="222" width="5" height="16" fill="#2c3e50" /><rect x="705" y="216" width="9" height="7" fill="#f1c40f" />
         </g>
 
-        <!-- 晝夜動態光影覆蓋層 (Day/Night Light Overlay) -->
+        <!-- 樹木 (填補建築之間的空隙：兩欄縫隙各上下一棵) -->
+        <g>
+          <rect x="319" y="126" width="6" height="12" fill="#7a4a21" /><circle cx="322" cy="112" r="17" fill="#3e7d32" /><circle cx="312" cy="122" r="11" fill="#4c9440" /><circle cx="330" cy="104" r="10" fill="#63a84f" />
+          <rect x="635" y="126" width="6" height="12" fill="#7a4a21" /><circle cx="638" cy="112" r="17" fill="#3e7d32" /><circle cx="648" cy="122" r="11" fill="#4c9440" /><circle cx="630" cy="104" r="10" fill="#63a84f" />
+          <rect x="319" y="426" width="6" height="12" fill="#7a4a21" /><circle cx="322" cy="412" r="17" fill="#3e7d32" /><circle cx="312" cy="422" r="11" fill="#4c9440" /><circle cx="330" cy="404" r="10" fill="#63a84f" />
+          <rect x="635" y="426" width="6" height="12" fill="#7a4a21" /><circle cx="638" cy="412" r="17" fill="#3e7d32" /><circle cx="648" cy="422" r="11" fill="#4c9440" /><circle cx="630" cy="404" r="10" fill="#63a84f" />
+        </g>
+        <!-- 邊緣灌木與花叢 -->
+        <g fill="#4c9440">
+          <circle cx="90" cy="9" r="6" /><circle cx="855" cy="9" r="6" /><circle cx="90" cy="531" r="6" /><circle cx="855" cy="531" r="6" />
+          <circle cx="12" cy="140" r="6" /><circle cx="948" cy="140" r="6" /><circle cx="12" cy="400" r="6" /><circle cx="948" cy="400" r="6" />
+        </g>
+        <g>
+          <rect x="664" y="326" width="4" height="4" fill="#e74c3c" /><rect x="670" y="324" width="4" height="4" fill="#f1c40f" /><rect x="920" y="326" width="4" height="4" fill="#9b59b6" />
+          <rect x="664" y="500" width="4" height="4" fill="#f1c40f" /><rect x="920" y="500" width="4" height="4" fill="#e74c3c" />
+          <rect x="120" y="228" width="4" height="4" fill="#e74c3c" /><rect x="836" y="228" width="4" height="4" fill="#f1c40f" />
+          <rect x="120" y="284" width="4" height="4" fill="#9b59b6" /><rect x="836" y="284" width="4" height="4" fill="#3498db" />
+          <rect x="348" y="30" width="4" height="4" fill="#e74c3c" /><rect x="600" y="30" width="4" height="4" fill="#ffffff" />
+        </g>
+        <!-- 草叢碎點 (只放在開放草地) -->
+        <g fill="#5fa038">
+          <rect x="318" y="52" width="6" height="4" /><rect x="636" y="52" width="6" height="4" />
+          <rect x="318" y="480" width="6" height="4" /><rect x="636" y="480" width="6" height="4" />
+          <rect x="24" y="262" width="6" height="4" /><rect x="930" y="262" width="6" height="4" />
+        </g>
         <rect id="map-night-overlay" width="960" height="540" fill="rgba(0,0,0,0)" style="transition: fill 1.5s ease; pointer-events: none;" />
       </svg>
 
@@ -1470,8 +1444,8 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v8.3.0)</span>
-        <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-color);">✕</button>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v8.8.2)</span>
+        <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
         <button class="help-tab-btn active" onclick="switchHelpTab('tab-daily', this)">⏰ 基本作息</button>
@@ -1603,7 +1577,7 @@
       <!-- 標題與關閉 -->
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-bottom:15px; flex-shrink:0;">
         <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">🚪 學生衣櫃與試衣間</h3>
-        <button onclick="closeWardrobeModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        <button onclick="closeWardrobeModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px;">✕</button>
       </div>
       
       <!-- 試衣間主要內容 (雙欄 layout: 左側是分類與裝備列表，右側是當前小人預覽與開啟畫板) -->
@@ -1633,7 +1607,7 @@
           </div>
           
           <button class="btn-exam-mini ready" onclick="openPixelEditor()" style="width: 100%; border: none; cursor: pointer; padding: 10px; border-radius: 12px; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 6px;">
-            🎨 設計新服飾 (像素畫布)
+            🎨 設計新服飾 (32×50 高解析畫布)
           </button>
           <button class="btn-exam-mini" onclick="triggerImportSkinDirect()" style="width: 100%; border: none; cursor: pointer; padding: 10px; border-radius: 12px; font-weight: 700; margin-top: 8px; background: #30d158; color: white;">
             📤 上傳 PNG 加入衣櫃（朋友分享的圖）
@@ -1650,10 +1624,10 @@
       <div id="wardrobe-editor-view" style="display: none; flex: 1; gap: 20px; overflow: hidden;">
         <!-- 左側：畫布本體 -->
         <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div id="pixel-canvas-container" style="background: rgba(255,255,255,0.4); border: 2px solid var(--border-color); border-radius: 12px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(16, 1fr); width: 288px; height: 450px; touch-action: none; gap: 1px; user-select: none; -webkit-user-select: none;">
-            <!-- 16x25 格子 (真角色座標)，用 JS 動態生成 -->
+          <div id="pixel-canvas-container" style="background: rgba(255,255,255,0.4); border: 2px solid var(--border-color); border-radius: 12px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(32, 1fr); width: 320px; height: 500px; touch-action: none; gap: 1px; user-select: none; -webkit-user-select: none;">
+            <!-- 32x50 HD 格子 (真角色座標 2x 細分)，用 JS 動態生成 -->
           </div>
-          <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">格線與淡色剪影僅作編輯輔助（剪影就是角色本人），背景為透明</div>
+          <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">32×50 高解析畫布（1,600 格）・格線與淡色剪影僅作編輯輔助（剪影就是角色本人），背景為透明</div>
         </div>
         
         <!-- 右側：調色盤與工具 -->
@@ -1751,7 +1725,7 @@
         <div style="display:flex; align-items:center; gap:10px;">
           <span id="ach-progress-text" style="font-size:0.8rem; font-weight:700; color:var(--primary);">0 / 0</span>
           <button onclick="closeAchievementPanel()"
-            style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+            style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px;">✕</button>
         </div>
       </div>
       <div class="ach-progress-bar" style="flex-shrink:0;">
@@ -1781,7 +1755,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <span class="game-modal-title" id="mg-title" style="margin:0; border:none; padding:0;">🎮 小遊戲</span>
         <button id="mg-close-btn" onclick="closeMinigame()"
-          style="background:none; border:none; font-size:1.2rem; cursor:pointer; display:none;">✕</button>
+          style="background:none; border:none; font-size:1.2rem; cursor:pointer; display:none; min-width:40px; min-height:40px; padding:8px;">✕</button>
       </div>
       <p id="mg-desc" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;"></p>
       <div class="mg-timer-bar">
@@ -1840,8 +1814,17 @@
 
 
   <!-- 懸浮 Footer 版號 -->
+  <nav id="room-nav" aria-label="房間快捷導覽">
+    <button class="room-chip" onclick="focusLandmark('school')">🏫 學校</button>
+    <button class="room-chip" onclick="focusLandmark('library')">📚 圖書館</button>
+    <button class="room-chip" onclick="focusLandmark('gym')">🏃 操場</button>
+    <button class="room-chip" onclick="focusLandmark('restaurant')">🍔 餐廳</button>
+    <button class="room-chip" onclick="focusLandmark('store')">🏪 超商</button>
+    <button class="room-chip" onclick="focusLandmark('home')">🏠 住家</button>
+  </nav>
+
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v8.3.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v8.8.2)
   </div>
 
   <!-- ==========================================================================
@@ -1862,7 +1845,7 @@
       <button class="btn-exam-mini ready" onclick="closeOnboarding()" style="width:100%; border:none; cursor:pointer; padding:10px; border-radius:12px; font-weight:800; margin-top:10px;">開始養成！</button>
     </div>
   </div>
-  <div id="rotate-hint">📱 橫放手機，地圖看得更清楚喔！</div>
+  <div id="rotate-hint">👆 拖曳移動地圖找房間，雙指可縮放</div>
 
   <script src="js/state.js"></script>
   <script src="js/coords.js"></script>
