@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v8.9.1)
+   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v9.1.0)
    作息大腦、主循環、房租結算、版本控制與啟動初始化
    ========================================================================== */
 
@@ -97,6 +97,7 @@
     }
     function commutePxPerMin() { return WALK_PX_PER_MIN / (gameState.commuteSpeedMult || 1); }
     function startCommuteTo(targetLoc) {
+      if (gameState.isCommuting) return; // v9.1：通勤中不改道——大腦每 tick 都在決策，沒這道防線會半路重建路徑、把小人拉回起點門口 (測試實測會半路改去別棟)
       const pts = buildCommutePath(currentLoc, targetLoc);
       const total = pathTotalLength(pts);
       const shoesBonus = Math.max(0.4, 1 - (gameState.passive.shoes * 0.15));
@@ -247,7 +248,7 @@
       const vp = document.getElementById("map-viewport");
       const map = document.getElementById("town-map");
       if (!vp || !map) return;
-      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v8.9.1)
+      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v9.1.0)
       if (vp.scrollTop !== 0) vp.scrollTop = 0;
       const availW = vp.clientWidth;
       const availH = vp.clientHeight;
@@ -648,11 +649,25 @@
     }
 
     function processHourlyState() {
+      if (currentState !== 'studying') gameState.focus = Math.max(0, (gameState.focus || 0) - 22); // v9.1 專注流失
       // v8.2 成就追蹤器 (過去這些成就沒有任何判定來源)
       if ((currentLoc === 'school' || currentLoc === 'library') && currentState === 'studying') gameState.studyStreakHours = (gameState.studyStreakHours || 0) + 1; else gameState.studyStreakHours = 0;
       if (currentLoc === 'school') gameState._wentSchoolToday = true;
       if (currentState === 'eating') { if (gameState._eatDay !== gameState.totalGameDays) { gameState._eatDay = gameState.totalGameDays; gameState.eatsToday = 0; } gameState.eatsToday = (gameState.eatsToday || 0) + 1; }
       if (currentState === 'angry') { if (gameState._angerDay !== gameState.totalGameDays) { gameState._angerDay = gameState.totalGameDays; gameState.angerToday = 0; } gameState.angerToday = (gameState.angerToday || 0) + 1; }
+      if (currentState === 'sports') { if (gameState._sportDay !== gameState.totalGameDays) { gameState._sportDay = gameState.totalGameDays; gameState.sportsHoursToday = 0; } gameState.sportsHoursToday = (gameState.sportsHoursToday || 0) + 1; }
+      if (currentState === 'working') { if (gameState._workDay !== gameState.totalGameDays) { gameState._workDay = gameState.totalGameDays; gameState.workHoursToday = 0; } gameState.workHoursToday = (gameState.workHoursToday || 0) + 1; }
+      // v9.1 好友同行：同場做同件事 → 每小時消耗 1 小時額度，額外好感與小加成
+      { const co = gameState.coInvite;
+        if (co && co.left > 0 && !gameState.isCommuting && co.loc === currentLoc &&
+            ((co.loc === 'school' && currentState === 'studying') || (co.loc === 'library' && currentState === 'studying') ||
+             (co.loc === 'gym' && currentState === 'sports') || (co.loc === 'restaurant' && currentState === 'eating'))) {
+          co.left -= 1;
+          gainFriendAffinity(co.friend, 1, true);
+          if (co.loc === 'gym') gameState.stress = Math.max(0, gameState.stress - 3);
+          if (co.loc === 'restaurant') gameState.hunger = Math.min(100, gameState.hunger + 8);
+          if (co.left <= 0) queueFloatingText('💞 同行時間結束，下次再約！');
+        } }
       if (gameState.stress <= 0) gameState.zeroStressHours = (gameState.zeroStressHours || 0) + 1; else gameState.zeroStressHours = 0;
       // 同場景好友陪伴好感度自動成長
       if (!gameState.isCommuting && typeof gainFriendAffinity === 'function') {
@@ -688,7 +703,7 @@
         const sleepBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('sleep_boost') : 1.0;
         const energyMut = typeof getMutationMult === 'function' ? getMutationMult('energy_recover') : 1.0;
         const homeEnergyBase = homeLv === 3 ? 40 : (homeLv === 2 ? 25 : 15);
-        gameState.energy = Math.min(100, gameState.energy + homeEnergyBase * sleepBuff * energyMut);
+        gameState.energy = Math.min(100, gameState.energy + homeEnergyBase * sleepBuff * energyMut * (1 + (gameState.homeDecor || 0) * 0.04)); // v9.1 裝潢加成
         const homeStressBonus = homeLv === 3 ? 5 : (homeLv === 2 ? 2 : 0);
         if (gameState.parentsStatus === 'alive') {
           gameState.stress = Math.max(0, gameState.stress - (3 + homeStressBonus));
@@ -749,6 +764,17 @@
         playSound('buy');
       }
       else if (currentState === "studying") {
+        // v9.1 專注度：連續讀書累積 (最高效率 +50%)，中斷就流失 —— 讀書要有「進入狀況」的節奏
+        if (gameState._studyDay !== gameState.totalGameDays) { gameState._studyDay = gameState.totalGameDays; gameState.studyHoursToday = 0; }
+        gameState.studyHoursToday = (gameState.studyHoursToday || 0) + 1;
+        const prevFocusTier = Math.floor((gameState.focus || 0) / 35);
+        gameState.focus = Math.min(100, (gameState.focus || 0) + 14);
+        const newFocusTier = Math.floor(gameState.focus / 35);
+        if (newFocusTier > prevFocusTier) queueFloatingText(newFocusTier >= 2 ? '🔥 燃燒專注！學習效率 +50%' : '✨ 進入專注狀態！學習效率提升');
+        const focusMult = 1 + gameState.focus / 200;
+        if (Math.random() < 0.12 && typeof triggerRandomEvent === 'function' && typeof STUDY_EVENTS_POOL !== 'undefined') {
+          triggerRandomEvent(STUDY_EVENTS_POOL[Math.floor(Math.random() * STUDY_EVENTS_POOL.length)]);
+        }
         let efficiency = 1.0;
         if (gameState.energy < 20) efficiency *= 0.2;
         else if (gameState.hunger < 30) efficiency *= 0.5;
@@ -762,7 +788,7 @@
           const studyBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('study_boost') : 1.0;
           const xiaoxuanMult = typeof getFriendBonus === 'function' ? getFriendBonus('school_eff') : 1.0;
           const schoolMult = schoolLv === 3 ? 1.60 : (schoolLv === 2 ? 1.25 : 1.0);
-          gainKnowledge("school", efficiency * headphoneBonus * studyBuff * smartMult * studyMut * xiaoxuanMult * schoolMult);
+          gainKnowledge("school", efficiency * focusMult * ((gameState.coInvite && gameState.coInvite.loc === 'school' && gameState.coInvite.left > 0) ? 1.25 : 1) * headphoneBonus * studyBuff * smartMult * studyMut * xiaoxuanMult * schoolMult);
           gameState.stress = Math.min(100, gameState.stress + 5 * gameState.difficulty * mentalRed * stressMut * yuqingStressMult);
         } else if (currentLoc === "library") {
           let bookBonus = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3);
@@ -772,13 +798,14 @@
           const yuqingMult = typeof getFriendBonus === 'function' ? getFriendBonus('library_eff') : 1.0;
           const libEffMult = libLv === 3 ? 1.75 : (libLv === 2 ? 1.30 : 1.0);
           const libStressDiv = libLv === 3 ? 0.5 : 1.0;
-          gainKnowledge("library", efficiency * bookBonus * reviewBuff * smartMult * memMult * studyMut * libMut * yuqingMult * libEffMult);
+          gainKnowledge("library", efficiency * focusMult * ((gameState.coInvite && gameState.coInvite.loc === 'library' && gameState.coInvite.left > 0) ? 1.25 : 1) * bookBonus * reviewBuff * smartMult * memMult * studyMut * libMut * yuqingMult * libEffMult);
           gameState.stress = Math.min(100, gameState.stress + 8 * gameState.difficulty * mentalRed * stressMut * yuqingStressMult * libStressDiv);
         }
       }
       else if (currentState === "angry") {
         gameState.stress = Math.min(100, gameState.stress + 2);
       }
+      if (typeof evaluateDailyQuests === 'function') evaluateDailyQuests(); // v9.1
     }
 
     // 機制 1：均勻學科增長（永遠找最低分的科目）
@@ -812,6 +839,7 @@
 
       const gainLabel = type === 'school' ? '聽講' : '複習';
       sub[propKey] = Math.min(limit, sub[propKey] + baseGain);
+      if (typeof spawnKnowledgeOrb === 'function') spawnKnowledgeOrb(targetKey);
       queueFloatingText(`+${baseGain} ${sub.name}${gainLabel}`);
       playSound('levelUp');
     }
@@ -824,11 +852,14 @@
       const salaryMut = typeof getMutationMult === 'function' ? getMutationMult('salary') : 1.0;
       const friendAllowance = typeof getFriendBonus === 'function' ? getFriendBonus('daily_allowance') : 0;
       const dailyBonus = Math.round((10 + Math.floor(totalScore / 10) + friendAllowance) * salaryMut);
-      gameState.money += dailyBonus;
+      // v9.1 生活費：隨年級與小鎮繁榮成長，後期不再只進不出 (金額不大，是壓力來源之一)
+      let totalLevels = 0; try { totalLevels = ['home', 'store', 'restaurant', 'school', 'library', 'gym'].reduce((s, k) => s + getLandmarkLevel(k), 0); } catch (e) { }
+      const livingCost = 8 + gameState.gradeIndex * 8 + totalLevels * 2;
+      gameState.money += dailyBonus - livingCost;
       gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + dailyBonus;
       updateUI();
       saveGameData(); // 立即存檔，確保零用錢累積
-      queueFloatingText(`📅 每日結算：零用錢 +$${dailyBonus}!`);
+      queueFloatingText(`📅 每日結算：零用錢 +$${dailyBonus}・生活費 −$${livingCost}`);
       playSound('buy');
     }
 
@@ -1055,7 +1086,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v8.9.1) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.1.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

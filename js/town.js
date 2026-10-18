@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - TOWN & LANDMARK ENGINE (v8.9.1)
+   🎮 GBA SCHOLAR IDLE - TOWN & LANDMARK ENGINE (v9.1.0)
    6 大島嶼建設升級、城鎮繁榮度、咪咪小貓與地標派遣
    ========================================================================== */
 
@@ -158,6 +158,82 @@
       if (cat) {
         cat.style.display = getLandmarkLevel('home') >= 3 ? 'flex' : 'none';
       }
+    }
+
+    // ---------- v9.1 花錢系統：住家裝潢 / 小鎮美化 / 獎學金捐贈 ----------
+    const HOME_DECOR_TIERS = [null,
+      { name: '溫馨小窩', price: 800, desc: '地毯 ＋ 綠植盆栽' },
+      { name: '書香升級', price: 3000, desc: '小書櫃 ＋ 閱讀檯燈（睡眠恢復 +4%）' },
+      { name: '舒適客廳', price: 9000, desc: '壁掛電視 ＋ 沙發（睡眠恢復 +8%）' },
+      { name: '豪華套房', price: 25000, desc: '水族箱 ＋ 獎盃櫃（睡眠恢復 +16%）' }];
+    const TOWN_BEAUTY_DEFS = {
+      arch: { name: '🌸 公園花拱門', price: 12000 },
+      fountain: { name: '⛲ 音樂噴水池', price: 20000 },
+      statue: { name: '🗽 學霸紀念雕像', price: 40000 } };
+    function buyHomeDecor(tier) {
+      const def = HOME_DECOR_TIERS[tier];
+      if (!def) return;
+      const cur = gameState.homeDecor || 0;
+      if (cur >= tier) { createFloatingText('✅ 這一階裝潢已經完成囉'); return; }
+      if (cur !== tier - 1) { createFloatingText('🪜 裝潢要一階一階來，先完成前一階'); return; }
+      if (gameState.money < def.price) { playSound('examFail'); createFloatingText(`❌ 錢不夠！裝潢「${def.name}」需要 $${def.price}`); return; }
+      gameState.money -= def.price;
+      gameState.homeDecor = tier;
+      playSound('levelUp');
+      queueFloatingText(`🏠 住家裝潢完成：${def.name}！（${def.desc}）`);
+      refreshMoneySinks(); updateUI(); saveGameData();
+    }
+    function buyTownBeauty(key) {
+      const def = TOWN_BEAUTY_DEFS[key];
+      if (!def) return;
+      if (!gameState.townBeauty) gameState.townBeauty = {};
+      if (gameState.townBeauty[key]) { createFloatingText('✅ 這項美化工程已經完工囉'); return; }
+      if (gameState.money < def.price) { playSound('examFail'); createFloatingText(`❌ 錢不夠！「${def.name}」需要 $${def.price}`); return; }
+      gameState.money -= def.price;
+      gameState.townBeauty[key] = true;
+      playSound('levelUp');
+      queueFloatingText(`🎉 小鎮美化完工：${def.name}！去地圖上看看吧`);
+      refreshMoneySinks(); updateUI(); saveGameData();
+    }
+    function donorTitle() {
+      const t = gameState.donatedTotal || 0;
+      if (t >= 50000) return '👑 小鎮之光';
+      if (t >= 15000) return '🏅 榮譽鎮民';
+      if (t >= 3000) return '💛 熱心鎮民';
+      return '尚未獲得稱號';
+    }
+    function donateScholarship(amount) {
+      if (gameState.money < amount) { playSound('examFail'); createFloatingText(`❌ 錢不夠捐 $${amount} 喔`); return; }
+      gameState.money -= amount;
+      gameState.donatedTotal = (gameState.donatedTotal || 0) + amount;
+      gameState.stress = Math.max(0, gameState.stress - 5);
+      playSound('levelUp');
+      queueFloatingText(`💛 捐贈獎學金 $${amount}（累計 $${gameState.donatedTotal}・${donorTitle()}），做好事心情好，壓力 −5`);
+      refreshMoneySinks(); updateUI(); saveGameData();
+    }
+    function refreshMoneySinks() {
+      const decor = gameState.homeDecor || 0;
+      for (let i = 1; i <= 4; i++) {
+        const g = document.getElementById('decor-' + i);
+        if (g) g.style.display = decor >= i ? 'block' : 'none';
+        const b = document.getElementById('btn-decor-' + i);
+        if (b) {
+          if (decor >= i) { b.textContent = '✅ 已完成'; b.disabled = true; }
+          else if (decor === i - 1) { b.textContent = `$${HOME_DECOR_TIERS[i].price} 裝潢`; b.disabled = false; }
+          else { b.textContent = '🔒 先完成前一階'; b.disabled = true; }
+        }
+      }
+      const ds = document.getElementById('decor-status');
+      if (ds) ds.textContent = decor > 0 ? `目前裝潢：${HOME_DECOR_TIERS[decor].name}（睡眠恢復 +${decor * 4}%）` : '目前裝潢：樸素小屋';
+      const tb = gameState.townBeauty || {};
+      Object.keys(TOWN_BEAUTY_DEFS).forEach(k => {
+        const g = document.getElementById('beauty-' + k);
+        if (g) g.style.display = tb[k] ? 'block' : 'none';
+        const b = document.getElementById('btn-beauty-' + k);
+        if (b) { b.textContent = tb[k] ? '✅ 已完工' : `$${TOWN_BEAUTY_DEFS[k].price} 興建`; b.disabled = !!tb[k]; }
+      });
+      const dn = document.getElementById('donor-status');
+      if (dn) dn.textContent = `累計捐贈 $${gameState.donatedTotal || 0}・稱號：${donorTitle()}`;
     }
 
     function renderBuildDrawer() {

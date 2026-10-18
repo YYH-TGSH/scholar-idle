@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - STATE & CORE DATA ENGINE (v8.9.1)
+   🎮 GBA SCHOLAR IDLE - STATE & CORE DATA ENGINE (v9.1.0)
    音效、台詞、等級、全域狀態、存讀檔、增益、成就、好友與輪迴
    ========================================================================== */
 
@@ -309,6 +309,7 @@
       lastRentDay: 0,
       workHoursTotal: 0,
       randomEventsResolved: 0,
+      focus: 0, studyHoursToday: 0,
       friends: { xiaoxuan: 0, dameng: 0, yuqing: 0, xiaohao: 0 },
       friendChatDay: { xiaoxuan: -1, dameng: -1, yuqing: -1, xiaohao: -1 },
       miniGameWins: { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 },
@@ -533,6 +534,59 @@
       }
     }
 
+    // ---------- v9.1 每日任務 ----------
+    const DAILY_QUEST_POOL = [
+      { id: 'study3', icon: '📚', desc: '讀書滿 3 小時', target: 3, reward: 60, prog: () => Math.min(3, gameState.studyHoursToday || 0) },
+      { id: 'study5', icon: '📖', desc: '讀書滿 5 小時', target: 5, reward: 120, prog: () => Math.min(5, gameState.studyHoursToday || 0) },
+      { id: 'sport2', icon: '🏃', desc: '運動滿 2 小時', target: 2, reward: 50, prog: () => Math.min(2, gameState.sportsHoursToday || 0) },
+      { id: 'work2', icon: '🏪', desc: '打工滿 2 小時', target: 2, reward: 70, prog: () => Math.min(2, gameState.workHoursToday || 0) },
+      { id: 'eat2', icon: '🍱', desc: '吃滿 2 餐', target: 2, reward: 40, prog: () => Math.min(2, gameState.eatsToday || 0) },
+      { id: 'chat2', icon: '💬', desc: '和 2 位好友聊天', target: 2, reward: 60, prog: () => Math.min(2, gameState.chatToday || 0) },
+      { id: 'focus70', icon: '🔥', desc: '專注度達到 70', target: 1, reward: 80, prog: () => (gameState.focus || 0) >= 70 ? 1 : 0 },
+      { id: 'exam1', icon: '🎓', desc: '通過一次升學考', target: 1, reward: 150, prog: () => gameState._examPassedDay === (gameState.totalGameDays || 0) ? 1 : 0 },
+    ];
+    function ensureDailyQuests() {
+      const today = gameState.totalGameDays || 0;
+      if (!gameState.dailyQuests || gameState.dailyQuests.day !== today) {
+        const ids = [...DAILY_QUEST_POOL].sort(() => Math.random() - 0.5).slice(0, 3).map(q => q.id);
+        gameState.dailyQuests = { day: today, ids, rewarded: {} };
+      }
+      return gameState.dailyQuests;
+    }
+    function evaluateDailyQuests() {
+      const dq = ensureDailyQuests();
+      let changed = false;
+      dq.ids.forEach(id => {
+        if (dq.rewarded[id]) return;
+        const q = DAILY_QUEST_POOL.find(x => x.id === id);
+        if (q && q.prog() >= q.target) {
+          dq.rewarded[id] = true; changed = true;
+          gameState.money = (gameState.money || 0) + q.reward;
+          queueFloatingText(`📋 每日任務完成：${q.desc}（+$${q.reward}）`);
+          playSound('levelUp');
+        }
+      });
+      if (changed) saveGameData();
+      if (typeof renderDailyQuests === 'function') renderDailyQuests();
+    }
+    // ---------- v9.1 好友邀約同行 ----------
+    const CO_LOCS = { xiaoxuan: 'school', yuqing: 'library', dameng: 'gym', xiaohao: 'restaurant' };
+    const CO_LABELS = { xiaoxuan: '🏫 一起在學校讀書', yuqing: '📚 一起在圖書館共讀', dameng: '🏃 一起到操場運動', xiaohao: '🍜 一起到餐廳吃飯' };
+    function inviteCoActivity(id) {
+      const def = FRIENDS_DEFS.find(f => f.id === id);
+      if (!def) return;
+      const today = gameState.totalGameDays || 0;
+      if (!gameState.coInviteDay) gameState.coInviteDay = {};
+      if ((gameState.friends[id] || 0) < 20) { createFloatingText('🔒 好感度滿 20 才能邀約同行喔！'); return; }
+      if (gameState.coInviteDay[id] === today) { createFloatingText('✅ 今天已經邀約過這位好友了'); return; }
+      playSound('levelUp');
+      gameState.coInviteDay[id] = today;
+      gameState.coInvite = { friend: id, loc: CO_LOCS[id], left: 2 };
+      queueFloatingText(`💞 已邀約 ${def.name}：${CO_LABELS[id]}（2 小時，效率/心情加成）`);
+      renderFriendsList();
+      saveGameData();
+    }
+
     function chatWithFriend(id) {
       if (!gameState.friendChatDay) gameState.friendChatDay = { xiaoxuan: -1, dameng: -1, yuqing: -1, xiaohao: -1 };
       const today = gameState.totalGameDays || 0;
@@ -558,6 +612,8 @@
       playSound('click');
       gameState.energy = Math.max(0, gameState.energy - 5);
       gameState.friendChatDay[id] = today;
+      if (gameState._chatDay !== today) { gameState._chatDay = today; gameState.chatToday = 0; }
+      gameState.chatToday = (gameState.chatToday || 0) + 1; // v9.1 每日任務計數
       gainFriendAffinity(id, 6, false);
       updateUI();
       saveGameData();
@@ -602,6 +658,8 @@
         const chattedToday = gameState.friendChatDay[f.id] === today;
         const isMax = aff >= 100;
         const favCount = gameState.bag[f.favGift] || 0;
+        const coToday = gameState.coInviteDay && gameState.coInviteDay[f.id] === today;
+        const coActive = gameState.coInvite && gameState.coInvite.friend === f.id && (gameState.coInvite.left || 0) > 0;
 
         return `
           <div class="friend-card">
@@ -632,6 +690,9 @@
               </button>
               <button class="friend-btn gift" onclick="giftToFriend('${f.id}', '${f.favGift}')" ${(favCount <= 0 || isMax) ? 'disabled' : ''}>
                 🎁 送最愛${f.favGiftName.slice(0, 4)} (+22) [持有:${favCount}]
+              </button>
+              <button class="friend-btn" style="background:#ff9f0a; color:#fff;" onclick="inviteCoActivity('${f.id}')" ${(aff < 20 || coToday) ? 'disabled' : ''}>
+                ${coActive ? '💞 同行中…' : (aff < 20 ? '🔒 好感 20 解鎖邀約' : (coToday ? '✅ 今日已邀約' : '💞 邀約同行 (2h 加成)'))}
               </button>
             </div>
           </div>
@@ -842,9 +903,35 @@
       }
     }
 
-    function triggerRandomEvent() {
+    const STUDY_EVENTS_POOL = [
+      {
+        title: '💡 靈光一閃', badge: '讀書事件', icon: '💡',
+        desc: '讀到一半，腦中突然把前幾章的觀念全部串起來了！這個瞬間稍縱即逝。',
+        choices: [
+          { label: '✍️ 立刻記下來', sub: '專注 +25，把靈感釘進筆記', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 25); return '💡 靈感入袋，專注大幅提升！'; } },
+          { label: '📖 繼續讀下去', sub: '壓力 +3，專注 +10', exec: () => { gameState.stress = Math.min(100, gameState.stress + 3); gameState.focus = Math.min(100, (gameState.focus || 0) + 10); return '📖 趁熱繼續讀，節奏沒斷。'; } },
+        ],
+      },
+      {
+        title: '😪 想睡了', badge: '讀書事件', icon: '😪',
+        desc: '眼皮越來越重，同一行字看了三遍還沒看懂。',
+        choices: [
+          { label: '💪 硬撐下去', sub: '壓力 +6，保住專注', exec: () => { gameState.stress = Math.min(100, gameState.stress + 6); return '💪 靠意志撐住了，但壓力上升。'; } },
+          { label: '🌿 起身休息一下', sub: '體力 +8，專注 −20', exec: () => { gameState.energy = Math.min(100, gameState.energy + 8); gameState.focus = Math.max(0, (gameState.focus || 0) - 20); return '🌿 休息後清醒多了，專注要重新累積。'; } },
+        ],
+      },
+      {
+        title: '🙋 同學來問問題', badge: '讀書事件', icon: '🙋',
+        desc: '同學湊過來問一題卡很久的題目，你其實已經會了。',
+        choices: [
+          { label: '🤝 教他', sub: '曉萱好感 +3，壓力 −4', exec: () => { if (typeof gainFriendAffinity === 'function') gainFriendAffinity('xiaoxuan', 3, true); gameState.stress = Math.max(0, gameState.stress - 4); return '🤝 教人自己也更熟練了，心情變好。'; } },
+          { label: '🙏 婉拒，專心讀書', sub: '專注 +8', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 8); return '🙏 守住自己的讀書節奏。'; } },
+        ],
+      },
+    ];
+    function triggerRandomEvent(forcedEvent) {
       if (activeRandomEvent) return;
-      const ev = RANDOM_EVENTS_POOL[Math.floor(Math.random() * RANDOM_EVENTS_POOL.length)];
+      const ev = forcedEvent || RANDOM_EVENTS_POOL[Math.floor(Math.random() * RANDOM_EVENTS_POOL.length)];
       activeRandomEvent = ev;
       randomEventDeadline = Date.now() + 15000; // 15 秒倒數
       randomEventModalOpen = false;

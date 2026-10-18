@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v8.9.1)
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.1.0)
    GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
    ========================================================================== */
 
@@ -498,6 +498,9 @@
 
     let currentWardrobeTab = 'hat';
     let editorTool = 'pencil';
+    let editorMirror = false;
+    let editorZoom = false;
+    let editorRecentColors = [];
     let editorSelectedColor = '#e74c3c';
     let editorCanvasPixels = new Array(SKIN_N).fill(null);
     let editorHistory = [];
@@ -670,6 +673,7 @@
         if (lbl) lbl.classList.toggle('active', t === type);
       });
       refreshEditorPreview();
+      renderTemplateChips();
     }
 
     // ---- v8.3 編輯器歷史 / 預覽 ----
@@ -787,7 +791,13 @@
           const el = document.elementFromPoint(x, y);
           return (el && el.classList && el.classList.contains('pixel-grid-cell')) ? el : null;
         };
+        let panStart = null;
         container.addEventListener('pointerdown', (e) => {
+          if (editorTool === 'pan') { // ✋ 移動畫布：拖曳捲動外層容器
+            const sc = document.getElementById('pixel-canvas-scroll');
+            if (sc) panStart = { x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop };
+            return;
+          }
           const cell = (e.target && e.target.classList && e.target.classList.contains('pixel-grid-cell')) ? e.target : cellFromPoint(e.clientX, e.clientY);
           if (!cell) return;
           e.preventDefault();
@@ -797,11 +807,16 @@
           paintCell(cell);
         });
         container.addEventListener('pointermove', (e) => {
+          if (panStart) {
+            const sc = document.getElementById('pixel-canvas-scroll');
+            if (sc) { sc.scrollLeft = panStart.l - (e.clientX - panStart.x); sc.scrollTop = panStart.t - (e.clientY - panStart.y); }
+            return;
+          }
           if (!drawing) return;
           const cell = cellFromPoint(e.clientX, e.clientY);
           if (cell) paintCell(cell);
         });
-        const endStroke = () => { if (drawing) { drawing = false; refreshEditorPreview(); } };
+        const endStroke = () => { panStart = null; if (drawing) { drawing = false; refreshEditorPreview(); } };
         container.addEventListener('pointerup', endStroke);
         container.addEventListener('pointercancel', endStroke);
         container.addEventListener('pointerleave', endStroke);
@@ -809,47 +824,122 @@
       refreshEditorPreview();
     }
 
+    const PALETTE_GROUPS = [
+      { label: '🕘 最近用色', colors: [] }, // 由 editorRecentColors 動態填入
+      { label: '🧑 膚色', colors: ['#ffe0bd', '#fed7aa', '#f1c27d', '#e0ac69', '#c68642', '#8d5524'] },
+      { label: '💇 髮色', colors: ['#2c1810', '#4a3728', '#6d4c41', '#8b5a2b', '#b07d48', '#e8c476', '#dfe3e6', '#e74c3c'] },
+      { label: '🎨 常用色', colors: ['#182042', '#e74c3c', '#c0392b', '#ffffff', '#f1c40f', '#2980b9', '#1f3a93', '#30d158', '#27ae60', '#ff9f0a', '#bf5af2', '#8e44ad', '#aedefc', '#86868b', '#ff8a8a', '#ffd60a', '#0a84ff', '#fca5a5', '#1d1d1f', '#70b848'] },
+    ];
     function initEditorPalette() {
-      const container = document.getElementById('palette-grid');
+      const container = document.getElementById('palette-groups');
       if (!container) return;
       container.innerHTML = "";
-
-      // v8.3 色票第一排就是角色自己的顏色 (描邊/膚/髮/帽/外套/背包/褲/鞋)，畫出來才會像同一個人
-      const presetColors = [
-        '#182042', '#fed7aa', '#3c2415', '#e74c3c', '#c0392b', '#ffffff', '#f1c40f', '#2980b9',
-        '#1f3a93', '#30d158', '#27ae60', '#ff9f0a', '#bf5af2', '#8e44ad', '#aedefc', '#86868b',
-        '#ff8a8a', '#ffd60a', '#0a84ff', '#8b5a2b', '#4a3728', '#fca5a5', '#1d1d1f', '#70b848'
-      ];
-
-      presetColors.forEach(color => {
-        const dot = document.createElement('div');
-        dot.className = `palette-dot ${color === editorSelectedColor ? 'active' : ''}`;
-        dot.style.backgroundColor = color;
-        dot.onclick = () => {
-          selectPaletteColor(color);
-        };
-        container.appendChild(dot);
+      PALETTE_GROUPS.forEach(group => {
+        const colors = group.label.includes('最近') ? editorRecentColors : group.colors;
+        if (group.label.includes('最近') && !colors.length) return;
+        const lbl = document.createElement('div');
+        lbl.className = 'palette-group-label';
+        lbl.textContent = group.label;
+        container.appendChild(lbl);
+        const grid = document.createElement('div');
+        grid.style.cssText = 'display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-bottom: 8px;';
+        colors.forEach(color => {
+          const dot = document.createElement('div');
+          dot.className = `palette-dot ${color === editorSelectedColor ? 'active' : ''}`;
+          dot.style.backgroundColor = color;
+          dot.onclick = () => { selectPaletteColor(color); };
+          grid.appendChild(dot);
+        });
+        container.appendChild(grid);
       });
     }
 
     function selectPaletteColor(color) {
       playSound('click');
       editorSelectedColor = color;
-
+      editorRecentColors = [color, ...editorRecentColors.filter(c => c !== color)].slice(0, 8);
       const picker = document.getElementById('editor-custom-color');
       if (picker) picker.value = color;
-
       initEditorPalette();
+    }
+
+    // ---- 部件範本 (16x25 字串圖，展開成 32x50；'.' = 不動) ----
+    const SKIN_TEMPLATES = {
+      hat: [
+        { name: '棒球帽', map: { R: '#e74c3c', D: '#c0392b', W: '#ffffff' }, rows: [
+          '................','....RRRRRRR.....','..RRRRRRRRRRR...','.RRRRRRRRRRRRR..','.DDDDDDDDDDDDDD.','....WWWW........','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
+        { name: '毛帽', map: { T: '#1abc9c', B: '#148f77', W: '#ffffff' }, rows: [
+          '................','...TTTTTTTTTT...','..TTTTTTTTTTTT..','..TTTTTTTTTTTT..','.TTTTTTTTTTTTTT.','.BBBBBBBBBBBBBB.','.BWBWBWBWBWBWB..','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
+        { name: '畢業帽', map: { K: '#23232b', G: '#f1c40f' }, rows: [
+          '................','.KKKKKKKKKKKKKK.','..KKKKKKKKKKKK..','....KKKKKKKK....','....KKKKKKKK....','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
+      ],
+      clothes: [
+        { name: '學霸制服', map: { N: '#2c3e50', W: '#ffffff', R: '#c0392b', D: '#182042' }, rows: [
+          '................','................','................','................','................','................','................','................','................','................','...NNNNNNNNNN...','..NNNNNNNNNNNN..','..NNWWNNNNWWNN..','..NNWWNNRRNNNN..','..NNNWNRRNNNNN..','..NNNWWNNNNNNN..','..SSNNNNNNNSS...','..SSNNNNNNNSS...','....NNNNNNNN....','....NNNNNNNN....','....DDDDDDDD....','................','................','................','................'] },
+        { name: '連帽T', map: { G: '#27ae60', D: '#1e8449', W: '#eafaf1' }, rows: [
+          '................','................','................','................','................','................','................','................','................','....GGGGGGGG....','..GGGGGGGGGGGG..','.GGGGGGGGGGGGGG.','.GGGGGGGGGGGGGG.','.GGGGGGGGGGGGGG.','.GGGGGDDDDGGGGG.','.GGGGGDDDDGGGGG.','..SSGGGGGGSS....','..SSGGGGGGSS....','....GGGGGGGG....','....GGGGGGGG....','....DDDDDDDD....','................','................','................','................'] },
+        { name: '背心紳士', map: { W: '#ffffff', B: '#8b5a2b', D: '#6d4423', G: '#f1c40f' }, rows: [
+          '................','................','................','................','................','................','................','................','................','................','...WWBBBBBBWW...','..WWWBBBBBBWWW..','..WWBBBBBBBBWW..','..WWBBBGGBBBB...','..WWBBBBBBBBWW..','..WWBBBBBBBBWW..','..SSBBBBBBBBSS..','..SSBBBBBBBBSS..','....BBBBBBB.....','....BBBBBBB.....','....DDDDDDD.....','................','................','................','................'] },
+      ],
+      shoes: [
+        { name: '紅白球鞋', map: { W: '#ffffff', R: '#e74c3c', D: '#c0392b' }, rows: [
+          '................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...WWWW..WWWW...','..WWWWWWWWWWWW..','...RRRR..RRRR...','................'] },
+        { name: '紳士皮鞋', map: { B: '#4a3728', D: '#2c1810', G: '#f1c40f' }, rows: [
+          '................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...BBBB..BBBB...','..BBBBBBBBBBBB..','...DDDD..DDDD...','................'] },
+      ],
+    };
+    function renderTemplateChips() {
+      const box = document.getElementById('template-chips');
+      if (!box) return;
+      const type = getEditorType();
+      box.innerHTML = '';
+      (SKIN_TEMPLATES[type] || []).forEach((tpl, i) => {
+        const b = document.createElement('button');
+        b.className = 'speed-btn template-chip';
+        b.textContent = tpl.name;
+        b.onclick = () => applySkinTemplate(type, i);
+        box.appendChild(b);
+      });
+    }
+    function applySkinTemplate(type, i) {
+      const tpl = (SKIN_TEMPLATES[type] || [])[i];
+      if (!tpl) return;
+      playSound('click');
+      pushEditorHistory();
+      const rows = tpl.rows.flatMap(row => { const ex = row.split('').map(ch => ch + ch).join(''); return [ex, ex]; }).join('');
+      for (let k = 0; k < SKIN_N; k++) {
+        const ch = rows[k];
+        if (ch && ch !== '.' && tpl.map[ch]) editorCanvasPixels[k] = tpl.map[ch];
+      }
+      refreshEditorCanvas(); refreshEditorPreview();
+      queueFloatingText(`🧩 已套用範本：${tpl.name}（可繼續微調，不喜歡可復原）`);
     }
 
     // 編輯工具 (v8.3：鉛筆/橡皮擦/填色/吸色)
     function setEditorTool(tool) {
       playSound('click');
       editorTool = tool;
-      ['pencil', 'eraser', 'fill', 'picker'].forEach(t => {
+      ['pencil', 'eraser', 'fill', 'picker', 'pan'].forEach(t => {
         const btn = document.getElementById(`tool-${t}`);
         if (btn) btn.classList.toggle('active', tool === t);
       });
+      const cont = document.getElementById('pixel-canvas-container');
+      if (cont) cont.style.cursor = tool === 'pan' ? 'grab' : 'crosshair';
+    }
+    function toggleEditorMirror() {
+      playSound('click');
+      editorMirror = !editorMirror;
+      const b = document.getElementById('tool-mirror');
+      if (b) { b.textContent = editorMirror ? '🪞 鏡像：開' : '🪞 鏡像：關'; b.classList.toggle('active', editorMirror); }
+    }
+    function toggleEditorZoom() {
+      playSound('click');
+      editorZoom = !editorZoom;
+      const cont = document.getElementById('pixel-canvas-container');
+      if (cont) cont.classList.toggle('zoomed', editorZoom);
+      const b = document.getElementById('editor-zoom-btn');
+      if (b) { b.textContent = editorZoom ? '🔍 放大中 (點我還原)' : '🔍 放大 2x'; b.classList.toggle('active', editorZoom); }
+      if (editorZoom) setEditorTool('pan'); // 放大後先讓使用者移動到想畫的位置
     }
 
     function clearEditorCanvas() {
@@ -873,6 +963,15 @@
       if (editorCanvasPixels[idx] !== val) {
         editorCanvasPixels[idx] = val;
         cell.style.backgroundColor = val ? val : 'transparent';
+      }
+      if (editorMirror) { // 鏡像：同一筆同步畫到左右對稱格
+        const x = idx % SKIN_W, y = Math.floor(idx / SKIN_W);
+        const midx = y * SKIN_W + (SKIN_W - 1 - x);
+        if (midx !== idx && editorCanvasPixels[midx] !== val) {
+          editorCanvasPixels[midx] = val;
+          const mc = document.querySelector(`.pixel-grid-cell[data-index="${midx}"]`);
+          if (mc) mc.style.backgroundColor = val ? val : 'transparent';
+        }
       }
     }
 
@@ -1177,6 +1276,7 @@
       const btnClose = document.getElementById("btn-modal-close");
 
       if (roll <= passRate) {
+        gameState._examPassedDay = gameState.totalGameDays; // v9.1 每日任務
         playSound('examSuccess');
         if (gameState.gradeIndex < GRADES.length - 1) {
           gameState.gradeIndex += 1;
@@ -1320,7 +1420,21 @@
     }
 
     // ------------------------------------------
+    // v9.1 每日任務面板
+    function renderDailyQuests() {
+      const box = document.getElementById('daily-quests-list');
+      if (!box || typeof ensureDailyQuests !== 'function') return;
+      const dq = ensureDailyQuests();
+      box.innerHTML = dq.ids.map(id => {
+        const q = DAILY_QUEST_POOL.find(x => x.id === id);
+        if (!q) return '';
+        const p = q.prog(); const done = !!dq.rewarded[id] || p >= q.target;
+        return `<div class="quest-row ${done ? 'done' : ''}"><span class="quest-icon">${q.icon}</span><span class="quest-desc">${q.desc}</span><span class="quest-prog">${Math.min(p, q.target)}/${q.target}</span><span class="quest-reward">${done ? '✅ 已領 $' + q.reward : '$' + q.reward}</span></div>`;
+      }).join('');
+    }
     function updateUI() {
+      renderDailyQuests();
+      if (typeof refreshMoneySinks === 'function') refreshMoneySinks();
       elGradeTitle.innerText = GRADES[gameState.gradeIndex].name;
       elMoneyVal.innerText = '$' + gameState.money;
 
@@ -1391,7 +1505,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v8.9.1) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.1.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1552,6 +1666,30 @@
       elStageBoard.innerHTML = html;
     }
 
+    // v9.1 知識光點：學到哪一科，就冒哪一科顏色的光點
+    const SUBJECT_COLORS = { cn: '#e74c3c', en: '#2980b9', ma: '#27ae60', sc: '#8e44ad', so: '#f39c12' };
+    function spawnKnowledgeOrb(subKey) {
+      const wrap = document.getElementById('char-wrap');
+      if (!wrap) return;
+      const orb = document.createElement('div');
+      orb.className = 'knowledge-orb';
+      orb.style.background = SUBJECT_COLORS[subKey] || '#ffd32a';
+      orb.style.left = (14 + Math.random() * 16) + 'px';
+      wrap.appendChild(orb);
+      setTimeout(() => orb.remove(), 1300);
+    }
+    // v9.1 桌上書堆：今日讀得越多，書堆越高 (最多 5 本)
+    function updateStudyBooks() {
+      const n = Math.min(5, gameState.studyHoursToday || 0);
+      ['study-books-school', 'study-books-library'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.querySelectorAll('.book-layer').forEach((b, i) => { b.style.display = i < n ? 'block' : 'none'; });
+      });
+      const fx = document.getElementById('lbl-focus');
+      if (fx) fx.innerText = `${Math.round(gameState.focus || 0)} / 100`;
+      const fb = document.getElementById('bar-focus');
+      if (fb) fb.style.width = `${Math.round(gameState.focus || 0)}%`;
+    }
     function updateCharacterAnimation() {
       // 1. 地標房屋掀頂 (active-inside)
       for (let key in elLandmarks) {
@@ -1569,6 +1707,11 @@
           elLandmarks[key].classList.remove("active-highlight");
         }
       }
+
+      // v9.1 專注光暈 + 書堆刷新
+      updateStudyBooks();
+      { const focusTier = (typeof currentState !== 'undefined' && currentState === 'studying') ? ((gameState.focus || 0) >= 70 ? 'focus-high' : ((gameState.focus || 0) >= 35 ? 'focus-mid' : '')) : '';
+        if (elCharWrap && elCharWrap.dataset.focusTier !== focusTier) { elCharWrap.dataset.focusTier = focusTier; elCharWrap.classList.toggle('focus-high', focusTier === 'focus-high'); elCharWrap.classList.toggle('focus-mid', focusTier === 'focus-mid'); } }
 
       // 2. 清除小人身上的表情與家具 CSS 模式 (只保留住家陪睡控制)
       const elHome = elLandmarks.home;
