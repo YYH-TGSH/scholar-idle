@@ -3460,3 +3460,49 @@ input, select, textarea { border-radius: 14px !important; }
 .beauty-spray { stroke-dasharray: 7 5; animation: beauty-spray-dash 0.9s linear infinite; }
 .beauty-spray.s2 { animation-delay: 0.3s; } .beauty-spray.s3 { animation-delay: 0.6s; }
 @keyframes beauty-spray-dash { to { stroke-dashoffset: -12; } }
+
+
+/* ================= v9.2 底部彈出卡片 (Bottom Sheet) ================= */
+/* 取代右側全高抽屜：面板從底部滑出、高度依內容（最高 86dvh）、點遮罩或按 Esc 關閉。 */
+#sheet-backdrop {
+  position: fixed; inset: 0; z-index: 99;
+  background: rgba(13, 18, 38, 0.46);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#sheet-backdrop.show { opacity: 1; pointer-events: auto; }
+.drawer-panel {
+  position: fixed !important;
+  left: 0 !important; right: 0 !important;
+  top: auto !important; bottom: 0 !important;
+  width: auto !important; height: auto !important;
+  max-height: 86dvh;
+  margin-left: auto; margin-right: auto;
+  border-left: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 26px 26px 0 0 !important;
+  transform: translateY(106%);
+  box-shadow: none !important;
+  transition: transform 0.48s cubic-bezier(0.32, 0.72, 0.24, 1), visibility 0s linear 0.48s, box-shadow 0.3s ease !important;
+}
+.drawer-panel.open {
+  transform: translateY(0);
+  box-shadow: 0 -14px 44px rgba(10, 16, 40, 0.30) !important;
+  transition: transform 0.48s cubic-bezier(0.32, 0.72, 0.24, 1), visibility 0s, box-shadow 0.3s ease !important;
+}
+@media (min-width: 700px) {
+  .drawer-panel { width: 620px !important; }
+}
+/* 拖曳把手 */
+.drawer-panel::before {
+  content: ""; position: absolute; top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 46px; height: 5px; border-radius: 3px;
+  background: rgba(20, 28, 54, 0.22);
+  z-index: 3; pointer-events: none;
+}
+.drawer-panel .drawer-header { padding-top: 26px; }
+.drawer-panel .drawer-body {
+  min-height: 0;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}

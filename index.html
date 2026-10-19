@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.1.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.2.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -949,6 +949,7 @@
        滑出式側邊抽屜面板 (Drawers)
        ========================================== -->
 <!-- 常駐屬性面板 (左側) -->
+  <div id="sheet-backdrop" onclick="closeAllDrawers()"></div>
   <div class="drawer-panel fixed-status-panel" id="drawer-status">
     <div class="drawer-header" style="padding: 16px 20px; background: rgba(255, 255, 255, 0.15);">
       <h3 style="font-size: 1rem; display: flex; align-items: center; gap: 6px;">📊 學科與生理狀態</h3>
@@ -1437,7 +1438,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.1.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.2.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -1830,7 +1831,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.1.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.2.0)
   </div>
 
   <!-- ==========================================================================

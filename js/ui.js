@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.1.0)
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.2.0)
    GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
    ========================================================================== */
 
@@ -63,6 +63,7 @@
 
       if (!isOpen) {
         target.classList.add("open");
+        syncSheetBackdrop(); // v9.2
         if (id === 'friends' && typeof renderFriendsList === 'function') {
           renderFriendsList();
         }
@@ -76,7 +77,16 @@
       document.querySelectorAll(".drawer-panel").forEach(drawer => {
         drawer.classList.remove("open");
       });
+      syncSheetBackdrop(); // v9.2
     }
+
+    // v9.2 底部彈出卡片：遮罩與任一開啟中的面板同步；點遮罩/Esc 關閉
+    function syncSheetBackdrop() {
+      const bd = document.getElementById("sheet-backdrop");
+      if (!bd) return;
+      bd.classList.toggle("show", !!document.querySelector(".drawer-panel.open"));
+    }
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAllDrawers(); });
 
 
     // ==========================================
@@ -1505,7 +1515,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.1.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.2.0) | 上次存檔：${ts}`);
       }
     }
 

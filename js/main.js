@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v9.1.0)
+   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v9.2.0)
    作息大腦、主循環、房租結算、版本控制與啟動初始化
    ========================================================================== */
 
@@ -248,7 +248,7 @@
       const vp = document.getElementById("map-viewport");
       const map = document.getElementById("town-map");
       if (!vp || !map) return;
-      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v9.1.0)
+      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v9.2.0)
       if (vp.scrollTop !== 0) vp.scrollTop = 0;
       const availW = vp.clientWidth;
       const availH = vp.clientHeight;
@@ -1086,7 +1086,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.1.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.2.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
