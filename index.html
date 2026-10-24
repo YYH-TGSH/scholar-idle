@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.2.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.4.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -26,6 +26,9 @@
 
   <!-- 一屏盡覽自適應聚落視窗 (全螢幕自適應等比縮放舞台) -->
   <div class="map-viewport" id="map-viewport">
+    <div id="glance-quest" class="glance-card" onclick="openSheetTab('status','quests')">📋 今日任務 <b id="glance-quest-txt">0/3</b></div>
+    <div id="glance-rival" class="glance-card right" onclick="openSheetTab('status','rivals')">🏁 <span id="glance-rival-txt">宿敵競速</span></div>
+    <div id="combo-pill" style="display:none;">🔥 陪讀連擊 ×<span id="combo-num">0</span><span class="combo-hint">點知識泡泡！</span></div>
     <div class="town-map" id="town-map">
 
       <!-- ==========================================================================
@@ -910,6 +913,12 @@
       </div>
       <button id="btn-exam-trigger" class="btn-exam-mini" onclick="triggerExam()">參加考試</button>
     </div>
+    <div class="hud-vitals">
+      <span class="hv"><span class="hv-ico">🔋</span><span class="hv-bar"><span id="hud-energy" class="hv-e"></span></span></span>
+      <span class="hv"><span class="hv-ico">🍔</span><span class="hv-bar"><span id="hud-hunger" class="hv-h"></span></span></span>
+      <span class="hv"><span class="hv-ico">😖</span><span class="hv-bar"><span id="hud-stress" class="hv-s"></span></span></span>
+      <span class="hv"><span class="hv-ico">🔥</span><span class="hv-bar"><span id="hud-focus" class="hv-f"></span></span></span>
+    </div>
   </div>
 
   <!-- 危險狀態警示條 -->
@@ -922,7 +931,7 @@
   <!-- 2. 右側懸浮控制小圓鈕 -->
   <div class="floating-controls">
     <button class="control-fab" onclick="toggleDrawer('status')" style="background-color: var(--sky-blue);" title="查看能力 (S)">
-      📊 <span class="fab-lbl">能力</span>
+      📊 <span class="fab-lbl">能力</span><span class="fab-dot" id="login-dot" style="display:none;"></span>
     </button>
     <button class="control-fab" onclick="toggleDrawer('build')" style="background-color: #ff9f0a;" title="城鎮建設 (B)">
       🏛️ <span class="fab-lbl">建設</span>
@@ -1019,6 +1028,22 @@
       <div class="status-group" style="margin-bottom: 14px;">
         <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">📋 今日任務 <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">完成自動發獎勵，每天刷新 3 個</span></div>
         <div id="daily-quests-list"></div>
+      </div>
+
+      <div class="status-group" style="margin-bottom: 14px;">
+        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">🎯 本週目標 <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">達成獎 $1200，每週一題</span></div>
+        <div id="weekly-goal-box"></div>
+      </div>
+
+      <div class="status-group" style="margin-bottom: 14px;">
+        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">🏁 宿敵競爭 <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">搶同一個升學名額</span></div>
+        <div id="rivals-list"></div>
+        <div id="rival-taunt" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-weight: 700;"></div>
+      </div>
+
+      <div class="status-group" style="margin-bottom: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn" style="flex: 1; min-width: 140px;" onclick="openMockExam()">📝 模擬考<span style="display:block; font-size: 0.68rem; font-weight: 600; opacity: 0.75;">每日一次・幫正式考試加成功率</span></button>
+        <button class="btn" style="flex: 1; min-width: 140px;" onclick="openLoginModal()">📅 <span id="login-btn-label">每日登入</span></button>
       </div>
 
       <div class="academic-section-group">
@@ -1281,6 +1306,20 @@
           </div>
         </div>
 
+        <!-- 🎰 服裝轉蛋 (v9.3 收集) -->
+        <div class="shop-item" style="border: 2px dashed #8e44ad;">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🎰</span>
+            <div>
+              <span class="shop-item-name">服裝轉蛋（限定部件・湊套裝）</span>
+              <div class="shop-item-desc" id="gacha-status">已收集部件 0 / 9</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" id="btn-gacha" onclick="drawGacha()">🎰 抽一次 $300</button>
+          </div>
+        </div>
+
         <!-- 🏠 住家裝潢 (v9.1 花錢系統) -->
         <div class="shop-item" style="border: 2px dashed #b8860b;">
           <div class="shop-item-info">
@@ -1438,7 +1477,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.2.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.4.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -1723,6 +1762,47 @@
   </div>
 
 
+  <div class="overlay" id="mock-overlay">
+    <div class="game-modal" style="width: 480px; max-width: 95%; text-align: left; padding: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="font-size: 1.1rem;">📝 模擬考</h3>
+        <span style="font-weight:900; background:#ffe9a8; border-radius:999px; padding:4px 12px;">⏱ <span id="mock-time">60</span> 秒</span>
+      </div>
+      <div id="mock-quiz">
+        <div id="mock-progress" style="font-size:0.78rem; color:var(--text-muted); font-weight:700; margin-bottom:6px;"></div>
+        <div id="mock-q" style="font-size:1.02rem; font-weight:900; margin-bottom:12px;"></div>
+        <div id="mock-opts" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+      <div id="mock-result" style="display:none; text-align:center; padding:10px 0;"></div>
+      <div style="text-align:right; margin-top:14px;">
+        <button class="btn" onclick="closeMockExam()">離開</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="login-overlay">
+    <div class="game-modal" style="width: 480px; max-width: 95%; text-align: left; padding: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size: 1.1rem;">📅 每日登入獎勵</h3>
+        <span id="login-streak" style="font-weight:900;">🔥 連續登入 1 天</span>
+      </div>
+      <div id="login-grid"></div>
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="btn" id="btn-login-claim" style="flex:1;" onclick="claimLoginReward()">🎁 領取今天的獎勵</button>
+        <button class="btn" onclick="closeLoginModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="gacha-overlay">
+    <div class="game-modal" style="width: 420px; max-width: 95%; text-align: center; padding: 24px; overflow: hidden;">
+      <h3 style="font-size: 1.1rem; margin-bottom: 8px;">🎰 服裝轉蛋</h3>
+      <div id="gacha-stage" style="font-size: 4rem; line-height: 1.2; transition: transform 0.09s;">🎁</div>
+      <div id="gacha-result" style="min-height: 44px; font-size: 0.92rem; margin-top: 8px;"></div>
+      <button class="btn" id="btn-gacha-close" style="display:none; margin-top: 10px;" onclick="closeGacha()">太棒了</button>
+    </div>
+  </div>
+
   <div class="overlay" id="achievement-overlay" onclick="if(event.target===this) closeAchievementPanel()">
     <div class="game-modal"
       style="width: 600px; max-width: 95%; max-height: 85vh; text-align: left; padding: 20px; display: flex; flex-direction: column;">
@@ -1831,7 +1911,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.2.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.4.0)
   </div>
 
   <!-- ==========================================================================
@@ -1841,14 +1921,7 @@
   <div class="overlay" id="onboarding-overlay">
     <div class="game-modal" style="width:440px; max-width:92%; text-align:left; padding:22px;">
       <div class="game-modal-title" style="margin-bottom:12px;">🎓 歡迎來到學霸養成記！</div>
-      <p style="line-height:1.9; font-size:0.95rem;">
-        你的目標：<b>一路升學，成為宇宙終極博士！</b><br>
-        ① 小人會自動作息：白天上課、晚上去圖書館複習<br>
-        ② 五科分數 = 學校聽講 (60) + 圖書館複習 (40)，填得越滿，考試合格率越高<br>
-        ③ 注意<b>精力 / 飽足 / 壓力</b>：太累或壓力爆表會讀不進去，該吃就吃、該睡就睡、該運動就運動<br>
-        ④ 錢不夠？週末去便利商店打工；有錢就升級小鎮建築，效果是永久的<br>
-        ⑤ 覺得慢？右上角可以調速度，推薦 60x
-      </p>
+      <div id="onboarding-manual"></div>
       <button class="btn-exam-mini ready" onclick="closeOnboarding()" style="width:100%; border:none; cursor:pointer; padding:10px; border-radius:12px; font-weight:800; margin-top:10px;">開始養成！</button>
     </div>
   </div>

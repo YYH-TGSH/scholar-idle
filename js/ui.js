@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.2.0)
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.4.0)
    GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
    ========================================================================== */
 
@@ -906,7 +906,7 @@
       (SKIN_TEMPLATES[type] || []).forEach((tpl, i) => {
         const b = document.createElement('button');
         b.className = 'speed-btn template-chip';
-        b.textContent = tpl.name;
+        b.textContent = (tpl.gacha && !(gameState.unlockedParts || []).includes(tpl.gacha)) ? '🔒 ' + tpl.name : tpl.name; // v9.3
         b.onclick = () => applySkinTemplate(type, i);
         box.appendChild(b);
       });
@@ -914,6 +914,7 @@
     function applySkinTemplate(type, i) {
       const tpl = (SKIN_TEMPLATES[type] || [])[i];
       if (!tpl) return;
+      if (tpl.gacha && !(gameState.unlockedParts || []).includes(tpl.gacha)) { createFloatingText('🔒 這是轉蛋限定部件，先去商店抽到它！'); return; } // v9.3
       playSound('click');
       pushEditorHistory();
       const rows = tpl.rows.flatMap(row => { const ex = row.split('').map(ch => ch + ch).join(''); return [ex, ex]; }).join('');
@@ -922,6 +923,8 @@
         if (ch && ch !== '.' && tpl.map[ch]) editorCanvasPixels[k] = tpl.map[ch];
       }
       refreshEditorCanvas(); refreshEditorPreview();
+      if (!gameState.equippedParts) gameState.equippedParts = { hat: null, clothes: null, shoes: null };
+      gameState.equippedParts[type] = tpl.gacha || ('tpl:' + tpl.name); // v9.3 套裝判定
       queueFloatingText(`🧩 已套用範本：${tpl.name}（可繼續微調，不喜歡可復原）`);
     }
 
@@ -1188,7 +1191,7 @@
         if (typeof getTownProsperityTotal === 'function' && getTownProsperityTotal() >= 18) landmarkExamBonus += 5;
       } catch (e) { }
       const examMut = typeof getMutationMult === 'function' ? getMutationMult('exam_rate') : 1.0;
-      return Math.min(100, Math.max(5, Math.round((baseRate + examBonus + landmarkExamBonus) * examMut)));
+      return Math.min(100, Math.max(5, Math.round((baseRate + examBonus + landmarkExamBonus + (gameState.mockBuff || 0)) * examMut))); // v9.3 模擬考加成
     }
 
     function getExamCooldownRemaining() {
@@ -1280,6 +1283,7 @@
     }
 
     function finishExam(passRate, nextGradeName) {
+      gameState.mockBuff = 0; // v9.3 模擬考加成：用於本次考試後失效
       const roll = Math.random() * 100;
       const desc = document.getElementById("modal-desc");
       const statusLbl = document.getElementById("modal-status-lbl");
@@ -1292,6 +1296,9 @@
           gameState.gradeIndex += 1;
         }
         gameState.difficulty = parseFloat((gameState.difficulty + 0.15).toFixed(2));
+        gameState.examsPassedTotal = (gameState.examsPassedTotal || 0) + 1; // v9.3
+        if (typeof bumpWeekly === 'function') bumpWeekly('exams');
+        if (typeof onPlayerExamPassed === 'function') onPlayerExamPassed();
 
         for (let key in gameState.subjects) {
           gameState.subjects[key].school = 0;
@@ -1317,6 +1324,7 @@
         statusLbl.innerText = "失敗為成功之母。";
 
         // 設定 7 天冷卻結束時刻
+        if (typeof onPlayerExamFailed === 'function') onPlayerExamFailed(); // v9.3 宿敵搶先
         gameState.examCooldownEndDays = (gameState.totalGameDays || 0) + 7;
         gameState.examCooldownEndHour = gameState.hour;
         gameState.examCooldownEndMinute = gameState.minute;
@@ -1334,6 +1342,7 @@
 
     // ❓ 說明 Modal 控制函數
     function showHelpModal() {
+      if (typeof manualGo === 'function') manualGo('help', 0); // v9.4
       try {
         playSound('click');
         const overlay = document.getElementById("help-overlay");
@@ -1444,6 +1453,11 @@
     }
     function updateUI() {
       renderDailyQuests();
+      if (typeof renderRivals === 'function') renderRivals(); // v9.3
+      if (typeof renderWeeklyGoal === 'function') renderWeeklyGoal(); // v9.3
+      if (typeof renderGachaBox === 'function') renderGachaBox(); // v9.3
+      if (typeof renderLoginBtn === 'function') renderLoginBtn(); // v9.3
+      if (typeof renderHud === 'function') renderHud(); // v9.4
       if (typeof refreshMoneySinks === 'function') refreshMoneySinks();
       elGradeTitle.innerText = GRADES[gameState.gradeIndex].name;
       elMoneyVal.innerText = '$' + gameState.money;
@@ -1515,7 +1529,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.2.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.4.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1659,7 +1673,7 @@
         elBtnExam.style.cursor = 'not-allowed';
         elBtnExam.style.background = 'linear-gradient(135deg, #86868b, #636366)';
       } else {
-        elBtnExam.innerText = (gameState.examAttempts || 0) === 0 ? '參加考試（首次免費）' : '參加考試（$50）';
+        elBtnExam.innerText = `參加考試 ${rate}%${(gameState.examAttempts || 0) === 0 ? '（首次免費）' : '（$50）'}${gameState.mockBuff ? ' 模擬+' + gameState.mockBuff + '%' : ''}`; // v9.4 按鈕直接顯示成功率
         elBtnExam.disabled = false;
         elBtnExam.style.opacity = '1';
         elBtnExam.style.cursor = 'pointer';
@@ -2536,3 +2550,634 @@
       showMinigameResult(chosen === correct, 'home');
     };
 
+
+
+    // ================= v9.3 好玩化：陪讀連擊 / 模擬考 / 宿敵 / 本週目標 / 登入獎勵 / 轉蛋套裝 =================
+    // ---------- 陪讀連擊 ----------
+    const COMBO_SUBJECT_CHARS = { cn: '國', en: '英', ma: '數', sc: '理', so: '社' };
+    function comboMult() { return 1 + Math.min(gameState.combo || 0, 50) * 0.005; }
+    function updateComboPill() {
+      const pill = document.getElementById('combo-pill');
+      if (!pill) return;
+      const c = gameState.combo || 0;
+      pill.style.display = c >= 2 ? 'block' : 'none';
+      const num = document.getElementById('combo-num');
+      if (num) num.textContent = c;
+    }
+    function uiCovered() { return !!document.querySelector('.drawer-panel.open') || !!document.querySelector('.overlay.active'); }
+    function spawnComboBubble() {
+      const wrap = document.getElementById('char-wrap');
+      if (!wrap || wrap.querySelector('.combo-bubble')) return;
+      const keys = Object.keys(COMBO_SUBJECT_CHARS);
+      const sub = keys[Math.floor(Math.random() * keys.length)];
+      const el = document.createElement('button');
+      el.className = 'combo-bubble';
+      el.textContent = COMBO_SUBJECT_CHARS[sub];
+      el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#ffd32a';
+      el.style.left = (-30 + Math.random() * 62) + 'px';
+      el.style.top = (-52 + Math.random() * 22) + 'px';
+      el.setAttribute('aria-label', '知識泡泡');
+      el.onclick = () => popComboBubble(el);
+      wrap.appendChild(el);
+      setTimeout(() => {
+        if (el.isConnected && !el.dataset.done) {
+          el.remove();
+          if (!uiCovered() && (gameState.combo || 0) > 0) {
+            gameState.combo = 0;
+            updateComboPill();
+            queueFloatingText('💨 泡泡跑掉了，連擊中斷…');
+          }
+        }
+      }, 2600);
+      el._sub = sub;
+    }
+    function popComboBubble(el) {
+      if (!el || el.dataset.done) return;
+      el.dataset.done = '1';
+      const sub = el._sub || 'cn';
+      el.remove();
+      gameState.combo = (gameState.combo || 0) + 1;
+      const today = gameState.totalGameDays || 0;
+      if (gameState._comboDay !== today) { gameState._comboDay = today; gameState.comboHitsToday = 0; }
+      gameState.comboHitsToday = (gameState.comboHitsToday || 0) + 1;
+      if (typeof bumpWeekly === 'function') bumpWeekly('combo');
+      const prop = currentLoc === 'school' ? 'school' : 'home';
+      const cap = prop === 'school' ? 60 : 40;
+      const s = gameState.subjects[sub];
+      if (s) s[prop] = Math.min(cap, s[prop] + 1);
+      if (gameState.combo % 10 === 0) playSound('levelUp');
+      queueFloatingText(`🫧 連擊 ×${gameState.combo}（${s ? s.name : ''} +1）`);
+      updateComboPill();
+    }
+    function maybeSpawnComboBubble() {
+      try {
+        if (typeof gameState === 'undefined' || !gameState) return;
+        if (currentState !== 'studying') return;
+        if (currentLoc !== 'school' && currentLoc !== 'library') return;
+        if (uiCovered()) return;
+        if (Math.random() < 0.45) return;
+        spawnComboBubble();
+      } catch (e) { }
+    }
+    setInterval(maybeSpawnComboBubble, 1100);
+
+    // ---------- 模擬考 ----------
+    const MOCK_QUESTIONS = [
+      { q: '「床前明月光」的下一句是？', opts: ['疑是地上霜', '低頭思故鄉', '舉頭望明月'], a: 0 },
+      { q: '成語「畫蛇添足」的意思是？', opts: ['畫畫很厲害', '多此一舉', '蛇沒有腳'], a: 1 },
+      { q: 'Apple 是哪一種水果？', opts: ['香蕉', '西瓜', '蘋果'], a: 2 },
+      { q: '「Hot」的相反詞是？', opts: ['Cold', 'Warm', 'Big'], a: 0 },
+      { q: '7 × 8 = ?', opts: ['54', '56', '64'], a: 1 },
+      { q: '100 − 37 = ?', opts: ['63', '67', '73'], a: 0 },
+      { q: '三角形的內角和是幾度？', opts: ['90 度', '180 度', '360 度'], a: 1 },
+      { q: '12 × 5 = ?', opts: ['50', '55', '60'], a: 2 },
+      { q: '水的化學式是？', opts: ['CO2', 'H2O', 'O2'], a: 1 },
+      { q: '植物行光合作用需要什麼？', opts: ['月光', '陽光', '燈光泡泡'], a: 1 },
+      { q: '地球繞著什麼轉？', opts: ['月亮', '太陽', '火星'], a: 1 },
+      { q: '台灣最高的山是？', opts: ['阿里山', '雪山', '玉山'], a: 2 },
+      { q: '雙十國慶是幾月幾日？', opts: ['10 月 10 日', '1 月 1 日', '12 月 25 日'], a: 0 },
+      { q: '台灣最大的天然湖泊是？', opts: ['澄清湖', '日月潭', '鯉魚潭'], a: 1 },
+      { q: '一打有幾個？', opts: ['10 個', '12 個', '20 個'], a: 1 },
+      { q: 'Dog 的複數形是？', opts: ['Doges', 'Dogs', 'Dogies'], a: 1 },
+      { q: '哪個動物會冬眠？', opts: ['熊', '猴子', '大象'], a: 0 },
+      { q: '彩虹有幾種顏色？', opts: ['5 種', '6 種', '7 種'], a: 2 },
+    ];
+    let mockTimer = null, mockList = [], mockIdx = 0, mockScore = 0, mockTimeLeft = 60, mockLock = false;
+    function openMockExam() {
+      if (gameState._mockDay === (gameState.totalGameDays || 0)) { createFloatingText('📝 今天已經考過模擬考了，明天再來！'); return; }
+      const ov = document.getElementById('mock-overlay');
+      if (!ov) return;
+      mockList = [...MOCK_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 10);
+      mockIdx = 0; mockScore = 0; mockTimeLeft = 60; mockLock = false;
+      ov.classList.add('active');
+      document.getElementById('mock-result').style.display = 'none';
+      document.getElementById('mock-quiz').style.display = 'block';
+      renderMockQ();
+      clearInterval(mockTimer);
+      mockTimer = setInterval(() => {
+        mockTimeLeft--;
+        const tl = document.getElementById('mock-time');
+        if (tl) tl.textContent = mockTimeLeft;
+        if (mockTimeLeft <= 0) finishMockExam();
+      }, 1000);
+      const tl = document.getElementById('mock-time');
+      if (tl) tl.textContent = mockTimeLeft;
+    }
+    function renderMockQ() {
+      const item = mockList[mockIdx];
+      if (!item) { finishMockExam(); return; }
+      document.getElementById('mock-progress').textContent = `第 ${mockIdx + 1} / ${mockList.length} 題・答對 ${mockScore} 題`;
+      document.getElementById('mock-q').textContent = item.q;
+      const box = document.getElementById('mock-opts');
+      box.innerHTML = '';
+      item.opts.forEach((op, i) => {
+        const b = document.createElement('button');
+        b.className = 'btn mock-opt';
+        b.textContent = op;
+        b.onclick = () => answerMock(i, b);
+        box.appendChild(b);
+      });
+    }
+    function answerMock(i, btn) {
+      if (mockLock) return;
+      mockLock = true;
+      const item = mockList[mockIdx];
+      const ok = i === item.a;
+      if (ok) mockScore++;
+      btn.style.background = ok ? '#30d158' : '#ff5a5a';
+      btn.style.color = '#fff';
+      playSound(ok ? 'levelUp' : 'examFail');
+      setTimeout(() => { mockIdx++; mockLock = false; if (mockIdx >= mockList.length) finishMockExam(); else renderMockQ(); }, 260);
+    }
+    function finishMockExam() {
+      clearInterval(mockTimer);
+      gameState._mockDay = gameState.totalGameDays || 0;
+      const buff = Math.min(20, mockScore * 2);
+      gameState.mockBuff = buff;
+      document.getElementById('mock-quiz').style.display = 'none';
+      const res = document.getElementById('mock-result');
+      res.style.display = 'block';
+      res.innerHTML = `<div style="font-size:2rem;">${mockScore >= 8 ? '🏆' : (mockScore >= 5 ? '💪' : '😅')}</div><div style="font-weight:900; font-size:1.05rem; margin:6px 0;">答對 ${mockScore} / ${mockList.length} 題</div><div style="color:var(--text-muted); font-size:0.85rem;">正式考試成功率 <b style="color:#2a9d8f;">+${buff}%</b>（用於下一次升學考）</div>`;
+      playSound(mockScore >= 5 ? 'examSuccess' : 'click');
+      saveGameData();
+      updateUI();
+    }
+    function closeMockExam() {
+      clearInterval(mockTimer);
+      const ov = document.getElementById('mock-overlay');
+      if (ov) ov.classList.remove('active');
+    }
+
+    // ---------- 宿敵 ----------
+    const RIVAL_DEFS = [
+      { key: 'jie', name: '王子傑', emoji: '😎', rate: 0.78, lines: { lead: '「這次的升學名額，我先預約了。」', ready: '「我準備好了，你呢？」' } },
+      { key: 'kui', name: '陳小葵', emoji: '🌸', rate: 0.66, burst: true, lines: { lead: '「嘻嘻，我好像比較快喔～」', ready: '「我隨時可以考囉！」' } },
+      { key: 'shu', name: '高大樹', emoji: '🌳', rate: 0.58, lines: { lead: '「一步一腳印，我先到了。」', ready: '「準備完成，等你一起考。」' } },
+    ];
+    function ensureRivals() {
+      if (!Array.isArray(gameState.rivals) || gameState.rivals.length !== 3) {
+        gameState.rivals = RIVAL_DEFS.map((d, i) => ({ key: d.key, prog: [14, 9, 5][i], wins: 0 }));
+      }
+      return gameState.rivals;
+    }
+    function playerGradeProgress() {
+      let s = 0;
+      for (let k in gameState.subjects) s += gameState.subjects[k].school + gameState.subjects[k].home;
+      return Math.min(100, Math.round(s / 5));
+    }
+    function tickRivalsHourly() {
+      const rs = ensureRivals();
+      const you = playerGradeProgress();
+      rs.forEach(r => {
+        const def = RIVAL_DEFS.find(d => d.key === r.key);
+        let g = def.rate * (0.85 + Math.random() * 0.3);
+        if (def.burst && Math.random() < 0.08) g += 2.2;
+        const diff = r.prog - you;
+        if (diff > 25) g *= 0.7; else if (diff < -25) g *= 1.3;
+        r.prog = Math.round(Math.min(100, r.prog + g) * 10) / 10;
+      });
+      let leader = 'you', best = you;
+      rs.forEach(r => { if (r.prog > best) { best = r.prog; leader = r.key; } });
+      const prev = gameState._rivalLeader;
+      gameState._rivalLeader = leader;
+      if (prev && prev !== leader) {
+        if (leader === 'you') queueFloatingText('🏁 你衝到第一名了！');
+        else { const d = RIVAL_DEFS.find(x => x.key === leader); queueFloatingText(`🏁 ${d.name} 超前你了，加油！`); }
+      }
+      renderRivals();
+    }
+    function onPlayerExamPassed() {
+      ensureRivals().forEach(r => { r.prog = 4 + Math.round(Math.random() * 10); });
+      gameState._rivalLeader = null;
+      queueFloatingText('🏁 宿敵們也跟上來了，新一輪競賽開始！');
+      renderRivals();
+    }
+    function onPlayerExamFailed() {
+      const rs = ensureRivals();
+      const ready = rs.filter(r => r.prog >= 100);
+      if (ready.length) {
+        const d = RIVAL_DEFS.find(x => x.key === ready[0].key);
+        ready[0].wins = (ready[0].wins || 0) + 1;
+        ready[0].prog = 4 + Math.round(Math.random() * 10);
+        queueFloatingText(`😤 ${d.name} 搶先升學了！下次贏回來`);
+        renderRivals();
+      }
+    }
+    function renderRivals() {
+      const box = document.getElementById('rivals-list');
+      if (!box) return;
+      const rs = ensureRivals();
+      const you = playerGradeProgress();
+      const rows = [{ name: '你', emoji: '🧑', prog: you, you: true, wins: gameState.examsPassedTotal || 0 }]
+        .concat(rs.map(r => { const d = RIVAL_DEFS.find(x => x.key === r.key); return { name: d.name, emoji: d.emoji, prog: r.prog, wins: r.wins || 0 }; }))
+        .sort((a, b) => b.prog - a.prog);
+      const sig = rows.map(r => r.name + Math.round(r.prog) + ':' + r.wins).join('|');
+      if (box.dataset.sig === sig) return;
+      box.dataset.sig = sig;
+      box.innerHTML = rows.map(r => `<div class="rival-row${r.you ? ' is-you' : ''}"><span class="rival-emoji">${r.emoji}</span><span class="rival-name">${r.name}${r.wins ? ` 🏆×${r.wins}` : ''}</span><span class="rival-bar"><span class="rival-fill" style="width:${Math.min(100, r.prog)}%"></span></span><span class="rival-pct">${Math.floor(r.prog)}%${r.prog >= 100 ? ' 準備好了！' : ''}</span></div>`).join('');
+      const taunt = document.getElementById('rival-taunt');
+      if (taunt) {
+        const top = rows[0];
+        if (top.you) taunt.textContent = '目前由你領先，別鬆懈！';
+        else { const d = RIVAL_DEFS.find(x => x.name === top.name); taunt.textContent = top.prog >= 100 ? d.lines.ready : d.lines.lead; }
+      }
+    }
+
+    // ---------- 本週目標 ----------
+    const WEEKLY_POOL = [
+      { id: 'study', icon: '📚', desc: '本週讀書 {t} 小時', target: 15, metric: 'study' },
+      { id: 'exams', icon: '🎓', desc: '本週通過 {t} 次升學考', target: 1, metric: 'exams' },
+      { id: 'chats', icon: '💬', desc: '本週和好友聊天 {t} 次', target: 8, metric: 'chats' },
+      { id: 'quests', icon: '📋', desc: '本週完成 {t} 個每日任務', target: 9, metric: 'quests' },
+      { id: 'combo', icon: '🫧', desc: '本週陪讀連擊點擊 {t} 次', target: 60, metric: 'combo' },
+    ];
+    const WEEKLY_REWARD = 1200;
+    function weekKeyOf() {
+      const d = new Date(); const s = new Date(d.getFullYear(), 0, 1);
+      const w = Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7);
+      return d.getFullYear() + '-W' + w;
+    }
+    function ensureWeeklyGoal() {
+      const key = weekKeyOf();
+      if (!gameState.weekly || gameState.weekly.key !== key) {
+        const def = WEEKLY_POOL[Math.floor(Math.random() * WEEKLY_POOL.length)];
+        gameState.weekly = { key, id: def.id, counts: { study: 0, exams: 0, chats: 0, quests: 0, combo: 0 }, rewarded: false };
+      }
+      return gameState.weekly;
+    }
+    function weeklyDef() { return WEEKLY_POOL.find(x => x.id === ensureWeeklyGoal().id); }
+    function bumpWeekly(m) {
+      const w = ensureWeeklyGoal();
+      w.counts[m] = (w.counts[m] || 0) + 1;
+      evaluateWeeklyReward();
+      renderWeeklyGoal();
+    }
+    function evaluateWeeklyReward() {
+      const w = ensureWeeklyGoal(); const def = weeklyDef();
+      if (!w.rewarded && (w.counts[def.metric] || 0) >= def.target) {
+        w.rewarded = true;
+        gameState.money = (gameState.money || 0) + WEEKLY_REWARD;
+        queueFloatingText(`🎯 本週目標達成：${def.desc.replace('{t}', def.target)}（+$${WEEKLY_REWARD}）`);
+        playSound('levelUp');
+        saveGameData();
+      }
+    }
+    function renderWeeklyGoal() {
+      const box = document.getElementById('weekly-goal-box');
+      if (!box) return;
+      const w = ensureWeeklyGoal(); const def = weeklyDef();
+      const cur = Math.min(def.target, w.counts[def.metric] || 0);
+      const sig = w.key + cur + w.rewarded;
+      if (box.dataset.sig === sig) return;
+      box.dataset.sig = sig;
+      box.innerHTML = `<div class="quest-row${w.rewarded ? ' done' : ''}"><span class="quest-icon">${def.icon}</span><span class="quest-desc">${def.desc.replace('{t}', def.target)}</span><span class="quest-prog">${w.rewarded ? '✅ 已領獎' : cur + ' / ' + def.target}</span><span class="quest-reward">$${WEEKLY_REWARD}</span></div>`;
+    }
+
+    // ---------- 每日登入獎勵 ----------
+    const LOGIN_REWARDS = [
+      { label: '$100', money: 100 }, { label: '$200', money: 200 }, { label: '🎁 服裝部件', part: true },
+      { label: '$400', money: 400 }, { label: '📚 全科 +4', study: 4 }, { label: '$800', money: 800 },
+      { label: '🎁 部件＋$600', part: true, money: 600 },
+    ];
+    function dateStr(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function ensureLogin() { if (!gameState.login) gameState.login = { last: '', streak: 0, claimed: true }; return gameState.login; }
+    function checkLoginReward() {
+      const L = ensureLogin();
+      const today = dateStr(new Date());
+      if (L.last !== today) {
+        const y = new Date(); y.setDate(y.getDate() - 1);
+        L.streak = (L.last === dateStr(y)) ? (L.streak || 0) + 1 : 1;
+        L.last = today; L.claimed = false;
+        saveGameData();
+      }
+      if (!L.claimed) {
+        if (document.querySelector('.overlay.active') && !document.getElementById('login-overlay').classList.contains('active')) {
+          gameState._loginRetries = (gameState._loginRetries || 0) + 1;
+          if (gameState._loginRetries < 24) setTimeout(checkLoginReward, 2500);
+          return;
+        }
+        openLoginModal();
+      }
+      renderLoginBtn();
+    }
+    function loginCycleDay() { const L = ensureLogin(); return ((Math.max(1, L.streak || 1) - 1) % 7) + 1; }
+    function openLoginModal() { const ov = document.getElementById('login-overlay'); if (!ov) return; renderLoginModal(); ov.classList.add('active'); }
+    function closeLoginModal() { const ov = document.getElementById('login-overlay'); if (ov) ov.classList.remove('active'); }
+    function renderLoginModal() {
+      const L = ensureLogin(); const day = loginCycleDay();
+      const grid = document.getElementById('login-grid');
+      if (grid) {
+        grid.innerHTML = LOGIN_REWARDS.map((r, i) => {
+          const d = i + 1; const cls = d < day ? ' past' : (d === day ? ' today' : '');
+          return `<div class="login-cell${cls}"><div class="login-day">第 ${d} 天</div><div class="login-reward">${r.label}</div>${d === day ? `<div class="login-state">${L.claimed ? '✅ 已領取' : '🎁 今天'}</div>` : ''}</div>`;
+        }).join('');
+      }
+      const st = document.getElementById('login-streak');
+      if (st) st.textContent = `🔥 連續登入 ${L.streak || 1} 天`;
+      const btn = document.getElementById('btn-login-claim');
+      if (btn) { btn.disabled = !!L.claimed; btn.textContent = L.claimed ? '✅ 今天已領取（明天再來）' : '🎁 領取今天的獎勵'; }
+    }
+    function claimLoginReward() {
+      const L = ensureLogin();
+      if (L.claimed) return;
+      const r = LOGIN_REWARDS[loginCycleDay() - 1];
+      if (r.money) gameState.money = (gameState.money || 0) + r.money;
+      if (r.study) { for (let k in gameState.subjects) { gameState.subjects[k].school = Math.min(60, gameState.subjects[k].school + r.study); gameState.subjects[k].home = Math.min(40, gameState.subjects[k].home + r.study); } }
+      let partMsg = '';
+      if (r.part) partMsg = grantRandomPart();
+      L.claimed = true;
+      playSound('levelUp');
+      queueFloatingText(`📅 登入獎勵：${r.label}${partMsg}`);
+      renderLoginModal(); renderLoginBtn();
+      saveGameData(); updateUI();
+    }
+    function grantRandomPart() {
+      const locked = GACHA_PARTS.filter(pt => !(gameState.unlockedParts || []).includes(pt.id));
+      if (!locked.length) { gameState.money = (gameState.money || 0) + 300; return '（部件已全收集，改發 $300）'; }
+      const pick = locked[Math.floor(Math.random() * locked.length)];
+      if (!gameState.unlockedParts) gameState.unlockedParts = [];
+      gameState.unlockedParts.push(pick.id);
+      return '：' + pick.name;
+    }
+    function renderLoginBtn() {
+      const el = document.getElementById('login-btn-label');
+      if (!el) return;
+      const L = ensureLogin();
+      const txt = `每日登入（連續 ${L.streak || 0} 天）${L.claimed ? '' : '・有獎勵可領！'}`;
+      if (el.textContent !== txt) el.textContent = txt;
+         const dot = document.getElementById('login-dot'); // v9.4 主畫面紅點
+      if (dot) dot.style.display = L.claimed ? 'none' : 'block';
+    }
+    setTimeout(() => { try { checkLoginReward(); } catch (e) { } }, 1600);
+
+    // ---------- 轉蛋 + 套裝 ----------
+    const HAT_A = ['................','....RRRRRRR.....','..RRRRRRRRRRR...','.RRRRRRRRRRRRR..','.DDDDDDDDDDDDDD.','....WWWW........','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'];
+    const HAT_B = ['................','...TTTTTTTTTT...','..TTTTTTTTTTTT..','..TTTTTTTTTTTT..','.TTTTTTTTTTTTTT.','.BBBBBBBBBBBBBB.','.BWBWBWBWBWBWB..','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'];
+    const TOP_A = ['................','................','................','................','................','................','................','................','................','................','...NNNNNNNNNN...','..NNNNNNNNNNNN..','..NNWWNNNNWWNN..','..NNWWNNRRNNNN..','..NNNWNRRNNNNN..','..NNNWWNNNNNNN..','..SSNNNNNNNSS...','..SSNNNNNNNSS...','....NNNNNNNN....','....NNNNNNNN....','....DDDDDDDD....','................','................','................','................'];
+    const TOP_B = ['................','................','................','................','................','................','................','................','................','................','...WWBBBBBBWW...','..WWWBBBBBBWWW..','..WWBBBBBBBBWW..','..WWBBBGGBBBB...','..WWBBBBBBBBWW..','..WWBBBBBBBBWW..','..SSBBBBBBBBSS..','..SSBBBBBBBBSS..','....BBBBBBB.....','....BBBBBBB.....','....DDDDDDD.....','................','................','................','................'];
+    const SHOE_A = ['................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...WWWW..WWWW...','..WWWWWWWWWWWW..','...RRRR..RRRR...','................'];
+    const SHOE_B = ['................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...BBBB..BBBB...','..BBBBBBBBBBBB..','...DDDD..DDDD...','................'];
+    const HAT_TOP = ['................','................','................','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','....GGGGGGGG....','..KKKKKKKKKKKK..','..KKKKKKKKKKKK..','................','................','................','................','................','................','................','................','................','................','................','................','................','................'];
+    const GACHA_PARTS = [
+      { id: 'star-hat', set: 'star', type: 'hat', name: '星空法帽', map: { T: '#2b2d5c', B: '#4547a8', W: '#f1c40f' }, rows: HAT_B },
+      { id: 'star-clothes', set: 'star', type: 'clothes', name: '星空法袍', map: { N: '#34306e', W: '#f5f3ff', R: '#f1c40f', D: '#1d1b3e' }, rows: TOP_A },
+      { id: 'star-shoes', set: 'star', type: 'shoes', name: '星塵跑鞋', map: { W: '#e8e6ff', R: '#5a54c4', D: '#3c388f' }, rows: SHOE_A },
+      { id: 'sport-hat', set: 'sport', type: 'hat', name: '火焰鴨舌帽', map: { R: '#ff8c1a', D: '#e56f00', W: '#ffffff' }, rows: HAT_A },
+      { id: 'sport-clothes', set: 'sport', type: 'clothes', name: '火焰背心', map: { W: '#ffffff', B: '#ff8c1a', D: '#c75b00', G: '#ffe08a' }, rows: TOP_B },
+      { id: 'sport-shoes', set: 'sport', type: 'shoes', name: '火焰跑鞋', map: { W: '#ffffff', R: '#ff8c1a', D: '#e56f00' }, rows: SHOE_A },
+      { id: 'noble-hat', set: 'noble', type: 'hat', name: '貴族禮帽', map: { K: '#23232b', G: '#f1c40f' }, rows: HAT_TOP },
+      { id: 'noble-clothes', set: 'noble', type: 'clothes', name: '貴族西裝', map: { W: '#f8f6f0', B: '#23232b', D: '#101016', G: '#f1c40f' }, rows: TOP_B },
+      { id: 'noble-shoes', set: 'noble', type: 'shoes', name: '貴族皮鞋', map: { B: '#23232b', D: '#101016', G: '#f1c40f' }, rows: SHOE_B },
+    ];
+    GACHA_PARTS.forEach(pt => { SKIN_TEMPLATES[pt.type].push({ name: pt.name, map: pt.map, rows: pt.rows, gacha: pt.id }); });
+    const SET_DEFS = {
+      star: { name: '🌌 星空學者套', parts: ['star-hat', 'star-clothes', 'star-shoes'], desc: '讀書效率 +15%' },
+      sport: { name: '🏃 運動健將套', parts: ['sport-hat', 'sport-clothes', 'sport-shoes'], desc: '通勤時間 −20%' },
+      noble: { name: '🎩 貴族學院套', parts: ['noble-hat', 'noble-clothes', 'noble-shoes'], desc: '打工時薪 +25%' },
+    };
+    function activeSets() {
+      const eq = gameState.equippedParts || {};
+      const vals = Object.values(eq);
+      return Object.keys(SET_DEFS).filter(k => SET_DEFS[k].parts.every(pid => vals.includes(pid)));
+    }
+    function setStudyMult() { return activeSets().includes('star') ? 1.15 : 1; }
+    function setMoveMult() { return activeSets().includes('sport') ? 0.8 : 1; }
+    function setWageMult() { return activeSets().includes('noble') ? 1.25 : 1; }
+    let gachaTimer = null;
+    function drawGacha() {
+      if ((gameState.money || 0) < 300) { createFloatingText('❌ 零用錢不夠！轉蛋一次 $300'); return; }
+      gameState.money -= 300;
+      const ov = document.getElementById('gacha-overlay');
+      const stage = document.getElementById('gacha-stage');
+      const res = document.getElementById('gacha-result');
+      const btn = document.getElementById('btn-gacha-close');
+      if (!ov || !stage) return;
+      ov.classList.add('active');
+      if (btn) btn.style.display = 'none';
+      if (res) res.textContent = '';
+      const pool = GACHA_PARTS.filter(pt => !(gameState.unlockedParts || []).includes(pt.id));
+      const result = pool.length ? { part: pool[Math.floor(Math.random() * pool.length)] } : { money: 150 };
+      const emojis = ['🎁', '🧢', '👕', '👟', '⭐', '🎩', '🌌'];
+      let n = 0;
+      clearInterval(gachaTimer);
+      gachaTimer = setInterval(() => {
+        stage.textContent = emojis[n % emojis.length];
+        stage.style.transform = `scale(${1 + ((n % 3) * 0.12)})`;
+        n++;
+        if (n > 11) {
+          clearInterval(gachaTimer);
+          if (result.part) {
+            stage.textContent = '🎉';
+            if (!gameState.unlockedParts) gameState.unlockedParts = [];
+            gameState.unlockedParts.push(result.part.id);
+            if (res) res.innerHTML = `抽中限定部件：<b>${result.part.name}</b>！<br><span style="font-size:0.8rem; color:var(--text-muted);">到衣櫃編輯器的範本區套用它，湊滿一套還有加成</span>`;
+            playSound('examSuccess');
+          } else {
+            stage.textContent = '💰';
+            gameState.money = (gameState.money || 0) + 150;
+            if (res) res.innerHTML = '部件全收集了！殘念獎 <b>$150</b>';
+            playSound('levelUp');
+          }
+          if (btn) btn.style.display = 'inline-block';
+          renderGachaBox();
+          saveGameData();
+          updateUI();
+        }
+      }, 90);
+    }
+    function closeGacha() {
+      clearInterval(gachaTimer);
+      const ov = document.getElementById('gacha-overlay');
+      if (ov) ov.classList.remove('active');
+    }
+    function renderGachaBox() {
+      const box = document.getElementById('gacha-status');
+      if (!box) return;
+      const owned = (gameState.unlockedParts || []).length;
+      const act = activeSets();
+      const sig = owned + '|' + act.join(',') + '|' + ((gameState.money || 0) >= 300);
+      if (box.dataset.sig === sig) return;
+      box.dataset.sig = sig;
+      const lines = Object.entries(SET_DEFS).map(([k, s]) => {
+        const has = s.parts.filter(pid => (gameState.unlockedParts || []).includes(pid)).length;
+        return `${s.name}：${has}/3${act.includes(k) ? ` ✅ 生效中（${s.desc}）` : ''}`;
+      }).join('<br>');
+      box.innerHTML = `已收集部件 ${owned} / ${GACHA_PARTS.length}<br>${lines}`;
+    }
+
+
+    // ================= v9.4 介面重構：主畫面直達 + 面板分頁 =================
+    function renderHud() {
+      const setW = (id, v) => { const e = document.getElementById(id); if (e) e.style.width = Math.max(0, Math.min(100, v || 0)) + '%'; };
+      setW('hud-energy', gameState.energy);
+      setW('hud-hunger', gameState.hunger);
+      setW('hud-stress', gameState.stress);
+      setW('hud-focus', gameState.focus || 0);
+      const q = document.getElementById('glance-quest-txt');
+      if (q && typeof ensureDailyQuests === 'function') {
+        const dq = ensureDailyQuests();
+        let done = 0, nextDesc = '';
+        dq.ids.forEach(id => {
+          const def = DAILY_QUEST_POOL.find(x => x.id === id);
+          if (!def) return;
+          if (def.prog() >= def.target) done++;
+          else if (!nextDesc) nextDesc = def.desc;
+        });
+        const txt = done + '/3' + (nextDesc ? '・' + nextDesc : (done >= 3 ? '・全完成🎉' : '・進行中'));
+        if (q.textContent !== txt) q.textContent = txt;
+      }
+      const r = document.getElementById('glance-rival-txt');
+      if (r && typeof ensureRivals === 'function') {
+        const rs = ensureRivals();
+        const you = playerGradeProgress();
+        let top = { name: '你', prog: you, you: true };
+        rs.forEach(rv => { const d = RIVAL_DEFS.find(x => x.key === rv.key); if (rv.prog > top.prog) top = { name: d.name, prog: rv.prog, you: false }; });
+        const txt = top.you ? `你領先中 ${you}%` : `${top.name} ${Math.floor(top.prog)}%${top.prog >= 100 ? ' 準備好了！' : ' 領先中'}`;
+        if (r.textContent !== txt) r.textContent = txt;
+      }
+      const eb = document.getElementById('btn-exam-trigger');
+      if (eb && typeof getExamSuccessRate === 'function') {
+        const cd = typeof getExamCooldownRemaining === 'function' ? getExamCooldownRemaining() : 0;
+        const rate = getExamSuccessRate();
+        eb.classList.toggle('exam-hot', cd <= 0 && rate >= 70); // 按鈕文字由 updateExamProgress 統一管理（含成功率）
+      }
+    }
+
+    // ---------- 面板分頁：把既有內容節點搬進分頁容器（不改任何既有 id/渲染邏輯） ----------
+    const SHEET_DEFS = {
+      status: [{ key: 'vitals', label: '⚡ 狀態' }, { key: 'quests', label: '📋 任務' }, { key: 'rivals', label: '🏁 宿敵' }, { key: 'subjects', label: '📚 學科' }],
+      shop: [{ key: 'items', label: '🛒 道具' }, { key: 'decor', label: '🏠 裝潢' }, { key: 'gacha', label: '🎰 轉蛋' }],
+      build: [{ key: 'land', label: '🏛️ 地標' }, { key: 'town', label: '🌸 美化・捐贈' }],
+    };
+    function topChildOf(body, el) {
+      let n = el;
+      while (n && n.parentElement !== body) n = n.parentElement;
+      return n;
+    }
+    function setupSheet(drawerId, defs, resolveNodes, leftoverKey) {
+      const drawer = document.getElementById('drawer-' + drawerId);
+      if (!drawer || drawer.dataset.tabsReady) return;
+      drawer.dataset.tabsReady = '1';
+      const body = drawer.querySelector('.drawer-body');
+      const pages = {};
+      defs.forEach((def, i) => {
+        const page = document.createElement('div');
+        page.className = 'sheet-page' + (i === 0 ? ' active' : '');
+        page.dataset.page = def.key;
+        pages[def.key] = page;
+      });
+      const resolved = resolveNodes(body);
+      defs.forEach(def => {
+        (resolved[def.key] || []).forEach(n => { if (n) pages[def.key].appendChild(n); });
+      });
+      [...body.children].forEach(n => { if (!Object.values(pages).includes(n)) pages[leftoverKey].appendChild(n); });
+      defs.forEach(def => body.appendChild(pages[def.key]));
+      const bar = document.createElement('div');
+      bar.className = 'sheet-tabs';
+      defs.forEach((def, i) => {
+        const b = document.createElement('button');
+        b.className = 'sheet-tab' + (i === 0 ? ' active' : '');
+        b.textContent = def.label;
+        b.onclick = () => switchSheetTab(drawerId, def.key);
+        bar.appendChild(b);
+      });
+      drawer.insertBefore(bar, body);
+    }
+    function switchSheetTab(drawerId, key) {
+      const drawer = document.getElementById('drawer-' + drawerId);
+      if (!drawer) return;
+      drawer.querySelectorAll('.sheet-page').forEach(pg => pg.classList.toggle('active', pg.dataset.page === key));
+      const defs = SHEET_DEFS[drawerId] || [];
+      drawer.querySelectorAll('.sheet-tab').forEach((tb, i) => tb.classList.toggle('active', defs[i] && defs[i].key === key));
+      const body = drawer.querySelector('.drawer-body');
+      if (body) body.scrollTop = 0;
+    }
+    function openSheetTab(drawerId, key) {
+      const target = document.getElementById('drawer-' + drawerId);
+      if (!target) return;
+      if (!target.classList.contains('open')) toggleDrawer(drawerId);
+      switchSheetTab(drawerId, key);
+    }
+    function setupAllSheets() {
+      setupSheet('status', SHEET_DEFS.status, (body) => {
+        const byId = id => document.getElementById(id);
+        const mockBtn = body.querySelector('button[onclick*="openMockExam"]');
+        return {
+          vitals: [topChildOf(body, byId('bar-energy'))],
+          quests: [topChildOf(body, byId('daily-quests-list')), topChildOf(body, byId('weekly-goal-box'))],
+          rivals: [topChildOf(body, byId('rivals-list')), mockBtn ? topChildOf(body, mockBtn) : null],
+          subjects: [body.querySelector('.academic-section-group')],
+        };
+      }, 'subjects');
+      setupSheet('shop', SHEET_DEFS.shop, (body) => {
+        // v9.4.1: 商品卡共用一個清單容器，不能用 topChild（會整包搬走）— 直接搬 .shop-item 本人
+        const all = [...body.querySelectorAll('.shop-item')];
+        const gachaItem = all.find(it => it.querySelector('#gacha-status'));
+        const decorItem = all.find(it => it.querySelector('#decor-status'));
+        const items = all.filter(it => it !== gachaItem && it !== decorItem);
+        return { items, decor: [decorItem], gacha: [gachaItem] };
+      }, 'items');
+      setupSheet('build', SHEET_DEFS.build, (body) => {
+        const beautyTop = topChildOf(body, document.getElementById('btn-beauty-arch'));
+        const donorTop = topChildOf(body, document.getElementById('donor-status'));
+        const town = [beautyTop];
+        if (donorTop && donorTop !== beautyTop) town.push(donorTop);
+        return { land: [topChildOf(body, document.getElementById('build-island-list'))], town };
+      }, 'land');
+    }
+    setupAllSheets();
+
+
+    // ================= v9.4 說明動畫卡片 =================
+    const MANUAL_CARDS = [
+      { icon: '🌅', title: '自動作息，你陪他衝', text: '小學霸會自己上學、吃飯、睡覺；你負責在他讀書時陪讀、在關鍵時刻親自下場。', demo: 'walk' },
+      { icon: '⚡', title: '狀態都在畫面上', text: '精力・飽足・壓力・專注永遠顯示在畫面最上方，太低就帶他去吃飯、運動、睡覺。', demo: 'bars' },
+      { icon: '🫧', title: '陪讀連擊', text: '讀書時點掉身邊的知識泡泡：連擊越高讀書越快，泡泡跑掉連擊就歸零。', demo: 'bubble' },
+      { icon: '📝', title: '先模擬考，再升學', text: '每天先打一場 60 秒模擬考拉高成功率，再去參加升學考——學歷越高，零用錢越多。', demo: 'exam' },
+      { icon: '🏁', title: '贏過三個宿敵', text: '王子傑、陳小葵、高大樹跟你搶同一個升學名額，畫面右上角隨時看得到誰領先。', demo: 'race' },
+      { icon: '🎁', title: '每天回來都有獎', text: '登入獎勵、每週目標、服裝轉蛋集套裝——穿滿一套，讀書／通勤／打工都有加成。', demo: 'gift' },
+    ];
+    const MANUAL_STATE = {};
+    function manualDemoHtml(kind) {
+      if (kind === 'walk') return '<span class="dm-side">🏠</span><span class="dm-walker">🚶</span><span class="dm-side">🏫</span><div class="dm-road"></div>';
+      if (kind === 'bars') return '<div class="dm-bars"><div class="dm-bar"><span class="f1"></span></div><div class="dm-bar"><span class="f2"></span></div><div class="dm-bar"><span class="f3"></span></div></div>';
+      if (kind === 'bubble') return '<span class="dm-bubble">國</span><span class="dm-bubble b2">數</span><span class="dm-bubble b3">英</span>';
+      if (kind === 'exam') return '<div class="dm-exam"><div class="dm-exam-bar"><span></span></div><div class="dm-exam-txt">成功率 UP!</div></div>';
+      if (kind === 'race') return '<div class="dm-race"><div class="dm-rrow">🧑<span class="dm-rbar"><span class="r1"></span></span></div><div class="dm-rrow">😎<span class="dm-rbar"><span class="r2"></span></span></div></div>';
+      return '<span class="dm-gift">🎁</span><span class="dm-spark">✨</span>';
+    }
+    function buildManualCarousel(container, prefix) {
+      if (!container) return;
+      MANUAL_STATE[prefix] = { idx: 0 };
+      container.innerHTML = `<div class="manual-viewport"><div class="manual-track" id="${prefix}-track">${MANUAL_CARDS.map(c => `<div class="manual-card"><div class="manual-demo">${manualDemoHtml(c.demo)}</div><div class="manual-card-title">${c.icon} ${c.title}</div><p>${c.text}</p></div>`).join('')}</div></div><div class="manual-nav"><button class="manual-arrow" onclick="manualMove('${prefix}', -1)" aria-label="上一頁">‹</button><div class="manual-dots" id="${prefix}-dots">${MANUAL_CARDS.map((_, i) => `<span class="manual-dot${i === 0 ? ' active' : ''}"></span>`).join('')}</div><button class="manual-arrow" onclick="manualMove('${prefix}', 1)" aria-label="下一頁">›</button></div>`;
+    }
+    function manualGo(prefix, i) {
+      const st = MANUAL_STATE[prefix];
+      if (!st) return;
+      st.idx = Math.max(0, Math.min(MANUAL_CARDS.length - 1, i));
+      const track = document.getElementById(prefix + '-track');
+      if (track) track.style.transform = `translateX(-${st.idx * 100}%)`;
+      const dots = document.getElementById(prefix + '-dots');
+      if (dots) [...dots.children].forEach((d, di) => d.classList.toggle('active', di === st.idx));
+    }
+    function manualMove(prefix, dir) {
+      const st = MANUAL_STATE[prefix];
+      if (!st) return;
+      playSound('click');
+      manualGo(prefix, st.idx + dir);
+    }
+    function setupManuals() {
+      const helpModal = document.querySelector('#help-overlay .game-modal');
+      if (helpModal && !document.getElementById('help-manual')) {
+        const tabs = helpModal.querySelector('.help-tabs');
+        const scroller = tabs ? tabs.nextElementSibling : null;
+        if (tabs) tabs.remove();
+        if (scroller) scroller.remove();
+        const wrap = document.createElement('div');
+        wrap.id = 'help-manual';
+        helpModal.appendChild(wrap);
+        buildManualCarousel(wrap, 'help');
+      }
+      buildManualCarousel(document.getElementById('onboarding-manual'), 'ob');
+    }
+    setupManuals();

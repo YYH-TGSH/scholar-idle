@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - STATE & CORE DATA ENGINE (v9.2.0)
+   🎮 GBA SCHOLAR IDLE - STATE & CORE DATA ENGINE (v9.4.0)
    音效、台詞、等級、全域狀態、存讀檔、增益、成就、好友與輪迴
    ========================================================================== */
 
@@ -310,6 +310,7 @@
       workHoursTotal: 0,
       randomEventsResolved: 0,
       focus: 0, studyHoursToday: 0,
+      combo: 0, mockBuff: 0, examsPassedTotal: 0, unlockedParts: [], equippedParts: { hat: null, clothes: null, shoes: null }, weekly: null, login: null, rivals: null,
       friends: { xiaoxuan: 0, dameng: 0, yuqing: 0, xiaohao: 0 },
       friendChatDay: { xiaoxuan: -1, dameng: -1, yuqing: -1, xiaohao: -1 },
       miniGameWins: { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 },
@@ -544,6 +545,8 @@
       { id: 'chat2', icon: '💬', desc: '和 2 位好友聊天', target: 2, reward: 60, prog: () => Math.min(2, gameState.chatToday || 0) },
       { id: 'focus70', icon: '🔥', desc: '專注度達到 70', target: 1, reward: 80, prog: () => (gameState.focus || 0) >= 70 ? 1 : 0 },
       { id: 'exam1', icon: '🎓', desc: '通過一次升學考', target: 1, reward: 150, prog: () => gameState._examPassedDay === (gameState.totalGameDays || 0) ? 1 : 0 },
+      { id: 'combo15', icon: '🫧', desc: '陪讀連擊點擊 15 次', target: 15, reward: 90, prog: () => Math.min(15, gameState.comboHitsToday || 0) },
+      { id: 'mock1', icon: '📝', desc: '參加一次模擬考', target: 1, reward: 80, prog: () => gameState._mockDay === (gameState.totalGameDays || 0) ? 1 : 0 },
     ];
     function ensureDailyQuests() {
       const today = gameState.totalGameDays || 0;
@@ -562,6 +565,7 @@
         if (q && q.prog() >= q.target) {
           dq.rewarded[id] = true; changed = true;
           gameState.money = (gameState.money || 0) + q.reward;
+          if (typeof bumpWeekly === 'function') bumpWeekly('quests'); // v9.3 本週目標
           queueFloatingText(`📋 每日任務完成：${q.desc}（+$${q.reward}）`);
           playSound('levelUp');
         }
@@ -614,6 +618,7 @@
       gameState.friendChatDay[id] = today;
       if (gameState._chatDay !== today) { gameState._chatDay = today; gameState.chatToday = 0; }
       gameState.chatToday = (gameState.chatToday || 0) + 1; // v9.1 每日任務計數
+      if (typeof bumpWeekly === 'function') bumpWeekly('chats'); // v9.3 本週目標
       gainFriendAffinity(id, 6, false);
       updateUI();
       saveGameData();
