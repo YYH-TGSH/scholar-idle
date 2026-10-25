@@ -21,9 +21,10 @@
       'library-idle': { x: 1387, y: 195 },
       'store-work': { x: 555, y: 185 },
       'store-idle': { x: 497, y: 195 },
-      'home-sleep': { x: 90, y: 175 },
-      'home-idle': { x: 167, y: 190 },
-      'home-dinner': { x: 244, y: 200 }
+      'home-sleep': { x: 840, y: 182 },
+      'home-idle': { x: 500, y: 212 },
+      'home-dinner': { x: 655, y: 208 },
+      'home-desk': { x: 1032, y: 208 }
     };
 
     // 統一更新角色位置、朝向與縮放

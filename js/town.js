@@ -588,8 +588,8 @@
       { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#2c3e50' }, work: 'restaurant', spot: { x: 875, y: 150 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
       { key: 'coach', kind: 'staff', name: '阿力', homeX: 1370, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#2c3e50' }, work: 'gym', spot: { x: 1610, y: 150 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
       { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1690, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#2c3e50' }, work: 'store', spot: { x: 590, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」'] },
-      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, sleepSpot: { x: 135, y: 158 }, homeSpot: { x: 230, y: 175 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
-      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#2c3e50' }, sleepSpot: { x: 160, y: 180 }, homeSpot: { x: 270, y: 175 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
+      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
+      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#2c3e50' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
     ];
     const NPC_STREET_Y = 300;
     const NPC_DOOR_Y = 240;
@@ -716,91 +716,27 @@
       return (gameState.npcs || []).some(n => n.key !== 'coach' && n.dest === 'gym' && (n.state === 'seated' || n.state === 'path' || n.state === 'queue'));
     }
     function ensureNPCs() {
+      (gameState.npcs || []).forEach(n => { if ((n.kind === 'rival' || n.kind === 'staff') && n.state === 'sleeping' && n.dest === 'home') { n.state = 'away'; n.dest = 'away'; n.x = -80; n.y = NPC_STREET_Y; n.path = []; } }); // v9.15 舊存檔遷移：睡在已拆除的小屋
       const ok = Array.isArray(gameState.npcs) && gameState.npcs.length === NPC_DEFS.length
         && NPC_DEFS.every((d, i) => gameState.npcs[i] && gameState.npcs[i].key === d.key && gameState.npcs[i].kind === d.kind);
       if (ok) return gameState.npcs;
       gameState.npcs = NPC_DEFS.map((d, i) => {
-        if (d.kind === 'parent') return { key: d.key, kind: d.kind, x: d.sleepSpot.x, y: d.sleepSpot.y, state: 'sleeping', dest: 'home', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 };
-        if (d.kind === 'rival' || d.kind === 'staff') return { key: d.key, kind: d.kind, x: d.homeX, y: NPC_HOUSE_Y, state: 'sleeping', dest: 'home', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 };
+        if (d.kind === 'parent') return { key: d.key, kind: d.kind, x: d.sleepSpot.x, y: d.sleepSpot.y, state: 'sleeping', dest: 'home', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0, inside: true }; // v9.14
+        if (d.kind === 'rival' || d.kind === 'staff') return { key: d.key, kind: d.kind, x: -80, y: NPC_STREET_Y, state: 'away', dest: 'away', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 }; // v9.15 家在地圖外
         return { key: d.key, kind: d.kind, x: 300 + i * 240, y: NPC_STREET_Y, state: 'path', dest: '', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 };
       });
       gameState.npcs.forEach(n => { if (npcDef(n.key).kind === 'friend') npcPickTarget(n); });
       return gameState.npcs;
     }
-    function npcPickTarget(npc) {
+    function npcHomeTime(npc) { // v9.15：21:00 起每人錯開 0–110 分鐘回家（名字雜湊，固定不跳動）
+      let h = 0; const k = npc.key || '';
+      for (let i = 0; i < k.length; i++) h = (h * 37 + k.charCodeAt(i)) % 997;
+      return 21 * 60 + (h % 110);
+    }
+    function npcGoToDest(npc, dest) { // v9.15：共用目的地走法（回家=離開地圖）
       const def = npcDef(npc.key);
-      const hour = gameState.hour || 0;
-      if (npc._lunchForce === gameState.totalGameDays && hour === 12) { // v9.12.7 午餐強制食堂
-        npc._lunchForce = null;
-        npc.dest = 'restaurant';
-        const lseat = npcRequestSeat(npc, 'restaurant');
-        if (lseat) { npc.path = [{ x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
-        else npcEnqueue(npc, 'restaurant');
-        return 'restaurant';
-      }
-      const dow = gameState.dayOfWeek || 1;
-      const weekend = (dow === 6 || dow === 7);
-      let dest;
-      if (def.kind === 'parent') {
-        if (hour >= 22 || hour < 7) {
-          npc.dest = 'home';
-          npc.path = [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: NPC_DOOR_X.home, y: NPC_DOOR_Y }, def.sleepSpot];
-          npc.arrive = 'sleep'; npc.state = 'path'; return 'home';
-        } else if (hour >= 18 || (hour === 17 && (gameState.minute || 0) >= 40)) { // v9.13 爸媽 17:40 回家備晚餐
-          npc.dest = 'home';
-          npc.path = [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: NPC_DOOR_X.home, y: NPC_DOOR_Y }, def.homeSpot];
-          npc.arrive = 'athome'; npc.state = 'path'; return 'home';
-        } else {
-          npc.dest = 'away';
-          npc.path = [{ x: NPC_DOOR_X.home, y: NPC_DOOR_Y }, { x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }];
-          npc.arrive = 'away'; npc.state = 'path'; return 'away';
-        }
-      }
-      if (def.kind === 'staff') {
-        const nowM = hour * 60 + (gameState.minute || 0);
-        const workDay = def.shift.days === 'daily' || !weekend;
-        let inWindow = false;
-        if (def.shift.oncall) inWindow = workDay && gymOccupiedNow();
-        else if (workDay) {
-          if (def.shift.start > def.shift.end) inWindow = (nowM >= def.shift.start - 60) || (nowM < def.shift.end);
-          else inWindow = (nowM >= def.shift.start - 60) && (nowM < def.shift.end);
-        }
-        if (inWindow) dest = 'work';
-        else if (hour >= 23 || hour < 7) dest = 'home';
-        else dest = 'park';
-        if (dest === 'work') {
-          npc.dest = def.work;
-          npc.path = [{ x: NPC_DOOR_X[def.work], y: NPC_STREET_Y }, def.spot];
-          npc.arrive = 'seat'; npc.state = 'path'; return dest;
-        } else if (dest === 'home') {
-          npc.dest = 'home';
-          npc.path = [{ x: def.homeX, y: NPC_STREET_Y }, { x: def.homeX, y: NPC_HOUSE_Y }];
-          npc.arrive = 'sleep'; npc.state = 'path'; return dest;
-        } else {
-          const px = 200 + Math.floor(Math.random() * 1550);
-          npc.dest = 'park';
-          npc.path = [{ x: px, y: NPC_STREET_Y }, { x: px, y: NPC_PARK_Y }];
-          npc.arrive = 'idle'; npc.state = 'path'; return dest;
-        }
-      }
-      if (def.kind === 'rival') {
-        if (hour >= 23 || hour < 7) dest = 'home';
-        else if (weekend) dest = ['library', 'gym', 'restaurant', 'store'][Math.floor(Math.random() * 4)];
-        else if (hour >= 8 && hour < 16) dest = 'school';
-        else if (hour >= 17 && hour < 21) dest = 'library';
-        else dest = ['restaurant', 'store', 'gym'][Math.floor(Math.random() * 3)];
-      } else {
-        if (hour >= 23 || hour < 7) dest = 'away';
-        else {
-          const pool = [...def.spots, 'park', 'park'];
-          dest = pool[Math.floor(Math.random() * pool.length)];
-        }
-      }
       npc.dest = dest;
-      if (dest === 'home') {
-        npc.path = [{ x: def.homeX, y: NPC_STREET_Y }, { x: def.homeX, y: NPC_HOUSE_Y }];
-        npc.arrive = 'sleep';
-      } else if (dest === 'away') {
+      if (dest === 'away') {
         npc.path = [{ x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }];
         npc.arrive = 'away';
       } else if (dest === 'park') {
@@ -820,8 +756,81 @@
       npc.state = 'path';
       return dest;
     }
+    function parentBackHome(npc) { // v9.14.4：爸 17:40、媽 18:12 回家
+      const t = (gameState.hour || 0) * 60 + (gameState.minute || 0);
+      return npc.key === 'mom' ? t >= 18 * 60 + 12 : t >= 17 * 60 + 40;
+    }
+    function npcPickTarget(npc) {
+      const def = npcDef(npc.key);
+      const hour = gameState.hour || 0;
+      if (npc._lunchForce === gameState.totalGameDays && hour === 12) { // v9.12.7 午餐強制食堂
+        npc._lunchForce = null;
+        npc.dest = 'restaurant';
+        const lseat = npcRequestSeat(npc, 'restaurant');
+        if (lseat) { npc.path = [{ x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
+        else npcEnqueue(npc, 'restaurant');
+        return 'restaurant';
+      }
+      const dow = gameState.dayOfWeek || 1;
+      const weekend = (dow === 6 || dow === 7);
+      let dest;
+      if (def.kind === 'parent') {
+        // v9.14.4：爸媽回家時間錯開（爸 17:40、媽 18:12）
+        // v9.14：進出室內在門口瞬間切換座標系（door waypoint）
+        const DOOR_IN = { x: NPC_DOOR_X.home, y: NPC_DOOR_Y, door: 'in', ix: 565, iy: 218 };
+        const DOOR_OUT = { x: 565, y: 218, door: 'out', wx: NPC_DOOR_X.home, wy: NPC_DOOR_Y };
+        if (hour >= 22 || hour < 7) {
+          npc.dest = 'home';
+          npc.path = npc.inside ? [def.sleepSpot] : [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, DOOR_IN, def.sleepSpot];
+          npc.arrive = 'sleep'; npc.state = 'path'; return 'home';
+        } else if (parentBackHome(npc)) { // v9.14.4 爸 17:40 / 媽 18:12
+          npc.dest = 'home';
+          npc.path = npc.inside ? [def.homeSpot] : [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, DOOR_IN, def.homeSpot];
+          npc.arrive = 'athome'; npc.state = 'path'; return 'home';
+        } else {
+          npc.dest = 'away';
+          npc.path = npc.inside ? [DOOR_OUT, { x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }] : [{ x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }];
+          npc.arrive = 'away'; npc.state = 'path'; return 'away';
+        }
+      }
+      if (def.kind === 'staff') {
+        const nowM = hour * 60 + (gameState.minute || 0);
+        const workDay = def.shift.days === 'daily' || !weekend;
+        let inWindow = false;
+        if (def.shift.oncall) inWindow = workDay && gymOccupiedNow();
+        else if (workDay) {
+          if (def.shift.start > def.shift.end) inWindow = (nowM >= def.shift.start - 60) || (nowM < def.shift.end);
+          else inWindow = (nowM >= def.shift.start - 60) && (nowM < def.shift.end);
+        }
+        if (inWindow) dest = 'work';
+        else if (hour < 7 || nowM >= npcHomeTime(npc)) dest = 'away'; // v9.15 回家=離開地圖
+        else dest = ['park', 'park', 'restaurant', 'store', 'library', 'gym'][Math.floor(Math.random() * 6)]; // v9.15 下班先去晃
+        if (dest === 'work') {
+          npc.dest = def.work;
+          npc.path = [{ x: NPC_DOOR_X[def.work], y: NPC_STREET_Y }, def.spot];
+          npc.arrive = 'seat'; npc.state = 'path'; return dest;
+        }
+        return npcGoToDest(npc, dest);
+      }
+      if (def.kind === 'rival') {
+        if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away'; // v9.15 21:00 後陸續回家
+        else if (weekend) dest = ['library', 'gym', 'restaurant', 'store', 'park'][Math.floor(Math.random() * 5)];
+        else if (hour >= 8 && hour < 16) dest = 'school';
+        else if (hour >= 17 && hour < 21) dest = ['library', 'library', 'park', 'gym'][Math.floor(Math.random() * 4)];
+        else dest = ['restaurant', 'store', 'gym', 'park'][Math.floor(Math.random() * 4)];
+      } else {
+        if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away';
+        else {
+          const pool = [...def.spots, 'park', 'park'];
+          dest = pool[Math.floor(Math.random() * pool.length)];
+        }
+      }
+      return npcGoToDest(npc, dest);
+    }
     function npcExitPath(npc) {
       const prevDest = npc.dest;
+      npc.breakHome = null; // v9.15：離場順手清掉下課殘留狀態
+      npc._parkJoined = false;
       npcFreeSeat(npc);
       if (npc.dest && NPC_DOOR_X[npc.dest]) {
         npc.path = [{ x: NPC_DOOR_X[npc.dest], y: NPC_DOOR_Y }, { x: NPC_DOOR_X[npc.dest], y: NPC_STREET_Y }];
@@ -879,19 +888,6 @@
           layer.appendChild(el);
         });
       }
-      if (!document.getElementById('npc-houses')) {
-        const wrap = document.createElement('div');
-        wrap.id = 'npc-houses';
-        NPC_DEFS.filter(d => d.kind === 'rival' || d.kind === 'staff').forEach(d => {
-          const h = document.createElement('div');
-          h.className = 'npc-house';
-          h.style.left = d.homeX + 'px';
-          h.style.top = NPC_HOUSE_Y + 'px';
-          h.innerHTML = `<span class="npc-house-emoji">🏠</span><span class="npc-house-name">${d.name}的家</span><span class="npc-zzz" id="npc-zzz-${d.key}" style="display:none;">💤</span>`;
-          wrap.appendChild(h);
-        });
-        map.appendChild(wrap);
-      }
     }
     // v9.12.2 講台前景層：蓋在 NPC 圖層之上，王老師站上去時下半身被講桌遮住（站在講台後面）
     function ensurePodiumFg() {
@@ -905,7 +901,7 @@
       fg.innerHTML = `<svg viewBox="118 110 48 25" style="width:100%; height:100%; display:block;"><g id="sch-podium"><rect x="118" y="110" width="48" height="6" fill="#b0743e" stroke="#182042" stroke-width="1.5" /><rect x="121" y="116" width="42" height="17" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" /><rect x="118" y="131" width="48" height="4" fill="#6d4c41" /></g></svg>`;
       map.appendChild(fg);
     }
-    function npcSay(npc) {
+    function npcSay(npc, customText) {
       if (!npc || npc.state === 'away' || npc.state === 'sleeping') return;
       if (npc._sayUntil && Date.now() < npc._sayUntil) return;
       npc._sayUntil = Date.now() + 3000;
@@ -916,12 +912,12 @@
       bubble.className = 'npc-speech';
       bubble.style.left = npc.x + 'px';
       bubble.style.top = (npc.y - 78) + 'px';
-      bubble.textContent = def.say[Math.floor(Math.random() * def.say.length)];
+      bubble.textContent = customText || def.say[Math.floor(Math.random() * def.say.length)];
       layer.appendChild(bubble);
       setTimeout(() => bubble.remove(), 2600);
     }
     // ================= v9.13 住家精緻化：晚餐同桌 =================
-    const DINNER_SEATS = { dad: { x: 224, y: 186 }, mom: { x: 264, y: 186 } };
+    const DINNER_SEATS = { dad: { x: 626, y: 192 }, mom: { x: 685, y: 192 } }; // v9.14 室內餐廳
     const DINNER_SAY = {
       mom: ['多吃點，看你瘦的。', '今天在學校好嗎？', '這道是你最愛吃的。', '慢點吃，鍋裡還有。'],
       dad: ['吃慢點，沒人跟你搶。', '功課有不懂的，晚上問我。', '最近考試順利嗎？', '嗯，好吃，你媽手藝越來越好了。']
@@ -934,11 +930,12 @@
       return null;
     }
     function ensureDinnerFurniture() {
-      const layer = document.getElementById('npc-layer');
+      ensureHomeInterior(); // v9.14：餐桌在室內場景裡
+      const layer = document.getElementById('home-rooms');
       if (!layer || document.getElementById('dinner-table-back')) return;
       const back = document.createElement('div');
       back.id = 'dinner-table-back';
-      back.style.cssText = 'position:absolute; left:204px; top:150px; width:88px; height:44px; z-index:172; pointer-events:none;';
+      back.style.cssText = 'position:absolute; left:601px; top:118px; width:108px; height:54px; z-index:172; pointer-events:none;';
       back.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
         <rect x="12" y="6" width="14" height="16" fill="#a9743f" stroke="#182042" stroke-width="1.8" />
         <rect x="62" y="6" width="14" height="16" fill="#a9743f" stroke="#182042" stroke-width="1.8" />
@@ -946,7 +943,7 @@
       layer.appendChild(back);
       const fg = document.createElement('div');
       fg.id = 'dinner-table-fg';
-      fg.style.cssText = 'position:absolute; left:204px; top:150px; width:88px; height:44px; z-index:192; pointer-events:none;';
+      fg.style.cssText = 'position:absolute; left:601px; top:118px; width:108px; height:54px; z-index:196; pointer-events:none;';
       fg.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
         <rect x="4" y="27" width="80" height="5" fill="#8b5a2b" stroke="#182042" stroke-width="1.5" />
         <rect x="10" y="32" width="5" height="10" fill="#795548" />
@@ -973,7 +970,260 @@
       if (steam) steam.style.display = phase === 'prep' ? 'block' : 'none';
       const glow = document.getElementById('lamp-glow');
       if (glow) { const h = gameState.hour || 0; const on = (h >= 17 && h < 22) ? '0.9' : '0'; if (glow.style.opacity !== on) glow.style.opacity = on; }
+      const glow2 = document.getElementById('lamp-glow2');
+      if (glow2) { const h = gameState.hour || 0; const on2 = (h >= 17 && h < 22) ? '0.85' : '0'; if (glow2.style.opacity !== on2) glow2.style.opacity = on2; }
     }
+
+    // ================= v9.14 捲動式室內 =================
+    const HOME_ROOMS_HTML = `
+<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
+  <defs>
+    <pattern id="planks" width="46" height="152" patternUnits="userSpaceOnUse">
+      <rect width="46" height="152" fill="#d9a066"/><line x1="0" y1="0" x2="0" y2="152" stroke="#b57e46" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="18" width="340" height="130" fill="#f0e7f7"/>
+  <rect x="380" y="18" width="372" height="130" fill="#fdf1dc"/>
+  <rect x="792" y="18" width="358" height="130" fill="#e9f2fc"/>
+  <rect x="0" y="148" width="1150" height="152" fill="url(#planks)"/>
+  <rect x="340" y="18" width="40" height="282" fill="#e8dcc8"/>
+  <rect x="752" y="18" width="40" height="282" fill="#e8dcc8"/>
+  <rect x="348" y="100" width="24" height="200" fill="#d9a066"/>
+  <rect x="760" y="100" width="24" height="200" fill="#d9a066"/>
+  <rect x="340" y="88" width="40" height="16" fill="#8a5a33"/>
+  <rect x="752" y="88" width="40" height="16" fill="#8a5a33"/>
+  <rect x="340" y="96" width="8" height="204" fill="#a5713d"/>
+  <rect x="372" y="96" width="8" height="204" fill="#a5713d"/>
+  <rect x="752" y="96" width="8" height="204" fill="#a5713d"/>
+  <rect x="784" y="96" width="8" height="204" fill="#a5713d"/>
+  <rect x="0" y="0" width="1150" height="18" fill="#8a5a33"/>
+  <rect x="0" y="140" width="340" height="8" fill="#ffffff" opacity="0.55"/>
+  <rect x="380" y="140" width="372" height="8" fill="#ffffff" opacity="0.55"/>
+  <rect x="792" y="140" width="358" height="8" fill="#ffffff" opacity="0.55"/>
+  <!-- 爸媽房 -->
+  <rect x="36" y="40" width="80" height="62" fill="#2b3a67" stroke="#182042" stroke-width="2"/>
+  <circle cx="94" cy="58" r="9" fill="#ffe082"/>
+  <circle cx="52" cy="52" r="1.8" fill="#ffffff"/><circle cx="66" cy="82" r="1.8" fill="#ffffff"/><circle cx="46" cy="70" r="1.4" fill="#ffffff"/>
+  <line x1="76" y1="40" x2="76" y2="102" stroke="#182042" stroke-width="2"/>
+  <rect x="30" y="36" width="14" height="72" fill="#b39ddb"/><rect x="108" y="36" width="14" height="72" fill="#b39ddb"/>
+  <rect x="150" y="48" width="46" height="36" fill="#ffffff" stroke="#182042" stroke-width="2"/>
+  <circle cx="165" cy="68" r="6" fill="#ffcc99"/><circle cx="181" cy="68" r="6" fill="#ffcc99"/><circle cx="173" cy="60" r="5" fill="#ffd9b3"/>
+  <rect x="272" y="52" width="60" height="140" fill="#a5713d" stroke="#182042" stroke-width="2"/>
+  <line x1="302" y1="52" x2="302" y2="192" stroke="#182042" stroke-width="2"/>
+  <circle cx="296" cy="124" r="3" fill="#ffd54f"/><circle cx="308" cy="124" r="3" fill="#ffd54f"/>
+  <ellipse cx="162" cy="256" rx="118" ry="20" fill="#ce93d8" opacity="0.45"/>
+  <rect x="72" y="116" width="180" height="18" rx="4" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
+  <rect x="68" y="130" width="188" height="88" rx="6" fill="#ffffff" stroke="#182042" stroke-width="2"/>
+  <rect x="84" y="136" width="68" height="24" rx="6" fill="#ffffff" stroke="#cfd8dc" stroke-width="1.5"/>
+  <rect x="172" y="136" width="68" height="24" rx="6" fill="#ffffff" stroke="#cfd8dc" stroke-width="1.5"/>
+  <rect x="68" y="158" width="188" height="60" rx="6" fill="#9575cd" stroke="#182042" stroke-width="2"/>
+  <rect x="68" y="158" width="188" height="8" fill="#7e57c2"/>
+  <circle cx="100" cy="182" r="5" fill="rgba(255,255,255,0.28)"/><circle cx="160" cy="196" r="5" fill="rgba(255,255,255,0.28)"/><circle cx="216" cy="180" r="5" fill="rgba(255,255,255,0.28)"/>
+  <text x="20" y="290" font-size="14" font-weight="700" fill="#6d4c8c" opacity="0.65">爸媽房</text>
+  <!-- 客廳・餐廳 -->
+  <rect x="392" y="44" width="54" height="104" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
+  <rect x="404" y="56" width="30" height="26" fill="#bfe3ff" stroke="#182042" stroke-width="1.5"/>
+  <rect x="402" y="92" width="34" height="44" fill="none" stroke="#182042" stroke-width="1.5"/>
+  <circle cx="438" cy="112" r="3.5" fill="#ffd54f"/>
+  <rect x="566" y="38" width="80" height="62" fill="#bfe3ff" stroke="#182042" stroke-width="2"/>
+  <circle cx="588" cy="58" r="10" fill="#ffd54f"/>
+  <ellipse cx="622" cy="66" rx="14" ry="6" fill="#ffffff"/><ellipse cx="606" cy="84" rx="11" ry="5" fill="#ffffff"/>
+  <rect x="560" y="34" width="14" height="72" fill="#ffb74d"/><rect x="640" y="34" width="14" height="72" fill="#ffb74d"/>
+  <rect x="452" y="122" width="132" height="38" rx="8" fill="#ef5350" stroke="#182042" stroke-width="2"/>
+  <rect x="442" y="138" width="18" height="50" rx="7" fill="#e53935" stroke="#182042" stroke-width="2"/>
+  <rect x="576" y="138" width="18" height="50" rx="7" fill="#e53935" stroke="#182042" stroke-width="2"/>
+  <rect x="452" y="156" width="132" height="30" rx="6" fill="#e53935" stroke="#182042" stroke-width="2"/>
+  <line x1="518" y1="158" x2="518" y2="184" stroke="#182042" stroke-width="1.5"/>
+  <rect x="648" y="46" width="92" height="60" rx="4" fill="#263238" stroke="#182042" stroke-width="2"/>
+  <rect x="654" y="52" width="80" height="48" fill="#37474f"/>
+  <rect x="654" y="76" width="80" height="24" fill="#4db6ac"/>
+  <circle cx="678" cy="64" r="6" fill="#ffe082"/>
+  <rect x="686" y="106" width="16" height="8" fill="#263238"/>
+  <line x1="616" y1="112" x2="616" y2="196" stroke="#546e7a" stroke-width="3"/>
+  <path d="M600,88 L632,88 L624,112 L608,112 Z" fill="#ffd54f" stroke="#182042" stroke-width="1.8"/>
+  <ellipse id="lamp-glow2" cx="655" cy="128" rx="135" ry="60" fill="#ffd76a" opacity="0" style="transition:opacity 1s;"/>
+  <line x1="655" y1="18" x2="655" y2="40" stroke="#182042" stroke-width="2.5"/>
+  <path d="M632,58 L678,58 L664,40 L646,40 Z" fill="#ff8a65" stroke="#182042" stroke-width="1.8"/>
+  <rect x="430" y="228" width="300" height="54" rx="12" fill="#ffcc80" opacity="0.5"/>
+  <rect x="386" y="236" width="66" height="26" rx="4" fill="#90a4ae"/>
+  <text x="396" y="290" font-size="14" font-weight="700" fill="#a5713d" opacity="0.65">客廳・餐廳</text>
+  <!-- 我的房間 -->
+  <rect x="812" y="40" width="70" height="62" fill="#a8d8ff" stroke="#182042" stroke-width="2"/>
+  <ellipse cx="838" cy="60" rx="13" ry="6" fill="#ffffff"/><ellipse cx="856" cy="80" rx="10" ry="5" fill="#ffffff"/>
+  <rect x="806" y="36" width="13" height="72" fill="#64b5f6"/><rect x="876" y="36" width="13" height="72" fill="#64b5f6"/>
+  <rect x="968" y="40" width="68" height="52" fill="#ffffff" stroke="#182042" stroke-width="2"/>
+  <polygon points="1002,50 1005.5,59 1015,59 1007.5,65 1010.5,74 1002,68.5 993.5,74 996.5,65 989,59 998.5,59" fill="#ffd54f" stroke="#182042" stroke-width="1.2"/>
+  <line x1="980" y1="82" x2="1024" y2="82" stroke="#90a4ae" stroke-width="2.5"/>
+  <ellipse cx="876" cy="256" rx="108" ry="20" fill="#90caf9" opacity="0.5"/>
+  <rect x="796" y="116" width="158" height="18" rx="4" fill="#6d4c41" stroke="#182042" stroke-width="2"/>
+  <rect x="792" y="130" width="162" height="88" rx="6" fill="#ffffff" stroke="#182042" stroke-width="2"/>
+  <rect x="806" y="136" width="68" height="24" rx="6" fill="#ffffff" stroke="#cfd8dc" stroke-width="1.5"/>
+  <rect x="792" y="158" width="162" height="60" rx="6" fill="#42a5f5" stroke="#182042" stroke-width="2"/>
+  <rect x="792" y="176" width="162" height="6" fill="rgba(255,255,255,0.35)"/>
+  <rect x="792" y="194" width="162" height="6" fill="rgba(255,255,255,0.35)"/>
+  <rect x="972" y="146" width="130" height="10" fill="#a5713d" stroke="#182042" stroke-width="2"/>
+  <rect x="978" y="156" width="6" height="40" fill="#795548"/><rect x="1090" y="156" width="6" height="40" fill="#795548"/>
+  <rect x="986" y="128" width="10" height="18" fill="#ef5350"/><rect x="998" y="132" width="8" height="14" fill="#42a5f5"/><rect x="1008" y="130" width="9" height="16" fill="#66bb6a"/>
+  <rect x="1010" y="168" width="44" height="10" rx="4" fill="#5d4037" stroke="#182042" stroke-width="1.5"/>
+  <rect x="1014" y="186" width="36" height="8" fill="#795548"/>
+  <rect x="1108" y="60" width="38" height="130" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
+  <line x1="1108" y1="102" x2="1146" y2="102" stroke="#182042" stroke-width="2"/><line x1="1108" y1="146" x2="1146" y2="146" stroke="#182042" stroke-width="2"/>
+  <rect x="1112" y="84" width="6" height="18" fill="#ef5350"/><rect x="1120" y="80" width="6" height="22" fill="#42a5f5"/><rect x="1128" y="86" width="6" height="16" fill="#66bb6a"/>
+  <rect x="1112" y="128" width="6" height="18" fill="#ffb74d"/><rect x="1120" y="124" width="6" height="22" fill="#ab47bc"/><rect x="1128" y="130" width="6" height="16" fill="#26a69a"/>
+  <text x="800" y="290" font-size="14" font-weight="700" fill="#1565c0" opacity="0.65">我的房間</text>
+</svg>
+<div id="parents-blanket" style="display:none; position:absolute; left:70px; top:158px; width:184px; height:70px; z-index:260;">
+  <svg viewBox="0 0 100 38" style="width:100%; height:100%; display:block;">
+    <g class="sleep-form-anim">
+      <rect x="1" y="2" width="98" height="34" rx="7" fill="#9575cd" stroke="#182042" stroke-width="1.6"/>
+      <rect x="1" y="2" width="98" height="9" rx="4" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="20" cy="18" r="3.4" fill="rgba(255,255,255,0.3)"/><circle cx="50" cy="25" r="3.4" fill="rgba(255,255,255,0.3)"/><circle cx="82" cy="17" r="3.4" fill="rgba(255,255,255,0.3)"/>
+    </g>
+  </svg>
+</div>
+<div id="desk-hit" onclick="toggleDeskStudy()" title="在書桌自習" style="position:absolute; left:962px; top:112px; width:150px; height:102px; z-index:140; cursor:pointer;"></div>
+<div id="player-blanket" style="display:none; position:absolute; left:788px; top:158px; width:170px; height:70px; z-index:600;">
+  <svg viewBox="0 0 100 38" style="width:100%; height:100%; display:block;">
+    <g class="sleep-form-anim">
+      <rect x="1" y="2" width="98" height="34" rx="7" fill="#42a5f5" stroke="#182042" stroke-width="1.6"/>
+      <rect x="1" y="2" width="98" height="9" rx="4" fill="rgba(255,255,255,0.25)"/>
+      <rect x="8" y="15" width="84" height="5" fill="rgba(255,255,255,0.35)"/><rect x="8" y="25" width="84" height="5" fill="rgba(255,255,255,0.35)"/>
+    </g>
+  </svg>
+</div>`;
+    function toggleDeskStudy() { // v9.14.4：點房間書桌 = 在家自習開關
+      if (typeof currentLoc === 'undefined' || currentLoc !== 'home' || gameState.isCommuting) {
+        if (typeof createFloatingText === 'function') createFloatingText('回家才能用自己的書桌 🏠');
+        return;
+      }
+      gameState.deskStudy = !gameState.deskStudy;
+      if (gameState.deskStudy) {
+        currentState = 'studying';
+        if (typeof createFloatingText === 'function') createFloatingText('在書桌前自習 📖');
+      } else {
+        currentState = 'idle';
+        if (typeof createFloatingText === 'function') createFloatingText('休息一下 🍃');
+      }
+    }
+    function ensureHomeInterior() {
+      if (document.getElementById('home-stage')) return;
+      const host = document.querySelector('#landmark-home .island-platform-top') || document.querySelector('#landmark-home .island-platform') || document.getElementById('landmark-home');
+      if (!host) return;
+      const stage = document.createElement('div');
+      stage.id = 'home-stage';
+      stage.innerHTML = '<div id="home-rooms">' + HOME_ROOMS_HTML + '</div>';
+      host.appendChild(stage);
+      // v9.14.3：手指/滑鼠在房子裡拖曳 = 捲動室內；在地圖上拖曳 = 移動地圖（地圖引擎在 viewport 上，事件冒泡到不了就輪不到它）
+      let drag = null;
+      const activePtrs = new Set();
+      stage.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        activePtrs.add(e.pointerId);
+        if (activePtrs.size > 1) { // 第二根手指：取消室內拖曳（雙指縮放請從房子外開始）
+          drag = null;
+          const rooms = document.getElementById('home-rooms');
+          if (rooms) rooms.style.transition = '';
+          return;
+        }
+        drag = { x: e.clientX, pan: (_homePanManual !== null ? _homePanManual : _homePanCur), moved: 0 };
+        _homePanManual = drag.pan;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        const rooms = document.getElementById('home-rooms');
+        if (rooms) rooms.style.transition = 'none';
+      });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const sc = (stage.clientHeight || 179) / 300;
+        const visible = (stage.clientWidth || 278) / sc;
+        const maxPan = Math.max(0, 1150 - visible);
+        const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
+        drag.moved += Math.abs(next - _homePanManual);
+        _homeManualUntil = Date.now() + 30000; // v9.14.4
+        _homePanManual = next;
+        applyHomePan(_homePanManual, sc);
+      });
+      const endDrag = e => {
+        activePtrs.delete(e.pointerId);
+        _homeManualUntil = Date.now() + 30000; // v9.14.4：放開後再保留 30 秒
+        if (!drag) return;
+        const wasDrag = drag.moved > 0.5;
+        drag = null;
+        const rooms = document.getElementById('home-rooms');
+        if (rooms) rooms.style.transition = '';
+        if (wasDrag) { // 拖完的那一下 click 不要觸發島嶼聚焦
+          stage.addEventListener('click', ev2 => { ev2.stopPropagation(); ev2.preventDefault(); }, { capture: true, once: true });
+        }
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('dblclick', () => { _homePanManual = null; });
+    }
+    let _homePanManual = null; // v9.14.2：滑鼠拖曳的手動捲動位置（null=自動跟隨）
+    let _homeManualUntil = 0; // v9.14.4：手動操控後 30 秒不自動回追
+    let _homePanCur = 0;
+    let _homeWasIn = false;
+    function applyHomePan(pan, sc) {
+      const rooms = document.getElementById('home-rooms');
+      if (!rooms) return;
+      _homePanCur = pan;
+      rooms.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, 0px) scale(' + sc.toFixed(3) + ')';
+    }
+    function updateHomePan(focusX) {
+      const stage = document.getElementById('home-stage');
+      if (!stage) return;
+      const vpW = stage.clientWidth, vpH = stage.clientHeight;
+      if (!vpW || !vpH) return;
+      const sc = vpH / 300;
+      const visible = vpW / sc;
+      if (_homePanManual !== null) {
+        if (Date.now() > _homeManualUntil) _homePanManual = null; // v9.14.4：30 秒到，回自動跟隨
+        else { applyHomePan(_homePanManual, sc); return; }
+      }
+      if (typeof focusX !== 'number') focusX = 565;
+      let pan;
+      if (visible >= 1150) pan = (1150 - visible) / 2;
+      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      applyHomePan(pan, sc);
+    }
+    function updateHomeStage() {
+      ensureHomeInterior();
+      const stage = document.getElementById('home-stage');
+      if (!stage) return;
+      const rooms = document.getElementById('home-rooms');
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && !gameState.isCommuting;
+      if (playerIn !== _homeWasIn) { _homePanManual = null; _homeWasIn = playerIn; } // 進出家門 → 回到自動跟隨
+      const cw = document.getElementById('char-wrap');
+      if (playerIn) {
+        if (cw && rooms && cw.parentNode !== rooms) {
+          rooms.appendChild(cw);
+          cw.style.zIndex = '500';
+          if (typeof getCharacterCoords === 'function' && typeof updateCharacterPositionAndScale === 'function') {
+            const dc = getCharacterCoords(currentLoc, currentState);
+            updateCharacterPositionAndScale(dc.x, dc.y, false);
+          }
+        }
+      } else {
+        const map = document.getElementById('town-map');
+        if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      // 室內鏡頭：主角在家跟主角，否則看在家的爸媽，再否則停客廳
+      let focus = 565;
+      if (playerIn) focus = gameState.currentX || 500;
+      else {
+        const par = (gameState.npcs || []).find(n => n.kind === 'parent' && n.inside);
+        if (par) focus = par.x;
+      }
+      updateHomePan(focus);
+      const pBlanket = document.getElementById('player-blanket'); // v9.15：本人躺床上 + 棉被蓋在上層
+      if (pBlanket) pBlanket.style.display = (currentState === 'sleeping' && currentLoc === 'home') ? 'block' : 'none';
+      const parBlanket = document.getElementById('parents-blanket');
+      if (parBlanket) {
+        const anySleep = (gameState.npcs || []).some(n => n.kind === 'parent' && n.inside && n.state === 'sleeping');
+        const want = anySleep ? 'block' : 'none';
+        if (parBlanket.style.display !== want) parBlanket.style.display = want;
+      }
+    }
+
     function checkHomeDinner() {
       const phase = dinnerPhaseNow();
       updateHomeDinnerVisual(phase);
@@ -1003,12 +1253,52 @@
         }
       }
     }
+    const PARK_CHAT_OPEN = ['今天天氣也太好了吧！', '你們晚餐想吃什麼？', '我昨天打電動打到半夜，超爽', '欸欸，聽說食堂明天有新菜單', '最近有什麼好看的影片推薦嗎？', '假日一起去打球啦', '我跟你們說，我昨天做了一個超怪的夢', '這邊風好涼，超舒服的', '你們複習得怎麼樣了？', '走啦，等下一起去超商買冰'];
+    const PARK_CHAT_REPLY = ['真的！我也這麼覺得', '哈哈哈你也太好笑', '好啊好啊，算我一個', '我懂我懂，那個超讚的', '蛤？真的假的', '對啊，我媽也這樣說', '那走啊，現在就去', '噓——小聲一點啦', '我上次也是這樣！', '好主意，揪！'];
+    function parkJoinCluster(npc) { // v9.15：到公園自動湊到別人的圈圈旁邊
+      if (npc.dest !== 'park' || npc._parkJoined) return;
+      const others = (gameState.npcs || []).filter(n => n !== npc && n.dest === 'park' && n.state === 'idle');
+      let best = null, bd = 1e9;
+      others.forEach(o => { const d = Math.hypot(o.x - npc.x, o.y - npc.y); if (d < bd) { bd = d; best = o; } });
+      if (!best) return;
+      npc._parkJoined = true;
+      if (bd <= 62) return;
+      const ang = ((npc.key.charCodeAt(0) * 53) % 360) * Math.PI / 180;
+      npc.path = [{ x: Math.round(best.x + Math.cos(ang) * 50), y: Math.round(best.y + 8 + Math.abs(Math.sin(ang)) * 14) }];
+      npc.arrive = 'idle'; npc.state = 'path';
+    }
+    function updateParkSocial() { // v9.15：公園成群聊天（有人開口、有人接話）
+      const absMin = (gameState.totalGameDays || 0) * 1440 + (gameState.hour || 0) * 60 + (gameState.minute || 0);
+      if (gameState._parkReply && absMin >= gameState._parkReply.at) {
+        const who = (gameState.npcs || []).find(n => n.key === gameState._parkReply.key);
+        if (who && who.dest === 'park' && who.state === 'idle') npcSay(who, gameState._parkReply.line);
+        gameState._parkReply = null;
+      }
+      if (absMin < (gameState._parkChatAt || 0)) return;
+      const idlers = (gameState.npcs || []).filter(n => n.dest === 'park' && n.state === 'idle' && n.kind !== 'parent');
+      const clusters = [];
+      idlers.forEach(n => { const c = clusters.find(c => c.some(m => Math.hypot(m.x - n.x, m.y - n.y) <= 120)); if (c) c.push(n); else clusters.push([n]); });
+      const big = clusters.filter(c => c.length >= 2);
+      if (!big.length) { gameState._parkChatAt = absMin + 6; return; }
+      const c = big[Math.floor(Math.random() * big.length)];
+      const cx = c.reduce((sum, m) => sum + m.x, 0) / c.length;
+      c.forEach(m => { m.dir = cx >= m.x ? 1 : -1; }); // 面對彼此
+      const sp = c[Math.floor(Math.random() * c.length)];
+      npcSay(sp, PARK_CHAT_OPEN[Math.floor(Math.random() * PARK_CHAT_OPEN.length)]);
+      if (Math.random() < 0.65) {
+        const others = c.filter(m => m !== sp);
+        const rp = others[Math.floor(Math.random() * others.length)];
+        gameState._parkReply = { at: absMin + 2 + Math.random() * 3, key: rp.key, line: PARK_CHAT_REPLY[Math.floor(Math.random() * PARK_CHAT_REPLY.length)] };
+      }
+      gameState._parkChatAt = absMin + 16 + Math.random() * 22;
+    }
     function updateNPCs(progressMinutes) {
       const npcs = ensureNPCs();
       ensureSeats();
       buildNPCLayer();
       ensurePodiumFg();
       checkHomeDinner();
+      updateParkSocial(); // v9.15
       const hour = gameState.hour || 0;
       const coach = npcs.find(n => n.key === 'coach');
       if (coach) {
@@ -1044,19 +1334,30 @@
         const def = npcDef(npc.key);
         const step = def.speed * progressMinutes;
         if (npc.state === 'path') {
-          const wp = npc.path[0];
-          if (!wp) { npcPickTarget(npc); }
+          if (!npc.path[0]) { npcPickTarget(npc); }
           else {
-            let arrived = false;
-            if (npc.x !== wp.x) {
-              const d = wp.x - npc.x;
-              if (Math.abs(d) <= step) npc.x = wp.x; else { npc.x += Math.sign(d) * step; npc.dir = Math.sign(d); }
-            } else if (npc.y !== wp.y) {
-              const d = wp.y - npc.y;
-              if (Math.abs(d) <= step) npc.y = wp.y; else npc.y += Math.sign(d) * step;
-            } else arrived = true;
+            // v9.15：一步之內走完預算內的整段路（舊版一 tick 只處理一個軸向一個點，高速下 NPC 要爬好幾個遊戲小時）
+            let budget = step, guard = 0, arrived = false;
+            while (npc.path.length && guard++ < 16) {
+              const wp = npc.path[0];
+              const dx = wp.x - npc.x, dy = wp.y - npc.y;
+              if (dx === 0 && dy === 0) {
+                npc.path.shift();
+                if (wp.door === 'in') { npc.inside = true; npc.x = wp.ix; npc.y = wp.iy; }
+                else if (wp.door === 'out') { npc.inside = false; npc.x = wp.wx; npc.y = wp.wy; }
+                if (npc.path.length === 0) { arrived = true; break; }
+                continue;
+              }
+              if (budget <= 0) break;
+              if (dx !== 0) {
+                if (Math.abs(dx) <= budget) { npc.x = wp.x; budget -= Math.abs(dx); npc.dir = Math.sign(dx); }
+                else { npc.x += Math.sign(dx) * budget; npc.dir = Math.sign(dx); budget = 0; }
+              } else {
+                if (Math.abs(dy) <= budget) { npc.y = wp.y; budget -= Math.abs(dy); }
+                else { npc.y += Math.sign(dy) * budget; budget = 0; }
+              }
+            }
             if (arrived) {
-              npc.path.shift();
               if (npc.path.length === 0) {
                 if (npc.arrive === 'seat') {
                   npc.state = 'seated';
@@ -1065,14 +1366,17 @@
                     if (sh.oncall) npc.dwell = 9999;
                     else {
                       const nowM = (gameState.hour || 0) * 60 + (gameState.minute || 0);
-                      npc.dwell = Math.max(30, sh.end >= nowM ? sh.end - nowM : sh.end + 1440 - nowM);
+                      let dw;
+                      if (sh.start > sh.end) dw = nowM >= sh.start ? (1440 - nowM + sh.end) : (sh.end - nowM); // 跨夜班
+                      else dw = nowM < sh.end ? (sh.end - nowM) : 30; // v9.15：下班後才坐下不再包到隔天
+                      npc.dwell = Math.max(30, dw);
                     }
                   } else npc.dwell = 30 + Math.random() * 60; // v9.12.7 staff 在別棟當客人（老師午餐）比照一般客人
                   if (npc.dest === 'restaurant' && npc.key !== 'chef') { npc.phase = 'order'; npc.orderLeft = 3; }
                 }
                 else if (npc.arrive === 'sleep') npc.state = 'sleeping';
                 else if (npc.arrive === 'away') npc.state = 'away';
-                else if (npc.arrive === 'idle') { npc.state = 'idle'; npc.dwell = 20 + Math.random() * 40; }
+                else if (npc.arrive === 'idle') { npc.state = 'idle'; npc.dwell = 20 + Math.random() * 40; parkJoinCluster(npc); }
                 else if (npc.arrive === 'queue') { npc.state = 'queue'; npc.queueWait = 0; }
                 else if (npc.arrive === 'serve') {
                   if (npc.busy === 'player') gameState.eatServed = true;
@@ -1099,8 +1403,10 @@
         } else if (npc.state === 'idle' && npc.breakHome) {
           npc.dwell -= progressMinutes;
           if (npc.dwell <= 0) {
-            if (schoolPhaseNow() === 'break') { const sp2 = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)]; npc.path = [sp2]; npc.arrive = 'idle'; npc.state = 'path'; }
-            else npc.dwell = 2; // 等鐘聲監看器送回座位
+            const ph = schoolPhaseNow();
+            if (ph === 'break') { const sp2 = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)]; npc.path = [sp2]; npc.arrive = 'idle'; npc.state = 'path'; }
+            else if (ph === 'class') npc.dwell = 2; // 等鐘聲監看器送回座位
+            else { npc.breakHome = null; npcExitPath(npc); } // v9.15：放學/週末了，不再等鐘聲，自己離校（修高速跳過鐘聲轉換卡死）
           }
         } else if (npc.state === 'seated' || npc.state === 'idle') {
           if (npc.state === 'seated' && npc.seatIdx != null && SEAT_MAP[npc.dest] && SEAT_MAP[npc.dest][npc.seatIdx] && !SEAT_MAP[npc.dest][npc.seatIdx].who) {
@@ -1139,12 +1445,16 @@
           if (hour >= 22 || (hour >= 7 && hour < 19)) npcPickTarget(npc);
         } else if (npc.state === 'away') {
           if (npc.kind === 'parent') {
-            if (hour >= 18 || (hour === 17 && (gameState.minute || 0) >= 40)) npcPickTarget(npc); // v9.13 同上：17:40 回家
-          } else if (hour >= 7 && hour < 23) {
+            if (parentBackHome(npc)) npcPickTarget(npc); // v9.14.4 爸媽錯開回家
+          } else if (hour >= 7 && (hour * 60 + (gameState.minute || 0)) < npcHomeTime(npc)) { // v9.15：還沒到他的回家時間才出門活動
             npc.x = npc.x < 960 ? -60 : 1980; npc.y = NPC_STREET_Y; npcPickTarget(npc);
           }
         }
-        const el = document.querySelector('#npc-layer #npc-' + npc.key);
+        const el = document.getElementById('npc-' + npc.key);
+        if (el && npc.inside !== undefined) { // v9.14：室內外容器切換
+          const _tgt = npc.inside ? document.getElementById('home-rooms') : document.getElementById('npc-layer');
+          if (_tgt && el.parentNode !== _tgt) _tgt.appendChild(el);
+        }
         if (el) {
           const lying = npc.state === 'sleeping' && npc.kind === 'parent';
           el.style.left = npc.x + 'px';
@@ -1169,10 +1479,6 @@
               if (dishEl.textContent !== _dt) dishEl.textContent = _dt;
             } else if (dishEl.style.display !== 'none') dishEl.style.display = 'none';
           }
-        }
-        if (def.kind === 'rival' || def.kind === 'staff') {
-          const zzz = document.getElementById('npc-zzz-' + npc.key);
-          if (zzz) zzz.style.display = npc.state === 'sleeping' ? 'inline' : 'none';
         }
         if (npc.state === 'seated' && npc.dest && NPC_SEAT_POOLS[npc.dest]) {
           const island = document.getElementById('landmark-' + npc.dest);

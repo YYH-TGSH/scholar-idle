@@ -190,7 +190,7 @@ body {
     /* 建築標籤 (開羅經典木牌標籤) */
     .island-tag {
       position: absolute;
-      bottom: -13px;
+      bottom: -27px; /* v9.14.3 全島統一：名牌吊在框框下方，不擋室內 */
       left: 50%;
       transform: translateX(-50%);
       background: #fff9ed;
@@ -216,7 +216,7 @@ body {
     /* 島嶼等級像素寶石徽章 */
     .island-lv-badge {
       position: absolute;
-      top: -8px;
+      top: -27px; /* v9.14.3 全島統一：徽章在框框上方 */
       right: -6px;
       z-index: 30;
       background: linear-gradient(135deg, #ffd32a, #ff9f1a);
@@ -360,8 +360,13 @@ body {
        ========================================== */
     .random-event-capsule {
       position: fixed;
-      top: 78px;
-      right: 24px;
+      top: auto;
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%); /* v9.15.2：改到畫面底端中間（使用者指定），不壓頂欄 */
+      bottom: calc(158px + env(safe-area-inset-bottom));
+      max-width: calc(100vw - 24px);
+      white-space: nowrap;
       z-index: 90;
       background: linear-gradient(135deg, #ff9f0a, #ff375f);
       color: #fff;
@@ -394,8 +399,8 @@ body {
     }
 
     @keyframes pulse-capsule {
-      0%, 100% { transform: scale(1) translateY(0); }
-      50% { transform: scale(1.06) translateY(-2px); }
+      0%, 100% { transform: translateX(-50%) scale(1) translateY(0); }
+      50% { transform: translateX(-50%) scale(1.06) translateY(-2px); }
     }
 
     .event-choice-btn {
@@ -2523,7 +2528,8 @@ body {
        ========================================== */
     .minigame-trigger {
       position: absolute;
-      top: -30px;
+      top: auto;
+      bottom: -86px; /* v9.15.1：改到名牌下方，不再被上方畫面遮住 */
       left: 50%;
       transform: translateX(-50%);
       z-index: 20;
@@ -2552,14 +2558,14 @@ body {
     .minigame-trigger .mg-badge::after {
       content: '';
       position: absolute;
-      bottom: -6px;
+      top: -6px; /* v9.15.2：按鈕移到名牌下方後，箭頭改到上方朝上指著建築 */
       left: 50%;
       transform: translateX(-50%) rotate(45deg);
       width: 10px;
       height: 10px;
-      background: linear-gradient(135deg, transparent 50%, #ff9f0a 50%);
-      border-right: 2px solid rgba(255, 255, 255, 0.6);
-      border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+      background: linear-gradient(135deg, #ff2d55 50%, transparent 50%);
+      border-left: 2px solid rgba(255, 255, 255, 0.6);
+      border-top: 2px solid rgba(255, 255, 255, 0.6);
     }
 
     @keyframes minigame-pulse {
@@ -2892,6 +2898,14 @@ body {
       border-color: var(--secondary);
       animation: shake-item 0.3s ease;
     }
+
+    .cooking-item.raw { filter: saturate(0.35) brightness(1.15); }
+    .cooking-item.perfect { border-color: #ffb300; box-shadow: 0 0 14px 3px rgba(255, 179, 0, 0.75); animation: mg-perfect-pulse 0.5s infinite alternate ease-in-out; }
+    .cooking-item.over { filter: sepia(0.7) brightness(0.72); }
+    .cooking-item.burnt { filter: grayscale(1) brightness(0.45); }
+    .cooking-item .cook-ring { position: absolute; left: 3px; right: 3px; bottom: 3px; height: 5px; border-radius: 3px; background: rgba(0,0,0,0.15); overflow: hidden; }
+    .cooking-item .cook-fill { display: block; height: 100%; background: linear-gradient(90deg, #ffd60a, #ff9f0a); }
+    @keyframes mg-perfect-pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
 
     @keyframes shake-item {
 
@@ -3274,7 +3288,7 @@ input, select, textarea { border-radius: 14px !important; }
   .btn-exam-mini { min-height: 40px; }
   .island-tag { font-size: .8rem !important; }
   .island-lv-badge { font-size: .78rem !important; padding: 4px 8px !important; }
-  .random-event-capsule { top: auto; bottom: calc(120px + env(safe-area-inset-bottom)); right: 12px; }
+  .random-event-capsule { left: 50%; right: auto; bottom: calc(158px + env(safe-area-inset-bottom)); }
 }
 
 /* 減少動態偏好：停掉常駐動畫 */
@@ -3340,7 +3354,7 @@ input, select, textarea { border-radius: 14px !important; }
   /* 所有彈窗在手機上限制高度可捲動 (輪迴彈窗內容 ~900px，矮螢幕原本會切掉確認鈕) */
   .overlay .game-modal { max-height: 92dvh !important; overflow-y: auto !important; }
   /* 突發事件膠囊原本 bottom:120px 會壓到房間導覽列 (96~146px 帶) → 抬到導覽列上方 */
-  .random-event-capsule { bottom: calc(154px + env(safe-area-inset-bottom)) !important; }
+  .random-event-capsule { bottom: calc(158px + env(safe-area-inset-bottom)) !important; }
   /* 警示條/成就吐司原本 top:72/80px 會蓋進三行高的手機頂欄 → 改到頂欄下方 */
   #alert-bar { top: calc(var(--chrome-top, 150px) + 6px) !important; }
   .achievement-toast { top: calc(var(--chrome-top, 150px) + 8px) !important; right: 12px !important; left: 12px; max-width: none !important; z-index: 99998 !important; }
@@ -3433,6 +3447,7 @@ input, select, textarea { border-radius: 14px !important; }
 .npc-teacher, .npc-peer, .npc-coach, .npc-chef, .npc-clerk { animation: npc-bob 2.4s ease-in-out infinite; }
 .npc-peer { animation-delay: 0.4s; } .npc-coach { animation-delay: 0.8s; } .npc-chef { animation-delay: 1.2s; } .npc-clerk { animation-delay: 1.6s; }
 @keyframes npc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px); } }
+@keyframes sleep-breath { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(1.5px); } }
 .smoke-puff { animation: smoke-rise 2.8s ease-in-out infinite; }
 @keyframes smoke-rise { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(-2.5px); opacity: 0.35; } }
 .store-sign-glow { filter: drop-shadow(0 0 3px rgba(48, 209, 88, 0.9)); }
@@ -3672,8 +3687,8 @@ input, select, textarea { border-radius: 14px !important; }
 #char-wrap.seated #student-sprite .pixel-feet, #char-wrap.seated #student-sprite > rect { display: none; }
 .npc.seated .npc-sprite { margin-top: 6px; }
 .npc.seated .npc-sprite .pixel-feet, .npc.seated .npc-sprite > rect { display: none; }
-.npc.lying .npc-sprite { transform: rotate(-90deg); }
-#char-wrap.lying #student-sprite { transform: rotate(-90deg); }
+.npc.lying .npc-sprite { transform: none; animation: sleep-breath 2.4s ease-in-out infinite; } /* v9.15.3 直著睡：不橫躺旋轉 */
+#char-wrap.lying #student-sprite { transform: none; animation: sleep-breath 2.4s ease-in-out infinite; } /* v9.15.3 直著睡 */
 .npc .npc-sprite, #char-wrap #student-sprite { transition: transform 0.6s ease; }
 @keyframes npc-bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
 .npc-house { position: absolute; width: 56px; margin-left: -28px; text-align: center; z-index: 15; pointer-events: none; }
@@ -3754,3 +3769,13 @@ input, select, textarea { border-radius: 14px !important; }
 .steam-wisp.w2 { animation-delay: 0.8s; }
 .steam-wisp.w3 { animation-delay: 1.6s; }
 @keyframes steamRise { 0% { transform: translateY(0); opacity: 0; } 35% { opacity: 0.85; } 100% { transform: translateY(-7px); opacity: 0; } }
+
+/* ===== v9.14 捲動式室內 ===== */
+#home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#1b2340; }
+#home-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
+.sleep-form { position:absolute; z-index:150; pointer-events:none; }
+
+/* v9.14.3：升級飾品全島統一在框框上方；室內可拖曳（滑鼠+觸控） */
+.island-up-deco { top:-24px !important; }
+#home-stage { cursor:grab; touch-action:none; }
+#home-stage:active { cursor:grabbing; }

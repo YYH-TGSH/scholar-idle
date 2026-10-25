@@ -86,7 +86,7 @@
     function buildCommutePath(fromLoc, toLoc) {
       const fromIdle = COORDS[fromLoc + '-idle'] || COORDS['home-idle'];
       const start = { x: gameState.currentX || fromIdle.x, y: gameState.currentY || fromIdle.y };
-      const end = COORDS[toLoc + '-idle'] || COORDS['home-idle'];
+      const end = toLoc === 'home' ? { x: DOOR_X.home, y: 195 } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // v9.14：回家路徑只到門口，室內由 stage 接手
       const fx = DOOR_X[fromLoc] || start.x, tx = DOOR_X[toLoc] || end.x;
       const raw = [start, { x: fx, y: DOOR_OUT_Y }, { x: fx, y: WALK_Y }, { x: tx, y: WALK_Y }, { x: tx, y: DOOR_OUT_Y }, end];
       const pts = [raw[0]];
@@ -117,6 +117,8 @@
     }
     function commutePxPerMin() { return WALK_PX_PER_MIN / (gameState.commuteSpeedMult || 1); }
     function startCommuteTo(targetLoc) {
+      if (targetLoc !== 'home') gameState.deskStudy = false; // v9.14.4 離家就結束書桌自習
+      if (currentLoc === 'home' && targetLoc !== 'home') { gameState.currentX = DOOR_X.home; gameState.currentY = 195; } // v9.14：離家先回到門口再出發（stage 同步關閉）
       if (gameState.isCommuting) return; // v9.1：通勤中不改道——大腦每 tick 都在決策，沒這道防線會半路重建路徑、把小人拉回起點門口 (測試實測會半路改去別棟)
       const pts = buildCommutePath(currentLoc, targetLoc);
       const total = pathTotalLength(pts);
@@ -163,6 +165,7 @@
     // 鏡頭用帶速度的彈簧積分追趕目標 (有慣性、會自然減速，就像 iOS 的 spring 動畫)。
     let _prevTickPos = null, _lastTickPos = null, _lastTickAt = 0;
     let _visPos = null; // v9.10.4: 視覺位置平滑 (吸收 tick 抖動)
+    let _leadPrev = null; const _leadVel = { x: 0, y: 0 }; // v9.15.2 鏡頭前饋用的平滑視覺速度
     let _camAnchor = null;     // 膠囊聚焦的世界座標錨點；null = 跟隨角色
     let _camZoomTarget = null; // 程式化縮放目標 (膠囊/雙擊)；null = 不介入
     let _camVX = 0, _camVY = 0, _camZV = 0;
@@ -200,7 +203,7 @@
         _visPos.y += (typ - _visPos.y) * kk;
         if (Math.abs(_visPos.x - txp) < 0.05) _visPos.x = txp;
         if (Math.abs(_visPos.y - typ) < 0.05) _visPos.y = typ;
-        updateCharacterPositionAndScale(Math.round(_visPos.x), Math.round(_visPos.y), _lastTickPos.flip);
+        updateCharacterPositionAndScale(_visPos.x, _visPos.y, _lastTickPos.flip); // v9.15.2 不取整，次像素滑動不卡頓
       } else _visPos = null;
       if (_pointers.size > 0) return; // 玩家手指在控制鏡頭：彈簧讓路 (位置由手勢直接寫入)
       // 2) 決定鏡頭目標
@@ -209,17 +212,27 @@
       if (_camAnchor) {
         tx = -(_camAnchor.x - WORLD_W / 2) * s; ty = -(_camAnchor.y - WORLD_H / 2) * s; hasTarget = true;
       } else {
-        const cx = gameState.currentX || WORLD_W / 2, cy = gameState.currentY || WORLD_H / 2;
+        // v9.15.2：鏡頭改跟內插後的視覺位置（原本跟 100ms 才跳一次的邏輯位置，前饋又用每 tick 的瞬時位移估速度，
+        // 路徑一轉彎目標就跳一下，彈簧追著跳躍目標 = 通勤時鏡頭一頓一頓）
+        const cx = (gameState.isCommuting && _visPos) ? _visPos.x : (gameState.currentX || WORLD_W / 2);
+        const cy = (gameState.isCommuting && _visPos) ? _visPos.y : (gameState.currentY || WORLD_H / 2);
         // 速度前饋：瞄準小人「即將到達」的位置，剛好抵銷彈簧追蹤等速目標時的穩態落後 (2ζ/ω 秒)
         let leadX = 0, leadY = 0;
-        if (gameState.isCommuting && _prevTickPos && _lastTickPos) {
+        if (gameState.isCommuting && _visPos) {
           const LEAD = 2 * CAM_ZETA / (2 * Math.PI / CAM_RESPONSE);
           // 起步/抵達 300px 內把前饋漸漸收掉：起步不暴衝、抵達不衝過頭再回彈
           const edge = Math.min(gameState.commuteDonePx || 0, Math.max(0, (gameState.commuteTotalPx || 0) - (gameState.commuteDonePx || 0)));
           const taper = Math.max(0, Math.min(1, edge / 300));
-          leadX = (_lastTickPos.x - _prevTickPos.x) * 10 * LEAD * taper;
-          leadY = (_lastTickPos.y - _prevTickPos.y) * 10 * LEAD * taper;
-        }
+          if (_leadPrev) {
+            const ivx = (_visPos.x - _leadPrev.x) / Math.max(dt, 0.001);
+            const ivy = (_visPos.y - _leadPrev.y) / Math.max(dt, 0.001);
+            _leadVel.x += (ivx - _leadVel.x) * 0.12;
+            _leadVel.y += (ivy - _leadVel.y) * 0.12;
+          }
+          _leadPrev = { x: _visPos.x, y: _visPos.y };
+          leadX = _leadVel.x * LEAD * taper;
+          leadY = _leadVel.y * LEAD * taper;
+        } else { _leadPrev = null; _leadVel.x *= 0.8; _leadVel.y *= 0.8; }
         tx = -(cx + leadX - WORLD_W / 2) * s; ty = -(cy + leadY - WORLD_H / 2) * s;
         if (gameState.isCommuting) hasTarget = true;
         else if (Date.now() >= _camHoldUntil) {
@@ -324,7 +337,7 @@
       const c = centers[loc];
       if (!c) return;
       if (mapZoom < 1.7) _camZoomTarget = 1.7; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間
-      _camHoldUntil = Date.now() + 4000; // 暫停跟隨 4 秒，不要跟玩家搶鏡頭
+      _camHoldUntil = Date.now() + 30000; // v9.14.4 手動操控後 30 秒不自動回追主角
       centerMapOn(c[0], c[1]);
       const el = document.getElementById('landmark-' + loc);
       if (el) { el.classList.remove('nav-pulse'); void el.offsetWidth; el.classList.add('nav-pulse'); }
@@ -336,7 +349,7 @@
       if (!vp) return;
       _mapSetupDone = true;
       vp.addEventListener('pointerdown', (e) => {
-        _camHoldUntil = Date.now() + 4000; // 玩家手動看地圖時，跟隨相機先讓路
+        _camHoldUntil = Date.now() + 30000; // v9.14.4 手動看地圖時，跟隨相機先讓路 30 秒
         _camAnchor = null; _camZoomTarget = null; _camVX = 0; _camVY = 0;
         _pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (_pointers.size === 2) {
@@ -370,7 +383,7 @@
       }, true);
       vp.addEventListener('wheel', (e) => {
         e.preventDefault();
-        _camHoldUntil = Date.now() + 4000; _camAnchor = null; _camZoomTarget = null; _camVX = 0; _camVY = 0;
+        _camHoldUntil = Date.now() + 30000; _camAnchor = null; _camZoomTarget = null; _camVX = 0; _camVY = 0; // v9.14.4
         mapZoom = Math.max(1, Math.min(3, mapZoom * (e.deltaY < 0 ? 1.12 : 0.89)));
         clampMapPan(); applyMapZoom();
       }, { passive: false });
@@ -382,6 +395,7 @@
 
     // 遊戲時間推進 (推進 speed / 10 分鐘，1x 速度下 1 秒(10次tick) = 1 遊戲分鐘)
     function tick() {
+      if (window._minigameOpen) return; // v9.15.2 玩小遊戲時遊戲時間凍結
       const progressMinutes = gameState.speed / 10;
 
       // 1. 處理通勤 (v9.0 路徑積分：位置與倒數同源，抵達與歸零同一刻)
@@ -458,6 +472,7 @@
 
       // 3. 計算開關燈鎖定狀態
       calculateLocks();
+      if (typeof updateHomeStage === 'function') updateHomeStage(); // v9.14
 
       // 4. 行為決策
       decideLocationAndState();
@@ -639,6 +654,10 @@
         return;
       }
 
+      if (gameState.deskStudy) { // v9.14.4 書桌自習：體力/飢餓/深夜自動解除，否則留在家裡讀書
+        if (gameState.energy < 12 || gameState.hunger < 18 || gameState.hour >= 23 || gameState.hour < 5) gameState.deskStudy = false;
+        else targetLoc = 'home';
+      }
       if (currentLoc === targetLoc) {
         if (currentLoc === "school") {
           currentState = (gameState.stress >= 85) ? "angry" : ((typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') ? "idle" : "studying"); // v9.12 下課離席放鬆
@@ -657,7 +676,8 @@
         }
         else if (currentLoc === "home") {
           currentState = (gameState.hour === 18 && gameState.energy >= 30 && gameState.overrideAction !== 'sleep') ? "dinner" // v9.13 晚餐同桌
-            : (gameState.energy < 30 || gameState.hour >= 22 || gameState.hour < 7 || (gameState.overrideAction === 'sleep')) ? "sleeping" : "idle";
+            : (gameState.energy < 30 || gameState.hour >= 22 || gameState.hour < 7 || (gameState.overrideAction === 'sleep')) ? "sleeping"
+            : (gameState.deskStudy && gameState.energy >= 30) ? "studying" : "idle"; // v9.14.4 書桌自習
         }
       }
       else {
@@ -670,6 +690,7 @@
       if (loc === 'home') {
         if (state === 'sleeping') return COORDS['home-sleep'];
         if (state === 'dinner') return COORDS['home-dinner']; // v9.13
+        if (state === 'studying' && gameState.deskStudy) return COORDS['home-desk']; // v9.14.4
         return COORDS['home-idle'];
       }
       if (loc === 'school') {
@@ -882,7 +903,7 @@
     // 知識泡泡維持額外獎勵（+1/顆＋連擊加速本函數的累積速率）。
     function processStudyTick(progressMinutes) {
       if (currentState !== 'studying') return;
-      if (currentLoc !== 'school' && currentLoc !== 'library') return;
+      if (currentLoc !== 'school' && currentLoc !== 'library' && !(currentLoc === 'home' && gameState.deskStudy)) return;
       let efficiency = 1.0;
       if (gameState.energy < 20) efficiency *= 0.2;
       else if (gameState.hunger < 30) efficiency *= 0.5;
@@ -901,7 +922,7 @@
         const xiaoxuanMult = typeof getFriendBonus === 'function' ? getFriendBonus('school_eff') : 1.0;
         const schoolMult = lv === 3 ? 1.60 : (lv === 2 ? 1.25 : 1.0);
         mult = headphoneBonus * studyBuff * xiaoxuanMult * schoolMult; type = 'school';
-      } else {
+      } else if (currentLoc === 'library') {
         let lv = 1; try { lv = getLandmarkLevel('library'); } catch (e) { }
         let bookBonus = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3);
         const reviewBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('review_boost') : 1.0;
@@ -910,6 +931,8 @@
         const yuqingMult = typeof getFriendBonus === 'function' ? getFriendBonus('library_eff') : 1.0;
         const libEffMult = lv === 3 ? 1.75 : (lv === 2 ? 1.30 : 1.0);
         mult = bookBonus * reviewBuff * memMult * libMut * yuqingMult * libEffMult; type = 'library';
+      } else { // v9.14.4 在家書桌：只有書本/平板加成
+        mult = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3); type = 'library';
       }
       gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (progressMinutes / 60);
       if (gameState._studyFrac < 1) return;

@@ -1746,7 +1746,7 @@
       if (_playerSleepEl) _playerSleepEl.style.display = "none";
       elCharWrap.classList.remove("in-bed");
       elCharWrap.classList.remove("lying");
-      elCharWrap.classList.toggle("seated", currentState === 'eating' || currentState === 'dinner'); // v9.13 晚餐也坐
+      elCharWrap.classList.toggle("seated", currentState === 'eating' || currentState === 'dinner' || (currentLoc === 'home' && currentState === 'studying' && gameState.deskStudy)); // v9.14.4 書桌前也坐
       if (elStudentSprite) { // v9.10.4 坐姿：裁掉 viewBox 下段 (鞋子區) + 高度等比 + 整隻下沉讓腰進吧台後
         const _sp2 = currentState === 'eating' || currentState === 'dinner'; // v9.13
         const _vb2 = _sp2 ? '0 0 16 21' : '0 0 16 25';
@@ -1898,6 +1898,9 @@
           } else if (currentLoc === "library") {
             setStageBoard(`圖書館：<span>自修複習課業 📚</span>`);
             elCharBubble.innerText = "好好複習！💡";
+          } else if (currentLoc === "home" && gameState.deskStudy) { // v9.14.4
+            setStageBoard(`住家：<span>書桌前自習中 📖</span>`);
+            elCharBubble.innerText = "在家也要認真！✍️";
           } else {
             setStageBoard(`住家：<span>發呆放鬆中 🍃</span>`);
             elCharBubble.innerText = "放空一下下～";
@@ -2075,6 +2078,7 @@
     }
 
     function startMinigame(loc) {
+      window._minigameOpen = true; // v9.15.2 凍結遊戲時間（tick 直接跳過）
       playSound('click');
       if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; } // v8.9.1 防舊計時器殘留
       currentMinigame = loc;
@@ -2098,13 +2102,14 @@
     }
 
     function closeMinigame() {
+      window._minigameOpen = false; // v9.15.2 時間恢復流動
       playSound('click');
       document.getElementById('minigame-overlay').classList.remove('active');
       if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
       currentMinigame = null;
     }
 
-    function showMinigameResult(win, loc) {
+    function showMinigameResult(win, loc, score) {
       gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES; // v8.9.1 完成才起算冷卻
       if (!gameState.miniGameWins) gameState.miniGameWins = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
       if (win) gameState.miniGameWins[loc] = (gameState.miniGameWins[loc] || 0) + 1;
@@ -2128,7 +2133,7 @@
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">🎉</span>
           <div class="result-title" style="color:var(--accent);">勝利！</div>
-          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 分鐘！</div>
+          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 分鐘！${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examSuccess');
       } else {
@@ -2136,7 +2141,7 @@
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">😅</span>
           <div class="result-title" style="color:var(--secondary);">失敗...</div>
-          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 分鐘</div>
+          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 分鐘${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examFail');
       }
@@ -2206,61 +2211,121 @@
     }
 
     // ---- 🍔 鐵板料理 ----
+    // v9.15.1 鐵板翻炒王：看準金黃色澤收成，訂單加分
+    const COOK_FOODS = ['🥩', '🍳', '🥦', '🌽', '🍤', '🧅', '🍗', '🦑'];
+    function cookPhase(s) {
+      if (!s.food) return 'empty';
+      if (s.burnt) return 'burnt';
+      if (s.cook < 0.45) return 'raw';
+      if (s.cook <= 0.78) return 'perfect';
+      return 'over';
+    }
     function startCookingGame() {
-      document.getElementById('mg-title').innerText = '🍔 鐵板料理';
-      document.getElementById('mg-desc').innerText = '按照數字順序翻轉食材！';
+      document.getElementById('mg-title').innerText = '🍳 鐵板翻炒王';
+      document.getElementById('mg-desc').innerText = '食材變金黃發光時點它收成！完成訂單有獎勵，30 秒拚 14 分';
       const area = document.getElementById('mg-game-area');
       const timerFill = document.getElementById('mg-timer-fill');
       timerFill.style.width = '100%';
-
-      const foods = ['🥩', '🍳', '🥦', '🌽', '🍤', '🧅'];
-      const selected = foods.sort(() => Math.random() - 0.5).slice(0, 5);
-
+      const G = window._cookGame = {
+        t: 30, score: 0, combo: 0, spawnIn: 0, over: false,
+        slots: Array.from({ length: 6 }, () => ({ food: null, cook: 0, speed: 1, burnt: 0 })),
+        order: null, orderT: 0
+      };
+      window._cookNewOrder = function () {
+        const food = COOK_FOODS[Math.floor(Math.random() * COOK_FOODS.length)];
+        G.order = { food, need: 2 + Math.floor(Math.random() * 2), got: 0 };
+        G.orderT = 12;
+      };
+      window._cookNewOrder();
       area.innerHTML = `
-        <div style="font-size:0.85rem; margin-bottom:10px; font-weight:700;">按 1→2→3→4→5 的順序翻轉食材！</div>
-        <div class="cooking-belt" id="cooking-belt">
-          ${selected.map((food, i) => `
-            <div class="cooking-item" data-order="${i}" onclick="handleCookingClick(this, ${i})">
-              ${food}
-              <span class="order-num">${i + 1}</span>
-            </div>
-          `).join('')}
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+          <div id="cook-score" style="font-weight:900; font-size:0.95rem;">⭐ 0 分 ・ 🔥 連擊 0</div>
+          <div id="cook-order" style="font-weight:800; font-size:0.88rem; background:#fff3e0; border:2px solid #ffb300; border-radius:12px; padding:3px 10px;"></div>
+          <div style="font-weight:800; font-size:0.85rem; opacity:0.75;">目標 14 分</div>
         </div>
+        <div class="cooking-belt" id="cooking-belt">
+          ${G.slots.map((s, i) => `<div class="cooking-item" data-slot="${i}" onclick="handleCookingClick(this, ${i})"><span class="cook-emoji"></span><span class="cook-ring"><span class="cook-fill"></span></span></div>`).join('')}
+        </div>
+        <div style="font-size:0.78rem; opacity:0.7; margin-top:8px;">🟡 金黃發光 = 完美收成 +1 ｜ 太生點一下 = 翻面加速 ｜ 過熟點掉丟棄 ｜ 🖤 焦掉點掉丟棄（連擊歸零）</div>
       `;
-
-      // 2 秒後隱藏順序提示
-      setTimeout(() => {
-        document.querySelectorAll('.order-num').forEach(n => n.style.display = 'none');
-      }, 2000);
-
-      let timeLeft = 100;
-      mgTimerInterval = setInterval(() => {
-        timeLeft -= 0.8;
-        timerFill.style.width = `${Math.max(0, timeLeft)}%`;
-        if (timeLeft <= 0) {
-          clearInterval(mgTimerInterval);
-          showMinigameResult(false, 'restaurant');
-        }
-      }, 100);
-
-      window._cookingNextIndex = 0;
+      mgTimerInterval = setInterval(() => window._cookTick(0.1), 100);
+      window._cookRender();
     }
 
-    function handleCookingClick(el, order) {
-      if (order === window._cookingNextIndex) {
-        el.classList.add('done');
-        el.style.pointerEvents = 'none';
-        window._cookingNextIndex++;
-        playSound('click');
-        if (window._cookingNextIndex >= 5) {
-          if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
-          setTimeout(() => showMinigameResult(true, 'restaurant'), 500);
-        }
-      } else {
-        el.classList.add('wrong-order');
-        setTimeout(() => el.classList.remove('wrong-order'), 300);
-        playSound('examFail');
+    window._cookTick = function (dt) {
+      const G = window._cookGame;
+      if (!G || G.over) return;
+      const timerFill = document.getElementById('mg-timer-fill');
+      G.t -= dt;
+      if (timerFill) timerFill.style.width = `${Math.max(0, G.t / 30 * 100)}%`;
+      if (G.t <= 0) {
+        G.over = true;
+        if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
+        showMinigameResult(G.score >= 14, 'restaurant', G.score);
+        return;
       }
+      if (G.order) { G.orderT -= dt; if (G.orderT <= 0) { G.combo = 0; window._cookNewOrder(); } }
+      G.spawnIn -= dt;
+      const emptyIdx = G.slots.map((s, i) => s.food ? -1 : i).filter(i => i >= 0);
+      if (G.spawnIn <= 0 && emptyIdx.length) {
+        const i = emptyIdx[Math.floor(Math.random() * emptyIdx.length)];
+        const ramp = 1 + (30 - G.t) / 60;
+        const food = (G.order && Math.random() < 0.4) ? G.order.food : COOK_FOODS[Math.floor(Math.random() * COOK_FOODS.length)];
+        G.slots[i] = { food, cook: 0, speed: (0.22 + Math.random() * 0.15) * ramp, burnt: 0 };
+        G.spawnIn = 0.55 + Math.random() * 0.5;
+      }
+      G.slots.forEach(s => {
+        if (!s.food) return;
+        if (s.burnt) { s.burnt -= dt; if (s.burnt <= 0) { s.food = null; s.cook = 0; } return; }
+        s.cook += dt * s.speed;
+        if (s.cook >= 1.15) s.burnt = 0.9;
+      });
+      window._cookRender();
+    };
+
+    window._cookRender = function () {
+      const G = window._cookGame;
+      if (!G) return;
+      const scoreEl = document.getElementById('cook-score');
+      if (scoreEl) scoreEl.textContent = `⭐ ${G.score} 分 ・ 🔥 連擊 ${G.combo}`;
+      const orderEl = document.getElementById('cook-order');
+      if (orderEl && G.order) orderEl.textContent = `訂單 ${G.order.food} ×${G.order.need}（${G.order.got}/${G.order.need}）獎勵 +4 ・ ${Math.max(0, Math.ceil(G.orderT))}s`;
+      document.querySelectorAll('#cooking-belt .cooking-item').forEach((el, i) => {
+        const s = G.slots[i]; if (!s) return;
+        const ph = cookPhase(s);
+        el.className = 'cooking-item' + (s.food ? ' ' + ph : '');
+        const em = el.querySelector('.cook-emoji'); if (em) em.textContent = s.food ? (ph === 'burnt' ? '🖤' : s.food) : '';
+        const fill = el.querySelector('.cook-fill'); if (fill) fill.style.width = `${Math.min(100, s.cook * 100)}%`;
+      });
+    };
+
+    function handleCookingClick(el, i) {
+      const G = window._cookGame;
+      if (!G || G.over) return;
+      const s = G.slots[i];
+      if (!s || !s.food) return;
+      const ph = cookPhase(s);
+      if (ph === 'perfect') {
+        G.score += 1; G.combo++;
+        if (G.combo % 5 === 0) G.score += 1; // 連擊里程碑額外 +1
+        if (G.order && s.food === G.order.food) {
+          G.order.got++;
+          if (G.order.got >= G.order.need) { G.score += 4; G.t = Math.min(30, G.t + 2); window._cookNewOrder(); }
+        }
+        s.food = null; s.cook = 0;
+        playSound('click');
+      } else if (ph === 'raw') {
+        s.cook += 0.18; // 翻面加速
+        playSound('click');
+      } else if (ph === 'burnt') {
+        G.combo = 0;
+        s.food = null; s.cook = 0; s.burnt = 0;
+        playSound('examFail');
+      } else { // over：丟棄，不斷連擊
+        s.food = null; s.cook = 0;
+        playSound('click');
+      }
+      window._cookRender();
     }
 
     // ---- 🏃 狂點吹氣球 ----
@@ -2652,7 +2717,7 @@
       try {
         if (typeof gameState === 'undefined' || !gameState) return;
         if (currentState !== 'studying') return;
-        if (currentLoc !== 'school' && currentLoc !== 'library') return;
+        if (currentLoc !== 'school' && currentLoc !== 'library' && !(currentLoc === 'home' && gameState.deskStudy)) return;
         if (uiCovered()) return;
         if (Math.random() < 0.45) return;
         spawnComboBubble();
