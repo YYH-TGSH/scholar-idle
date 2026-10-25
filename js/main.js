@@ -462,6 +462,7 @@
       // 4. 行為決策
       decideLocationAndState();
       processStudyTick(progressMinutes); // v9.12.12 放置型主成長：讀書每分鐘連續增長
+      processDinnerTick(progressMinutes); // v9.13 晚餐同桌：飽足/減壓/專注連續入帳
 
       // 5. 畫面渲染
       updateLocksUI();
@@ -554,7 +555,9 @@
         elCalendarMode.style.color = "var(--text-color)";
 
         const h = gameState.hour;
-        if (gameState.hunger < 35 && !restaurantLocked) {
+        if (h === 18 && gameState.parentsStatus === 'alive' && !homeLocked) {
+          targetLoc = "home"; // v9.13 晚餐優先於飢餓規則：18:00 回家同桌（家裡晚餐一樣補飽足）
+        } else if (gameState.hunger < 35 && !restaurantLocked) {
           targetLoc = "restaurant";
         } else if (h === 12 && !restaurantLocked) {
           targetLoc = "restaurant"; // v9.12.8 午休吃飯：跟全校一起去食堂，不再自己留在教室聽講
@@ -588,7 +591,9 @@
           targetLoc = "home"; // 早晨安穩睡覺
         } else {
           // 週末智慧排程：若現金不夠繳下期房租且精力飽足健康，優先去超商打工賺錢！
-          if (gameState.hunger < 45 && !restaurantLocked) {
+          if (h === 18 && gameState.parentsStatus === 'alive') {
+            targetLoc = "home"; // v9.13 週末晚餐也回家同桌
+          } else if (gameState.hunger < 45 && !restaurantLocked) {
             targetLoc = "restaurant";
           } else if (gameState.stress > 60) {
             targetLoc = "gym";
@@ -651,7 +656,8 @@
           currentState = "working";
         }
         else if (currentLoc === "home") {
-          currentState = (gameState.energy < 30 || gameState.hour >= 22 || gameState.hour < 7 || (gameState.overrideAction === 'sleep')) ? "sleeping" : "idle";
+          currentState = (gameState.hour === 18 && gameState.energy >= 30 && gameState.overrideAction !== 'sleep') ? "dinner" // v9.13 晚餐同桌
+            : (gameState.energy < 30 || gameState.hour >= 22 || gameState.hour < 7 || (gameState.overrideAction === 'sleep')) ? "sleeping" : "idle";
         }
       }
       else {
@@ -663,6 +669,7 @@
     function getCharacterCoords(loc, state) {
       if (loc === 'home') {
         if (state === 'sleeping') return COORDS['home-sleep'];
+        if (state === 'dinner') return COORDS['home-dinner']; // v9.13
         return COORDS['home-idle'];
       }
       if (loc === 'school') {
@@ -848,6 +855,26 @@
       }
       if (typeof tickRivalsHourly === 'function') tickRivalsHourly(); // v9.3 宿敵
       if (typeof evaluateDailyQuests === 'function') evaluateDailyQuests(); // v9.1
+    }
+
+    // v9.13 晚餐同桌效果：坐在餐桌旁連續入帳（有家人同桌＝完整效果；一個人吃＝減半）
+    function processDinnerTick(progressMinutes) {
+      if (currentState !== 'dinner') return;
+      const fam = (gameState.npcs || []).some(n => n.kind === 'parent' && n.atDinner && n.state === 'seated');
+      const rate = fam ? 1 : 0.5;
+      gameState.hunger = Math.min(100, gameState.hunger + 50 * rate * progressMinutes / 60);
+      gameState.stress = Math.max(0, gameState.stress - 15 * rate * progressMinutes / 60);
+      gameState.focus = Math.min(100, (gameState.focus || 0) + 10 * rate * progressMinutes / 60);
+      gameState._dinnerMin = (gameState._dinnerMin || 0) + progressMinutes;
+      if (gameState._dinnerMin >= 25 && gameState._dinnerDoneDay !== gameState.totalGameDays) {
+        gameState._dinnerDoneDay = gameState.totalGameDays;
+        if (gameState._eatDay !== gameState.totalGameDays) { gameState._eatDay = gameState.totalGameDays; gameState.eatsToday = 0; }
+        gameState.eatsToday = (gameState.eatsToday || 0) + 1;
+        if (fam) {
+          queueFloatingText('🍚 吃飽了！媽媽的味道，壓力一掃而空');
+          if (Math.random() < 0.35) { const amt = 10 + Math.floor(Math.random() * 21); gameState.money += amt; queueFloatingText(`💰 爸爸偷偷塞了零用錢 +$${amt}`); }
+        } else queueFloatingText('🍚 一個人吃完晚餐了');
+      }
     }
 
     // v9.12.12 放置型主成長：讀書不再等整點結算（學校每節下課都卡在整點邊界，舊制幾乎永遠領不到），

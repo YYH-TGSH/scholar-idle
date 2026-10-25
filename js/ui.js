@@ -1746,9 +1746,9 @@
       if (_playerSleepEl) _playerSleepEl.style.display = "none";
       elCharWrap.classList.remove("in-bed");
       elCharWrap.classList.remove("lying");
-      elCharWrap.classList.toggle("seated", currentState === 'eating');
+      elCharWrap.classList.toggle("seated", currentState === 'eating' || currentState === 'dinner'); // v9.13 晚餐也坐
       if (elStudentSprite) { // v9.10.4 坐姿：裁掉 viewBox 下段 (鞋子區) + 高度等比 + 整隻下沉讓腰進吧台後
-        const _sp2 = currentState === 'eating';
+        const _sp2 = currentState === 'eating' || currentState === 'dinner'; // v9.13
         const _vb2 = _sp2 ? '0 0 16 21' : '0 0 16 25';
         if (elStudentSprite.getAttribute('viewBox') !== _vb2) elStudentSprite.setAttribute('viewBox', _vb2);
         const _sh2 = _sp2 ? '42px' : '50px';
@@ -1859,6 +1859,22 @@
           stopZzzParticles();
           stopSweatParticles();
           break;
+
+        case 'dinner': {
+          elStudentSprite.classList.add("state-eating");
+          const _famD = (gameState.npcs || []).some(n => n.kind === 'parent' && n.atDinner && n.state === 'seated');
+          if (_famD) {
+            setStageBoard(`住家：<span>晚餐同桌中 🍚</span>`);
+            const _dl = ['好吃！媽媽煮的最好吃 😋', '今天的菜好香～', '我還要再吃一碗！', '吃飽了，好滿足～'];
+            elCharBubble.innerText = _dl[Math.floor(((gameState.hour * 60 + gameState.minute) % 60) / 15) % _dl.length];
+          } else {
+            setStageBoard(`住家：<span>一個人吃晚餐 🍚</span>`);
+            elCharBubble.innerText = '一個人的晚餐…簡單吃一點。';
+          }
+          stopZzzParticles();
+          stopSweatParticles();
+          break;
+        }
 
         case 'sports':
           elStudentSprite.classList.add("state-sports");

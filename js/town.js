@@ -746,7 +746,7 @@
           npc.dest = 'home';
           npc.path = [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: NPC_DOOR_X.home, y: NPC_DOOR_Y }, def.sleepSpot];
           npc.arrive = 'sleep'; npc.state = 'path'; return 'home';
-        } else if (hour >= 19) {
+        } else if (hour >= 18 || (hour === 17 && (gameState.minute || 0) >= 40)) { // v9.13 爸媽 17:40 回家備晚餐
           npc.dest = 'home';
           npc.path = [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: NPC_DOOR_X.home, y: NPC_DOOR_Y }, def.homeSpot];
           npc.arrive = 'athome'; npc.state = 'path'; return 'home';
@@ -920,11 +920,95 @@
       layer.appendChild(bubble);
       setTimeout(() => bubble.remove(), 2600);
     }
+    // ================= v9.13 住家精緻化：晚餐同桌 =================
+    const DINNER_SEATS = { dad: { x: 224, y: 186 }, mom: { x: 264, y: 186 } };
+    const DINNER_SAY = {
+      mom: ['多吃點，看你瘦的。', '今天在學校好嗎？', '這道是你最愛吃的。', '慢點吃，鍋裡還有。'],
+      dad: ['吃慢點，沒人跟你搶。', '功課有不懂的，晚上問我。', '最近考試順利嗎？', '嗯，好吃，你媽手藝越來越好了。']
+    };
+    let _dinnerChatAt = -99;
+    function dinnerPhaseNow() {
+      const h = gameState.hour || 0, m = gameState.minute || 0;
+      if (h === 17 && m >= 40) return 'prep';
+      if (h === 18) return 'dinner';
+      return null;
+    }
+    function ensureDinnerFurniture() {
+      const layer = document.getElementById('npc-layer');
+      if (!layer || document.getElementById('dinner-table-back')) return;
+      const back = document.createElement('div');
+      back.id = 'dinner-table-back';
+      back.style.cssText = 'position:absolute; left:204px; top:150px; width:88px; height:44px; z-index:172; pointer-events:none;';
+      back.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
+        <rect x="12" y="6" width="14" height="16" fill="#a9743f" stroke="#182042" stroke-width="1.8" />
+        <rect x="62" y="6" width="14" height="16" fill="#a9743f" stroke="#182042" stroke-width="1.8" />
+        <rect x="4" y="20" width="80" height="7" fill="#b08968" stroke="#182042" stroke-width="1.8" /></svg>`;
+      layer.appendChild(back);
+      const fg = document.createElement('div');
+      fg.id = 'dinner-table-fg';
+      fg.style.cssText = 'position:absolute; left:204px; top:150px; width:88px; height:44px; z-index:192; pointer-events:none;';
+      fg.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
+        <rect x="4" y="27" width="80" height="5" fill="#8b5a2b" stroke="#182042" stroke-width="1.5" />
+        <rect x="10" y="32" width="5" height="10" fill="#795548" />
+        <rect x="73" y="32" width="5" height="10" fill="#795548" />
+        <g id="home-dinner-set" style="display:none;">
+          <ellipse cx="20" cy="24" rx="7" ry="3.4" fill="#ffffff" stroke="#182042" stroke-width="1.4" /><ellipse cx="20" cy="23" rx="4" ry="1.8" fill="#fff7e0" />
+          <ellipse cx="68" cy="24" rx="7" ry="3.4" fill="#ffffff" stroke="#182042" stroke-width="1.4" /><ellipse cx="68" cy="23" rx="4" ry="1.8" fill="#fff7e0" />
+          <ellipse cx="44" cy="25" rx="9" ry="4" fill="#e74c3c" stroke="#182042" stroke-width="1.4" /><ellipse cx="44" cy="24" rx="5.5" ry="2.2" fill="#f39c12" />
+          <path class="steam-wisp" d="M38,16 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+          <path class="steam-wisp w2" d="M44,17 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+          <path class="steam-wisp w3" d="M50,16 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+        </g>
+        <g id="home-dinner-steam" style="display:none;">
+          <path class="steam-wisp" d="M40,20 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+          <path class="steam-wisp w2" d="M47,20 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+        </g></svg>`;
+      layer.appendChild(fg);
+    }
+    function updateHomeDinnerVisual(phase) {
+      ensureDinnerFurniture();
+      const set = document.getElementById('home-dinner-set');
+      if (set) set.style.display = phase === 'dinner' ? 'block' : 'none';
+      const steam = document.getElementById('home-dinner-steam');
+      if (steam) steam.style.display = phase === 'prep' ? 'block' : 'none';
+      const glow = document.getElementById('lamp-glow');
+      if (glow) { const h = gameState.hour || 0; const on = (h >= 17 && h < 22) ? '0.9' : '0'; if (glow.style.opacity !== on) glow.style.opacity = on; }
+    }
+    function checkHomeDinner() {
+      const phase = dinnerPhaseNow();
+      updateHomeDinnerVisual(phase);
+      const parents = (gameState.npcs || []).filter(n => n.kind === 'parent');
+      if (!phase) {
+        parents.forEach(n => {
+          if (n.atDinner) { n.atDinner = false; n.path = [npcDef(n.key).homeSpot]; n.arrive = 'athome'; n.state = 'path'; }
+        });
+        return;
+      }
+      parents.forEach(n => {
+        if (n.atDinner || n.dest !== 'home' || n.state === 'path' || n.state === 'sleeping' || n.state === 'away') return;
+        const seat = DINNER_SEATS[n.key];
+        if (!seat) return;
+        n.atDinner = true; n.path = [seat]; n.arrive = 'dinner'; n.state = 'path';
+      });
+      if (phase === 'dinner') {
+        const absMin = (gameState.totalGameDays || 0) * 1440 + (gameState.hour || 0) * 60 + Math.floor(gameState.minute || 0);
+        if (absMin - _dinnerChatAt >= 12) {
+          const seated = parents.filter(n => n.atDinner && n.state === 'seated');
+          if (seated.length) {
+            _dinnerChatAt = absMin;
+            const sp = seated[Math.floor(Math.random() * seated.length)];
+            const lines = DINNER_SAY[sp.key] || [];
+            if (lines.length) npcSay(sp, lines[Math.floor(Math.random() * lines.length)]);
+          }
+        }
+      }
+    }
     function updateNPCs(progressMinutes) {
       const npcs = ensureNPCs();
       ensureSeats();
       buildNPCLayer();
       ensurePodiumFg();
+      checkHomeDinner();
       const hour = gameState.hour || 0;
       const coach = npcs.find(n => n.key === 'coach');
       if (coach) {
@@ -1004,6 +1088,7 @@
                   npc.dwell = sh2.oncall ? 9999 : Math.max(30, sh2.end >= nowM2 ? sh2.end - nowM2 : sh2.end + 1440 - nowM2);
                 }
                 else if (npc.arrive === 'athome') npc.state = 'athome';
+                else if (npc.arrive === 'dinner') { npc.state = 'seated'; npc.dwell = 9999; } // v9.13 晚餐入座
                 else if (npc.arrive === 'street') npcPickTarget(npc);
               }
             }
@@ -1054,7 +1139,7 @@
           if (hour >= 22 || (hour >= 7 && hour < 19)) npcPickTarget(npc);
         } else if (npc.state === 'away') {
           if (npc.kind === 'parent') {
-            if (hour >= 19) npcPickTarget(npc);
+            if (hour >= 18 || (hour === 17 && (gameState.minute || 0) >= 40)) npcPickTarget(npc); // v9.13 同上：17:40 回家
           } else if (hour >= 7 && hour < 23) {
             npc.x = npc.x < 960 ? -60 : 1980; npc.y = NPC_STREET_Y; npcPickTarget(npc);
           }
@@ -1071,7 +1156,7 @@
           el.classList.toggle('npc-walking', npc.state === 'path');
           el.classList.toggle('npc-hidden', npc.state === 'away');
           el.classList.toggle('lying', lying);
-          el.classList.toggle('seated', npc.state === 'seated' && npc.dest === 'restaurant');
+          el.classList.toggle('seated', npc.state === 'seated' && (npc.dest === 'restaurant' || npc.dest === 'home')); // v9.13 在家晚餐也坐
           el.classList.toggle('on-break', npc.state === 'seated' && npc.dest === 'school' && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break');
           el.style.zIndex = String(Math.round(npc.y)); // v9.12.3 依深度排序：前方人物蓋後方
           const tag = el.querySelector('.npc-zzz-tag');

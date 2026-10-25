@@ -3748,3 +3748,9 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* v9.12.11 用餐標示：比照 NPC 只留餐點膠囊（同一列、同圖示），文字泡泡用餐時隱藏，不再飄在膠囊上方 */
 #char-wrap.seated #char-bubble { display: none !important; }
+
+/* v9.13 晚餐同桌：熱氣 */
+.steam-wisp { animation: steamRise 2.4s ease-in-out infinite; }
+.steam-wisp.w2 { animation-delay: 0.8s; }
+.steam-wisp.w3 { animation-delay: 1.6s; }
+@keyframes steamRise { 0% { transform: translateY(0); opacity: 0; } 35% { opacity: 0.85; } 100% { transform: translateY(-7px); opacity: 0; } }

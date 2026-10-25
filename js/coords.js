@@ -22,7 +22,8 @@
       'store-work': { x: 555, y: 185 },
       'store-idle': { x: 497, y: 195 },
       'home-sleep': { x: 90, y: 175 },
-      'home-idle': { x: 167, y: 190 }
+      'home-idle': { x: 167, y: 190 },
+      'home-dinner': { x: 244, y: 200 }
     };
 
     // 統一更新角色位置、朝向與縮放
