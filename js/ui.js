@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.4.0)
+   🎮 GBA SCHOLAR IDLE - UI & VISUAL ENGINE (v9.10.4)
    GBA 雙層像素框、抽屜面板、衣櫃像素繪圖、考試、小遊戲與 NPC 視覺渲染
    ========================================================================== */
 
@@ -1529,7 +1529,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.4.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.10.4) | 上次存檔：${ts}`);
       }
     }
 
@@ -1745,8 +1745,24 @@
       const _playerSleepEl = document.getElementById("npc-player-sleep");
       if (_playerSleepEl) _playerSleepEl.style.display = "none";
       elCharWrap.classList.remove("in-bed");
+      elCharWrap.classList.remove("lying");
+      elCharWrap.classList.toggle("seated", currentState === 'eating');
+      if (elStudentSprite) { // v9.10.4 坐姿：裁掉 viewBox 下段 (鞋子區) + 高度等比 + 整隻下沉讓腰進吧台後
+        const _sp2 = currentState === 'eating';
+        const _vb2 = _sp2 ? '0 0 16 21' : '0 0 16 25';
+        if (elStudentSprite.getAttribute('viewBox') !== _vb2) elStudentSprite.setAttribute('viewBox', _vb2);
+        const _sh2 = _sp2 ? '42px' : '50px';
+        if (elStudentSprite.style.height !== _sh2) elStudentSprite.style.height = _sh2;
+        // v9.10.6 坐姿改用 transform 縮放（margin 對主角 sprite 完全無效,實測確認）:
+        // 縮到 NPC 坐姿的寬高 (32→26), 屁股釘在錨點、頭降到跟 NPC 同高
+        const _st2 = _sp2 ? 'translateY(-3px) scale(0.82)' : '';
+        if (elStudentSprite.style.transform !== _st2) elStudentSprite.style.transform = _st2;
+        if (_sp2 && elStudentSprite.style.transformOrigin !== '50% 100%') elStudentSprite.style.transformOrigin = '50% 100%';
+        if (elStudentSprite.style.marginBottom) elStudentSprite.style.marginBottom = '';
+      }
 
       elStudentSprite.setAttribute("class", "sprite-pixel");
+      if (currentState !== 'eating') { gameState.eatOrderLeft = null; gameState.eatPhase = null; gameState.eatServed = false; const _pd2 = document.getElementById('player-dish'); if (_pd2) _pd2.style.display = 'none'; }
 
       // 3. 處理運動場繞操場跑步動畫切換 (CSS Animation 接管)
       if (currentState === 'sports' && !gameState.isCommuting) {
@@ -1790,16 +1806,16 @@
             elHome.classList.add("mode-sleeping");
             if (gameState.parentsStatus === 'alive') {
               document.getElementById("prop-bed-parents").style.display = "block";
-              document.getElementById("npc-parents-sleep").style.display = "block";
+              document.getElementById("npc-parents-sleep").style.display = "none"; // v9.8 步行爸媽取代靜態睡姿
             } else {
               // 爸媽不在，大雙人床空無一人 (保留空大床，顯得極具黑色幽默與寂寞)
               document.getElementById("prop-bed-parents").style.display = "block";
               document.getElementById("npc-parents-sleep").style.display = "none";
             }
-            // v9.0 自己也要躺好：顯示床上入睡形態、本體小人藏進被窩 (氣泡與 Zzz 粒子仍從床位發出)
+            // v9.8 自己躺平睡：紙娃娃橫躺在床上，靜態睡姿退場
             const _ps = document.getElementById("npc-player-sleep");
-            if (_ps) _ps.style.display = "block";
-            elCharWrap.classList.add("in-bed");
+            if (_ps) _ps.style.display = "none";
+            elCharWrap.classList.add("lying");
           }
 
           setStageBoard(`住家：<span>睡覺休息中 💤</span>`);
@@ -1809,9 +1825,36 @@
           break;
 
         case 'eating':
-          elStudentSprite.classList.add("state-eating");
-          setStageBoard(`餐廳：<span>享用鐵板燒補充體力 🍽️</span>`);
-          elCharBubble.innerText = "好吃！炒麵炒肉... 🥩";
+          const sp = (typeof todaysSpecial === 'function') ? todaysSpecial() : { name: '鐵板燒', emoji: '🍽️' };
+          if (gameState.eatOrderLeft == null) { gameState.eatOrderLeft = 3; gameState.eatServed = false; gameState.eatPhase = 'order'; gameState._eatServeCelebrated = false; }
+          if (gameState.eatPhase === 'order') {
+            gameState.eatOrderLeft = Math.max(0, gameState.eatOrderLeft - gameState.speed / 10);
+            elStudentSprite.classList.add("state-idle");
+            setStageBoard(`餐廳：<span>看菜單點菜中 📋</span>`);
+            elCharBubble.innerText = "嗯…先看菜單點菜 📋";
+            if (gameState.eatOrderLeft <= 0) { gameState.eatPhase = 'wait'; gameState.eatWaitLeft = 6; }
+          } else if (gameState.eatPhase === 'wait' && !gameState.eatServed) {
+            gameState.eatWaitLeft = Math.max(0, (gameState.eatWaitLeft || 0) - gameState.speed / 10);
+            if (gameState.eatWaitLeft <= 0) gameState.eatServed = true;
+            elStudentSprite.classList.add("state-idle");
+            setStageBoard(`餐廳：<span>阿火師現炒中，等上菜 🍳</span>`);
+            elCharBubble.innerText = "好香…等上菜 🍳";
+          } else {
+            if (!gameState._eatServeCelebrated) {
+              gameState._eatServeCelebrated = true;
+              if (gameState.specialClaimedDay !== (gameState.totalGameDays || 0)) {
+                gameState.specialClaimedDay = gameState.totalGameDays || 0;
+                gameState.focus = Math.min(100, (gameState.focus || 0) + 15);
+              }
+            }
+            elStudentSprite.classList.add("state-eating");
+            setStageBoard(`餐廳：<span>享用今日特餐：${sp.name} ${sp.emoji}</span>`);
+            elCharBubble.innerText = `好吃！今日特餐${sp.name} ${sp.emoji}`;
+          }
+          let _pd = document.getElementById('player-dish');
+          if (!_pd) { _pd = document.createElement('div'); _pd.id = 'player-dish'; document.getElementById('char-wrap').appendChild(_pd); }
+          _pd.style.display = 'block';
+          _pd.textContent = gameState.eatPhase === 'order' ? '📋' : (!gameState.eatServed ? '🍳' : sp.emoji);
           stopZzzParticles();
           stopSweatParticles();
           break;
@@ -1825,7 +1868,7 @@
         case 'working':
           elStudentSprite.classList.add("state-studying");
           setStageBoard(`便利商店：<span>站櫃檯打工賺錢中 💰</span>`);
-          elCharBubble.innerText = "歡迎光臨！請問需要載具嗎？🏪";
+          elCharBubble.innerText = "歡迎光臨！嗶～請問需要載具嗎？🏪";
           stopZzzParticles();
           stopSweatParticles();
           break;
@@ -1869,43 +1912,22 @@
         elCharBubble.innerText = bubbleOverrideText;
       }
 
-      // 5. 控制學校老師 (Teacher) 的出沒
-      const elTeacher = document.getElementById("npc-teacher");
-      if (currentState === 'studying' && currentLoc === 'school') {
-        elTeacher.style.display = "block";
-      } else {
-        elTeacher.style.display = "none";
-      }
+      // 5. v9.7 學校老師改由步行 NPC 擔任，靜態老師永久退場
+      const elTeacher = document.getElementById("npc-teacher-static");
+      if (elTeacher) elTeacher.style.display = "none";
 
-      // 6. 控制操場教練 (Coach) 的出沒
-      const elCoach = document.getElementById("npc-coach");
-      if (currentState === 'sports' && currentLoc === 'gym') {
-        elCoach.style.display = "block";
-      } else {
-        elCoach.style.display = "none";
-      }
+      // 6. v9.8 操場教練改由隨叫隨到步行 NPC 擔任，靜態教練永久退場
+      const elCoach = document.getElementById("npc-coach-static");
+      if (elCoach) elCoach.style.display = "none";
 
-      // 7. 控制餐廳廚師 (Chef) 的出沒
-      const elChef = document.getElementById("npc-chef");
-      if (!restaurantLocked) {
-        elChef.style.display = "block";
-      } else {
-        elChef.style.display = "none";
-      }
+      // 7. v9.8 餐廳廚師改由步行 NPC 擔任，靜態廚師永久退場
+      const elChef = document.getElementById("npc-chef-static");
+      if (elChef) elChef.style.display = "none";
 
-      // 8. 控制圖書館同儕 (Peer) 的出沒
-      const elPeer = document.getElementById("npc-peer");
-      if (!libraryLocked) {
-        elPeer.style.display = "block";
-      } else {
-        elPeer.style.display = "none";
-      }
 
-      // 9. 控制便利商店店員/客人 (Clerk) 的出沒
-      const elClerk = document.getElementById("npc-clerk");
-      if (elClerk) {
-        elClerk.style.display = storeLocked ? "none" : "block";
-      }
+      // 9. v9.7 超商店員改由步行 NPC 擔任，靜態店員永久退場
+      const elClerk = document.getElementById("npc-clerk-static");
+      if (elClerk) elClerk.style.display = "none";
     }
 
     // 粒子
@@ -3146,19 +3168,36 @@
       if (kind === 'race') return '<div class="dm-race"><div class="dm-rrow">🧑<span class="dm-rbar"><span class="r1"></span></span></div><div class="dm-rrow">😎<span class="dm-rbar"><span class="r2"></span></span></div></div>';
       return '<span class="dm-gift">🎁</span><span class="dm-spark">✨</span>';
     }
+    // v9.11 說明改版（diagram-design 骨架 × 學霸黃）：封面頁 + 六系統頁，卡片分頁不捲動
+    const MANUAL_TOTAL = MANUAL_CARDS.length + 1;
     function buildManualCarousel(container, prefix) {
       if (!container) return;
       MANUAL_STATE[prefix] = { idx: 0 };
-      container.innerHTML = `<div class="manual-viewport"><div class="manual-track" id="${prefix}-track">${MANUAL_CARDS.map(c => `<div class="manual-card"><div class="manual-demo">${manualDemoHtml(c.demo)}</div><div class="manual-card-title">${c.icon} ${c.title}</div><p>${c.text}</p></div>`).join('')}</div></div><div class="manual-nav"><button class="manual-arrow" onclick="manualMove('${prefix}', -1)" aria-label="上一頁">‹</button><div class="manual-dots" id="${prefix}-dots">${MANUAL_CARDS.map((_, i) => `<span class="manual-dot${i === 0 ? ' active' : ''}"></span>`).join('')}</div><button class="manual-arrow" onclick="manualMove('${prefix}', 1)" aria-label="下一頁">›</button></div>`;
+      const cover = `<section class="manual-page dd-cover"><div class="dd-eyebrow">HOW TO PLAY · 玩法說明<span class="dd-pg">1 / ${MANUAL_TOTAL}</span></div><div class="dd-h1">學霸養成記，<br>你只需要<span class="dd-hl">陪他衝</span>。</div><p class="dd-lede">小學霸會自己過一天：上學、吃飯、讀書、睡覺都自動進行。你的工作只有在關鍵時刻下場 — 其他時間，看著他長大就好。</p><div class="dd-rule"></div><div class="dd-sec"><span class="dd-no">01</span><span class="dd-sec-t">他的一天</span><span class="dd-en">DAILY LOOP</span></div><div class="dd-flow"><div class="dd-node"><div class="dd-emo">🌅</div><div class="dd-lb">起床</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🏫</div><div class="dd-lb">上學</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🍜</div><div class="dd-lb">吃飯</div></div><div class="dd-arrow">→</div><div class="dd-node focal"><div class="dd-emo">📚</div><div class="dd-lb">讀書</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🌙</div><div class="dd-lb">睡覺</div></div></div><div class="dd-callout"><p>整天只有<b>讀書</b>需要你：點掉身邊的知識泡泡，連擊越高、讀得越快。</p></div><div class="dd-cover-foot">共 ${MANUAL_TOTAL} 頁 · 按「下一頁」一頁一頁看</div></section>`;
+      const pages = MANUAL_CARDS.map((c, i) => `<section class="manual-page dd-page"><div class="dd-eyebrow">THE SYSTEM · 六件事<span class="dd-pg">${i + 2} / ${MANUAL_TOTAL}</span></div><div class="dd-spacer"></div><div class="dd-demo"><span class="dd-tag">DEMO · ${c.title}</span><div class="manual-demo">${manualDemoHtml(c.demo)}</div></div><div class="manual-card dd-card${i === 0 ? ' focal' : ''}"><div class="dd-top"><span class="dd-num">No.${i + 1}</span><span class="dd-title">${c.title}</span><span class="dd-ico">${c.icon}</span></div><p>${c.text}</p></div><div class="dd-spacer"></div></section>`).join('');
+      const dots = Array.from({ length: MANUAL_TOTAL }, (_, i) => `<span class="manual-dot${i === 0 ? ' active' : ''}"></span>`).join('');
+      container.innerHTML = `<div class="dd-manual"><div class="manual-viewport dd-viewport"><div class="manual-track" id="${prefix}-track">${cover}${pages}</div></div><div class="dd-nav"><button class="dd-prev" id="${prefix}-prev" onclick="manualMove('${prefix}', -1)" aria-label="上一頁" disabled>‹</button><div class="manual-dots dd-dots" id="${prefix}-dots">${dots}</div><button class="dd-next" id="${prefix}-next" onclick="manualNext('${prefix}')">下一頁 →</button></div></div>`;
+    }
+    function manualNext(prefix) {
+      const st = MANUAL_STATE[prefix];
+      if (!st) return;
+      playSound('click');
+      if (st.idx < MANUAL_TOTAL - 1) { manualGo(prefix, st.idx + 1); return; }
+      if (prefix === 'help') closeHelpModal();
+      else if (prefix === 'ob') closeOnboarding();
     }
     function manualGo(prefix, i) {
       const st = MANUAL_STATE[prefix];
       if (!st) return;
-      st.idx = Math.max(0, Math.min(MANUAL_CARDS.length - 1, i));
+      st.idx = Math.max(0, Math.min(MANUAL_TOTAL - 1, i));
       const track = document.getElementById(prefix + '-track');
       if (track) track.style.transform = `translateX(-${st.idx * 100}%)`;
       const dots = document.getElementById(prefix + '-dots');
       if (dots) [...dots.children].forEach((d, di) => d.classList.toggle('active', di === st.idx));
+      const pv = document.getElementById(prefix + '-prev');
+      if (pv) pv.disabled = st.idx === 0;
+      const nx = document.getElementById(prefix + '-next');
+      if (nx) nx.textContent = st.idx === MANUAL_TOTAL - 1 ? '看完了 ✓' : '下一頁 →';
     }
     function manualMove(prefix, dir) {
       const st = MANUAL_STATE[prefix];

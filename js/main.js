@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v9.4.0)
+   🎮 GBA SCHOLAR IDLE - MAIN GAME LOOP & BOOTSTRAP (v9.10.4)
    作息大腦、主循環、房租結算、版本控制與啟動初始化
    ========================================================================== */
 
@@ -48,7 +48,27 @@
       const activeBtn = document.getElementById(`speed-${sp}x`);
       if (activeBtn) activeBtn.classList.add("active");
 
+      const triggerLabel = document.getElementById("speed-trigger-label");
+      if (triggerLabel) triggerLabel.textContent = sp + "x";
+
       startTicker();
+    }
+
+    function toggleSpeedPopover(ev) {
+      if (ev) ev.stopPropagation();
+      const pop = document.getElementById('speed-popover');
+      if (!pop) return;
+      const open = pop.classList.toggle('open');
+      if (open) setTimeout(() => document.addEventListener('click', closeSpeedPopoverOnDoc, { once: true }), 0);
+    }
+    function closeSpeedPopoverOnDoc(e) {
+      const pop = document.getElementById('speed-popover');
+      const trg = document.getElementById('speed-trigger');
+      if (pop && !pop.contains(e.target) && trg && !trg.contains(e.target)) pop.classList.remove('open');
+    }
+    function closeSpeedPopover() {
+      const pop = document.getElementById('speed-popover');
+      if (pop) pop.classList.remove('open');
     }
 
     // v9.0：人物移動改由 tick 沿路徑積分 (不再靠 CSS transition 猜時間)，
@@ -142,6 +162,7 @@
     // 現在：tick 只負責邏輯與快照，rAF (60fps) 負責一切畫面運動——人物在快照間內插，
     // 鏡頭用帶速度的彈簧積分追趕目標 (有慣性、會自然減速，就像 iOS 的 spring 動畫)。
     let _prevTickPos = null, _lastTickPos = null, _lastTickAt = 0;
+    let _visPos = null; // v9.10.4: 視覺位置平滑 (吸收 tick 抖動)
     let _camAnchor = null;     // 膠囊聚焦的世界座標錨點；null = 跟隨角色
     let _camZoomTarget = null; // 程式化縮放目標 (膠囊/雙擊)；null = 不介入
     let _camVX = 0, _camVY = 0, _camZV = 0;
@@ -171,10 +192,16 @@
       // 1) 人物視覺位置：tick 快照間線性內插 (永不超前邏輯位置，所以倒數與腳步仍同源)
       if (gameState.isCommuting && _prevTickPos && _lastTickPos) {
         const t = Math.min(1, (performance.now() - _lastTickAt) / 100);
-        const x = _prevTickPos.x + (_lastTickPos.x - _prevTickPos.x) * t;
-        const y = _prevTickPos.y + (_lastTickPos.y - _prevTickPos.y) * t;
-        updateCharacterPositionAndScale(Math.round(x), Math.round(y), _lastTickPos.flip);
-      }
+        const txp = _prevTickPos.x + (_lastTickPos.x - _prevTickPos.x) * t;
+        const typ = _prevTickPos.y + (_lastTickPos.y - _prevTickPos.y) * t;
+        if (!_visPos) _visPos = { x: txp, y: typ };
+        const kk = Math.min(1, dt * 22);
+        _visPos.x += (txp - _visPos.x) * kk;
+        _visPos.y += (typ - _visPos.y) * kk;
+        if (Math.abs(_visPos.x - txp) < 0.05) _visPos.x = txp;
+        if (Math.abs(_visPos.y - typ) < 0.05) _visPos.y = typ;
+        updateCharacterPositionAndScale(Math.round(_visPos.x), Math.round(_visPos.y), _lastTickPos.flip);
+      } else _visPos = null;
       if (_pointers.size > 0) return; // 玩家手指在控制鏡頭：彈簧讓路 (位置由手勢直接寫入)
       // 2) 決定鏡頭目標
       const s = (window.__baseMapScale || 1) * mapZoom;
@@ -248,7 +275,7 @@
       const vp = document.getElementById("map-viewport");
       const map = document.getElementById("town-map");
       if (!vp || !map) return;
-      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v9.4.0)
+      if (vp.scrollLeft !== 0) vp.scrollLeft = 0; // 保險：任何殘留捲動都歸零 (v9.10.4)
       if (vp.scrollTop !== 0) vp.scrollTop = 0;
       const availW = vp.clientWidth;
       const availH = vp.clientHeight;
@@ -442,6 +469,8 @@
       updateCharacterAnimation();
       updateSubjectBars();
       updateExamProgress();
+      if (typeof updateNPCs === 'function') updateNPCs(progressMinutes); // v9.5 NPC 走動
+      if (typeof updateSkyLighting === 'function') updateSkyLighting(); // v9.9 光影
 
       const currentMinInt = Math.floor(gameState.minute);
       if (currentMinInt % 10 === 0 && currentMinInt !== 0 && currentMinInt !== lastSavedMinute) {
@@ -1088,7 +1117,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.4.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.10.4) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

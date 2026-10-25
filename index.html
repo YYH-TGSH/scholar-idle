@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.4.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.11.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -16,7 +16,7 @@
   <!-- 引入 Google Fonts 經典點陣字型 (DotGothic16 支援繁體漢字與日文, Press Start 2P 支援經典像素英數) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Serif+TC:wght@600;900&family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <!-- 引入寶可夢 RPG 雙層像素樣式 -->
   <link rel="stylesheet" href="css/style.css">
@@ -112,7 +112,7 @@
             </svg>
 
             <!-- 老師 NPC (Teacher) -->
-            <div class="npc-teacher" id="npc-teacher"
+            <div class="npc-teacher" id="npc-teacher-static"
               style="display:block; position:absolute; right:25px; bottom:28px; width:40px; height:56px; z-index:18;">
               <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
                 <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
@@ -237,18 +237,6 @@
             </svg>
 
             <!-- 同儕 NPC (Peer Student) -->
-            <div class="npc-peer" id="npc-peer"
-              style="display:block; position:absolute; right:35px; bottom:28px; width:38px; height:52px; z-index:18;">
-              <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
-                <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
-                <rect x="3" y="12" width="10" height="9" fill="#16a085" />
-                <rect x="4" y="5" width="8" height="7" fill="#fed7aa" />
-                <rect x="3" y="2" width="10" height="5" fill="#d35400" />
-                <rect x="5" y="7" width="2" height="2" fill="#182042" /><rect x="9" y="7" width="2" height="2" fill="#182042" /><rect x="5" y="7" width="1" height="1" fill="#ffffff"/><rect x="9" y="7" width="1" height="1" fill="#ffffff"/><rect x="4" y="10" width="2" height="1" fill="#ff9d9d" opacity="0.85"/><rect x="10" y="10" width="2" height="1" fill="#ff9d9d" opacity="0.85"/><rect x="7" y="10" width="2" height="1" fill="#182042"/>
-                <rect x="4" y="14" width="8" height="6" fill="#ffffff" stroke="#182042" stroke-width="0.8" />
-              </svg>
-              <div class="bubble-mini" style="font-size:0.75rem;">安靜自習 🤫</div>
-            </div>
           </div>
         </div>
 
@@ -317,7 +305,7 @@
             </svg>
 
             <!-- 教練 NPC (Coach) -->
-            <div class="npc-coach" id="npc-coach"
+            <div class="npc-coach" id="npc-coach-static"
               style="display:block; position:absolute; right:20px; top:36px; width:36px; height:50px; z-index:18;">
               <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
                 <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
@@ -388,44 +376,57 @@
               <text x="88" y="82" font-size="6.5" fill="#c0392b" font-family="'DotGothic16', monospace" font-weight="900">$40</text>
 
               <!-- 右側大廚房熱炒料理台 (Kitchen Wok Station) -->
-              <rect x="175" y="52" width="94" height="46" fill="#2c3e50" stroke="#182042" stroke-width="2" />
+              <rect x="175" y="52" width="94" height="72" fill="#2c3e50" stroke="#182042" stroke-width="2" />
+              <rect x="175" y="118" width="94" height="6" fill="#1a252f" />
               <text x="185" y="70" font-size="8.5" fill="#ffd32a" font-family="'DotGothic16', monospace" font-weight="900">🔥 現煮熱出餐口</text>
               <rect x="185" y="76" width="74" height="18" fill="#474787" stroke="#182042" stroke-width="1.5" />
-              <!-- 鐵板爐火紅橙光 -->
-              <rect x="195" y="80" width="12" height="8" fill="#ff793f" />
-              <rect x="215" y="80" width="14" height="8" fill="#ffb142" />
-              <rect x="237" y="80" width="12" height="8" fill="#ff793f" />
+              <!-- 鐵板爐火紅橙光 (v9.10: 下移到櫃台前緣、廚師手邊) -->
+              <rect x="195" y="106" width="12" height="8" fill="#ff793f" />
+              <rect x="215" y="106" width="14" height="8" fill="#ffb142" />
+              <rect x="237" y="106" width="12" height="8" fill="#ff793f" />
 
               <!-- 正向棋盤格木紋拼花地板 (Terracotta Floor) -->
               <rect x="8" y="124" width="268" height="57" fill="#ecd9b6" stroke="#182042" stroke-width="2" />
               <line x1="8" y1="143" x2="276" y2="143" stroke="#d5b88a" stroke-width="2" />
               <line x1="8" y1="162" x2="276" y2="162" stroke="#d5b88a" stroke-width="2" />
 
-              <!-- 實木拉麵吧台長桌 (Ramen Dining Bar) -->
-              <rect x="18" y="136" width="148" height="26" fill="#8d5a2c" stroke="#182042" stroke-width="2" />
-              <rect x="20" y="138" width="144" height="6" fill="#b0743e" />
-              <!-- 拉麵碗 1 (紅碗) -->
+              <!-- 實木拉麵吧台長桌 (Ramen Dining Bar, v9.10 加長版：6 個吧台位) -->
+              <rect x="18" y="136" width="240" height="26" fill="#8d5a2c" stroke="#182042" stroke-width="2" />
+              <rect x="20" y="138" width="236" height="6" fill="#b0743e" />
+              <!-- 拉麵碗 x6 (對齊每張圓椅) -->
               <rect x="42" y="130" width="16" height="8" fill="#e74c3c" stroke="#182042" stroke-width="1.2" />
               <rect x="44" y="128" width="12" height="3" fill="#f1c40f" />
-              <!-- 拉麵碗 2 (白瓷碗) -->
-              <rect x="90" y="130" width="16" height="8" fill="#ffffff" stroke="#182042" stroke-width="1.2" />
-              <rect x="92" y="128" width="12" height="3" fill="#f1c40f" />
-              <line x1="102" y1="126" x2="110" y2="134" stroke="#182042" stroke-width="1.5" />
-              <!-- 拉麵碗 3 (藍瓷碗) -->
-              <rect x="136" y="130" width="16" height="8" fill="#3498db" stroke="#182042" stroke-width="1.2" />
-              <rect x="138" y="128" width="12" height="3" fill="#f1c40f" />
+              <rect x="82" y="130" width="16" height="8" fill="#ffffff" stroke="#182042" stroke-width="1.2" />
+              <rect x="84" y="128" width="12" height="3" fill="#f1c40f" />
+              <rect x="122" y="130" width="16" height="8" fill="#3498db" stroke="#182042" stroke-width="1.2" />
+              <rect x="124" y="128" width="12" height="3" fill="#f1c40f" />
+              <rect x="162" y="130" width="16" height="8" fill="#e74c3c" stroke="#182042" stroke-width="1.2" />
+              <rect x="164" y="128" width="12" height="3" fill="#f1c40f" />
+              <rect x="202" y="130" width="16" height="8" fill="#ffffff" stroke="#182042" stroke-width="1.2" />
+              <rect x="204" y="128" width="12" height="3" fill="#f1c40f" />
+              <rect x="242" y="130" width="16" height="8" fill="#3498db" stroke="#182042" stroke-width="1.2" />
+              <rect x="244" y="128" width="12" height="3" fill="#f1c40f" />
 
-              <!-- 吧台圓椅 (Stools) -->
+              <!-- 椅下地板陰影 (接地感) -->
+              <ellipse cx="50" cy="179" rx="11" ry="2.5" fill="rgba(0,0,0,0.18)" /><ellipse cx="90" cy="179" rx="11" ry="2.5" fill="rgba(0,0,0,0.18)" /><ellipse cx="130" cy="179" rx="11" ry="2.5" fill="rgba(0,0,0,0.18)" /><ellipse cx="170" cy="179" rx="11" ry="2.5" fill="rgba(0,0,0,0.18)" /><ellipse cx="210" cy="179" rx="11" ry="2.5" fill="rgba(0,0,0,0.18)" /><ellipse cx="250" cy="179" rx="11" ry="2.5" fill="rgba(0,0,0,0.18)" />
+              <!-- 吧台圓椅 (Stools x6) -->
               <rect x="44" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
               <rect x="40" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
-              <rect x="92" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
-              <rect x="88" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
-              <rect x="138" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
-              <rect x="134" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="84" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="80" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="124" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="120" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="164" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="160" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="204" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="200" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+              <rect x="244" y="162" width="12" height="14" fill="#6d4c41" stroke="#182042" stroke-width="1.5" />
+              <rect x="240" y="160" width="20" height="4" fill="#e74c3c" stroke="#182042" stroke-width="1" />
+
             </svg>
 
             <!-- 大廚 NPC (Chef) -->
-            <div class="npc-chef" id="npc-chef"
+            <div class="npc-chef" id="npc-chef-static"
               style="display:none; position:absolute; right:35px; bottom:28px; width:40px; height:54px; z-index:18;">
               <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
                 <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
@@ -447,6 +448,7 @@
 
         <div class="island-lv-badge" id="restaurant-lv-badge" onclick="event.stopPropagation(); openBuildDrawer('restaurant');">Lv.1 基礎</div>
         <div class="island-tag">🍔 活力食堂</div>
+        <div class="special-sign" id="special-sign">今日特餐</div>
       </div>
 
       <!-- ==========================================================================
@@ -528,7 +530,7 @@
             </svg>
 
             <!-- 店長 NPC (Clerk) -->
-            <div class="npc-clerk" id="npc-clerk"
+            <div class="npc-clerk" id="npc-clerk-static"
               style="display:block; position:absolute; right:35px; bottom:28px; width:40px; height:54px; z-index:18;">
               <svg viewBox="0 0 16 26" shape-rendering="crispEdges" style="width:100%; height:100%;">
                 <rect x="4" y="21" width="3" height="4" fill="#182042" /><rect x="9" y="21" width="3" height="4" fill="#182042" />
@@ -905,11 +907,14 @@
 
     <div class="header-right">
       <div class="speed-control-mini">
-        <button class="speed-btn active" id="speed-1x" onclick="setSpeed(1)">1x</button>
-        <button class="speed-btn" id="speed-10x" onclick="setSpeed(10)">10x</button>
-        <button class="speed-btn" id="speed-60x" onclick="setSpeed(60)">60x</button>
-        <button class="speed-btn" id="speed-240x" onclick="setSpeed(240)">240x</button>
-        <button class="speed-btn" id="speed-720x" onclick="setSpeed(720)">720x</button>
+        <button id="speed-trigger" class="speed-trigger" onclick="toggleSpeedPopover(event)" title="調整時間速度">⏩ <span id="speed-trigger-label">1x</span></button>
+        <div class="speed-popover" id="speed-popover">
+          <button class="speed-btn active" id="speed-1x" onclick="setSpeed(1); closeSpeedPopover();">1x</button>
+          <button class="speed-btn" id="speed-10x" onclick="setSpeed(10); closeSpeedPopover();">10x</button>
+          <button class="speed-btn" id="speed-60x" onclick="setSpeed(60); closeSpeedPopover();">60x</button>
+          <button class="speed-btn" id="speed-240x" onclick="setSpeed(240); closeSpeedPopover();">240x</button>
+          <button class="speed-btn" id="speed-720x" onclick="setSpeed(720); closeSpeedPopover();">720x</button>
+        </div>
       </div>
       <button id="btn-exam-trigger" class="btn-exam-mini" onclick="triggerExam()">參加考試</button>
     </div>
@@ -1477,7 +1482,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.4.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.11.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -1911,7 +1916,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.4.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.11.0)
   </div>
 
   <!-- ==========================================================================

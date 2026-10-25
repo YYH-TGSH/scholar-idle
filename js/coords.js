@@ -13,13 +13,13 @@
     const COORDS = {
       'school-class': { x: 1067, y: 195 },
       'school-idle': { x: 1107, y: 195 },
-      'restaurant-eat': { x: 747, y: 190 },
+      'restaurant-eat': { x: 750, y: 190 },
       'restaurant-idle': { x: 792, y: 195 },
       'gym-run': { x: 1652, y: 75 },
       'gym-idle': { x: 1727, y: 180 },
       'library-study': { x: 1327, y: 195 },
       'library-idle': { x: 1387, y: 195 },
-      'store-work': { x: 452, y: 190 },
+      'store-work': { x: 555, y: 185 },
       'store-idle': { x: 497, y: 195 },
       'home-sleep': { x: 90, y: 175 },
       'home-idle': { x: 167, y: 190 }
@@ -34,7 +34,7 @@
       const posKey = `${x}|${y}|${flipH ? 1 : 0}`;
       if (_lastCharPos === posKey && !gameState.isCommuting) return;
       _lastCharPos = posKey;
-      elCharWrap.style.left = `${x}px`;
+      elCharWrap.style.left = `${x - 21}px`; // v9.10.7 置中修正：wrap 寬 42，舊寫法把左緣放在座標上，主角永遠右偏 21（半個椅距），座位/書桌/床位全歪。改為中心對齊座標，與 NPC 一致。
       elCharWrap.style.top = `${y - 70}px`;
       gameState.currentX = x;
       gameState.currentY = y;
