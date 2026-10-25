@@ -90,6 +90,14 @@
           gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
           osc.start(now);
           osc.stop(now + 0.1);
+        } else if (type === 'bell') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1318.5, now);
+          osc.frequency.setValueAtTime(1046.5, now + 0.18);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+          osc.start(now);
+          osc.stop(now + 0.45);
         } else if (type === 'levelUp') {
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(523.25, now);

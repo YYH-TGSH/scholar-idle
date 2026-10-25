@@ -461,6 +461,7 @@
 
       // 4. 行為決策
       decideLocationAndState();
+      processStudyTick(progressMinutes); // v9.12.12 放置型主成長：讀書每分鐘連續增長
 
       // 5. 畫面渲染
       updateLocksUI();
@@ -471,6 +472,8 @@
       updateExamProgress();
       if (typeof updateNPCs === 'function') updateNPCs(progressMinutes); // v9.5 NPC 走動
       if (typeof updateSkyLighting === 'function') updateSkyLighting(); // v9.9 光影
+      if (typeof checkSchoolBell === 'function') checkSchoolBell(); // v9.12 學校鐘聲/下課
+      if (typeof updateSchoolBoard === 'function') updateSchoolBoard(); // v9.12.3 時鐘+黑板
 
       const currentMinInt = Math.floor(gameState.minute);
       if (currentMinInt % 10 === 0 && currentMinInt !== 0 && currentMinInt !== lastSavedMinute) {
@@ -553,6 +556,8 @@
         const h = gameState.hour;
         if (gameState.hunger < 35 && !restaurantLocked) {
           targetLoc = "restaurant";
+        } else if (h === 12 && !restaurantLocked) {
+          targetLoc = "restaurant"; // v9.12.8 午休吃飯：跟全校一起去食堂，不再自己留在教室聽講
         } else if (gameState.stress > 80) {
           targetLoc = "gym";
         } else {
@@ -601,6 +606,12 @@
         }
       }
 
+      // v9.12.10 用餐保護：已經在餐廳點餐/等菜，或上菜未滿 15 分鐘，不被排程叫走（午餐 13:00 邊界同理）
+      if (currentLoc === "restaurant" && !restaurantLocked && gameState.eatPhase) {
+        const _absM = (gameState.totalGameDays || 0) * 1440 + gameState.hour * 60 + gameState.minute;
+        if (gameState.eatPhase === 'order' || (gameState.eatPhase === 'wait' && !gameState.eatServed) || (gameState.eatServed && (gameState._servedAtMin == null || _absM - gameState._servedAtMin < 15))) targetLoc = "restaurant";
+      }
+
       // 檢查目的地是否已被時間鎖定（避免自動作息時卡入死鎖，自動修正目的地）
       if (targetLoc === "home" && homeLocked) {
         targetLoc = "school"; // 強制去學校 (平日上學)
@@ -625,7 +636,7 @@
 
       if (currentLoc === targetLoc) {
         if (currentLoc === "school") {
-          currentState = (gameState.stress >= 85) ? "angry" : "studying";
+          currentState = (gameState.stress >= 85) ? "angry" : ((typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') ? "idle" : "studying"); // v9.12 下課離席放鬆
         }
         else if (currentLoc === "gym") {
           currentState = "sports";
@@ -818,7 +829,7 @@
           const studyBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('study_boost') : 1.0;
           const xiaoxuanMult = typeof getFriendBonus === 'function' ? getFriendBonus('school_eff') : 1.0;
           const schoolMult = schoolLv === 3 ? 1.60 : (schoolLv === 2 ? 1.25 : 1.0);
-          gainKnowledge("school", efficiency * focusMult * ((gameState.coInvite && gameState.coInvite.loc === 'school' && gameState.coInvite.left > 0) ? 1.25 : 1) * headphoneBonus * studyBuff * smartMult * studyMut * xiaoxuanMult * schoolMult * (typeof comboMult === 'function' ? comboMult() : 1) * (typeof setStudyMult === 'function' ? setStudyMult() : 1));
+          /* v9.12.12 知識增長改由 processStudyTick 每分鐘連續累積（放置型主成長），此處不再整點結算 */
           gameState.stress = Math.min(100, gameState.stress + 5 * gameState.difficulty * mentalRed * stressMut * yuqingStressMult);
         } else if (currentLoc === "library") {
           let bookBonus = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3);
@@ -828,7 +839,7 @@
           const yuqingMult = typeof getFriendBonus === 'function' ? getFriendBonus('library_eff') : 1.0;
           const libEffMult = libLv === 3 ? 1.75 : (libLv === 2 ? 1.30 : 1.0);
           const libStressDiv = libLv === 3 ? 0.5 : 1.0;
-          gainKnowledge("library", efficiency * focusMult * ((gameState.coInvite && gameState.coInvite.loc === 'library' && gameState.coInvite.left > 0) ? 1.25 : 1) * bookBonus * reviewBuff * smartMult * memMult * studyMut * libMut * yuqingMult * libEffMult * (typeof comboMult === 'function' ? comboMult() : 1) * (typeof setStudyMult === 'function' ? setStudyMult() : 1));
+          /* v9.12.12 同上：圖書館增長改每分鐘連續累積 */
           gameState.stress = Math.min(100, gameState.stress + 8 * gameState.difficulty * mentalRed * stressMut * yuqingStressMult * libStressDiv);
         }
       }
@@ -837,6 +848,60 @@
       }
       if (typeof tickRivalsHourly === 'function') tickRivalsHourly(); // v9.3 宿敵
       if (typeof evaluateDailyQuests === 'function') evaluateDailyQuests(); // v9.1
+    }
+
+    // v9.12.12 放置型主成長：讀書不再等整點結算（學校每節下課都卡在整點邊界，舊制幾乎永遠領不到），
+    // 改為每 tick 依遊戲分鐘連續累積（速率與舊制相同：每小時約 (2~4)×效率，取期望 3），滿 1 點即入帳最低科目。
+    // 知識泡泡維持額外獎勵（+1/顆＋連擊加速本函數的累積速率）。
+    function processStudyTick(progressMinutes) {
+      if (currentState !== 'studying') return;
+      if (currentLoc !== 'school' && currentLoc !== 'library') return;
+      let efficiency = 1.0;
+      if (gameState.energy < 20) efficiency *= 0.2;
+      else if (gameState.hunger < 30) efficiency *= 0.5;
+      if (efficiency <= 0) return;
+      const focusMult = 1 + (gameState.focus || 0) / 200;
+      const smartMult = typeof getRebirthMult === 'function' ? getRebirthMult('smartness') : 1.0;
+      const studyMut = typeof getMutationMult === 'function' ? getMutationMult('study_gain') : 1.0;
+      const combo = typeof comboMult === 'function' ? comboMult() : 1;
+      const setMult = typeof setStudyMult === 'function' ? setStudyMult() : 1;
+      const coMult = (gameState.coInvite && gameState.coInvite.loc === currentLoc && gameState.coInvite.left > 0) ? 1.25 : 1;
+      let type, mult;
+      if (currentLoc === 'school') {
+        let lv = 1; try { lv = getLandmarkLevel('school'); } catch (e) { }
+        const headphoneBonus = 1 + ((gameState.passive.headphone || 0) * 0.10);
+        const studyBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('study_boost') : 1.0;
+        const xiaoxuanMult = typeof getFriendBonus === 'function' ? getFriendBonus('school_eff') : 1.0;
+        const schoolMult = lv === 3 ? 1.60 : (lv === 2 ? 1.25 : 1.0);
+        mult = headphoneBonus * studyBuff * xiaoxuanMult * schoolMult; type = 'school';
+      } else {
+        let lv = 1; try { lv = getLandmarkLevel('library'); } catch (e) { }
+        let bookBonus = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3);
+        const reviewBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('review_boost') : 1.0;
+        const memMult = typeof getRebirthMult === 'function' ? getRebirthMult('memory') : 1.0;
+        const libMut = typeof getMutationMult === 'function' ? getMutationMult('library_eff') : 1.0;
+        const yuqingMult = typeof getFriendBonus === 'function' ? getFriendBonus('library_eff') : 1.0;
+        const libEffMult = lv === 3 ? 1.75 : (lv === 2 ? 1.30 : 1.0);
+        mult = bookBonus * reviewBuff * memMult * libMut * yuqingMult * libEffMult; type = 'library';
+      }
+      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (progressMinutes / 60);
+      if (gameState._studyFrac < 1) return;
+      const propKey = type === 'school' ? 'school' : 'home';
+      const limit = type === 'school' ? 60 : 40;
+      const subKeys = ['cn', 'en', 'ma', 'sc', 'so'];
+      const gained = {};
+      while (gameState._studyFrac >= 1) {
+        let targetKey = null, minScore = Infinity;
+        for (const k of subKeys) { const sc = gameState.subjects[k][propKey]; if (sc < limit && sc < minScore) { minScore = sc; targetKey = k; } }
+        if (!targetKey) { gameState._studyFrac = 0; break; }
+        gameState.subjects[targetKey][propKey] = Math.min(limit, gameState.subjects[targetKey][propKey] + 1);
+        gained[targetKey] = (gained[targetKey] || 0) + 1;
+        gameState._studyFrac -= 1;
+      }
+      for (const k in gained) {
+        if (typeof spawnKnowledgeOrb === 'function') spawnKnowledgeOrb(k);
+        queueFloatingText(`+${gained[k]} ${gameState.subjects[k].name}${type === 'school' ? '聽講' : '複習'}`);
+      }
     }
 
     // 機制 1：均勻學科增長（永遠找最低分的科目）

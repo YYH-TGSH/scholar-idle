@@ -575,14 +575,14 @@
 
     // ================= v9.8 精緻化：座位池＋門口排隊＋全員步行職員＋爸媽 =================
     const NPC_DEFS = [
-      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 620, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93' }, say: ['「這次的升學名額，我先預約了。」', '「我準備好了，你呢？」'] },
+      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 620, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
       { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 1240, speed: 62, palette: { hair: '#ff8fab', outfit: '#ff6b9d', shorts: '#5b2a86' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
       { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1830, speed: 58, palette: { hair: '#2f6b33', outfit: '#27ae60', shorts: '#1e8449' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
       { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#1a1a24', outfit: '#3b6ea5', shorts: '#2c3e50' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
       { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#2c3e50' }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
       { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#2c3e50' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
       { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#2c3e50' }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 1105, y: 150 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 1112, y: 145 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
       { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#2c3e50' }, work: 'store', spot: { x: 520, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
       { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#2c3e50' }, work: 'library', spot: { x: 1330, y: 150 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
       { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#2c3e50' }, work: 'restaurant', spot: { x: 875, y: 150 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
@@ -597,7 +597,7 @@
     const NPC_PARK_Y = 440;
     const NPC_DOOR_X = { home: 175, store: 485, restaurant: 795, school: 1105, library: 1415, gym: 1732 };
     // 玩家專屬位子：座位池永遠保留，NPC 絕不坐上去跟玩家重疊
-    const PLAYER_RESERVED = { school: { x: 1067, y: 195 }, library: { x: 1327, y: 195 }, restaurant: { x: 750, y: 190 }, store: { x: 555, y: 185 }, gym: { x: 1652, y: 75 } };
+    const PLAYER_RESERVED = { school: { x: 1062, y: 195 }, library: { x: 1327, y: 195 }, restaurant: { x: 750, y: 190 }, store: { x: 555, y: 185 }, gym: { x: 1652, y: 75 } };
     const SPECIAL_MENU = [
       { name: '招牌炒麵', emoji: '🍝' }, { name: '豚骨拉麵', emoji: '🍜' }, { name: '鐵板牛排', emoji: '🥩' },
       { name: '香煎雞腿', emoji: '🍗' }, { name: '海鮮炒飯', emoji: '🍚' }, { name: '麻婆豆腐', emoji: '🌶️' }, { name: '味噌鮭魚', emoji: '🐟' },
@@ -625,7 +625,7 @@
       if (txt !== _specialSignText) { _specialSignText = txt; sign.textContent = txt; }
     }
     const NPC_SEAT_POOLS = {
-      school: { activity: 'study', grid: [[1010, 195], [1050, 195], [1090, 195], [1130, 195], [1170, 195], [1210, 195], [1250, 195]] },
+      school: { activity: 'study', grid: [[994, 195], [1028, 195], [1096, 195], [1130, 195], [1164, 195], [1198, 195], [1232, 195]] },
       library: { activity: 'study', grid: [[1290, 195], [1330, 195], [1370, 195], [1410, 195], [1450, 195], [1490, 195], [1530, 195]] },
       restaurant: { activity: 'dine', grid: [[710, 190], [750, 190], [790, 190], [830, 190], [870, 190], [910, 190]] },
       store: { activity: 'browse', grid: [[390, 190], [430, 190], [470, 190], [510, 190], [550, 190], [590, 190], [630, 190]] },
@@ -730,6 +730,14 @@
     function npcPickTarget(npc) {
       const def = npcDef(npc.key);
       const hour = gameState.hour || 0;
+      if (npc._lunchForce === gameState.totalGameDays && hour === 12) { // v9.12.7 午餐強制食堂
+        npc._lunchForce = null;
+        npc.dest = 'restaurant';
+        const lseat = npcRequestSeat(npc, 'restaurant');
+        if (lseat) { npc.path = [{ x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
+        else npcEnqueue(npc, 'restaurant');
+        return 'restaurant';
+      }
       const dow = gameState.dayOfWeek || 1;
       const weekend = (dow === 6 || dow === 7);
       let dest;
@@ -885,6 +893,18 @@
         map.appendChild(wrap);
       }
     }
+    // v9.12.2 講台前景層：蓋在 NPC 圖層之上，王老師站上去時下半身被講桌遮住（站在講台後面）
+    function ensurePodiumFg() {
+      if (document.getElementById('podium-fg')) return;
+      const map = document.getElementById('npc-layer') || document.getElementById('town-map');
+      if (!map) return;
+      const fg = document.createElement('div');
+      fg.id = 'podium-fg';
+      fg.style.zIndex = '150'; // v9.12.3 在 NPC 圖層內：蓋住老師(145)、不擋學生(195)與人名
+      fg.style.left = '1088px'; fg.style.top = '135px'; fg.style.width = '48px'; fg.style.height = '25px';
+      fg.innerHTML = `<svg viewBox="118 110 48 25" style="width:100%; height:100%; display:block;"><g id="sch-podium"><rect x="118" y="110" width="48" height="6" fill="#b0743e" stroke="#182042" stroke-width="1.5" /><rect x="121" y="116" width="42" height="17" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" /><rect x="118" y="131" width="48" height="4" fill="#6d4c41" /></g></svg>`;
+      map.appendChild(fg);
+    }
     function npcSay(npc) {
       if (!npc || npc.state === 'away' || npc.state === 'sleeping') return;
       if (npc._sayUntil && Date.now() < npc._sayUntil) return;
@@ -904,6 +924,7 @@
       const npcs = ensureNPCs();
       ensureSeats();
       buildNPCLayer();
+      ensurePodiumFg();
       const hour = gameState.hour || 0;
       const coach = npcs.find(n => n.key === 'coach');
       if (coach) {
@@ -916,17 +937,18 @@
         } else if (!occ && coach.dest === 'gym' && coach.state === 'seated') coach.dwell = 0;
       }
       const chef = npcs.find(n => n.key === 'chef');
+      npcs.forEach(n => { if (n.key === 'chef') n.phase = null; }); // v9.12.6 清除廚師殘留的客人 phase（老師當客人時保留）
       let playerOrdering = false, playerWaiting = false;
       try {
         playerOrdering = typeof currentLoc !== 'undefined' && currentLoc === 'restaurant' && typeof currentState !== 'undefined' && currentState === 'eating' && (gameState.eatPhase === 'order' || gameState.eatPhase === 'wait');
         playerWaiting = playerOrdering && gameState.eatPhase === 'wait' && !gameState.eatServed;
       } catch (e) {}
-      ORDERS_PENDING = playerOrdering || npcs.some(n => n.state === 'seated' && n.dest === 'restaurant' && (n.phase === 'order' || n.phase === 'wait'));
+      ORDERS_PENDING = playerOrdering || npcs.some(n => n.key !== 'chef' && n.state === 'seated' && n.dest === 'restaurant' && (n.phase === 'order' || n.phase === 'wait')); // v9.12.6 staff 不算客人（阿火師自 serve 循環）
       if (chef && chef.state === 'seated' && chef.dest === 'restaurant' && !chef.busy) {
         let target = null, serveSpot = null;
         if (playerWaiting) { target = 'player'; serveSpot = { x: 750, y: 145 }; }
         else {
-          const diner = npcs.find(n => n.state === 'seated' && n.dest === 'restaurant' && n.phase === 'wait');
+          const diner = npcs.find(n => n.key !== 'chef' && n.state === 'seated' && n.dest === 'restaurant' && n.phase === 'wait');
           if (diner) { target = diner.key; serveSpot = { x: diner.x, y: diner.y - 45 }; }
         }
         if (target) { chef.busy = target; chef.state = 'path'; chef.path = [serveSpot]; chef.arrive = 'serve'; }
@@ -954,15 +976,15 @@
               if (npc.path.length === 0) {
                 if (npc.arrive === 'seat') {
                   npc.state = 'seated';
-                  if (npc.kind === 'staff') {
+                  if (npc.kind === 'staff' && npc.dest === def.work) {
                     const sh = def.shift;
                     if (sh.oncall) npc.dwell = 9999;
                     else {
                       const nowM = (gameState.hour || 0) * 60 + (gameState.minute || 0);
                       npc.dwell = Math.max(30, sh.end >= nowM ? sh.end - nowM : sh.end + 1440 - nowM);
                     }
-                  } else npc.dwell = 30 + Math.random() * 60;
-                  if (npc.dest === 'restaurant') { npc.phase = 'order'; npc.orderLeft = 3; }
+                  } else npc.dwell = 30 + Math.random() * 60; // v9.12.7 staff 在別棟當客人（老師午餐）比照一般客人
+                  if (npc.dest === 'restaurant' && npc.key !== 'chef') { npc.phase = 'order'; npc.orderLeft = 3; }
                 }
                 else if (npc.arrive === 'sleep') npc.state = 'sleeping';
                 else if (npc.arrive === 'away') npc.state = 'away';
@@ -989,11 +1011,17 @@
         } else if (npc.state === 'idle' && npc.servingReturn) {
           npc.dwell -= progressMinutes;
           if (npc.dwell <= 0) { npc.servingReturn = false; npc.path = [def.spot]; npc.arrive = 'post'; npc.state = 'path'; }
+        } else if (npc.state === 'idle' && npc.breakHome) {
+          npc.dwell -= progressMinutes;
+          if (npc.dwell <= 0) {
+            if (schoolPhaseNow() === 'break') { const sp2 = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)]; npc.path = [sp2]; npc.arrive = 'idle'; npc.state = 'path'; }
+            else npc.dwell = 2; // 等鐘聲監看器送回座位
+          }
         } else if (npc.state === 'seated' || npc.state === 'idle') {
           if (npc.state === 'seated' && npc.seatIdx != null && SEAT_MAP[npc.dest] && SEAT_MAP[npc.dest][npc.seatIdx] && !SEAT_MAP[npc.dest][npc.seatIdx].who) {
             SEAT_MAP[npc.dest][npc.seatIdx].who = npc.key;
           }
-          if (npc.state === 'seated' && npc.dest === 'restaurant') {
+          if (npc.state === 'seated' && npc.dest === 'restaurant' && npc.key !== 'chef') {
             if (npc.phase === 'order') { npc.orderLeft = Math.max(0, (npc.orderLeft || 0) - progressMinutes); if (npc.orderLeft <= 0) { npc.phase = 'wait'; npc.waitLeft = 6; } }
             else if (npc.phase === 'wait') { npc.waitLeft = Math.max(0, (npc.waitLeft || 0) - progressMinutes); if (npc.waitLeft <= 0) npc.phase = 'eat'; }
           }
@@ -1044,6 +1072,8 @@
           el.classList.toggle('npc-hidden', npc.state === 'away');
           el.classList.toggle('lying', lying);
           el.classList.toggle('seated', npc.state === 'seated' && npc.dest === 'restaurant');
+          el.classList.toggle('on-break', npc.state === 'seated' && npc.dest === 'school' && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break');
+          el.style.zIndex = String(Math.round(npc.y)); // v9.12.3 依深度排序：前方人物蓋後方
           const tag = el.querySelector('.npc-zzz-tag');
           if (tag) tag.style.display = npc.state === 'sleeping' ? 'inline' : 'none';
           const dishEl = el.querySelector('.npc-dish');
@@ -1131,4 +1161,127 @@
       _skyEls.glows.forEach(g => { g.style.opacity = r3(nf * (g.dataset.store ? 1 : 0.75)); });
       _skyEls.sb.style.opacity = r3(nf);
       _skyEls.sg.style.opacity = r3(nf * 0.85);
+    }
+
+    // ================= v9.12 學校鐘聲 / 下課 / 週五榜單結算 =================
+    function schoolPhaseNow() {
+      const dow = gameState.dayOfWeek;
+      if (dow === 6 || dow === 7) return null; // 週末不上課 (1=一 … 5=五)
+      const hh = gameState.hour || 0;
+      if (hh < 8 || hh >= 16) return null;
+      return (gameState.minute || 0) >= 50 ? 'break' : 'class';
+    }
+    let _schoolPrevPhase = undefined;
+    let _bellLastAbsMin = null;
+    function ringBell(text) {
+      const bell = document.getElementById('school-bell');
+      if (bell) { bell.classList.remove('ringing'); void bell.getBBox; bell.classList.add('ringing'); setTimeout(() => bell.classList.remove('ringing'), 1150); }
+      if (typeof playSound === 'function') playSound('bell');
+      if (text && typeof queueFloatingText === 'function') queueFloatingText(text);
+    }
+    function checkSchoolBell() {
+      const phase = schoolPhaseNow();
+      const atSchool = typeof currentLoc !== 'undefined' && currentLoc === 'school' && !gameState.isCommuting;
+      if (phase === 'break') {
+        if (atSchool) {
+          gameState._breakAtSchool = true;
+          const absMin = (gameState.totalGameDays || 0) * 1440 + (gameState.hour || 0) * 60 + (gameState.minute || 0);
+          if (_bellLastAbsMin != null && absMin > _bellLastAbsMin) gameState.stress = Math.max(0, (gameState.stress || 0) - (absMin - _bellLastAbsMin) * 0.5); // 下課放鬆：壓力加速消退
+          _bellLastAbsMin = absMin;
+        }
+      } else _bellLastAbsMin = null;
+      if (_schoolPrevPhase !== undefined && phase !== _schoolPrevPhase) {
+        if (_schoolPrevPhase === 'class' && phase === 'break') {
+          ringBell('🔔 下課鐘響！休息 10 分鐘');
+          startBreakMoves();
+          (gameState.npcs || []).filter(n => n.state === 'seated' && n.dest === 'school').slice(0, 2).forEach(n => npcSay(n));
+        } else if (_schoolPrevPhase === 'break' && phase === 'class') {
+          ringBell('🔔 上課鐘響，回到座位');
+          endBreakMoves();
+          if (gameState._breakAtSchool && atSchool) {
+            gameState.focus = Math.min(100, (gameState.focus || 0) + 10);
+            if (typeof queueFloatingText === 'function') queueFloatingText('📝 下課跟同學對了筆記，專注 +10');
+          }
+          gameState._breakAtSchool = false;
+        } else if (_schoolPrevPhase && phase === null && gameState.dayOfWeek === 5) {
+          settleBoardWeek();
+        }
+      }
+      if (phase && (gameState.hour || 0) === 12 && gameState._lunchStamp !== gameState.totalGameDays) {
+        gameState._lunchStamp = gameState.totalGameDays;
+        (gameState.npcs || []).forEach(n => {
+          if (n.dest === 'school' && (n.kind === 'friend' || n.kind === 'rival' || n.key === 'teacher') && (n.state === 'seated' || n.state === 'idle' || (n.state === 'path' && n.breakHome))) sendToLunch(n);
+        });
+      }
+      _schoolPrevPhase = phase;
+    }
+    const BREAK_SPOTS = [{ x: 1010, y: 202 }, { x: 1075, y: 204 }, { x: 1150, y: 204 }, { x: 1220, y: 202 }, { x: 985, y: 168 }];
+    function startBreakMoves() {
+      (gameState.npcs || []).forEach(n => {
+        if (n.dest !== 'school' || n.state !== 'seated') return;
+        const isTeacher = n.key === 'teacher';
+        if (!isTeacher && n.kind === 'staff') return;
+        if (!isTeacher && Math.random() > 0.7) return; // 70% 同學起身活動筋骨
+        const spot = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)];
+        n.breakHome = isTeacher ? { x: npcDef('teacher').spot.x, y: npcDef('teacher').spot.y, arrive: 'post' } : { x: n.x, y: n.y, arrive: 'seat' };
+        n.path = [spot]; n.arrive = 'idle'; n.state = 'path';
+      });
+    }
+    function endBreakMoves() {
+      if ((gameState.hour || 0) === 12) return; // 午休直接接著去食堂，不回座
+      (gameState.npcs || []).forEach(n => {
+        if (!n.breakHome) return;
+        n.path = [{ x: n.breakHome.x, y: n.breakHome.y }]; n.arrive = n.breakHome.arrive; n.state = 'path'; n.breakHome = null;
+      });
+    }
+    function sendToLunch(npc) {
+      npc.breakHome = null;
+      npc._lunchForce = gameState.totalGameDays;
+      npcFreeSeat(npc);
+      npc.path = [{ x: NPC_DOOR_X.school, y: NPC_DOOR_Y }, { x: NPC_DOOR_X.school, y: NPC_STREET_Y }];
+      npc.arrive = 'street'; npc.state = 'path';
+    }
+    function settleBoardWeek() {
+      if (typeof boardRows !== 'function') return;
+      const rows = boardRows();
+      const myRank = rows.findIndex(r => r.you);
+      const SCHOLARSHIP = [150, 80, 40, 0]; // v9.12.1 每週競賽獎學金
+      const amt = myRank >= 0 ? SCHOLARSHIP[myRank] : 0;
+      if (typeof queueFloatingText === 'function') {
+        if (amt > 0) queueFloatingText(`🎓 本週競賽第 ${myRank + 1} 名，獎學金 $${amt}！`);
+        else queueFloatingText(`🎓 本週競賽第 ${myRank + 1} 名，沒有獎學金，下週加油！`);
+      }
+      if (amt > 0) {
+        gameState.money = (gameState.money || 0) + amt;
+        if (myRank === 0) gameState.boardWins = (gameState.boardWins || 0) + 1;
+        if (typeof playSound === 'function') playSound('levelUp');
+      }
+      // 新一週：宿敵進度重置，你的競賽進度從本週起算
+      if (typeof ensureRivals === 'function') ensureRivals().forEach(r => { r.prog = 4 + Math.round(Math.random() * 10); });
+      if (typeof playerGradeProgress === 'function') gameState._weekBaseProg = playerGradeProgress();
+      gameState._rivalLeader = null;
+      if (typeof renderBoard === 'function') renderBoard();
+      if (typeof renderRivals === 'function') renderRivals();
+    }
+
+    // ================= v9.12.3 教室時鐘 + 黑板節次 =================
+    const PERIODS = { 8: ['第一節・國語', '📚 國語課', '子曰：學而時習之'], 9: ['第二節・數學', '🔢 數學課', '3.14 × r² = 圓面積'], 10: ['第三節・英文', '🔤 English', 'Study hard!'], 11: ['第四節・自然', '🔬 自然課', 'H2O = 水的化學式'], 13: ['第五節・社會', '🌏 社會課', '臺灣 • 我們的家鄉'], 14: ['第六節・數學', '🔢 數學課', 'a² + b² = c²'], 15: ['第七節・國語', '📚 國語課', '讀書百遍，其義自見'] };
+    let _boardSig = '';
+    function updateSchoolBoard() {
+      const hh = gameState.hour || 0, mm = gameState.minute || 0;
+      const phase = schoolPhaseNow();
+      const sig = phase + '|' + hh + '|' + Math.floor(mm);
+      if (sig === _boardSig) return;
+      _boardSig = sig;
+      const ch = document.getElementById('clock-h'), cm = document.getElementById('clock-m');
+      if (ch && cm) {
+        ch.setAttribute('transform', `rotate(${(((hh % 12) + mm / 60) * 30).toFixed(1)} 36 50)`);
+        cm.setAttribute('transform', `rotate(${((mm % 60) * 6).toFixed(1)} 36 50)`);
+      }
+      const M = document.getElementById('bb-main'), S = document.getElementById('bb-sub'), T = document.getElementById('bb-today');
+      if (!M || !S || !T) return;
+      if (phase === 'class' && hh === 12) { M.textContent = '🍱 午休時間'; S.textContent = '吃飽睡好，下午才有精神'; T.textContent = 'LUNCH BREAK'; }
+      else if (phase === 'class' && PERIODS[hh]) { const p = PERIODS[hh]; M.textContent = p[1]; S.textContent = p[2]; T.textContent = 'NOW: ' + p[0]; }
+      else if (phase === 'break') { const nx = PERIODS[hh + 1]; M.textContent = '☕ 下課 10 分鐘'; S.textContent = '伸個懶腰 • 喝口水'; T.textContent = nx ? 'NEXT: ' + nx[0] : 'NEXT: 放學囉'; }
+      else { M.textContent = '📚 天道酬勤 • 必上第一志願！'; S.textContent = 'E = mc²  |  100% PASS'; T.textContent = 'TODAY: CHINESE & MATH'; }
     }

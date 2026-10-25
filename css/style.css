@@ -3061,7 +3061,7 @@ input, select, textarea { border-radius: 14px !important; }
   font-weight: 800 !important;
 }
 #stage-board {
-  background: #fff !important;
+  background: rgba(255,255,255,0.55) !important;
   border: 2px solid #26324b !important;
   border-radius: 999px !important;
   color: #26324b !important;
@@ -3624,7 +3624,7 @@ input, select, textarea { border-radius: 14px !important; }
 
 
 /* ================= v9.5 速度控制縮小 ================= */
-.speed-control-mini { position: relative; }
+.speed-control-mini { position: relative; flex: none !important; background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; } /* v9.12.11 容器不再佔位，只剩速度膠囊本身 */
 .speed-trigger {
   cursor: pointer; border: 1.5px solid var(--border-color); border-radius: 999px;
   background: rgba(255,255,255,0.85); padding: 6px 12px; font-size: 0.8rem; font-weight: 800;
@@ -3663,8 +3663,8 @@ input, select, textarea { border-radius: 14px !important; }
 .steam-puff.sp1 { left: 14px; } .steam-puff.sp2 { left: 30px; animation-delay: 0.55s; } .steam-puff.sp3 { left: 46px; animation-delay: 1.1s; }
 @keyframes steam-rise { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 25% { opacity: 0.9; } 100% { transform: translateY(-26px) scale(1.6); opacity: 0; } }
 @keyframes flick { from { transform: scale(1); } to { transform: scale(1.25) translateY(-1px); } }
-.npc-dish { position: absolute; top: 0; right: -14px; font-size: 11px; line-height: 1.5; background: #ffffff; border: 1.5px solid #182042; border-radius: 999px; padding: 0 4px; box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
-#player-dish { position: absolute; top: -6px; right: -20px; z-index: 30; font-size: 12px; line-height: 1.5; background: #ffffff; border: 1.5px solid #182042; border-radius: 999px; padding: 0 5px; box-shadow: 0 1px 0 rgba(0,0,0,0.25); pointer-events: none; }
+.npc-dish { position: absolute; top: -16px; left: 50%; right: auto; transform: translateX(-50%); font-size: 11px; line-height: 1.5; background: #ffffff; border: 1.5px solid #182042; border-radius: 999px; padding: 0 4px; box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
+#player-dish { position: absolute; top: -16px; /* v9.12.11 與 NPC 膠囊同高（凍結量測校正） */ left: 50%; right: auto; transform: translateX(-50%); z-index: 30; font-size: 12px; line-height: 1.5; background: #ffffff; border: 1.5px solid #182042; border-radius: 999px; padding: 0 5px; box-shadow: 0 1px 0 rgba(0,0,0,0.25); pointer-events: none; }
 /* v9.10.5: pin the character wrapper height — in the portrait layout
    it collapsed to ~40px, breaking the y-70 feet anchor and sinking the
    seated pose. Landscape was already 70px; this normalizes both. */
@@ -3680,7 +3680,7 @@ input, select, textarea { border-radius: 14px !important; }
 .npc-house-emoji { display: block; font-size: 30px; }
 .npc-house-name { display: block; font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.7); background: rgba(20,28,54,0.45); border-radius: 999px; padding: 1px 5px; white-space: nowrap; }
 .npc-zzz { font-size: 14px; }
-.npc-speech { position: absolute; transform: translate(-50%, 0); background: rgba(255,255,255,0.95); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 5px 9px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; z-index: 40; box-shadow: 0 4px 12px rgba(10,16,40,0.2); pointer-events: none; }
+.npc-speech { position: absolute; transform: translate(-50%, 0); background: rgba(255,255,255,0.6); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 5px 9px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; z-index: 999; box-shadow: 0 4px 12px rgba(10,16,40,0.2); pointer-events: none; }
 
 /* v9.10.6: pin char wrapper height at file end (top level, all viewports) */
 .character-wrapper { height: 70px !important; }
@@ -3733,3 +3733,18 @@ input, select, textarea { border-radius: 14px !important; }
 .dd-dots .manual-dot { width:7px; height:7px; border-radius:50%; background:var(--dd-hair); display:block; transition:all .25s; }
 .dd-dots .manual-dot.active { background:var(--dd-deep); width:18px; border-radius:4px; }
 .dd-next { height:42px; padding:0 16px; border-radius:8px; border:1.5px solid var(--dd-ink); background:var(--dd-accent); font-weight:900; font-size:13.5px; color:var(--dd-ink); cursor:pointer; flex:none; font-family:inherit; }
+
+/* v9.12 學校：鐘樓搖鈴 + 下課 NPC 站立 */
+#school-bell.ringing { animation: bell-shake 0.5s ease-in-out 2; transform-box: fill-box; transform-origin: 50% 0%; }
+@keyframes bell-shake { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(20deg); } 75% { transform: rotate(-20deg); } }
+.npc.on-break .npc-sprite { transform: translateY(-4px); }
+
+/* v9.12.2 講台前景層（高於 NPC 圖層 20） */
+#podium-fg { position: absolute; z-index: 21; pointer-events: none; }
+
+/* v9.12.4 主角狀態/想法泡泡半透明：不遮住老師上課 */
+#char-bubble { background: rgba(255,253,247,0.6) !important; }
+#char-bubble::after { background: rgba(255,253,247,0.6) !important; }
+
+/* v9.12.11 用餐標示：比照 NPC 只留餐點膠囊（同一列、同圖示），文字泡泡用餐時隱藏，不再飄在膠囊上方 */
+#char-wrap.seated #char-bubble { display: none !important; }

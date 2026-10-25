@@ -11,7 +11,7 @@
 
     // 各室內互動點 (由舊 960 佈局的島內相對座標平移而來，室內陳設不變)
     const COORDS = {
-      'school-class': { x: 1067, y: 195 },
+      'school-class': { x: 1062, y: 195 },
       'school-idle': { x: 1107, y: 195 },
       'restaurant-eat': { x: 750, y: 190 },
       'restaurant-idle': { x: 792, y: 195 },

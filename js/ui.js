@@ -1762,7 +1762,7 @@
       }
 
       elStudentSprite.setAttribute("class", "sprite-pixel");
-      if (currentState !== 'eating') { gameState.eatOrderLeft = null; gameState.eatPhase = null; gameState.eatServed = false; const _pd2 = document.getElementById('player-dish'); if (_pd2) _pd2.style.display = 'none'; }
+      if (currentState !== 'eating') { gameState.eatOrderLeft = null; gameState.eatPhase = null; gameState.eatServed = false; gameState._servedAtMin = null; const _pd2 = document.getElementById('player-dish'); if (_pd2) _pd2.style.display = 'none'; }
 
       // 3. 處理運動場繞操場跑步動畫切換 (CSS Animation 接管)
       if (currentState === 'sports' && !gameState.isCommuting) {
@@ -1842,6 +1842,7 @@
           } else {
             if (!gameState._eatServeCelebrated) {
               gameState._eatServeCelebrated = true;
+              gameState._servedAtMin = (gameState.totalGameDays || 0) * 1440 + gameState.hour * 60 + Math.floor(gameState.minute); // v9.12.10 用餐保護起算
               if (gameState.specialClaimedDay !== (gameState.totalGameDays || 0)) {
                 gameState.specialClaimedDay = gameState.totalGameDays || 0;
                 gameState.focus = Math.min(100, (gameState.focus || 0) + 15);
@@ -2732,7 +2733,7 @@
 
     // ---------- 宿敵 ----------
     const RIVAL_DEFS = [
-      { key: 'jie', name: '王子傑', emoji: '😎', rate: 0.78, lines: { lead: '「這次的升學名額，我先預約了。」', ready: '「我準備好了，你呢？」' } },
+      { key: 'jie', name: '王子傑', emoji: '😎', rate: 0.78, lines: { lead: '「這週的獎學金，我先預約了。」', ready: '「我準備好了，你呢？」' } },
       { key: 'kui', name: '陳小葵', emoji: '🌸', rate: 0.66, burst: true, lines: { lead: '「嘻嘻，我好像比較快喔～」', ready: '「我隨時可以考囉！」' } },
       { key: 'shu', name: '高大樹', emoji: '🌳', rate: 0.58, lines: { lead: '「一步一腳印，我先到了。」', ready: '「準備完成，等你一起考。」' } },
     ];
@@ -2742,6 +2743,9 @@
       }
       return gameState.rivals;
     }
+    function raceProgYou() { // v9.12.1 每週競賽：你的進度從本週起算
+      return Math.max(0, playerGradeProgress() - (gameState._weekBaseProg || 0));
+    }
     function playerGradeProgress() {
       let s = 0;
       for (let k in gameState.subjects) s += gameState.subjects[k].school + gameState.subjects[k].home;
@@ -2749,7 +2753,7 @@
     }
     function tickRivalsHourly() {
       const rs = ensureRivals();
-      const you = playerGradeProgress();
+      const you = raceProgYou();
       rs.forEach(r => {
         const def = RIVAL_DEFS.find(d => d.key === r.key);
         let g = def.rate * (0.85 + Math.random() * 0.3);
@@ -2771,7 +2775,8 @@
     function onPlayerExamPassed() {
       ensureRivals().forEach(r => { r.prog = 4 + Math.round(Math.random() * 10); });
       gameState._rivalLeader = null;
-      queueFloatingText('🏁 宿敵們也跟上來了，新一輪競賽開始！');
+      gameState._weekBaseProg = playerGradeProgress();
+      queueFloatingText('🎓 宿敵們也跟上來了，新一週競賽開始！');
       renderRivals();
     }
     function onPlayerExamFailed() {
@@ -2780,16 +2785,41 @@
       if (ready.length) {
         const d = RIVAL_DEFS.find(x => x.key === ready[0].key);
         ready[0].wins = (ready[0].wins || 0) + 1;
-        ready[0].prog = 4 + Math.round(Math.random() * 10);
-        queueFloatingText(`😤 ${d.name} 搶先升學了！下次贏回來`);
+        rs.forEach(r => { r.prog = 4 + Math.round(Math.random() * 10); });
+        gameState._weekBaseProg = playerGradeProgress();
+        gameState._rivalLeader = null;
+        queueFloatingText(`🎓 ${d.name} 衝到 100%，拿下本週獎學金了！下週贏回來`);
         renderRivals();
       }
     }
+    // v9.12 公佈欄：與宿敵面板同一份名次，貼到學校牆上
+    function boardRows() {
+      const rs = ensureRivals();
+      const you = raceProgYou();
+      return [{ name: '你', prog: you, you: true }]
+        .concat(rs.map(r => { const d = RIVAL_DEFS.find(x => x.key === r.key); return { name: d.name, prog: r.prog, you: false }; }))
+        .sort((a, b) => b.prog - a.prog);
+    }
+    function renderBoard() {
+      const g = document.getElementById('rank-board');
+      if (!g) return;
+      const rows = boardRows();
+      const sig = rows.map(r => r.name + Math.floor(r.prog)).join('|');
+      if (g.dataset.sig === sig) return;
+      g.dataset.sig = sig;
+      rows.slice(0, 3).forEach((r, i) => { const el = document.getElementById('board-r' + (i + 1)); if (el) el.textContent = `${i + 1}.${r.name} ${Math.floor(r.prog)}%`; });
+      const myRank = rows.findIndex(r => r.you);
+      const hl = document.getElementById('board-hl');
+      if (hl) { if (myRank >= 0 && myRank < 3) { hl.style.display = ''; hl.setAttribute('y', String(50 + myRank * 12)); } else hl.style.display = 'none'; }
+      const you = document.getElementById('board-you');
+      if (you) you.textContent = myRank >= 3 ? `你：第 ${myRank + 1} 名 ${Math.floor(rows[myRank].prog)}%` : '';
+    }
     function renderRivals() {
+      renderBoard();
       const box = document.getElementById('rivals-list');
       if (!box) return;
       const rs = ensureRivals();
-      const you = playerGradeProgress();
+      const you = raceProgYou();
       const rows = [{ name: '你', emoji: '🧑', prog: you, you: true, wins: gameState.examsPassedTotal || 0 }]
         .concat(rs.map(r => { const d = RIVAL_DEFS.find(x => x.key === r.key); return { name: d.name, emoji: d.emoji, prog: r.prog, wins: r.wins || 0 }; }))
         .sort((a, b) => b.prog - a.prog);
@@ -3048,15 +3078,6 @@
         const txt = done + '/3' + (nextDesc ? '・' + nextDesc : (done >= 3 ? '・全完成🎉' : '・進行中'));
         if (q.textContent !== txt) q.textContent = txt;
       }
-      const r = document.getElementById('glance-rival-txt');
-      if (r && typeof ensureRivals === 'function') {
-        const rs = ensureRivals();
-        const you = playerGradeProgress();
-        let top = { name: '你', prog: you, you: true };
-        rs.forEach(rv => { const d = RIVAL_DEFS.find(x => x.key === rv.key); if (rv.prog > top.prog) top = { name: d.name, prog: rv.prog, you: false }; });
-        const txt = top.you ? `你領先中 ${you}%` : `${top.name} ${Math.floor(top.prog)}%${top.prog >= 100 ? ' 準備好了！' : ' 領先中'}`;
-        if (r.textContent !== txt) r.textContent = txt;
-      }
       const eb = document.getElementById('btn-exam-trigger');
       if (eb && typeof getExamSuccessRate === 'function') {
         const cd = typeof getExamCooldownRemaining === 'function' ? getExamCooldownRemaining() : 0;
@@ -3156,7 +3177,7 @@
       { icon: '⚡', title: '狀態都在畫面上', text: '精力・飽足・壓力・專注永遠顯示在畫面最上方，太低就帶他去吃飯、運動、睡覺。', demo: 'bars' },
       { icon: '🫧', title: '陪讀連擊', text: '讀書時點掉身邊的知識泡泡：連擊越高讀書越快，泡泡跑掉連擊就歸零。', demo: 'bubble' },
       { icon: '📝', title: '先模擬考，再升學', text: '每天先打一場 60 秒模擬考拉高成功率，再去參加升學考——學歷越高，零用錢越多。', demo: 'exam' },
-      { icon: '🏁', title: '贏過三個宿敵', text: '王子傑、陳小葵、高大樹跟你搶同一個升學名額，畫面右上角隨時看得到誰領先。', demo: 'race' },
+      { icon: '🏁', title: '每週競賽拚獎學金', text: '王子傑、陳小葵、高大樹是你的競賽對手：進度即時貼在學校公佈欄，每週五放學結算，前三名有獎學金，冠軍 $150。', demo: 'race' },
       { icon: '🎁', title: '每天回來都有獎', text: '登入獎勵、每週目標、服裝轉蛋集套裝——穿滿一套，讀書／通勤／打工都有加成。', demo: 'gift' },
     ];
     const MANUAL_STATE = {};
@@ -3173,7 +3194,7 @@
     function buildManualCarousel(container, prefix) {
       if (!container) return;
       MANUAL_STATE[prefix] = { idx: 0 };
-      const cover = `<section class="manual-page dd-cover"><div class="dd-eyebrow">HOW TO PLAY · 玩法說明<span class="dd-pg">1 / ${MANUAL_TOTAL}</span></div><div class="dd-h1">學霸養成記，<br>你只需要<span class="dd-hl">陪他衝</span>。</div><p class="dd-lede">小學霸會自己過一天：上學、吃飯、讀書、睡覺都自動進行。你的工作只有在關鍵時刻下場 — 其他時間，看著他長大就好。</p><div class="dd-rule"></div><div class="dd-sec"><span class="dd-no">01</span><span class="dd-sec-t">他的一天</span><span class="dd-en">DAILY LOOP</span></div><div class="dd-flow"><div class="dd-node"><div class="dd-emo">🌅</div><div class="dd-lb">起床</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🏫</div><div class="dd-lb">上學</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🍜</div><div class="dd-lb">吃飯</div></div><div class="dd-arrow">→</div><div class="dd-node focal"><div class="dd-emo">📚</div><div class="dd-lb">讀書</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🌙</div><div class="dd-lb">睡覺</div></div></div><div class="dd-callout"><p>整天只有<b>讀書</b>需要你：點掉身邊的知識泡泡，連擊越高、讀得越快。</p></div><div class="dd-cover-foot">共 ${MANUAL_TOTAL} 頁 · 按「下一頁」一頁一頁看</div></section>`;
+      const cover = `<section class="manual-page dd-cover"><div class="dd-eyebrow">HOW TO PLAY · 玩法說明<span class="dd-pg">1 / ${MANUAL_TOTAL}</span></div><div class="dd-h1">學霸養成記，<br>你只需要<span class="dd-hl">陪他衝</span>。</div><p class="dd-lede">小學霸會自己過一天：上學、吃飯、讀書、睡覺都自動進行。你的工作只有在關鍵時刻下場 — 其他時間，看著他長大就好。</p><div class="dd-rule"></div><div class="dd-sec"><span class="dd-no">01</span><span class="dd-sec-t">他的一天</span><span class="dd-en">DAILY LOOP</span></div><div class="dd-flow"><div class="dd-node"><div class="dd-emo">🌅</div><div class="dd-lb">起床</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🏫</div><div class="dd-lb">上學</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🍜</div><div class="dd-lb">吃飯</div></div><div class="dd-arrow">→</div><div class="dd-node focal"><div class="dd-emo">📚</div><div class="dd-lb">讀書</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🌙</div><div class="dd-lb">睡覺</div></div></div><div class="dd-callout"><p>讀書<b>放著就會自己慢慢變強</b>；點掉身邊的知識泡泡是額外獎勵，連擊越高、讀得越快。</p></div><div class="dd-cover-foot">共 ${MANUAL_TOTAL} 頁 · 按「下一頁」一頁一頁看</div></section>`;
       const pages = MANUAL_CARDS.map((c, i) => `<section class="manual-page dd-page"><div class="dd-eyebrow">THE SYSTEM · 六件事<span class="dd-pg">${i + 2} / ${MANUAL_TOTAL}</span></div><div class="dd-spacer"></div><div class="dd-demo"><span class="dd-tag">DEMO · ${c.title}</span><div class="manual-demo">${manualDemoHtml(c.demo)}</div></div><div class="manual-card dd-card${i === 0 ? ' focal' : ''}"><div class="dd-top"><span class="dd-num">No.${i + 1}</span><span class="dd-title">${c.title}</span><span class="dd-ico">${c.icon}</span></div><p>${c.text}</p></div><div class="dd-spacer"></div></section>`).join('');
       const dots = Array.from({ length: MANUAL_TOTAL }, (_, i) => `<span class="manual-dot${i === 0 ? ' active' : ''}"></span>`).join('');
       container.innerHTML = `<div class="dd-manual"><div class="manual-viewport dd-viewport"><div class="manual-track" id="${prefix}-track">${cover}${pages}</div></div><div class="dd-nav"><button class="dd-prev" id="${prefix}-prev" onclick="manualMove('${prefix}', -1)" aria-label="上一頁" disabled>‹</button><div class="manual-dots dd-dots" id="${prefix}-dots">${dots}</div><button class="dd-next" id="${prefix}-next" onclick="manualNext('${prefix}')">下一頁 →</button></div></div>`;
@@ -3220,3 +3241,4 @@
       buildManualCarousel(document.getElementById('onboarding-manual'), 'ob');
     }
     setupManuals();
+    renderBoard();
