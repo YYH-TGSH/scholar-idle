@@ -13,8 +13,8 @@
     const COORDS = {
       'school-class': { x: 1062, y: 195 },
       'school-idle': { x: 1107, y: 195 },
-      'restaurant-eat': { x: 750, y: 190 },
-      'restaurant-idle': { x: 792, y: 195 },
+      'restaurant-eat': { x: 440, y: 184 }, // v9.19 吧台座南移（人不再被櫃檯擋住）
+      'restaurant-idle': { x: 610, y: 252 }, // v9.18 室內入口
       'gym-run': { x: 1652, y: 75 },
       'gym-idle': { x: 1727, y: 180 },
       'library-study': { x: 1327, y: 195 },
@@ -53,7 +53,7 @@
       }
       // v9.17.1：室內場景（住家/超商）被框框縮小，人物補償回大地圖同尺寸（腳底為原點）
       const par = elCharWrap.parentNode;
-      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms')) {
+      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms')) {
         const st = par.parentNode;
         scale *= 300 / ((st && st.clientHeight) || 179);
         elCharWrap.style.transformOrigin = '50% 100%';
