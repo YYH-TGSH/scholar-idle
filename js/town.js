@@ -582,7 +582,7 @@
       { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#2c3e50' }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
       { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#2c3e50' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
       { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#2c3e50' }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 1112, y: 145 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 575, y: 148 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
       { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#2c3e50' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
       { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#2c3e50' }, work: 'library', spot: { x: 1330, y: 150 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
       { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#2c3e50' }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
@@ -597,7 +597,7 @@
     const NPC_PARK_Y = 440;
     const NPC_DOOR_X = { home: 175, store: 485, restaurant: 795, school: 1105, library: 1415, gym: 1732 };
     // 玩家專屬位子：座位池永遠保留，NPC 絕不坐上去跟玩家重疊
-    const PLAYER_RESERVED = { school: { x: 1062, y: 195 }, library: { x: 1327, y: 195 }, restaurant: { x: 440, y: 184 }, store: { x: 565, y: 252 }, gym: { x: 1652, y: 75 } };
+    const PLAYER_RESERVED = { school: { x: 590, y: 250 }, library: { x: 1327, y: 195 }, restaurant: { x: 440, y: 184 }, store: { x: 565, y: 252 }, gym: { x: 1652, y: 75 } };
     const SPECIAL_MENU = [
       { name: '招牌炒麵', emoji: '🍝' }, { name: '豚骨拉麵', emoji: '🍜' }, { name: '鐵板牛排', emoji: '🥩' },
       { name: '香煎雞腿', emoji: '🍗' }, { name: '海鮮炒飯', emoji: '🍚' }, { name: '麻婆豆腐', emoji: '🌶️' }, { name: '味噌鮭魚', emoji: '🐟' },
@@ -632,7 +632,7 @@
     function freeWindowSeat(i) { if (i != null && i >= 0) windowSeatTaken[i] = false; }
     const NOODLE_NIGHT_LINES = ['「深夜的泡麵，特別好吃。」', '「呼…整天累都散了。」', '「窗外沒人，只有這間店還亮著。」', '「明天…再加油吧。」', '「阿哲的關東煮也不錯。」', '「這個時間還醒著的，都是有故事的人。」'];
     const NPC_SEAT_POOLS = {
-      school: { activity: 'study', grid: [[994, 195], [1028, 195], [1096, 195], [1130, 195], [1164, 195], [1198, 195], [1232, 195]] },
+      school: { activity: 'study', grid: [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]] }, // v9.22 教室中間 6 張課桌
       library: { activity: 'study', grid: [[1290, 195], [1330, 195], [1370, 195], [1410, 195], [1450, 195], [1490, 195], [1530, 195]] },
       restaurant: { activity: 'dine', grid: [[120, 184], [200, 184], [280, 184], [360, 184], [440, 184], [520, 184], [738, 190], [802, 190], [958, 238], [1022, 238]] }, // v9.19 吧台排（南移不被擋）＋圓桌座
       store: { activity: 'browse', grid: [[420, 205], [500, 205], [580, 205], [660, 205], [460, 255], [620, 255]] }, // v9.17 室內貨架走道
@@ -735,9 +735,12 @@
     const STORE_DOOR_OUT = { x: 565, y: 278, door: 'out', loc: 'store', wx: 485, wy: 240 };
     const REST_DOOR_IN = { x: 795, y: 240, door: 'in', loc: 'restaurant', ix: 610, iy: 278 }; // v9.18 餐廳門口瞬移
     const REST_DOOR_OUT = { x: 610, y: 278, door: 'out', loc: 'restaurant', wx: 795, wy: 240 };
+    const SCHOOL_DOOR_IN = { x: 1105, y: 240, door: 'in', loc: 'school', ix: 575, iy: 278 }; // v9.21 學校門口瞬移
+    const SCHOOL_DOOR_OUT = { x: 575, y: 278, door: 'out', loc: 'school', wx: 1105, wy: 240 };
     const INTERIORS = { // v9.18 室內場景通用表
       store: { roomsId: 'store-rooms', doorIn: STORE_DOOR_IN, doorOut: STORE_DOOR_OUT, worldDoorX: 485, inDoor: { x: 565, y: 278 } },
-      restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 795, inDoor: { x: 610, y: 278 } }
+      restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 795, inDoor: { x: 610, y: 278 } },
+      school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 1105, inDoor: { x: 575, y: 278 } }
     };
     function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; return npc.insideLoc === loc ? [pt] : [{ x: c.worldDoorX, y: NPC_STREET_Y }, c.doorIn, pt]; }
     function storePathTo(npc, pt) { return interiorPathTo(npc, 'store', pt); }
@@ -1009,6 +1012,7 @@
     }
     // v9.12.2 講台前景層：蓋在 NPC 圖層之上，王老師站上去時下半身被講桌遮住（站在講台後面）
     function ensurePodiumFg() {
+      if (document.getElementById('school-stage')) { const pf = document.getElementById('podium-fg'); if (pf) pf.remove(); return; } // v9.21 新場景自帶講台前景，舊層退役
       if (document.getElementById('podium-fg')) return;
       const map = document.getElementById('npc-layer') || document.getElementById('town-map');
       if (!map) return;
@@ -1533,11 +1537,12 @@
           npc.dwell -= progressMinutes;
           if (npc.dwell <= 0) {
             const ph = schoolPhaseNow();
-            if (ph === 'break') { const sp2 = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)]; npc.path = [sp2]; npc.arrive = 'idle'; npc.state = 'path'; }
+            if (ph === 'break') { const sp2 = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)]; npc.path = [{ x: sp2.x, y: sp2.y }]; npc.arrive = sp2.arrive; npc.breakMode = sp2.mode; npc.state = 'path'; }
             else if (ph === 'class') npc.dwell = 2; // 等鐘聲監看器送回座位
             else { npc.breakHome = null; npcExitPath(npc); } // v9.15：放學/週末了，不再等鐘聲，自己離校（修高速跳過鐘聲轉換卡死）
           }
         } else if (npc.state === 'seated' || npc.state === 'idle') {
+          if (npc.breakMode && npc.dest === 'school') tickBreakAmbiance(npc, progressMinutes); // v9.22 下課氛圍：聊天/看書/休息/喝茶/列印
           if (npc.state === 'seated' && npc.seatIdx != null && SEAT_MAP[npc.dest] && SEAT_MAP[npc.dest][npc.seatIdx] && !SEAT_MAP[npc.dest][npc.seatIdx].who) {
             SEAT_MAP[npc.dest][npc.seatIdx].who = npc.key;
           }
@@ -1584,12 +1589,13 @@
         }
         if (npc.insideLoc === 'store' && !document.getElementById('store-rooms')) ensureStoreInterior(); // v9.17：容器還沒建就先建（主迴圈外也要能切）
         if (npc.insideLoc === 'restaurant' && !document.getElementById('rest-rooms')) ensureRestInterior(); // v9.18
+        if (npc.insideLoc === 'school' && !document.getElementById('school-rooms')) ensureSchoolInterior(); // v9.21
         const el = document.getElementById('npc-' + npc.key);
         if (el) { // v9.14：室內外容器切換；v9.17：insideLoc（一般 NPC 的 inside 未初始化，不能當守衛）
           const _tgt = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? document.getElementById(INTERIORS[npc.insideLoc].roomsId) : (npc.inside ? document.getElementById('home-rooms') : document.getElementById('npc-layer'));
           if (_tgt && el.parentNode !== _tgt) _tgt.appendChild(el);
           // v9.17.1：室內人物補償場景縮放，與大地圖同尺寸（腳底為原點）
-          if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms')) {
+          if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms' || _tgt.id === 'school-rooms')) {
             const _st = _tgt.parentNode;
             const _tf = 'scale(' + (300 / ((_st && _st.clientHeight) || 179)).toFixed(3) + ')';
             if (el.style.transform !== _tf) { el.style.transform = _tf; el.style.transformOrigin = '50% 100%'; }
@@ -1671,13 +1677,7 @@
         const sg = document.createElement('div');
         sg.id = 'street-glows';
         map.appendChild(sg);
-        const sb = document.createElement('div');
-        sb.id = 'store-beacon';
-        map.appendChild(sb);
-        const sl = document.createElement('div');
-        sl.id = 'store-lit';
-        map.appendChild(sl); // v9.16.1 店面形狀的室內光（矩形貼合超商、蓋過夜色層）
-        const sw = document.createElement('div');
+        const sw = document.createElement('div'); // v9.22.1 store-beacon/store-lit 補光片退役：改由 #sky-night 在超商處挖空
         sw.id = 'sky-warm';
         map.appendChild(sw);
         const sn = document.createElement('div');
@@ -1699,7 +1699,7 @@
         buildSkyLayer();
         _skyEls = {
           sn: document.getElementById('sky-night'), sw: document.getElementById('sky-warm'),
-          sb: document.getElementById('store-beacon'), sg: document.getElementById('street-glows'),
+          sg: document.getElementById('street-glows'),
           glows: [...document.querySelectorAll('.island-glow')],
         };
         if (!_skyEls.sn) _skyEls = null;
@@ -1716,8 +1716,7 @@
       _skyEls.sw.style.opacity = r3(wf);
       _skyEls.glows.forEach(g => { g.style.opacity = r3(nf * (g.dataset.store ? 1 : 0.75)); });
       const storeIsl = document.getElementById('landmark-store'); if (storeIsl) storeIsl.classList.toggle('night-lit', nf > 0.45); // v9.16.1 整間店自己亮，不補光暈
-      _skyEls.sg.style.opacity = r3(nf * 0.85);
-      const slEl = document.getElementById('store-lit'); if (slEl) slEl.style.opacity = r3(nf); // v9.16.1 只有 24H 超商整間亮著
+      _skyEls.sg.style.opacity = r3(nf * 0.85); // v9.22.1 超商的亮來自 #sky-night 的挖空（見 style.css），不再疊補光片
     }
 
 
@@ -1898,6 +1897,184 @@
       updateStorePan(focus);
     }
 
+
+
+    // ================= v9.21 學校大場景（比照住家/超商/餐廳：大教室塞框框、課桌前景層） =================
+    const _deskBack = [], _deskFront = [];
+    [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]].forEach(([sx, sy]) => { // v9.22 教室只留 6 張課桌（左右改辦公室/閱讀角）
+      _deskBack.push(`<rect x="${sx - 28}" y="${sy - 38}" width="56" height="14" fill="#b08968" stroke="#182042" stroke-width="1.8"/><rect x="${sx - 16}" y="${sy - 35}" width="13" height="8" fill="#e74c3c"/><rect x="${sx + 4}" y="${sy - 34}" width="12" height="7" fill="#f5f0e6" stroke="#b0a58e" stroke-width="1"/><rect x="${sx - 20}" y="${sy + 3}" width="40" height="9" fill="#795548" stroke="#182042" stroke-width="1.5"/>`);
+      _deskFront.push(`<rect x="${sx - 28}" y="${sy - 24}" width="56" height="26" fill="#a9743f" stroke="#182042" stroke-width="1.8"/><line x1="${sx - 28}" y1="${sy - 24}" x2="${sx + 28}" y2="${sy - 24}" stroke="#d9a066" stroke-width="2"/>`);
+    });
+    const SCHOOL_ROOMS_HTML = `
+<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
+  <rect x="0" y="0" width="1150" height="124" fill="#f7ecd2"/>
+  <rect x="0" y="118" width="1150" height="6" fill="#d9c9a3"/>
+  <rect x="0" y="124" width="1150" height="176" fill="#d9a066"/>
+  <g stroke="#b57e46" stroke-width="2"><line x1="0" y1="168" x2="1150" y2="168"/><line x1="0" y1="212" x2="1150" y2="212"/><line x1="0" y1="256" x2="1150" y2="256"/></g>
+  <!-- 左：教師辦公室 -->
+  <rect x="36" y="26" width="104" height="70" fill="#bfe6f5" stroke="#182042" stroke-width="2"/><line x1="88" y1="26" x2="88" y2="96" stroke="#182042" stroke-width="2"/><line x1="36" y1="61" x2="140" y2="61" stroke="#182042" stroke-width="2"/><circle cx="60" cy="42" r="9" fill="#ffd93b"/>
+  <g>
+    <rect x="160" y="28" width="122" height="68" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
+    <rect x="168" y="36" width="10" height="24" fill="#e74c3c"/><rect x="180" y="36" width="8" height="24" fill="#f5f0e6"/><rect x="190" y="36" width="11" height="24" fill="#3498db"/><rect x="203" y="36" width="8" height="24" fill="#f1c40f"/><rect x="213" y="36" width="10" height="24" fill="#27ae60"/><rect x="225" y="36" width="8" height="24" fill="#9b59b6"/><rect x="235" y="36" width="11" height="24" fill="#e67e22"/><rect x="248" y="36" width="8" height="24" fill="#f5f0e6"/><rect x="258" y="36" width="10" height="24" fill="#e74c3c"/>
+    <line x1="160" y1="64" x2="282" y2="64" stroke="#182042" stroke-width="2"/>
+    <rect x="168" y="68" width="9" height="22" fill="#3498db"/><rect x="179" y="68" width="10" height="22" fill="#f1c40f"/><rect x="191" y="68" width="8" height="22" fill="#27ae60"/><rect x="201" y="68" width="11" height="22" fill="#e74c3c"/><rect x="214" y="68" width="8" height="22" fill="#f5f0e6"/><rect x="224" y="68" width="10" height="22" fill="#9b59b6"/><rect x="236" y="68" width="9" height="22" fill="#e67e22"/><rect x="247" y="68" width="11" height="22" fill="#3498db"/><rect x="260" y="68" width="8" height="22" fill="#f1c40f"/>
+  </g>
+  <rect x="48" y="102" width="118" height="18" fill="#fff8e1" stroke="#182042" stroke-width="1.8"/>
+  <text x="60" y="115" font-size="11" fill="#8d5a2c" font-family="'DotGothic16', monospace" font-weight="900">教師辦公室</text>
+  <rect x="222" y="106" width="66" height="9" fill="#6d4c41"/>
+  <rect x="228" y="82" width="54" height="24" fill="#cfd8dc" stroke="#182042" stroke-width="2"/>
+  <rect x="236" y="70" width="38" height="14" fill="#ffffff" stroke="#b0a58e" stroke-width="1"/>
+  <circle cx="274" cy="92" r="3" fill="#27ae60"/>
+  <rect x="104" y="104" width="108" height="12" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
+  <rect x="118" y="94" width="11" height="9" fill="#ffffff" stroke="#182042" stroke-width="1.2"/><path d="M121 94 q2 -5 5 0" stroke="#90a4ae" stroke-width="1.6" fill="none"/>
+  <rect x="146" y="97" width="20" height="7" fill="#f5f0e6" stroke="#b0a58e" stroke-width="1"/>
+  <rect x="186" y="92" width="10" height="12" fill="#27ae60"/><circle cx="191" cy="88" r="7" fill="#66bb6a"/>
+  <rect x="135" y="154" width="42" height="9" fill="#5d4037" stroke="#182042" stroke-width="1.5"/>
+  <rect x="302" y="14" width="10" height="196" fill="#a1887f" stroke="#182042" stroke-width="1.8"/>
+  <rect x="284" y="120" width="46" height="20" fill="#fff8e1" stroke="#182042" stroke-width="1.8"/>
+  <text x="289" y="134" font-size="10" fill="#8d5a2c" font-family="'DotGothic16', monospace" font-weight="900">三年二班</text>
+  <!-- 中：黑板 -->
+  <g>
+    <rect x="346" y="20" width="468" height="92" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
+    <rect x="354" y="28" width="452" height="76" fill="#2f5d3a"/>
+    <text x="374" y="58" font-size="14" fill="#e8f5e9" font-family="'DotGothic16', monospace" font-weight="900">今日課程：數學・國文・自然</text>
+    <text x="374" y="84" font-size="13" fill="#c8e6c9" font-family="'DotGothic16', monospace" font-weight="900">3/4 ＋ 1/2 ＝ ？　（這題考試會考！）</text>
+    <rect x="752" y="94" width="34" height="5" fill="#f5f0e6"/><rect x="722" y="94" width="16" height="5" fill="#ffb3c1"/>
+  </g>
+  <circle cx="838" cy="42" r="15" fill="#ffffff" stroke="#182042" stroke-width="2"/><line x1="838" y1="42" x2="838" y2="32" stroke="#182042" stroke-width="2"/><line x1="838" y1="42" x2="845" y2="46" stroke="#182042" stroke-width="2"/>
+  <!-- 右：榮譽榜＋閱讀角 -->
+  <g>
+    <rect x="866" y="18" width="256" height="66" fill="#c9a06b" stroke="#182042" stroke-width="2"/>
+    <text x="878" y="38" font-size="12" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🏆 榮譽榜</text>
+    <text x="878" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥇 第一名</text>
+    <text x="972" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥈 第二名</text>
+    <text x="878" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥉 第三名</text>
+    <text x="972" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">⭐ 進步獎</text>
+  </g>
+  <ellipse cx="1000" cy="228" rx="128" ry="46" fill="#b2dfdb" opacity="0.55"/>
+  <ellipse cx="1000" cy="228" rx="104" ry="36" fill="none" stroke="#80cbc4" stroke-width="2"/>
+  <rect x="888" y="138" width="224" height="30" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
+  <rect x="896" y="144" width="9" height="18" fill="#e74c3c"/><rect x="907" y="144" width="7" height="18" fill="#f5f0e6"/><rect x="916" y="144" width="9" height="18" fill="#3498db"/><rect x="927" y="144" width="7" height="18" fill="#f1c40f"/><rect x="936" y="144" width="9" height="18" fill="#27ae60"/><rect x="947" y="144" width="7" height="18" fill="#9b59b6"/><rect x="956" y="144" width="9" height="18" fill="#e67e22"/><rect x="1036" y="144" width="9" height="18" fill="#e74c3c"/><rect x="1047" y="144" width="7" height="18" fill="#3498db"/><rect x="1056" y="144" width="9" height="18" fill="#f1c40f"/><rect x="1067" y="144" width="7" height="18" fill="#27ae60"/><rect x="1076" y="144" width="9" height="18" fill="#9b59b6"/><rect x="1087" y="144" width="7" height="18" fill="#f5f0e6"/><rect x="1096" y="144" width="9" height="18" fill="#e67e22"/>
+  <rect x="952" y="122" width="96" height="16" fill="#fff8e1" stroke="#182042" stroke-width="1.6"/>
+  <text x="964" y="134" font-size="10" fill="#8d5a2c" font-family="'DotGothic16', monospace" font-weight="900">📚 閱讀角</text>
+  <ellipse cx="935" cy="246" rx="30" ry="13" fill="#ffab91" stroke="#182042" stroke-width="1.6"/>
+  <ellipse cx="1065" cy="250" rx="30" ry="13" fill="#90caf9" stroke="#182042" stroke-width="1.6"/>
+  <rect x="1108" y="196" width="16" height="12" fill="#8d5a2c"/><circle cx="1116" cy="186" r="10" fill="#66bb6a"/><circle cx="1108" cy="192" r="7" fill="#81c784"/>
+  <line x1="884" y1="196" x2="884" y2="234" stroke="#182042" stroke-width="2.5"/><path d="M876 196 L892 196 L888 182 L880 182 Z" fill="#ffd93b" stroke="#182042" stroke-width="1.5"/>
+  <rect x="524" y="108" width="102" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
+  ${_deskBack.join('')}
+  <rect x="515" y="272" width="120" height="28" fill="#8d5a2c"/>
+  <text x="553" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
+</svg>
+<svg id="school-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
+  <rect x="524" y="116" width="102" height="30" fill="#795548" stroke="#182042" stroke-width="2"/>
+  <line x1="524" y1="116" x2="626" y2="116" stroke="#a1887f" stroke-width="2"/>
+  <rect x="104" y="124" width="108" height="20" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
+  ${_deskFront.join('')}
+</svg>`;
+    function ensureSchoolInterior() {
+      if (document.getElementById('school-stage')) return;
+      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
+      if (!host) return;
+      const pf = document.getElementById('podium-fg'); if (pf) pf.remove(); // v9.21 舊講台前景層退役（新場景自帶講台前景）
+      const stage = document.createElement('div');
+      stage.id = 'school-stage';
+      stage.innerHTML = '<div id="school-rooms">' + SCHOOL_ROOMS_HTML + '</div>';
+      host.appendChild(stage);
+      let drag = null;
+      const activePtrs = new Set();
+      stage.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        activePtrs.add(e.pointerId);
+        if (activePtrs.size > 1) { drag = null; const rooms = document.getElementById('school-rooms'); if (rooms) rooms.style.transition = ''; return; }
+        drag = { x: e.clientX, pan: (_schoolPanManual !== null ? _schoolPanManual : _schoolPanCur), moved: 0 };
+        _schoolPanManual = drag.pan;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        const rooms = document.getElementById('school-rooms');
+        if (rooms) rooms.style.transition = 'none';
+      });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const sc = (stage.clientHeight || 179) / 300;
+        const visible = (stage.clientWidth || 278) / sc;
+        const maxPan = Math.max(0, 1150 - visible);
+        const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
+        drag.moved += Math.abs(next - _schoolPanManual);
+        _schoolManualUntil = Date.now() + 30000;
+        _schoolPanManual = next;
+        applySchoolPan(_schoolPanManual, sc);
+      });
+      const endDrag = e => {
+        activePtrs.delete(e.pointerId);
+        _schoolManualUntil = Date.now() + 30000;
+        if (!drag) return;
+        const wasDrag = drag.moved > 0.5;
+        drag = null;
+        const rooms = document.getElementById('school-rooms');
+        if (rooms) rooms.style.transition = '';
+        if (wasDrag) stage.addEventListener('click', ev2 => { ev2.stopPropagation(); ev2.preventDefault(); }, { capture: true, once: true });
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('dblclick', () => { _schoolPanManual = null; });
+    }
+    let _schoolPanManual = null;
+    let _schoolManualUntil = 0;
+    let _schoolPanCur = 0;
+    let _schoolWasIn = false;
+    function applySchoolPan(pan, sc) {
+      const rooms = document.getElementById('school-rooms');
+      if (!rooms) return;
+      _schoolPanCur = pan;
+      rooms.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, 0px) scale(' + sc.toFixed(3) + ')';
+    }
+    function updateSchoolPan(focusX) {
+      const stage = document.getElementById('school-stage');
+      if (!stage) return;
+      const vpW = stage.clientWidth, vpH = stage.clientHeight;
+      if (!vpW || !vpH) return;
+      const sc = vpH / 300;
+      const visible = vpW / sc;
+      if (_schoolPanManual !== null) {
+        if (Date.now() > _schoolManualUntil) _schoolPanManual = null;
+        else { applySchoolPan(_schoolPanManual, sc); return; }
+      }
+      if (typeof focusX !== 'number') focusX = 575;
+      let pan;
+      if (visible >= 1150) pan = (1150 - visible) / 2;
+      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      applySchoolPan(pan, sc);
+    }
+    function updateSchoolStage() {
+      ensureSchoolInterior();
+      const stage = document.getElementById('school-stage');
+      if (!stage) return;
+      const rooms = document.getElementById('school-rooms');
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'school' && !gameState.isCommuting;
+      if (playerIn !== _schoolWasIn) { _schoolPanManual = null; _schoolWasIn = playerIn; }
+      const cw = document.getElementById('char-wrap');
+      if (playerIn) {
+        if (cw && rooms && cw.parentNode !== rooms) {
+          rooms.appendChild(cw);
+          cw.style.zIndex = '500';
+          if (typeof getCharacterCoords === 'function' && typeof updateCharacterPositionAndScale === 'function') {
+            const dc = getCharacterCoords(currentLoc, currentState);
+            updateCharacterPositionAndScale(dc.x, dc.y, false);
+          }
+        }
+      } else {
+        const map = document.getElementById('town-map');
+        if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      if (cw && playerIn) cw.style.zIndex = (currentState === 'studying') ? '500' : '975'; // v9.21 上課坐課桌後（被課桌前景蓋腿）；走動/下課站立在前景之上
+      let focus = 575;
+      if (playerIn) focus = gameState.currentX || 560;
+      else {
+        const inner = (gameState.npcs || []).find(n => n.insideLoc === 'school');
+        if (inner) focus = inner.x;
+      }
+      updateSchoolPan(focus);
+    }
 
     // ================= v9.18 餐廳大場景（比照住家/超商：大室內塞框框、鐵板台前景層） =================
     const REST_ROOMS_HTML = `
@@ -2104,10 +2281,12 @@
         if (_schoolPrevPhase === 'class' && phase === 'break') {
           ringBell('🔔 下課鐘響！休息 10 分鐘');
           startBreakMoves();
+          rollPlayerBreak(atSchool); // v9.22 主角下課也會去閱讀角（60%）
           (gameState.npcs || []).filter(n => n.state === 'seated' && n.dest === 'school').slice(0, 2).forEach(n => npcSay(n));
         } else if (_schoolPrevPhase === 'break' && phase === 'class') {
           ringBell('🔔 上課鐘響，回到座位');
           endBreakMoves();
+          gameState._playerBreak = null; // v9.22
           if (gameState._breakAtSchool && atSchool) {
             gameState.focus = Math.min(100, (gameState.focus || 0) + 10);
             if (typeof queueFloatingText === 'function') queueFloatingText('📝 下課跟同學對了筆記，專注 +10');
@@ -2117,38 +2296,99 @@
           settleBoardWeek();
         }
       }
-      if (phase && (gameState.hour || 0) === 12 && gameState._lunchStamp !== gameState.totalGameDays) {
+      if (phase && (((gameState.hour || 0) === 11 && (gameState.minute || 0) >= 50) || (gameState.hour || 0) === 12) && gameState._lunchStamp !== gameState.totalGameDays) {
         gameState._lunchStamp = gameState.totalGameDays;
+        gameState._playerBreak = null; // v9.22 午餐出發，主角下課據點作廢
         (gameState.npcs || []).forEach(n => {
           if (n.dest === 'school' && (n.kind === 'friend' || n.kind === 'rival' || n.key === 'teacher') && (n.state === 'seated' || n.state === 'idle' || (n.state === 'path' && n.breakHome))) sendToLunch(n);
         });
       }
       _schoolPrevPhase = phase;
     }
-    const BREAK_SPOTS = [{ x: 1010, y: 202 }, { x: 1075, y: 204 }, { x: 1150, y: 204 }, { x: 1220, y: 202 }, { x: 985, y: 168 }];
+    const BREAK_SPOTS = [ // v9.22 閱讀角據點（右側）：聊天站位×3／看書站位／懶骨頭坐位×2（看書・休息）
+      { x: 950, y: 198, mode: 'chat', arrive: 'idle' },
+      { x: 1012, y: 198, mode: 'chat', arrive: 'idle' },
+      { x: 1085, y: 202, mode: 'chat', arrive: 'idle' },
+      { x: 905, y: 208, mode: 'read', arrive: 'idle' },
+      { x: 935, y: 246, mode: 'rest', arrive: 'seat' },
+      { x: 1065, y: 250, mode: 'read', arrive: 'seat' }
+    ];
+    const TEACHER_BREAK_SPOTS = [ // v9.22 教師辦公室據點（左側）：辦公桌喝茶（權重×2）／印表機印講義
+      { x: 155, y: 152, mode: 'tea', arrive: 'seat' },
+      { x: 155, y: 152, mode: 'tea', arrive: 'seat' },
+      { x: 252, y: 162, mode: 'print', arrive: 'idle' }
+    ];
+    const BREAK_CHAT_LINES = ['昨天的卡通超好看！', '等一下要不要去福利社？', '我跟你說喔…', '下節課要小考欸', '你午餐想吃什麼？', '假日我去打球了', '這本漫畫超推！', '老師剛剛講的我有聽懂'];
+    const BREAK_CHAT_REPLIES = ['真的假的！', '好啊好啊', '哈哈哈', '我也是！', '蛤～真的喔', '借我看！', '讚喔'];
+    function spawnNpcPop(npc, emoji) {
+      const el = document.getElementById('npc-' + npc.key);
+      const layer = el && el.parentNode;
+      if (!layer) return;
+      const pop = document.createElement('div');
+      pop.className = 'pick-pop';
+      pop.textContent = emoji;
+      pop.style.left = (npc.x - 8) + 'px'; pop.style.top = (npc.y - 70) + 'px';
+      layer.appendChild(pop);
+      setTimeout(() => { if (pop.parentNode) pop.parentNode.removeChild(pop); }, 2000);
+    }
+    function tickBreakAmbiance(npc, progressMinutes) {
+      if (typeof schoolPhaseNow !== 'function' || schoolPhaseNow() !== 'break') return;
+      npc.breakActCd = (npc.breakActCd == null ? 1 + Math.random() * 3 : npc.breakActCd) - progressMinutes;
+      if (npc.breakActCd > 0) return;
+      npc.breakActCd = 3 + Math.random() * 5;
+      const mode = npc.breakMode;
+      if (mode === 'chat') {
+        npcSay(npc, BREAK_CHAT_LINES[Math.floor(Math.random() * BREAK_CHAT_LINES.length)]);
+        const partner = (gameState.npcs || []).find(o => o !== npc && o.breakMode === 'chat' && Math.abs(o.x - npc.x) < 140 && Math.abs(o.y - npc.y) < 60);
+        if (partner && Math.random() < 0.5) { partner._sayUntil = 0; npcSay(partner, BREAK_CHAT_REPLIES[Math.floor(Math.random() * BREAK_CHAT_REPLIES.length)]); }
+      }
+      else if (mode === 'read') spawnNpcPop(npc, '📖');
+      else if (mode === 'rest') spawnNpcPop(npc, '💤');
+      else if (mode === 'tea') spawnNpcPop(npc, '☕');
+      else if (mode === 'print') spawnNpcPop(npc, '📄');
+    }
+    function rollPlayerBreak(atSchool) {
+      gameState._playerBreak = null;
+      if (!atSchool) return;
+      if (Math.random() > 0.6) return; // 40% 留在座位上休息
+      const spot = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)];
+      gameState._playerBreak = { x: spot.x, y: spot.y, mode: spot.mode };
+    }
     function startBreakMoves() {
+      const cornerPool = BREAK_SPOTS.slice();
+      for (let i = cornerPool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = cornerPool[i]; cornerPool[i] = cornerPool[j]; cornerPool[j] = t; }
       (gameState.npcs || []).forEach(n => {
         if (n.dest !== 'school' || n.state !== 'seated') return;
         const isTeacher = n.key === 'teacher';
         if (!isTeacher && n.kind === 'staff') return;
-        if (!isTeacher && Math.random() > 0.7) return; // 70% 同學起身活動筋骨
-        const spot = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)];
-        n.breakHome = isTeacher ? { x: npcDef('teacher').spot.x, y: npcDef('teacher').spot.y, arrive: 'post' } : { x: n.x, y: n.y, arrive: 'seat' };
-        n.path = [spot]; n.arrive = 'idle'; n.state = 'path';
+        if (isTeacher) {
+          const spot = TEACHER_BREAK_SPOTS[Math.floor(Math.random() * TEACHER_BREAK_SPOTS.length)];
+          n.breakHome = { x: npcDef('teacher').spot.x, y: npcDef('teacher').spot.y, arrive: 'post' };
+          n.breakMode = spot.mode; n.breakActCd = 1 + Math.random() * 3;
+          n.path = [{ x: spot.x, y: spot.y }]; n.arrive = spot.arrive; n.state = 'path';
+          return;
+        }
+        if (Math.random() > 0.7) return; // 70% 同學起身去閱讀角，30% 留在座位
+        const spot = cornerPool.pop();
+        if (!spot) return; // 閱讀角滿了就留在座位
+        n.breakHome = { x: n.x, y: n.y, arrive: 'seat' };
+        n.breakMode = spot.mode; n.breakActCd = 1 + Math.random() * 3;
+        n.path = [{ x: spot.x, y: spot.y }]; n.arrive = spot.arrive; n.state = 'path';
       });
     }
     function endBreakMoves() {
       if ((gameState.hour || 0) === 12) return; // 午休直接接著去食堂，不回座
       (gameState.npcs || []).forEach(n => {
         if (!n.breakHome) return;
-        n.path = [{ x: n.breakHome.x, y: n.breakHome.y }]; n.arrive = n.breakHome.arrive; n.state = 'path'; n.breakHome = null;
+        n.path = [{ x: n.breakHome.x, y: n.breakHome.y }]; n.arrive = n.breakHome.arrive; n.state = 'path'; n.breakHome = null; n.breakMode = null;
       });
     }
     function sendToLunch(npc) {
-      npc.breakHome = null;
+      npc.breakHome = null; npc.breakMode = null;
       npc._lunchForce = gameState.totalGameDays;
       npcFreeSeat(npc);
-      npc.path = [{ x: NPC_DOOR_X.school, y: NPC_DOOR_Y }, { x: NPC_DOOR_X.school, y: NPC_STREET_Y }];
+      if (npc.insideLoc && INTERIORS[npc.insideLoc]) npc.path = [INTERIORS[npc.insideLoc].doorOut, { x: NPC_DOOR_X.school, y: NPC_STREET_Y }]; // v9.22 室內的人走教室正門出去
+      else npc.path = [{ x: NPC_DOOR_X.school, y: NPC_DOOR_Y }, { x: NPC_DOOR_X.school, y: NPC_STREET_Y }];
       npc.arrive = 'street'; npc.state = 'path';
     }
     function settleBoardWeek() {
@@ -2190,7 +2430,7 @@
       }
       const M = document.getElementById('bb-main'), S = document.getElementById('bb-sub'), T = document.getElementById('bb-today');
       if (!M || !S || !T) return;
-      if (phase === 'class' && hh === 12) { M.textContent = '🍱 午休時間'; S.textContent = '吃飽睡好，下午才有精神'; T.textContent = 'LUNCH BREAK'; }
+      if (phase && ((hh === 11 && (gameState.minute || 0) >= 50) || hh === 12)) { M.textContent = '🍱 午休時間'; S.textContent = '吃飽睡好，下午才有精神'; T.textContent = 'LUNCH BREAK'; }
       else if (phase === 'class' && PERIODS[hh]) { const p = PERIODS[hh]; M.textContent = p[1]; S.textContent = p[2]; T.textContent = 'NOW: ' + p[0]; }
       else if (phase === 'break') { const nx = PERIODS[hh + 1]; M.textContent = '☕ 下課 10 分鐘'; S.textContent = '伸個懶腰 • 喝口水'; T.textContent = nx ? 'NEXT: ' + nx[0] : 'NEXT: 放學囉'; }
       else { M.textContent = '📚 天道酬勤 • 必上第一志願！'; S.textContent = 'E = mc²  |  100% PASS'; T.textContent = 'TODAY: CHINESE & MATH'; }

@@ -3665,15 +3665,12 @@ input, select, textarea { border-radius: 14px !important; }
 .npc-sprite { display: block; margin: 0 auto; }
 .npc-walking .npc-flip { animation: npc-bob 0.55s ease-in-out infinite alternate; }
 .npc-zzz-tag { position: absolute; top: -4px; right: 0; font-size: 13px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
-#sky-night { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(6,10,38,0.62), rgba(6,10,38,0.46)); }
+#sky-night { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(6,10,38,0.62), rgba(6,10,38,0.46)); clip-path: polygon(evenodd, 0px 0px, 1920px 0px, 1920px 540px, 0px 540px, 0px 0px, 353px 28px, 353px 207px, 617px 207px, 617px 28px, 353px 28px); } /* v9.22.1 超商位置挖空：黑色濾鏡蓋不到超商，整間店等於在濾鏡上方用原色亮著（不疊補光濾鏡） */
 #sky-warm { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
 #street-glows { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 40; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: radial-gradient(circle 110px at 300px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%), radial-gradient(circle 110px at 750px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%), radial-gradient(circle 110px at 1200px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%), radial-gradient(circle 110px at 1650px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%); }
-#store-beacon { display: none !important; } /* v9.16.1 使用者指示：拔掉黃色光暈，改整間店自己亮 */
-#store-lit { position: absolute; left: 353px; top: 28px; width: 264px; height: 179px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; border-radius: 22px; background: linear-gradient(180deg, rgba(255, 222, 156, 0.42) 0%, rgba(255, 200, 118, 0.30) 70%, rgba(255, 190, 105, 0.24) 100%); box-shadow: inset 0 0 0 2px rgba(255, 230, 170, 0.28), inset 0 -16px 22px rgba(120, 70, 20, 0.10); } /* 店面本體的室內光：矩形貼合店面、邊界就是牆，讀作「這間店的燈開著」 */
 #landmark-store .island-platform-top { transition: filter 0.9s linear; }
 #landmark-store .facade-roof { transition: filter 0.9s linear; }
-#landmark-store.night-lit .island-platform-top { filter: brightness(1.55) saturate(1.15); } /* 店面本體整間亮：#sky-night 半透明，底下先提亮、透出來仍比全鎮亮 */
-#landmark-store.night-lit .facade-roof { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* 招牌燈箱發光 */
+#landmark-store.night-lit .facade-roof { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* 招牌燈箱發光（店面本體的亮度改由 #sky-night 挖空達成，不再用 brightness 濾鏡硬拉） */
 .npc-role { position: absolute; top: -5px; left: 0; font-size: 13px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.45); } /* v9.16.1 值班職位小標 */
 /* ===== v9.17 超商大場景（比照住家 stage） ===== */
 #store-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3ead9; cursor:grab; touch-action:none; }
@@ -3685,6 +3682,10 @@ input, select, textarea { border-radius: 14px !important; }
 #rest-stage:active { cursor:grabbing; }
 #rest-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
 #rest-rooms #teppan-fx { left:246px; top:50px; width:110px; height:46px; z-index:940; }
+/* ===== v9.21 學校大場景（比照超商/餐廳 stage） ===== */
+#school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ecd2; cursor:grab; touch-action:none; }
+#school-stage:active { cursor:grabbing; }
+#school-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
 /* ===== v9.19 桌上餐點＋超商拿貨互動 ===== */
 .dish-plate { position:absolute; width:20px; height:20px; font-size:15px; line-height:20px; text-align:center; background:rgba(255,255,255,0.92); border:1.5px solid #182042; border-radius:50%; pointer-events:none; }
 .pick-pop { position:absolute; z-index:990; font-size:15px; pointer-events:none; animation: pick-float 1.9s ease-out forwards; }

@@ -487,6 +487,7 @@
       if (typeof updateHomeStage === 'function') updateHomeStage(); // v9.14
       if (typeof updateStoreStage === 'function') updateStoreStage(); // v9.17
       if (typeof updateRestStage === 'function') updateRestStage(); // v9.18
+      if (typeof updateSchoolStage === 'function') updateSchoolStage(); // v9.21
 
       // 4. 行為決策
       decideLocationAndState();
@@ -588,8 +589,8 @@
           targetLoc = "home"; // v9.13 晚餐優先於飢餓規則：18:00 回家同桌（家裡晚餐一樣補飽足）
         } else if (gameState.hunger < 35 && !restaurantLocked) {
           targetLoc = "restaurant";
-        } else if (h === 12 && !restaurantLocked) {
-          targetLoc = "restaurant"; // v9.12.8 午休吃飯：跟全校一起去食堂，不再自己留在教室聽講
+        } else if ((h === 12 || (h === 11 && gameState.minute >= 50)) && !restaurantLocked) {
+          targetLoc = "restaurant"; // v9.22 午餐 11:50 就出發（原 12:00）
         } else if (gameState.stress > 80) {
           targetLoc = "gym";
         } else {
@@ -709,6 +710,7 @@
         return COORDS['home-idle'];
       }
       if (loc === 'school') {
+        if (gameState._playerBreak && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') return gameState._playerBreak; // v9.22 下課在閱讀角
         if (state === 'studying') return COORDS['school-class'];
         return COORDS['school-idle'];
       }
@@ -1248,7 +1250,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.20.1) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.22.1) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

@@ -1529,7 +1529,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.20.1) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.22.1) | 上次存檔：${ts}`);
       }
     }
 
@@ -1928,8 +1928,17 @@
         case 'idle':
         default:
           elStudentSprite.classList.add("state-idle");
-          setStageBoard(`空閒：<span>發呆放鬆中 🍃</span>`);
-          elCharBubble.innerText = "放空一下下～";
+          if (currentLoc === "school" && gameState._playerBreak) { // v9.22 下課在閱讀角
+            const bm = gameState._playerBreak.mode;
+            setStageBoard(bm === 'chat' ? `學校：<span>下課聊天中 💬</span>` : bm === 'read' ? `學校：<span>下課在閱讀角看書 📚</span>` : `學校：<span>下課在閱讀角休息 💤</span>`);
+            elCharBubble.innerText = bm === 'chat' ? "欸欸，跟你說喔～" : bm === 'read' ? "這本好好看 📖" : "休息一下下 💤";
+          } else if (currentLoc === "school" && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') {
+            setStageBoard(`學校：<span>下課休息中 🔔</span>`);
+            elCharBubble.innerText = "下課放空一下～";
+          } else {
+            setStageBoard(`空閒：<span>發呆放鬆中 🍃</span>`);
+            elCharBubble.innerText = "放空一下下～";
+          }
           stopZzzParticles();
           stopSweatParticles();
           break;

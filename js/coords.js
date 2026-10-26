@@ -11,8 +11,8 @@
 
     // 各室內互動點 (由舊 960 佈局的島內相對座標平移而來，室內陳設不變)
     const COORDS = {
-      'school-class': { x: 1062, y: 195 },
-      'school-idle': { x: 1107, y: 195 },
+      'school-class': { x: 590, y: 250 }, // v9.22 主角課桌（前排中央）
+      'school-idle': { x: 648, y: 252 }, // v9.21 室內入口旁
       'restaurant-eat': { x: 440, y: 184 }, // v9.19 吧台座南移（人不再被櫃檯擋住）
       'restaurant-idle': { x: 610, y: 252 }, // v9.18 室內入口
       'gym-run': { x: 1652, y: 75 },
@@ -53,7 +53,7 @@
       }
       // v9.17.1：室內場景（住家/超商）被框框縮小，人物補償回大地圖同尺寸（腳底為原點）
       const par = elCharWrap.parentNode;
-      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms')) {
+      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms' || par.id === 'school-rooms')) { // v9.21 學校場景同尺寸補償
         const st = par.parentNode;
         scale *= 300 / ((st && st.clientHeight) || 179);
         elCharWrap.style.transformOrigin = '50% 100%';
