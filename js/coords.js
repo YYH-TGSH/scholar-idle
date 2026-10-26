@@ -19,8 +19,8 @@
       'gym-idle': { x: 1727, y: 180 },
       'library-study': { x: 1327, y: 195 },
       'library-idle': { x: 1387, y: 195 },
-      'store-work': { x: 555, y: 185 },
-      'store-idle': { x: 497, y: 195 },
+      'store-work': { x: 935, y: 150 }, // v9.17 室內場景：收銀台後
+      'store-idle': { x: 565, y: 252 }, // v9.17 室內場景：入口內側
       'home-sleep': { x: 840, y: 182 },
       'home-idle': { x: 500, y: 212 },
       'home-dinner': { x: 655, y: 208 },
@@ -33,7 +33,7 @@
       const elCharWrap = document.getElementById("char-wrap");
       if (!elCharWrap) return;
       // v8.2 效能：座標沒變就不重寫 style (原本每 tick 10 次/秒強制 layout)
-      const posKey = `${x}|${y}|${flipH ? 1 : 0}`;
+      const posKey = `${x}|${y}|${flipH ? 1 : 0}|${elCharWrap.parentNode ? elCharWrap.parentNode.id : ''}`; // v9.17.1：換容器（進出室內）也要重套縮放
       if (_lastCharPos === posKey && !gameState.isCommuting) return;
       _lastCharPos = posKey;
       elCharWrap.style.left = `${x - 21}px`; // v9.10.7 置中修正：wrap 寬 42，舊寫法把左緣放在座標上，主角永遠右偏 21（半個椅距），座位/書桌/床位全歪。改為中心對齊座標，與 NPC 一致。
@@ -50,6 +50,15 @@
       let scale = 0.88;
       if (y >= 260) {
         scale = 0.98;
+      }
+      // v9.17.1：室內場景（住家/超商）被框框縮小，人物補償回大地圖同尺寸（腳底為原點）
+      const par = elCharWrap.parentNode;
+      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms')) {
+        const st = par.parentNode;
+        scale *= 300 / ((st && st.clientHeight) || 179);
+        elCharWrap.style.transformOrigin = '50% 100%';
+      } else if (elCharWrap.style.transformOrigin) {
+        elCharWrap.style.transformOrigin = '';
       }
       elCharWrap.style.transform = `scale(${scale})`;
     }

@@ -1529,7 +1529,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.10.4) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.17.1) | 上次存檔：${ts}`);
       }
     }
 
@@ -1825,6 +1825,14 @@
           break;
 
         case 'eating':
+          if (gameState.noodleUntil) { // v9.16 窗邊泡麵：坐窗邊吃，不走餐廳流程
+            elStudentSprite.classList.add("state-eating");
+            setStageBoard(`超商：<span>窗邊泡麵中 🍜 深夜裡的一點亮光</span>`);
+            elCharBubble.innerText = "呼…深夜的泡麵最療癒 🍜";
+            let _pdn = document.getElementById('player-dish');
+            if (_pdn) { _pdn.style.display = 'block'; _pdn.innerText = '🍜'; }
+            break;
+          }
           const sp = (typeof todaysSpecial === 'function') ? todaysSpecial() : { name: '鐵板燒', emoji: '🍽️' };
           if (gameState.eatOrderLeft == null) { gameState.eatOrderLeft = 3; gameState.eatServed = false; gameState.eatPhase = 'order'; gameState._eatServeCelebrated = false; }
           if (gameState.eatPhase === 'order') {
@@ -2099,6 +2107,37 @@
         case 'home': startSheepGame(); break;
       }
       updateMiniGameTriggers();
+    }
+
+    // v9.16 窗邊泡麵：點窗邊吧台開吃（深夜限定 $25 / 25 分鐘）
+    function noodleHitClick(e) {
+      if (e) e.stopPropagation();
+      playSound('click');
+      if (currentLoc !== 'store' || gameState.isCommuting) { setStageBoard(`窗邊泡麵：<span>先進超商再點窗邊吧台 🍜</span>`); return; }
+      if (gameState.noodleUntil) { setStageBoard(`超商：<span>已經在吃泡麵了 🍜</span>`); return; }
+      const h = gameState.hour || 0;
+      if (!(h >= 22 || h < 5)) { setStageBoard(`窗邊泡麵：<span>深夜限定（22:00–05:00）🌙 白天先去做別的事</span>`); return; }
+      if ((gameState.money || 0) < 25) { setStageBoard(`窗邊泡麵：<span>錢不夠…一碗 $25 🍜</span>`); return; }
+      const wi = claimWindowSeat();
+      if (wi < 0) { setStageBoard(`窗邊泡麵：<span>窗邊客滿了，等有人吃完再來 🍜</span>`); return; }
+      gameState.money = (gameState.money || 0) - 25;
+      gameState.noodleSeatIdx = wi;
+      gameState.noodleSeat = { x: STORE_WINDOW_SEATS[wi].x, y: STORE_WINDOW_SEATS[wi].y };
+      gameState.noodleUntil = (gameState.totalGameDays || 0) * 1440 + h * 60 + (gameState.minute || 0) + 25;
+      setStageBoard(`超商：<span>泡麵上桌！窗邊開吃 🍜（$25）</span>`);
+      saveGameData();
+    }
+    function endNoodleSession(completed) {
+      if (!gameState.noodleUntil) return;
+      freeWindowSeat(gameState.noodleSeatIdx);
+      gameState.noodleUntil = 0; gameState.noodleSeatIdx = null; gameState.noodleSeat = null;
+      if (completed) {
+        gameState.noodleCount = (gameState.noodleCount || 0) + 1;
+        addBuff('study_boost', 1.25, 60, '🍜', true, '深夜食堂：讀書效率 x1.25');
+        if (typeof queueFloatingText === 'function') queueFloatingText('🍜 深夜食堂：讀書效率提升！');
+        playSound('examSuccess');
+      }
+      saveGameData();
     }
 
     function closeMinigame() {

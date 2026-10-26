@@ -86,7 +86,7 @@
     function buildCommutePath(fromLoc, toLoc) {
       const fromIdle = COORDS[fromLoc + '-idle'] || COORDS['home-idle'];
       const start = { x: gameState.currentX || fromIdle.x, y: gameState.currentY || fromIdle.y };
-      const end = toLoc === 'home' ? { x: DOOR_X.home, y: 195 } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // v9.14：回家路徑只到門口，室內由 stage 接手
+      const end = (toLoc === 'home' || toLoc === 'store') ? { x: DOOR_X[toLoc], y: 195 } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // v9.14/v9.17：回家/進超商路徑只到門口，室內由 stage 接手
       const fx = DOOR_X[fromLoc] || start.x, tx = DOOR_X[toLoc] || end.x;
       const raw = [start, { x: fx, y: DOOR_OUT_Y }, { x: fx, y: WALK_Y }, { x: tx, y: WALK_Y }, { x: tx, y: DOOR_OUT_Y }, end];
       const pts = [raw[0]];
@@ -118,7 +118,9 @@
     function commutePxPerMin() { return WALK_PX_PER_MIN / (gameState.commuteSpeedMult || 1); }
     function startCommuteTo(targetLoc) {
       if (targetLoc !== 'home') gameState.deskStudy = false; // v9.14.4 離家就結束書桌自習
+      if (targetLoc !== 'store' && gameState.noodleUntil) endNoodleSession(false); // v9.16 離開超商 = 泡麵中斷
       if (currentLoc === 'home' && targetLoc !== 'home') { gameState.currentX = DOOR_X.home; gameState.currentY = 195; } // v9.14：離家先回到門口再出發（stage 同步關閉）
+      if (currentLoc === 'store' && targetLoc !== 'store') { gameState.currentX = DOOR_X.store; gameState.currentY = 195; } // v9.17：離開超商先回到門口再出發
       if (gameState.isCommuting) return; // v9.1：通勤中不改道——大腦每 tick 都在決策，沒這道防線會半路重建路徑、把小人拉回起點門口 (測試實測會半路改去別棟)
       const pts = buildCommutePath(currentLoc, targetLoc);
       const total = pathTotalLength(pts);
@@ -397,6 +399,15 @@
     function tick() {
       if (window._minigameOpen) return; // v9.15.2 玩小遊戲時遊戲時間凍結
       const progressMinutes = gameState.speed / 10;
+      // v9.16 窗邊泡麵進行中：飽足/減壓連續入帳，完成時結算
+      if (gameState.noodleUntil) {
+        const nowAbsN = (gameState.totalGameDays || 0) * 1440 + (gameState.hour || 0) * 60 + (gameState.minute || 0);
+        if (currentLoc === 'store' && currentState === 'eating' && !gameState.isCommuting) {
+          gameState.hunger = Math.min(100, (gameState.hunger || 0) + progressMinutes * 1.2);
+          gameState.stress = Math.max(0, (gameState.stress || 0) - progressMinutes * 0.8);
+        }
+        if (nowAbsN >= gameState.noodleUntil) endNoodleSession(true);
+      }
 
       // 1. 處理通勤 (v9.0 路徑積分：位置與倒數同源，抵達與歸零同一刻)
       if (gameState.isCommuting) {
@@ -473,6 +484,7 @@
       // 3. 計算開關燈鎖定狀態
       calculateLocks();
       if (typeof updateHomeStage === 'function') updateHomeStage(); // v9.14
+      if (typeof updateStoreStage === 'function') updateStoreStage(); // v9.17
 
       // 4. 行為決策
       decideLocationAndState();
@@ -658,6 +670,7 @@
         if (gameState.energy < 12 || gameState.hunger < 18 || gameState.hour >= 23 || gameState.hour < 5) gameState.deskStudy = false;
         else targetLoc = 'home';
       }
+      if (gameState.noodleUntil) targetLoc = 'store'; // v9.16 吃泡麵中：留在超商
       if (currentLoc === targetLoc) {
         if (currentLoc === "school") {
           currentState = (gameState.stress >= 85) ? "angry" : ((typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') ? "idle" : "studying"); // v9.12 下課離席放鬆
@@ -672,7 +685,7 @@
           currentState = "studying";
         }
         else if (currentLoc === "store") {
-          currentState = "working";
+          currentState = gameState.noodleUntil ? "eating" : "working"; // v9.16 泡麵中不站櫃檯
         }
         else if (currentLoc === "home") {
           currentState = (gameState.hour === 18 && gameState.energy >= 30 && gameState.overrideAction !== 'sleep') ? "dinner" // v9.13 晚餐同桌
@@ -711,6 +724,7 @@
       }
       if (loc === 'store') {
         if (state === 'working') return COORDS['store-work'];
+        if (state === 'eating' && gameState.noodleSeat) return gameState.noodleSeat; // v9.16 窗邊座
         return COORDS['store-idle'];
       }
       return COORDS['home-idle'];
@@ -1232,7 +1246,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.10.4) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.17.1) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

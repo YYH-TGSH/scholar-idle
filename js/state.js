@@ -1054,6 +1054,7 @@
       { id: 'anger_3_times', name: '暴走族', desc: '一天內暴走 3 次以上', icon: '🤬', category: 'life', hidden: false },
       { id: 'full_health', name: '身心健康', desc: '精力、飽足全滿且壓力為 0', icon: '💪', category: 'life', hidden: false },
       { id: 'night_owl', name: '夜貓子', desc: '凌晨 3 點還沒睡覺', icon: '🦉', category: 'life', hidden: false },
+      { id: 'night_noodle_5', name: '深夜食堂', desc: '在超商窗邊吃 5 次泡麵', icon: '🍜', category: 'life', hidden: false },
       { id: 'first_friend_max', name: '校園摯友', desc: '與任一位校園夥伴好感度達到滿級 (100)', icon: '🤝', category: 'life', hidden: false },
       { id: 'all_friends_max', name: '校園人氣王', desc: '與全部 4 位校園夥伴好感度達到滿級', icon: '🌟', category: 'life', hidden: false },
       // 💰 經濟成就
@@ -1148,6 +1149,7 @@
       if (gameState.energy <= 5 && gameState.hunger <= 5) unlockAchievement('near_death');
       if (gameState.energy >= 100 && gameState.hunger >= 100 && gameState.stress <= 0) unlockAchievement('full_health');
       if (gameState.hour === 3 && currentState !== 'sleeping') unlockAchievement('night_owl');
+      if ((gameState.noodleCount || 0) >= 5) unlockAchievement('night_noodle_5'); // v9.16
       if (gameState.friends) {
         const affVals = Object.values(gameState.friends);
         if (affVals.some(v => v >= 100)) unlockAchievement('first_friend_max');
