@@ -207,7 +207,7 @@
         if (Math.abs(_visPos.x - txp) < 0.05) _visPos.x = txp;
         if (Math.abs(_visPos.y - typ) < 0.05) _visPos.y = typ;
         updateCharacterPositionAndScale(_visPos.x, _visPos.y, _lastTickPos.flip); // v9.15.2 不取整，次像素滑動不卡頓
-      } else _visPos = null;
+      } else { _visPos = null; if (gameState._playerWalking && typeof getCharacterCoords === 'function') { const dc2 = getCharacterCoords(currentLoc, currentState); updateCharacterPositionAndScale(dc2.x, dc2.y, false); } } // v9.24 走路中用 rAF 補間（60fps 滑順）
       if (_pointers.size > 0) return; // 玩家手指在控制鏡頭：彈簧讓路 (位置由手勢直接寫入)
       // 2) 決定鏡頭目標
       const s = (window.__baseMapScale || 1) * mapZoom;
@@ -1250,7 +1250,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.22.1) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.25.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

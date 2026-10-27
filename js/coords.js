@@ -29,9 +29,21 @@
 
     // 統一更新角色位置、朝向與縮放
     let _lastCharPos = '';
+    let _pw = null; // v9.24 主角室內走路狀態
     function updateCharacterPositionAndScale(x, y, flipH) {
       const elCharWrap = document.getElementById("char-wrap");
       if (!elCharWrap) return;
+      // v9.24 主角在同一個場景內改位置＝走過去（下課去閱讀角、回家去餐桌），不再瞬移；換場景/睡覺/運動直接就位
+      const parId0 = elCharWrap.parentNode ? elCharWrap.parentNode.id : '';
+      if (typeof gameState !== 'undefined' && !gameState.isCommuting && typeof currentState !== 'undefined' && currentState !== 'sleeping' && currentState !== 'sports' && /-rooms$/.test(parId0)) {
+        if (!_pw || _pw.par !== parId0) { _pw = { x: x, y: y, par: parId0, t: 0 }; gameState._playerWalking = false; }
+        else {
+          const nowP = performance.now(); const dtF = Math.min(0.1, _pw.t ? (nowP - _pw.t) / 1000 : 0.016); _pw.t = nowP;
+          const dx = x - _pw.x, dy = y - _pw.y; const dist = Math.hypot(dx, dy);
+          if (dist > 3) { const st = Math.min(dist, 175 * dtF); _pw.x += dx / dist * st; _pw.y += dy / dist * st; gameState._playerWalking = true; if (dx < -2) flipH = true; else if (dx > 2) flipH = false; x = _pw.x; y = _pw.y; }
+          else { _pw.x = x; _pw.y = y; gameState._playerWalking = false; }
+        }
+      } else if (typeof gameState !== 'undefined') { gameState._playerWalking = false; _pw = null; }
       // v8.2 效能：座標沒變就不重寫 style (原本每 tick 10 次/秒強制 layout)
       const posKey = `${x}|${y}|${flipH ? 1 : 0}|${elCharWrap.parentNode ? elCharWrap.parentNode.id : ''}`; // v9.17.1：換容器（進出室內）也要重套縮放
       if (_lastCharPos === posKey && !gameState.isCommuting) return;

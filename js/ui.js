@@ -1529,7 +1529,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.22.1) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.25.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1746,9 +1746,9 @@
       if (_playerSleepEl) _playerSleepEl.style.display = "none";
       elCharWrap.classList.remove("in-bed");
       elCharWrap.classList.remove("lying");
-      elCharWrap.classList.toggle("seated", currentState === 'eating' || currentState === 'dinner' || (currentLoc === 'home' && currentState === 'studying' && gameState.deskStudy)); // v9.14.4 書桌前也坐
+      elCharWrap.classList.toggle("seated", (currentState === 'eating' || currentState === 'dinner' || (currentLoc === 'home' && currentState === 'studying' && gameState.deskStudy)) && !gameState._playerWalking); // v9.24 走路中不坐
       if (elStudentSprite) { // v9.10.4 坐姿：裁掉 viewBox 下段 (鞋子區) + 高度等比 + 整隻下沉讓腰進吧台後
-        const _sp2 = currentState === 'eating' || currentState === 'dinner'; // v9.13
+        const _sp2 = (currentState === 'eating' || currentState === 'dinner') && !gameState._playerWalking; // v9.24 走路中維持站姿
         const _vb2 = _sp2 ? '0 0 16 21' : '0 0 16 25';
         if (elStudentSprite.getAttribute('viewBox') !== _vb2) elStudentSprite.setAttribute('viewBox', _vb2);
         const _sh2 = _sp2 ? '42px' : '50px';
@@ -1779,6 +1779,15 @@
           updateCharacterPositionAndScale(destCoords.x, destCoords.y, isFlipped);
         }
       }
+
+      // v9.24 主角對話泡泡：在室內時移到場景層最上方（不被家具/講台蓋住），比照 NPC 泡泡
+      { const bub = elCharBubble, par = elCharWrap.parentNode;
+        if (bub && par) {
+          const inRooms = /-rooms$/.test(par.id || '');
+          if (inRooms && bub.parentNode !== par) { par.appendChild(bub); bub.classList.add('in-rooms'); }
+          else if (!inRooms && bub.parentNode !== elCharWrap) { elCharWrap.appendChild(bub); bub.classList.remove('in-rooms'); bub.style.left = ''; bub.style.top = ''; bub.dataset.pk = ''; }
+          if (inRooms) { const key = Math.round(gameState.currentX || 0) + '|' + Math.round(gameState.currentY || 0); if (bub.dataset.pk !== key) { bub.dataset.pk = key; bub.style.left = Math.round(gameState.currentX || 0) + 'px'; bub.style.top = Math.round((gameState.currentY || 0) - 132) + 'px'; } }
+        } }
 
       // 4. 根據狀態變更 class 與 NPC 的顯示
       switch (currentState) {
@@ -2719,18 +2728,30 @@
     function uiCovered() { return !!document.querySelector('.drawer-panel.open') || !!document.querySelector('.overlay.active'); }
     function spawnComboBubble() {
       const wrap = document.getElementById('char-wrap');
-      if (!wrap || wrap.querySelector('.combo-bubble')) return;
+      if (!wrap || document.querySelector('.combo-bubble')) return;
       const keys = Object.keys(COMBO_SUBJECT_CHARS);
       const sub = keys[Math.floor(Math.random() * keys.length)];
       const el = document.createElement('button');
       el.className = 'combo-bubble';
       el.textContent = COMBO_SUBJECT_CHARS[sub];
       el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#ffd32a';
-      el.style.left = (-30 + Math.random() * 62) + 'px';
-      el.style.top = (-52 + Math.random() * 22) + 'px';
+      // v9.25 使用者指定：泡泡出現在建築「框架內」的隨機位置——大、好點、不被家具擋、也不會疊到老師
+      const frameIds = { school: 'school-stage', store: 'store-stage', restaurant: 'rest-stage', home: 'home-stage', library: 'landmark-library' };
+      const frame = document.getElementById(frameIds[currentLoc] || '') || wrap;
+      if (frame === wrap) {
+        const sprEl = document.getElementById('student-sprite') || wrap;
+        el.style.left = ((sprEl.offsetLeft || 0) + 24 + Math.random() * 12) + 'px';
+        el.style.top = ((sprEl.offsetTop || 0) - 34 + Math.random() * 10) + 'px';
+      } else {
+        el.classList.add('in-frame');
+        el.style.left = (10 + Math.random() * 76) + '%';
+        el.style.top = (16 + Math.random() * 50) + '%';
+      }
       el.setAttribute('aria-label', '知識泡泡');
       el.onclick = () => popComboBubble(el);
-      wrap.appendChild(el);
+      el.addEventListener('pointerdown', e => e.stopPropagation());
+      el.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+      frame.appendChild(el);
       setTimeout(() => {
         if (el.isConnected && !el.dataset.done) {
           el.remove();
@@ -2765,6 +2786,7 @@
       try {
         if (typeof gameState === 'undefined' || !gameState) return;
         if (currentState !== 'studying') return;
+        if (gameState._playerWalking) return; // v9.24 走路中不冒泡泡（坐定位才開始）
         if (currentLoc !== 'school' && currentLoc !== 'library' && !(currentLoc === 'home' && gameState.deskStudy)) return;
         if (uiCovered()) return;
         if (Math.random() < 0.45) return;
@@ -2942,6 +2964,10 @@
       if (hl) { if (myRank >= 0 && myRank < 3) { hl.style.display = ''; hl.setAttribute('y', String(50 + myRank * 12)); } else hl.style.display = 'none'; }
       const you = document.getElementById('board-you');
       if (you) you.textContent = myRank >= 3 ? `你：第 ${myRank + 1} 名 ${Math.floor(rows[myRank].prog)}%` : '';
+      // v9.24 教室內的榮譽榜也要有人名（之前只有名次獎牌、沒有名字）
+      [['board-r1i', 0, '🥇'], ['board-r2i', 1, '🥈'], ['board-r3i', 2, '🥉']].forEach(([id, i, medal]) => { const el = document.getElementById(id); if (el && rows[i]) el.textContent = `${medal} ${rows[i].name} ${Math.floor(rows[i].prog)}%`; });
+      const b4 = document.getElementById('board-4i');
+      if (b4) { if (myRank >= 3) b4.textContent = `⭐ 你 第${myRank + 1}名 ${Math.floor(rows[myRank].prog)}%`; else if (rows[3]) b4.textContent = `⭐ ${rows[3].name} ${Math.floor(rows[3].prog)}%`; }
     }
     function renderRivals() {
       renderBoard();

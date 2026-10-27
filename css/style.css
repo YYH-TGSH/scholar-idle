@@ -3537,7 +3537,8 @@ input, select, textarea { border-radius: 14px !important; }
   position: absolute; width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-weight: 900; font-size: 0.82rem; color: #fff;
-  cursor: pointer; z-index: 46; pointer-events: auto;
+  cursor: pointer; z-index: 46; pointer-events: auto; width: 36px; height: 36px;
+.combo-bubble.in-frame { position: absolute; width: 44px; height: 44px; font-size: 1.05rem; z-index: 80; transform: translate(-50%, -50%); animation: bubble-in 0.22s ease-out; }
   border: 2px solid rgba(255,255,255,0.9);
   box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 -3px 6px rgba(0,0,0,0.18), inset 0 3px 5px rgba(255,255,255,0.45);
   animation: bubble-in 0.22s ease-out, bubble-bob 0.9s ease-in-out infinite alternate;
@@ -3665,7 +3666,7 @@ input, select, textarea { border-radius: 14px !important; }
 .npc-sprite { display: block; margin: 0 auto; }
 .npc-walking .npc-flip { animation: npc-bob 0.55s ease-in-out infinite alternate; }
 .npc-zzz-tag { position: absolute; top: -4px; right: 0; font-size: 13px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
-#sky-night { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(6,10,38,0.62), rgba(6,10,38,0.46)); clip-path: polygon(evenodd, 0px 0px, 1920px 0px, 1920px 540px, 0px 540px, 0px 0px, 353px 28px, 353px 207px, 617px 207px, 617px 28px, 353px 28px); } /* v9.22.1 超商位置挖空：黑色濾鏡蓋不到超商，整間店等於在濾鏡上方用原色亮著（不疊補光濾鏡） */
+#sky-night { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(6,10,38,0.62), rgba(6,10,38,0.46)); } /* v9.23 挖空改由 updateSkyLighting 動態寫入 clip-path：開著的建築不被夜色蓋住、休息就變黑 */
 #sky-warm { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
 #street-glows { position: absolute; left: 0; top: 0; width: 1920px; height: 540px; z-index: 40; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: radial-gradient(circle 110px at 300px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%), radial-gradient(circle 110px at 750px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%), radial-gradient(circle 110px at 1200px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%), radial-gradient(circle 110px at 1650px 300px, rgba(255,200,110,0.36), rgba(255,200,110,0) 70%); }
 #landmark-store .island-platform-top { transition: filter 0.9s linear; }
@@ -3675,17 +3676,17 @@ input, select, textarea { border-radius: 14px !important; }
 /* ===== v9.17 超商大場景（比照住家 stage） ===== */
 #store-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3ead9; cursor:grab; touch-action:none; }
 #store-stage:active { cursor:grabbing; }
-#store-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
+#store-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 .store-chip { position:absolute; z-index:980; background:#fff8e1; border:2px solid #182042; border-radius:999px; padding:3px 12px; font-size:12px; font-weight:900; color:#8d5a2c; box-shadow:0 2px 0 rgba(0,0,0,0.25); cursor:pointer; white-space:nowrap; }
 /* ===== v9.18 餐廳大場景（比照住家/超商 stage） ===== */
 #rest-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#a5713d; cursor:grab; touch-action:none; }
 #rest-stage:active { cursor:grabbing; }
-#rest-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
+#rest-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #rest-rooms #teppan-fx { left:246px; top:50px; width:110px; height:46px; z-index:940; }
 /* ===== v9.21 學校大場景（比照超商/餐廳 stage） ===== */
 #school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ecd2; cursor:grab; touch-action:none; }
 #school-stage:active { cursor:grabbing; }
-#school-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
+#school-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 /* ===== v9.19 桌上餐點＋超商拿貨互動 ===== */
 .dish-plate { position:absolute; width:20px; height:20px; font-size:15px; line-height:20px; text-align:center; background:rgba(255,255,255,0.92); border:1.5px solid #182042; border-radius:50%; pointer-events:none; }
 .pick-pop { position:absolute; z-index:990; font-size:15px; pointer-events:none; animation: pick-float 1.9s ease-out forwards; }
@@ -3786,6 +3787,7 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* v9.12.11 用餐標示：比照 NPC 只留餐點膠囊（同一列、同圖示），文字泡泡用餐時隱藏，不再飄在膠囊上方 */
 #char-wrap.seated #char-bubble { display: none !important; }
+#char-bubble.in-rooms { position: absolute; z-index: 996; transform: translateX(-50%); pointer-events: none; }
 
 /* v9.13 晚餐同桌：熱氣 */
 .steam-wisp { animation: steamRise 2.4s ease-in-out infinite; }
@@ -3795,7 +3797,7 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* ===== v9.14 捲動式室內 ===== */
 #home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#1b2340; }
-#home-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .8s cubic-bezier(.25,.8,.25,1); }
+#home-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 .sleep-form { position:absolute; z-index:150; pointer-events:none; }
 
 /* v9.14.3：升級飾品全島統一在框框上方；室內可拖曳（滑鼠+觸控） */

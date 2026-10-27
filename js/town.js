@@ -582,7 +582,7 @@
       { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#2c3e50' }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
       { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#2c3e50' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
       { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#2c3e50' }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 575, y: 148 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
       { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#2c3e50' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
       { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#2c3e50' }, work: 'library', spot: { x: 1330, y: 150 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
       { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#2c3e50' }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
@@ -742,7 +742,11 @@
       restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 795, inDoor: { x: 610, y: 278 } },
       school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 1105, inDoor: { x: 575, y: 278 } }
     };
-    function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; return npc.insideLoc === loc ? [pt] : [{ x: c.worldDoorX, y: NPC_STREET_Y }, c.doorIn, pt]; }
+    function npcExitPrefix(npc) { // v9.24 在室內的人要先走正門出去，路徑才不會在別間的座標系裡亂走（繞去隱藏的邊邊）
+      if (npc.insideLoc && INTERIORS[npc.insideLoc]) { const c = INTERIORS[npc.insideLoc]; return [c.inDoor, c.doorOut, { x: c.worldDoorX, y: NPC_STREET_Y }]; }
+      return [];
+    }
+    function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; if (npc.insideLoc === loc) return [pt]; return [...npcExitPrefix(npc), { x: c.worldDoorX, y: NPC_STREET_Y }, c.doorIn, pt]; }
     function storePathTo(npc, pt) { return interiorPathTo(npc, 'store', pt); }
     function npcDef(key) { return NPC_DEFS.find(d => d.key === key); }
     function npcIndex(key) { return NPC_DEFS.findIndex(d => d.key === key); }
@@ -853,16 +857,17 @@
         return dest;
       }
       if (dest === 'away') {
-        npc.path = [{ x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }];
+        const fromX = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? INTERIORS[npc.insideLoc].worldDoorX : npc.x;
+        npc.path = [...npcExitPrefix(npc), { x: fromX < 960 ? -80 : 2000, y: NPC_STREET_Y }];
         npc.arrive = 'away';
       } else if (dest === 'park') {
         const px = 200 + Math.floor(Math.random() * 1550);
-        npc.path = [{ x: px, y: NPC_STREET_Y }, { x: px, y: NPC_PARK_Y }];
+        npc.path = [...npcExitPrefix(npc), { x: px, y: NPC_STREET_Y }, { x: px, y: NPC_PARK_Y }];
         npc.arrive = 'idle';
       } else {
         const seat = npcRequestSeat(npc, dest);
         if (seat) {
-          npc.path = INTERIORS[dest] ? interiorPathTo(npc, dest, seat) : [{ x: NPC_DOOR_X[dest], y: NPC_STREET_Y }, seat];
+          npc.path = INTERIORS[dest] ? interiorPathTo(npc, dest, seat) : [...npcExitPrefix(npc), { x: NPC_DOOR_X[dest], y: NPC_STREET_Y }, seat];
           npc.arrive = 'seat';
         } else {
           npcEnqueue(npc, dest);
@@ -879,11 +884,11 @@
     function npcPickTarget(npc) {
       const def = npcDef(npc.key);
       const hour = gameState.hour || 0;
-      if (npc._lunchForce === gameState.totalGameDays && hour === 12) { // v9.12.7 午餐強制食堂
+      if (npc._lunchForce === gameState.totalGameDays && (hour === 11 || hour === 12)) { // v9.24 午餐強制食堂（11:50 起）
         npc._lunchForce = null;
         npc.dest = 'restaurant';
         const lseat = npcRequestSeat(npc, 'restaurant');
-        if (lseat) { npc.path = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? [INTERIORS[npc.insideLoc].inDoor, INTERIORS[npc.insideLoc].doorOut, { x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, lseat] : [{ x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
+        if (lseat) { npc.path = [...npcExitPrefix(npc), { x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, INTERIORS.restaurant.doorIn, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
         else npcEnqueue(npc, 'restaurant');
         return 'restaurant';
       }
@@ -923,7 +928,7 @@
         else dest = ['park', 'park', 'restaurant', 'store', 'library', 'gym'][Math.floor(Math.random() * 6)]; // v9.15 下班先去晃
         if (dest === 'work') {
           npc.dest = def.work;
-          npc.path = INTERIORS[def.work] ? interiorPathTo(npc, def.work, def.spot) : [{ x: NPC_DOOR_X[def.work], y: NPC_STREET_Y }, def.spot];
+          npc.path = INTERIORS[def.work] ? interiorPathTo(npc, def.work, def.spot) : [...npcExitPrefix(npc), { x: NPC_DOOR_X[def.work], y: NPC_STREET_Y }, def.spot];
           npc.arrive = 'seat'; npc.state = 'path'; return dest;
         }
         return npcGoToDest(npc, dest);
@@ -937,7 +942,9 @@
       } else {
         if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away';
         else {
-          const pool = [...def.spots, 'park', 'park'];
+          let pool = [...def.spots, 'park', 'park'];
+          if (!schoolPhaseNow()) pool = pool.filter(d => d !== 'school'); // v9.23.1 放學/週末學校不開放，不能再進去坐
+          if (!pool.length) pool = ['park'];
           dest = pool[Math.floor(Math.random() * pool.length)];
         }
       }
@@ -1040,7 +1047,7 @@
       setTimeout(() => bubble.remove(), 2600);
     }
     // ================= v9.13 住家精緻化：晚餐同桌 =================
-    const DINNER_SEATS = { dad: { x: 626, y: 192 }, mom: { x: 685, y: 192 } }; // v9.14 室內餐廳
+    const DINNER_SEATS = { dad: { x: 624, y: 162 }, mom: { x: 685, y: 162 } }; // v9.23.1 坐進桌北側的椅子（椅心 624/685）
     const DINNER_SAY = {
       mom: ['多吃點，看你瘦的。', '今天在學校好嗎？', '這道是你最愛吃的。', '慢點吃，鍋裡還有。'],
       dad: ['吃慢點，沒人跟你搶。', '功課有不懂的，晚上問我。', '最近考試順利嗎？', '嗯，好吃，你媽手藝越來越好了。']
@@ -1091,10 +1098,6 @@
       if (set) set.style.display = phase === 'dinner' ? 'block' : 'none';
       const steam = document.getElementById('home-dinner-steam');
       if (steam) steam.style.display = phase === 'prep' ? 'block' : 'none';
-      const glow = document.getElementById('lamp-glow');
-      if (glow) { const h = gameState.hour || 0; const on = (h >= 17 && h < 22) ? '0.9' : '0'; if (glow.style.opacity !== on) glow.style.opacity = on; }
-      const glow2 = document.getElementById('lamp-glow2');
-      if (glow2) { const h = gameState.hour || 0; const on2 = (h >= 17 && h < 22) ? '0.85' : '0'; if (glow2.style.opacity !== on2) glow2.style.opacity = on2; }
     }
 
     // ================= v9.14 捲動式室內 =================
@@ -1164,7 +1167,6 @@
   <rect x="686" y="106" width="16" height="8" fill="#263238"/>
   <line x1="616" y1="112" x2="616" y2="196" stroke="#546e7a" stroke-width="3"/>
   <path d="M600,88 L632,88 L624,112 L608,112 Z" fill="#ffd54f" stroke="#182042" stroke-width="1.8"/>
-  <ellipse id="lamp-glow2" cx="655" cy="128" rx="135" ry="60" fill="#ffd76a" opacity="0" style="transition:opacity 1s;"/>
   <line x1="655" y1="18" x2="655" y2="40" stroke="#182042" stroke-width="2.5"/>
   <path d="M632,58 L678,58 L664,40 L646,40 Z" fill="#ff8a65" stroke="#182042" stroke-width="1.8"/>
   <rect x="430" y="228" width="300" height="54" rx="12" fill="#ffcc80" opacity="0.5"/>
@@ -1283,8 +1285,17 @@
     }
     let _homePanManual = null; // v9.14.2：滑鼠拖曳的手動捲動位置（null=自動跟隨）
     let _homeManualUntil = 0; // v9.14.4：手動操控後 30 秒不自動回追
-    let _homePanCur = 0;
+    let _homePanCur = 0; let _homePanT = 0;
     let _homeWasIn = false;
+    function smoothPanStep(cur, target, focusX, visible, dtMs) { // v9.25 室內鏡頭：死區（小晃動不拉）＋限速追趕（不橡皮筋）
+      if (typeof cur !== 'number' || isNaN(cur)) return target;
+      if (Math.abs(target - cur) > visible) return target; // 剛進場差距大，直接到位
+      if ((dtMs || 0) > 350) return target; // 久未更新（切換分頁回來/場景切換）直接到位，不慢慢滑
+      const center = cur + visible / 2;
+      if (Math.abs(focusX - center) < visible * 0.16) return cur;
+      const maxStep = 340 * Math.min(0.1, Math.max(0.001, (dtMs || 16) / 1000));
+      return cur + Math.max(-maxStep, Math.min(maxStep, target - cur));
+    }
     function applyHomePan(pan, sc) {
       const rooms = document.getElementById('home-rooms');
       if (!rooms) return;
@@ -1306,7 +1317,8 @@
       let pan;
       if (visible >= 1150) pan = (1150 - visible) / 2;
       else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
-      applyHomePan(pan, sc);
+      const _nowHome = performance.now(); const _dtHome = _homePanT ? (_nowHome - _homePanT) : 16; _homePanT = _nowHome;
+      applyHomePan(smoothPanStep(_homePanCur, pan, focusX, visible, _dtHome), sc);
     }
     function updateHomeStage() {
       ensureHomeInterior();
@@ -1459,7 +1471,7 @@
       shopQueueTick(); // v9.20 超商結帳隊伍推進
       npcs.forEach(npc => {
         const def = npcDef(npc.key);
-        const step = def.speed * progressMinutes;
+        const step = def.speed * 1.5 * progressMinutes; // v9.24 走路加速
         if (npc.state === 'path') {
           if (!npc.path[0]) { npcPickTarget(npc); }
           else {
@@ -1537,12 +1549,27 @@
           npc.dwell -= progressMinutes;
           if (npc.dwell <= 0) {
             const ph = schoolPhaseNow();
-            if (ph === 'break') { const sp2 = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)]; npc.path = [{ x: sp2.x, y: sp2.y }]; npc.arrive = sp2.arrive; npc.breakMode = sp2.mode; npc.state = 'path'; }
+            if (ph === 'break') { const bi2 = freeBreakSpotIdx(); if (bi2 >= 0) { const sp2 = BREAK_SPOTS[bi2]; npc._breakSpotIdx = bi2; npc.path = [{ x: sp2.x + Math.round(Math.random() * 10 - 5), y: sp2.y }]; npc.arrive = sp2.arrive; npc.breakMode = sp2.mode; npc.state = 'path'; } else npc.dwell = 2; }
             else if (ph === 'class') npc.dwell = 2; // 等鐘聲監看器送回座位
             else { npc.breakHome = null; npcExitPath(npc); } // v9.15：放學/週末了，不再等鐘聲，自己離校（修高速跳過鐘聲轉換卡死）
           }
         } else if (npc.state === 'seated' || npc.state === 'idle') {
           if (npc.breakMode && npc.dest === 'school') tickBreakAmbiance(npc, progressMinutes); // v9.22 下課氛圍：聊天/看書/休息/喝茶/列印
+          if (npc.key === 'teacher' && npc.dest === 'school' && npc.insideLoc === 'school' && !npc.breakHome && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'class') { // v9.25 老師巡堂：上課時定時走下講台巡視
+            npc.roamCd = (npc.roamCd == null ? 2 + Math.random() * 3 : npc.roamCd) - progressMinutes;
+            if (npc.roamCd <= 0) {
+              npc.roamCd = 3.5 + Math.random() * 3.5;
+              const post = npcDef('teacher').spot;
+              const atPost = Math.hypot(npc.x - post.x, npc.y - post.y) < 6;
+              if (npc.state === 'seated' && atPost) {
+                const pt = TEACHER_ROAM_POINTS[Math.floor(Math.random() * TEACHER_ROAM_POINTS.length)];
+                npc.path = [{ x: pt.x, y: pt.y }]; npc.arrive = 'idle'; npc.state = 'path'; npc._roaming = true;
+                if (Math.random() < 0.4) npcSay(npc, TEACHER_ROAM_LINES[Math.floor(Math.random() * TEACHER_ROAM_LINES.length)]);
+              } else if (npc._roaming && npc.state === 'idle') {
+                npc.path = [{ x: post.x, y: post.y }]; npc.arrive = 'post'; npc.state = 'path'; npc._roaming = false;
+              }
+            }
+          }
           if (npc.state === 'seated' && npc.seatIdx != null && SEAT_MAP[npc.dest] && SEAT_MAP[npc.dest][npc.seatIdx] && !SEAT_MAP[npc.dest][npc.seatIdx].who) {
             SEAT_MAP[npc.dest][npc.seatIdx].who = npc.key;
           }
@@ -1693,6 +1720,29 @@
         }
       });
     }
+    // v9.23 每間建築的夜間挖空：平台矩形（CDP 實測 map 座標）＋營業時間（跟遊戲 locks 同步）
+    const SKY_HOLES = { home: [40, 25, 278, 179], store: [350, 25, 264, 179], restaurant: [660, 25, 264, 179], school: [970, 25, 264, 179], library: [1280, 25, 264, 179], gym: [1590, 25, 278, 179] };
+    function skyOpenSig() {
+      const h = (gameState.hour || 0) + (gameState.minute || 0) / 60;
+      const dow = gameState.dayOfWeek || 1;
+      const weekday = dow >= 1 && dow <= 5;
+      let sig = '';
+      if (h >= 6 && h < 23) sig += 'home,'; // 住家 06–23 有人醒著亮著，23 後全家睡了變暗
+      sig += 'store,'; // 24H 超商永遠亮
+      if (h >= 7 && h < 22) sig += 'restaurant,'; // 食堂 07–22
+      if (weekday && h >= 8 && h < 16) sig += 'school,'; // 學校 平日 08–16
+      if (h >= 8 && h < 21) sig += 'library,'; // 圖書館 08–21
+      if (h >= 6 && h < 22) sig += 'gym,'; // 操場夜間照明 06–22
+      return sig;
+    }
+    function skyNightClip(sig) {
+      let pts = '0px 0px, 1920px 0px, 1920px 540px, 0px 540px, 0px 0px';
+      sig.split(',').forEach(k => {
+        const r = SKY_HOLES[k]; if (!r) return;
+        pts += ', ' + r[0] + 'px ' + r[1] + 'px, ' + r[0] + 'px ' + (r[1] + r[3]) + 'px, ' + (r[0] + r[2]) + 'px ' + (r[1] + r[3]) + 'px, ' + (r[0] + r[2]) + 'px ' + r[1] + 'px, ' + r[0] + 'px ' + r[1] + 'px';
+      });
+      return 'polygon(evenodd, ' + pts + ')';
+    }
     let _skyEls = null, _skyLastKey = '';
     function updateSkyLighting() {
       if (!_skyEls) {
@@ -1708,9 +1758,11 @@
       const hf = (gameState.hour || 0) + (gameState.minute || 0) / 60;
       const nf = nightFactorAt(hf);
       const wf = warmFactorAt(hf);
-      const key = Math.round(nf * 40) + '|' + Math.round(wf * 40);
+      const openSig = skyOpenSig();
+      const key = Math.round(nf * 40) + '|' + Math.round(wf * 40) + '|' + openSig;
       if (key === _skyLastKey) return; // v9.10.4: 值沒變就不寫 style (減少每 tick 的版面重算，鏡頭更順)
       _skyLastKey = key;
+      _skyEls.sn.style.clipPath = skyNightClip(openSig); // v9.23 開著的建築挖空（不被夜色蓋）、休息的變黑
       const r3 = v => String(Math.round(v * 1000) / 1000);
       _skyEls.sn.style.opacity = r3(nf * 0.9);
       _skyEls.sw.style.opacity = r3(wf);
@@ -1833,7 +1885,7 @@
     }
     let _storePanManual = null;
     let _storeManualUntil = 0;
-    let _storePanCur = 0;
+    let _storePanCur = 0; let _storePanT = 0;
     let _storeWasIn = false;
     function applyStorePan(pan, sc) {
       const rooms = document.getElementById('store-rooms');
@@ -1856,7 +1908,8 @@
       let pan;
       if (visible >= 1150) pan = (1150 - visible) / 2;
       else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
-      applyStorePan(pan, sc);
+      const _nowStore = performance.now(); const _dtStore = _storePanT ? (_nowStore - _storePanT) : 16; _storePanT = _nowStore;
+      applyStorePan(smoothPanStep(_storePanCur, pan, focusX, visible, _dtStore), sc);
     }
     function updateStoreStage() {
       ensureStoreInterior();
@@ -1946,10 +1999,10 @@
   <g>
     <rect x="866" y="18" width="256" height="66" fill="#c9a06b" stroke="#182042" stroke-width="2"/>
     <text x="878" y="38" font-size="12" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🏆 榮譽榜</text>
-    <text x="878" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥇 第一名</text>
-    <text x="972" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥈 第二名</text>
-    <text x="878" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥉 第三名</text>
-    <text x="972" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">⭐ 進步獎</text>
+    <text id="board-r1i" x="878" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥇</text>
+    <text id="board-r2i" x="972" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥈</text>
+    <text id="board-r3i" x="878" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥉</text>
+    <text id="board-4i" x="972" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">⭐</text>
   </g>
   <ellipse cx="1000" cy="228" rx="128" ry="46" fill="#b2dfdb" opacity="0.55"/>
   <ellipse cx="1000" cy="228" rx="104" ry="36" fill="none" stroke="#80cbc4" stroke-width="2"/>
@@ -1961,14 +2014,14 @@
   <ellipse cx="1065" cy="250" rx="30" ry="13" fill="#90caf9" stroke="#182042" stroke-width="1.6"/>
   <rect x="1108" y="196" width="16" height="12" fill="#8d5a2c"/><circle cx="1116" cy="186" r="10" fill="#66bb6a"/><circle cx="1108" cy="192" r="7" fill="#81c784"/>
   <line x1="884" y1="196" x2="884" y2="234" stroke="#182042" stroke-width="2.5"/><path d="M876 196 L892 196 L888 182 L880 182 Z" fill="#ffd93b" stroke="#182042" stroke-width="1.5"/>
-  <rect x="524" y="108" width="102" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
+  <rect x="524" y="94" width="102" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
   ${_deskBack.join('')}
   <rect x="515" y="272" width="120" height="28" fill="#8d5a2c"/>
   <text x="553" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
 </svg>
 <svg id="school-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="524" y="116" width="102" height="30" fill="#795548" stroke="#182042" stroke-width="2"/>
-  <line x1="524" y1="116" x2="626" y2="116" stroke="#a1887f" stroke-width="2"/>
+  <rect x="524" y="102" width="102" height="20" fill="#795548" stroke="#182042" stroke-width="2"/>
+  <line x1="524" y1="102" x2="626" y2="102" stroke="#a1887f" stroke-width="2"/>
   <rect x="104" y="124" width="108" height="20" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
   ${_deskFront.join('')}
 </svg>`;
@@ -2020,7 +2073,7 @@
     }
     let _schoolPanManual = null;
     let _schoolManualUntil = 0;
-    let _schoolPanCur = 0;
+    let _schoolPanCur = 0; let _schoolPanT = 0;
     let _schoolWasIn = false;
     function applySchoolPan(pan, sc) {
       const rooms = document.getElementById('school-rooms');
@@ -2043,7 +2096,8 @@
       let pan;
       if (visible >= 1150) pan = (1150 - visible) / 2;
       else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
-      applySchoolPan(pan, sc);
+      const _nowSchool = performance.now(); const _dtSchool = _schoolPanT ? (_nowSchool - _schoolPanT) : 16; _schoolPanT = _nowSchool;
+      applySchoolPan(smoothPanStep(_schoolPanCur, pan, focusX, visible, _dtSchool), sc);
     }
     function updateSchoolStage() {
       ensureSchoolInterior();
@@ -2185,7 +2239,7 @@
     }
     let _restPanManual = null;
     let _restManualUntil = 0;
-    let _restPanCur = 0;
+    let _restPanCur = 0; let _restPanT = 0;
     let _restWasIn = false;
     function applyRestPan(pan, sc) {
       const rooms = document.getElementById('rest-rooms');
@@ -2208,7 +2262,8 @@
       let pan;
       if (visible >= 1150) pan = (1150 - visible) / 2;
       else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
-      applyRestPan(pan, sc);
+      const _nowRest = performance.now(); const _dtRest = _restPanT ? (_nowRest - _restPanT) : 16; _restPanT = _nowRest;
+      applyRestPan(smoothPanStep(_restPanCur, pan, focusX, visible, _dtRest), sc);
     }
     function updateRestStage() {
       ensureRestInterior();
@@ -2268,6 +2323,16 @@
     }
     function checkSchoolBell() {
       const phase = schoolPhaseNow();
+      if (!phase) { // v9.23.1 放學後學校淨空：在校內或正要進去的學生（非職員/家長）一律離校
+        (gameState.npcs || []).forEach(n => {
+          const d = npcDef(n.key);
+          if (!d || d.kind === 'staff' || d.kind === 'parent') return;
+          if (n.dest !== 'school' && n.insideLoc !== 'school') return;
+          n.breakMode = null;
+          if (n.insideLoc === 'school' || n.inside) npcExitPath(n); else npcPickTarget(n);
+        });
+      }
+      if (gameState._schoolPrevPhase === 'class' && phase === 'break') { startBreakMoves(); rollPlayerBreak(); }
       const atSchool = typeof currentLoc !== 'undefined' && currentLoc === 'school' && !gameState.isCommuting;
       if (phase === 'break') {
         if (atSchool) {
@@ -2300,7 +2365,7 @@
         gameState._lunchStamp = gameState.totalGameDays;
         gameState._playerBreak = null; // v9.22 午餐出發，主角下課據點作廢
         (gameState.npcs || []).forEach(n => {
-          if (n.dest === 'school' && (n.kind === 'friend' || n.kind === 'rival' || n.key === 'teacher') && (n.state === 'seated' || n.state === 'idle' || (n.state === 'path' && n.breakHome))) sendToLunch(n);
+          if ((n.dest === 'school' || n.insideLoc === 'school') && (n.kind === 'friend' || n.kind === 'rival' || n.key === 'teacher') && (n.state === 'seated' || n.state === 'idle' || n.state === 'path' || n.state === 'queued')) sendToLunch(n);
         });
       }
       _schoolPrevPhase = phase;
@@ -2331,6 +2396,8 @@
       layer.appendChild(pop);
       setTimeout(() => { if (pop.parentNode) pop.parentNode.removeChild(pop); }, 2000);
     }
+    const TEACHER_ROAM_POINTS = [ { x: 575, y: 168 }, { x: 510, y: 216 }, { x: 672, y: 216 }, { x: 368, y: 218 }, { x: 790, y: 218 } ]; // v9.25 老師巡堂點（教室前方＋走道）
+    const TEACHER_ROAM_LINES = ['都坐好，老師看一下', '嗯，這組很認真', '安靜一點點就好', '有問題舉手問老師', '寫完的先檢查一遍'];
     function tickBreakAmbiance(npc, progressMinutes) {
       if (typeof schoolPhaseNow !== 'function' || schoolPhaseNow() !== 'break') return;
       npc.breakActCd = (npc.breakActCd == null ? 1 + Math.random() * 3 : npc.breakActCd) - progressMinutes;
@@ -2347,16 +2414,25 @@
       else if (mode === 'tea') spawnNpcPop(npc, '☕');
       else if (mode === 'print') spawnNpcPop(npc, '📄');
     }
+    function freeBreakSpotIdx() { // v9.24 下課據點空位：別人（含主角）占著的不能再選，大家四散不疊在一起
+      const taken = new Set();
+      (gameState.npcs || []).forEach(n => { if (n.breakHome && n._breakSpotIdx != null) taken.add(n._breakSpotIdx); });
+      if (gameState._playerBreak && gameState._playerBreakSpotIdx != null) taken.add(gameState._playerBreakSpotIdx);
+      const free = [];
+      BREAK_SPOTS.forEach((s, i) => { if (!taken.has(i)) free.push(i); });
+      return free.length ? free[Math.floor(Math.random() * free.length)] : -1;
+    }
     function rollPlayerBreak(atSchool) {
       gameState._playerBreak = null;
       if (!atSchool) return;
       if (Math.random() > 0.6) return; // 40% 留在座位上休息
-      const spot = BREAK_SPOTS[Math.floor(Math.random() * BREAK_SPOTS.length)];
-      gameState._playerBreak = { x: spot.x, y: spot.y, mode: spot.mode };
+      const bi = freeBreakSpotIdx();
+      if (bi < 0) return; // 閱讀角滿了就留在座位
+      const bs = BREAK_SPOTS[bi];
+      gameState._playerBreakSpotIdx = bi;
+      gameState._playerBreak = { x: bs.x + Math.round(Math.random() * 10 - 5), y: bs.y, mode: bs.mode };
     }
     function startBreakMoves() {
-      const cornerPool = BREAK_SPOTS.slice();
-      for (let i = cornerPool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = cornerPool[i]; cornerPool[i] = cornerPool[j]; cornerPool[j] = t; }
       (gameState.npcs || []).forEach(n => {
         if (n.dest !== 'school' || n.state !== 'seated') return;
         const isTeacher = n.key === 'teacher';
@@ -2369,8 +2445,11 @@
           return;
         }
         if (Math.random() > 0.7) return; // 70% 同學起身去閱讀角，30% 留在座位
-        const spot = cornerPool.pop();
-        if (!spot) return; // 閱讀角滿了就留在座位
+        const bi = freeBreakSpotIdx();
+        if (bi < 0) return; // 閱讀角滿了就留在座位
+        const bs = BREAK_SPOTS[bi];
+        const spot = { x: bs.x + Math.round(Math.random() * 10 - 5), y: bs.y, mode: bs.mode, arrive: bs.arrive };
+        n._breakSpotIdx = bi;
         n.breakHome = { x: n.x, y: n.y, arrive: 'seat' };
         n.breakMode = spot.mode; n.breakActCd = 1 + Math.random() * 3;
         n.path = [{ x: spot.x, y: spot.y }]; n.arrive = spot.arrive; n.state = 'path';
@@ -2380,12 +2459,18 @@
       if ((gameState.hour || 0) === 12) return; // 午休直接接著去食堂，不回座
       (gameState.npcs || []).forEach(n => {
         if (!n.breakHome) return;
-        n.path = [{ x: n.breakHome.x, y: n.breakHome.y }]; n.arrive = n.breakHome.arrive; n.state = 'path'; n.breakHome = null; n.breakMode = null;
+        n.path = [{ x: n.breakHome.x, y: n.breakHome.y }]; n.arrive = n.breakHome.arrive; n.state = 'path'; n.breakHome = null; n.breakMode = null; n._breakSpotIdx = null;
       });
     }
-    function sendToLunch(npc) {
-      npc.breakHome = null; npc.breakMode = null;
+    function sendToLunch(npc) { // v9.24 直接送去餐廳座位（舊版只送到街上再重選、又漏了餐廳正門，學生會在街上亂晃）
+      npc.breakHome = null; npc.breakMode = null; npc._breakSpotIdx = null;
       npc._lunchForce = gameState.totalGameDays;
+      npcFreeSeat(npc);
+      npc.dest = 'restaurant';
+      const lseat = npcRequestSeat(npc, 'restaurant');
+      if (lseat) { npc.path = [...npcExitPrefix(npc), { x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, INTERIORS.restaurant.doorIn, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
+      else npcEnqueue(npc, 'restaurant');
+      return;
       npcFreeSeat(npc);
       if (npc.insideLoc && INTERIORS[npc.insideLoc]) npc.path = [INTERIORS[npc.insideLoc].doorOut, { x: NPC_DOOR_X.school, y: NPC_STREET_Y }]; // v9.22 室內的人走教室正門出去
       else npc.path = [{ x: NPC_DOOR_X.school, y: NPC_DOOR_Y }, { x: NPC_DOOR_X.school, y: NPC_STREET_Y }];
