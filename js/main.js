@@ -86,7 +86,7 @@
     function buildCommutePath(fromLoc, toLoc) {
       const fromIdle = COORDS[fromLoc + '-idle'] || COORDS['home-idle'];
       const start = { x: gameState.currentX || fromIdle.x, y: gameState.currentY || fromIdle.y };
-      const end = (toLoc === 'home' || toLoc === 'store' || toLoc === 'restaurant' || toLoc === 'school' || toLoc === 'library') ? { x: DOOR_X[toLoc], y: 195 } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // v9.14/v9.17/v9.18：回家/進超商/進餐廳路徑只到門口，室內由 stage 接手；v9.25.1 補學校、v9.26 補圖書館
+      const end = (toLoc === 'home' || toLoc === 'store' || toLoc === 'restaurant' || toLoc === 'school' || toLoc === 'library' || toLoc === 'gym') ? { x: DOOR_X[toLoc], y: 195 } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // v9.14/v9.17/v9.18：回家/進超商/進餐廳路徑只到門口，室內由 stage 接手；v9.25.1 補學校、v9.26 補圖書館、v9.27 補操場（全棟到齊）
       const fx = DOOR_X[fromLoc] || start.x, tx = DOOR_X[toLoc] || end.x;
       const raw = [start, { x: fx, y: DOOR_OUT_Y }, { x: fx, y: WALK_Y }, { x: tx, y: WALK_Y }, { x: tx, y: DOOR_OUT_Y }, end];
       const pts = [raw[0]];
@@ -124,6 +124,7 @@
       if (currentLoc === 'restaurant' && targetLoc !== 'restaurant') { gameState.currentX = DOOR_X.restaurant; gameState.currentY = 195; } // v9.18：離開餐廳先回到門口再出發
       if (currentLoc === 'school' && targetLoc !== 'school') { gameState.currentX = DOOR_X.school; gameState.currentY = 195; } // v9.25.1：離開學校先回到校門口再出發（v9.21 室內化漏了這條——主角原本從教室座位座標瞬移，把教室座標當世界座標走出幽靈路徑）
       if (currentLoc === 'library' && targetLoc !== 'library') { gameState.currentX = DOOR_X.library; gameState.currentY = 195; } // v9.26：離開圖書館先回到門口再出發（新室內上線清單）
+      if (currentLoc === 'gym' && targetLoc !== 'gym') { gameState.currentX = DOOR_X.gym; gameState.currentY = 195; } // v9.27：離開操場先回到門口再出發（新室內上線清單）
       if (gameState.isCommuting) return; // v9.1：通勤中不改道——大腦每 tick 都在決策，沒這道防線會半路重建路徑、把小人拉回起點門口 (測試實測會半路改去別棟)
       const pts = buildCommutePath(currentLoc, targetLoc);
       const total = pathTotalLength(pts);
@@ -491,6 +492,7 @@
       if (typeof updateRestStage === 'function') updateRestStage(); // v9.18
       if (typeof updateSchoolStage === 'function') updateSchoolStage(); // v9.21
       if (typeof updateLibraryStage === 'function') updateLibraryStage(); // v9.26
+      if (typeof updateGymStage === 'function') updateGymStage(); // v9.27
 
       // 4. 行為決策
       decideLocationAndState();
@@ -1027,7 +1029,7 @@
       // v9.1 生活費：隨年級與小鎮繁榮成長，後期不再只進不出 (金額不大，是壓力來源之一)
       let totalLevels = 0; try { totalLevels = ['home', 'store', 'restaurant', 'school', 'library', 'gym'].reduce((s, k) => s + getLandmarkLevel(k), 0); } catch (e) { }
       const livingCost = 8 + gameState.gradeIndex * 8 + totalLevels * 2;
-      gameState.money += dailyBonus - livingCost;
+      gameState.money = Math.max(0, gameState.money + dailyBonus - livingCost); // v9.27 盤點 #3：每日結算不把錢扣成負數（生活費最多收到 0）
       gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + dailyBonus;
       updateUI();
       saveGameData(); // 立即存檔，確保零用錢累積
@@ -1258,7 +1260,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.26.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.27.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

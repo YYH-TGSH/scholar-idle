@@ -586,7 +586,7 @@
       { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#2c3e50' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
       { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#2c3e50' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
       { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#2c3e50' }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
-      { key: 'coach', kind: 'staff', name: '阿力', homeX: 1370, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#2c3e50' }, work: 'gym', spot: { x: 1610, y: 150 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
+      { key: 'coach', kind: 'staff', name: '阿力', homeX: 1370, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#2c3e50' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
       { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1690, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#2c3e50' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
       { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
       { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#2c3e50' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
@@ -636,7 +636,7 @@
       library: { activity: 'study', grid: [[240, 208], [350, 208], [460, 208], [740, 208], [850, 208], [960, 208]] }, // v9.26 圖書館室內閱讀桌
       restaurant: { activity: 'dine', grid: [[120, 184], [200, 184], [280, 184], [360, 184], [440, 184], [520, 184], [738, 190], [802, 190], [958, 238], [1022, 238]] }, // v9.19 吧台排（南移不被擋）＋圓桌座
       store: { activity: 'browse', grid: [[420, 205], [500, 205], [580, 205], [660, 205], [460, 255], [620, 255]] }, // v9.17 室內貨架走道
-      gym: { activity: 'sport', grid: [[1680, 100], [1730, 100], [1780, 100], [1830, 100], [1700, 140], [1800, 140]] },
+      gym: { activity: 'sport', grid: [[240, 208], [390, 150], [540, 208], [800, 190], [900, 215], [980, 170]] }, // v9.27 操場場景內（前三跑道側、後三球場側）
     };
     // v9.19 桌上餐點：開吃時把對應的菜放到桌上（不只頭上泡泡）
     const PICK_ITEMS = ['🍙', '🍞', '🥛', '🧃', '🍫', '🍩', '🍎', '🧴', '🥫', '🍮'];
@@ -739,11 +739,14 @@
     const SCHOOL_DOOR_OUT = { x: 575, y: 278, door: 'out', loc: 'school', wx: 1105, wy: 240 };
     const LIB_DOOR_IN = { x: 1415, y: 240, door: 'in', loc: 'library', ix: 575, iy: 278 }; // v9.26 圖書館門口瞬移
     const LIB_DOOR_OUT = { x: 575, y: 278, door: 'out', loc: 'library', wx: 1415, wy: 240 };
+    const GYM_DOOR_IN = { x: 1732, y: 240, door: 'in', loc: 'gym', ix: 575, iy: 278 }; // v9.27 操場門口瞬移
+    const GYM_DOOR_OUT = { x: 575, y: 278, door: 'out', loc: 'gym', wx: 1732, wy: 240 };
     const INTERIORS = { // v9.18 室內場景通用表
       store: { roomsId: 'store-rooms', doorIn: STORE_DOOR_IN, doorOut: STORE_DOOR_OUT, worldDoorX: 485, inDoor: { x: 565, y: 278 } },
       restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 795, inDoor: { x: 610, y: 278 } },
       school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 1105, inDoor: { x: 575, y: 278 } },
-      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 1415, inDoor: { x: 575, y: 278 } }
+      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 1415, inDoor: { x: 575, y: 278 } },
+      gym: { roomsId: 'gym-rooms', doorIn: GYM_DOOR_IN, doorOut: GYM_DOOR_OUT, worldDoorX: 1732, inDoor: { x: 575, y: 278 } }
     };
     function npcExitPrefix(npc) { // v9.24 在室內的人要先走正門出去，路徑才不會在別間的座標系裡亂走（繞去隱藏的邊邊）
       if (npc.insideLoc && INTERIORS[npc.insideLoc]) { const c = INTERIORS[npc.insideLoc]; return [c.inDoor, c.doorOut, { x: c.worldDoorX, y: NPC_STREET_Y }]; }
@@ -1447,7 +1450,7 @@
         if (occ && coach.dest !== 'gym') {
           npcFreeSeat(coach); removeFromQueue(coach);
           coach.dest = 'gym';
-          coach.path = [{ x: NPC_DOOR_X.gym, y: NPC_STREET_Y }, npcDef('coach').spot];
+          coach.path = interiorPathTo(coach, 'gym', npcDef('coach').spot); // v9.27 操場室內化：改走通用門口路徑（原本手排路徑會把場景座標當世界座標）
           coach.arrive = 'seat'; coach.state = 'path';
         } else if (!occ && coach.dest === 'gym' && coach.state === 'seated') coach.dwell = 0;
       }
@@ -1578,6 +1581,10 @@
               if (npc.shelfCd <= 0) { npc.shelfCd = 13 + Math.random() * 12; const pt3 = LIB_SHELF_POINTS[Math.floor(Math.random() * LIB_SHELF_POINTS.length)]; npc._shelfTrip = true; npc.path = [{ x: pt3.x, y: pt3.y }]; npc.arrive = 'browse'; npc.state = 'path'; spawnNpcPop(npc, '📚'); } // 館員巡架上架
             }
           }
+          if (npc.dest === 'gym' && npc.insideLoc === 'gym' && npc.state === 'seated' && npc.kind !== 'staff' && npc.x > 700) { // v9.27 球場邊的人會投籃
+            npc.shotCd = (npc.shotCd == null ? 7 + Math.random() * 9 : npc.shotCd) - progressMinutes;
+            if (npc.shotCd <= 0) { npc.shotCd = 9 + Math.random() * 12; gymShootBall(npc); }
+          }
           if (npc.key === 'teacher' && npc.dest === 'school' && npc.insideLoc === 'school' && !npc.breakHome && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'class') { // v9.25 老師巡堂：上課時定時走下講台巡視
             npc.roamCd = (npc.roamCd == null ? 2 + Math.random() * 3 : npc.roamCd) - progressMinutes;
             if (npc.roamCd <= 0) {
@@ -1641,12 +1648,13 @@
         if (npc.insideLoc === 'restaurant' && !document.getElementById('rest-rooms')) ensureRestInterior(); // v9.18
         if (npc.insideLoc === 'school' && !document.getElementById('school-rooms')) ensureSchoolInterior(); // v9.21
         if (npc.insideLoc === 'library' && !document.getElementById('lib-rooms')) ensureLibraryInterior(); // v9.26
+        if (npc.insideLoc === 'gym' && !document.getElementById('gym-rooms')) ensureGymInterior(); // v9.27
         const el = document.getElementById('npc-' + npc.key);
         if (el) { // v9.14：室內外容器切換；v9.17：insideLoc（一般 NPC 的 inside 未初始化，不能當守衛）
           const _tgt = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? document.getElementById(INTERIORS[npc.insideLoc].roomsId) : (npc.inside ? document.getElementById('home-rooms') : document.getElementById('npc-layer'));
           if (_tgt && el.parentNode !== _tgt) _tgt.appendChild(el);
           // v9.17.1：室內人物補償場景縮放，與大地圖同尺寸（腳底為原點）
-          if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms' || _tgt.id === 'school-rooms' || _tgt.id === 'lib-rooms')) {
+          if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms' || _tgt.id === 'school-rooms' || _tgt.id === 'lib-rooms' || _tgt.id === 'gym-rooms')) {
             const _st = _tgt.parentNode;
             const _tf = 'scale(' + (300 / ((_st && _st.clientHeight) || 179)).toFixed(3) + ')';
             if (el.style.transform !== _tf) { el.style.transform = _tf; el.style.transformOrigin = '50% 100%'; }
@@ -2155,6 +2163,193 @@
       updateSchoolPan(focus);
     }
 
+
+
+    // ================= v9.27 操場大場景（全棟最後一間：露天球場塞框框、夕陽＋投籃） =================
+    const GYM_HOOP = { x: 1030, y: 96 }; // 籃框位置（場景座標）
+    const GYM_ROOMS_HTML = `
+<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
+  <rect id="gym-sky" x="0" y="0" width="1150" height="90" fill="#aee3ff"/>
+  <circle id="gym-sun" cx="950" cy="30" r="16" fill="#ffd93b" stroke="#f39c12" stroke-width="2"/>
+  <g fill="#ffffff" opacity="0.85"><ellipse cx="240" cy="26" rx="42" ry="9"/><ellipse cx="272" cy="20" rx="26" ry="8"/><ellipse cx="700" cy="40" rx="36" ry="8"/><ellipse cx="726" cy="35" rx="22" ry="7"/></g>
+  <g fill="#2e7d32"><circle cx="60" cy="84" r="17"/><circle cx="112" cy="88" r="13"/><circle cx="330" cy="86" r="15"/><circle cx="520" cy="84" r="12"/><circle cx="880" cy="86" r="14"/><circle cx="1108" cy="84" r="16"/></g>
+  <rect x="518" y="24" width="114" height="36" fill="#263238" stroke="#182042" stroke-width="2"/>
+  <text x="575" y="48" font-size="13" fill="#ffd93b" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">操 場</text>
+  <rect x="570" y="60" width="4" height="26" fill="#37474f"/><rect x="576" y="60" width="4" height="26" fill="#37474f"/>
+  <rect x="0" y="88" width="1150" height="212" fill="#58a038"/>
+  <g id="gym-floods" opacity="0"><g fill="#fff6bf"><circle cx="120" cy="58" r="24" opacity="0.45"/><circle cx="430" cy="58" r="24" opacity="0.45"/><circle cx="760" cy="58" r="24" opacity="0.45"/><circle cx="1062" cy="58" r="24" opacity="0.45"/></g><g fill="#37474f"><rect x="118" y="58" width="4" height="62"/><rect x="428" y="58" width="4" height="62"/><rect x="758" y="58" width="4" height="62"/><rect x="1060" y="58" width="4" height="62"/></g><g fill="#fff9c4" stroke="#182042" stroke-width="1.4"><rect x="108" y="48" width="24" height="11"/><rect x="418" y="48" width="24" height="11"/><rect x="748" y="48" width="24" height="11"/><rect x="1050" y="48" width="24" height="11"/></g></g>
+  <g fill="#90a4ae" stroke="#182042" stroke-width="1.6"><rect x="36" y="94" width="220" height="9"/><rect x="36" y="105" width="220" height="9"/><rect x="36" y="116" width="220" height="9"/></g>
+  <rect x="36" y="128" width="764" height="158" rx="76" fill="#c0392b" stroke="#182042" stroke-width="2.5"/>
+  <rect x="58" y="146" width="720" height="122" rx="60" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="9 7"/>
+  <rect x="88" y="158" width="664" height="98" rx="48" fill="#67b544"/>
+  <g stroke="#ffffff" stroke-width="2" opacity="0.8"><line x1="150" y1="207" x2="240" y2="207"/><line x1="330" y1="207" x2="420" y2="207"/><line x1="510" y1="207" x2="600" y2="207"/></g>
+  <rect x="812" y="96" width="318" height="168" fill="#d9a066" stroke="#182042" stroke-width="2.5"/>
+  <line x1="971" y1="96" x2="971" y2="264" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="971" cy="180" r="26" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <rect x="1006" y="138" width="124" height="84" fill="#b5651d" opacity="0.5"/>
+  <path d="M1006 138 A 74 74 0 0 0 1006 222" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <rect x="1052" y="60" width="7" height="38" fill="#37474f"/>
+  <rect x="1022" y="52" width="66" height="42" fill="#ffffff" stroke="#e65100" stroke-width="2.5"/>
+  <rect x="1040" y="66" width="30" height="22" fill="none" stroke="#e65100" stroke-width="2"/>
+  <ellipse cx="1030" cy="96" rx="9" ry="3.4" fill="none" stroke="#e65100" stroke-width="2.6"/>
+  <path d="M1022 97 L1026 112 M1030 98 L1030 113 M1038 97 L1034 112" stroke="#eceff1" stroke-width="1.4"/>
+  <rect x="515" y="272" width="120" height="28" fill="#795548"/>
+  <text x="575" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">入 口</text>
+</svg>
+<button class="gym-shoot-btn" onpointerdown="event.stopPropagation()" onclick="playerShoot()">🏀 投籃</button>`;
+    let _gymPanManual = null;
+    let _gymManualUntil = 0;
+    let _gymPanCur = 0; let _gymPanT = 0;
+    let _gymWasIn = false;
+    let _gymLightKey = '';
+    function applyGymPan(pan, sc) {
+      const rooms = document.getElementById('gym-rooms');
+      if (!rooms) return;
+      _gymPanCur = pan;
+      rooms.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, 0px) scale(' + sc.toFixed(3) + ')';
+    }
+    function updateGymPan(focusX) {
+      const stage = document.getElementById('gym-stage');
+      if (!stage) return;
+      const vpW = stage.clientWidth, vpH = stage.clientHeight;
+      if (!vpW || !vpH) return;
+      const sc = vpH / 300;
+      const visible = vpW / sc;
+      if (_gymPanManual !== null) {
+        if (Date.now() > _gymManualUntil) _gymPanManual = null;
+        else { applyGymPan(_gymPanManual, sc); return; }
+      }
+      if (typeof focusX !== 'number') focusX = 575;
+      let pan;
+      if (visible >= 1150) pan = (1150 - visible) / 2;
+      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      const _nowG = performance.now(); const _dtG = _gymPanT ? (_nowG - _gymPanT) : 16; _gymPanT = _nowG;
+      applyGymPan(smoothPanStep(_gymPanCur, pan, focusX, visible, _dtG), sc);
+    }
+    function ensureGymInterior() {
+      if (document.getElementById('gym-stage')) return;
+      const host = document.querySelector('#landmark-gym .island-platform-top') || document.querySelector('#landmark-gym .island-platform') || document.getElementById('landmark-gym');
+      if (!host) return;
+      const stage = document.createElement('div');
+      stage.id = 'gym-stage';
+      stage.innerHTML = '<div id="gym-rooms">' + GYM_ROOMS_HTML + '</div>';
+      host.appendChild(stage);
+      let drag = null;
+      const activePtrs = new Set();
+      stage.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        activePtrs.add(e.pointerId);
+        if (activePtrs.size > 1) { drag = null; const rooms = document.getElementById('gym-rooms'); if (rooms) rooms.style.transition = ''; return; }
+        drag = { x: e.clientX, pan: (_gymPanManual !== null ? _gymPanManual : _gymPanCur), moved: 0 };
+        _gymPanManual = drag.pan;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        const rooms = document.getElementById('gym-rooms');
+        if (rooms) rooms.style.transition = 'none';
+      });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const sc = (stage.clientHeight || 179) / 300;
+        const visible = (stage.clientWidth || 278) / sc;
+        const maxPan = Math.max(0, 1150 - visible);
+        const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
+        drag.moved += Math.abs(next - _gymPanManual);
+        _gymManualUntil = Date.now() + 30000;
+        _gymPanManual = next;
+        applyGymPan(_gymPanManual, sc);
+      });
+      const endDrag = e => {
+        activePtrs.delete(e.pointerId);
+        _gymManualUntil = Date.now() + 30000;
+        if (!drag) return;
+        const wasDrag = drag.moved > 0.5;
+        drag = null;
+        const rooms = document.getElementById('gym-rooms');
+        if (rooms) rooms.style.transition = '';
+        if (wasDrag) stage.addEventListener('click', ev2 => { ev2.stopPropagation(); ev2.preventDefault(); }, { capture: true, once: true });
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('dblclick', () => { _gymPanManual = null; });
+    }
+    function updateGymLighting() { // v9.27 操場天空：太陽整天移動，傍晚夕陽、入夜開燈
+      const sky = document.getElementById('gym-sky'), sun = document.getElementById('gym-sun'), fl = document.getElementById('gym-floods');
+      if (!sky || !sun || !fl) return;
+      const h = (gameState.hour || 0) + (gameState.minute || 0) / 60;
+      const key = (h < 6 || h >= 19.5) ? 'night' : h < 11 ? 'am' : h < 16 ? 'noon' : h < 18 ? 'golden' : 'sunset';
+      if (key === _gymLightKey) return; _gymLightKey = key;
+      const cfg = { night: ['#1d2a52', -30, -30, '0.85'], am: ['#aee3ff', 950, 30, '0'], noon: ['#7ecbf2', 575, 15, '0'], golden: ['#ffb066', 265, 42, '0'], sunset: ['#ff7e47', 150, 62, '0.35'] }[key];
+      sky.setAttribute('fill', cfg[0]);
+      sun.setAttribute('cx', String(cfg[1])); sun.setAttribute('cy', String(cfg[2]));
+      fl.style.opacity = cfg[3];
+    }
+    function updateGymStage() {
+      ensureGymInterior();
+      const stage = document.getElementById('gym-stage');
+      if (!stage) return;
+      const rooms = document.getElementById('gym-rooms');
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'gym' && !gameState.isCommuting;
+      if (playerIn !== _gymWasIn) { _gymPanManual = null; _gymWasIn = playerIn; }
+      const cw = document.getElementById('char-wrap');
+      if (playerIn) {
+        if (cw && rooms && cw.parentNode !== rooms) {
+          rooms.appendChild(cw);
+          cw.style.zIndex = '975';
+          if (typeof getCharacterCoords === 'function' && typeof updateCharacterPositionAndScale === 'function') {
+            const dc = getCharacterCoords(currentLoc, currentState);
+            updateCharacterPositionAndScale(dc.x, dc.y, false);
+          }
+        }
+      } else {
+        const map = document.getElementById('town-map');
+        if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      if (cw && playerIn) cw.style.zIndex = '975'; // 露天場地沒有傢俱前景，人物一律在最上層
+      let focus = 575;
+      if (playerIn) focus = gameState.currentX || 560;
+      else {
+        const inner = (gameState.npcs || []).find(n => n.insideLoc === 'gym');
+        if (inner) focus = inner.x;
+      }
+      updateGymPan(focus);
+      updateGymLighting();
+    }
+    function shootBallAnim(fromX, fromY, make, onText) { // v9.27 投籃動畫：拋物線到籃框，進→穿網落下，不進→彈框飛走
+      const rooms = document.getElementById('gym-rooms');
+      const ball = rooms && document.createElement('div');
+      if (ball && typeof ball.animate === 'function') {
+        ball.className = 'shot-ball'; ball.textContent = '🏀';
+        ball.style.left = (fromX - 10) + 'px'; ball.style.top = (fromY - 54) + 'px';
+        rooms.appendChild(ball);
+        const dx = GYM_HOOP.x - fromX, dy = GYM_HOOP.y - (fromY - 48);
+        const anim = ball.animate([
+          { transform: 'translate(0px, 0px)' },
+          { transform: 'translate(' + (dx * 0.5) + 'px, ' + (dy - 95) + 'px)', offset: 0.55 },
+          { transform: 'translate(' + dx + 'px, ' + dy + 'px)' }
+        ], { duration: 650, easing: 'ease-out' });
+        anim.onfinish = () => {
+          if (onText) onText();
+          if (make) { const drop = ball.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'translate(' + dx + 'px, ' + (dy + 52) + 'px)', opacity: 0.35 }], { duration: 330, easing: 'ease-in' }); drop.onfinish = () => ball.remove(); }
+          else { const bounce = ball.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'translate(' + (dx + 64) + 'px, ' + (dy + 92) + 'px)', opacity: 0.4 }], { duration: 400, easing: 'ease-in' }); bounce.onfinish = () => ball.remove(); }
+        };
+      } else if (onText) onText(); // 無 WAAPI 環境（測試）直接結算文字
+    }
+    function gymShootBall(npc) { // v9.27 NPC 投籃：55% 命中
+      const make = Math.random() < 0.55;
+      npc._lastShot = make ? 'make' : 'miss';
+      shootBallAnim(npc.x, npc.y, make, () => spawnNpcPop(npc, make ? '🏀 進！' : '差一點！'));
+    }
+    function playerShoot() { // v9.27 主角投籃：進球減壓（要人在操場）
+      if (typeof currentLoc === 'undefined' || currentLoc !== 'gym' || gameState.isCommuting) { queueFloatingText('要先到操場才能投籃喔 🏀'); return; }
+      const nowA = (gameState.totalGameDays || 0) * 1440 + (gameState.hour || 0) * 60 + (gameState.minute || 0);
+      if (gameState._shotBusyUntil && nowA < gameState._shotBusyUntil) return;
+      gameState._shotBusyUntil = nowA + 1;
+      const make = Math.random() < 0.55;
+      shootBallAnim(gameState.currentX || 575, gameState.currentY || 252, make, () => {
+        if (make) { gameState.stress = Math.max(0, (gameState.stress || 0) - 10); gameState._shotsMade = (gameState._shotsMade || 0) + 1; queueFloatingText('🏀 空心入網！壓力 −10'); }
+        else queueFloatingText('差一點點！再來一顆 🏀');
+        if (typeof playSound === 'function') playSound('click');
+      });
+    }
 
     // ================= v9.26 圖書館大場景（比照住家/超商/餐廳/學校：大室內塞框框、窗光＋抽書） =================
     const LIB_SHELF_POINTS = [ { x: 240, y: 128 }, { x: 380, y: 128 }, { x: 760, y: 128 }, { x: 905, y: 128 } ]; // 書架前走道（抽書/上架站位）

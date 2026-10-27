@@ -3686,6 +3686,13 @@ input, select, textarea { border-radius: 14px !important; }
 /* ===== v9.21 學校大場景（比照超商/餐廳 stage） ===== */
 #school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ecd2; cursor:grab; touch-action:none; }
 #lib-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe6d0; cursor:grab; touch-action:none; }
+#gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#58a038; cursor:grab; touch-action:none; }
+#gym-stage:active { cursor:grabbing; }
+#gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+#gym-sky, #gym-floods { transition: opacity 1.2s ease; }
+.shot-ball { position:absolute; width:20px; height:20px; font-size:16px; line-height:20px; text-align:center; z-index:990; pointer-events:none; }
+.gym-shoot-btn { position:absolute; left:866px; top:238px; z-index:980; padding:5px 10px; border-radius:999px; border:2px solid #182042; background:#ffd93b; color:#182042; font-family:inherit; font-weight:900; font-size:12px; cursor:pointer; box-shadow:0 2px 0 #182042; animation: libGlow 2.2s ease-in-out infinite; }
+.gym-shoot-btn:active { transform: translateY(2px); box-shadow:none; }
 #lib-stage:active { cursor:grabbing; }
 #lib-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #lib-shaft-w, #lib-shaft-e, #lib-lamps { transition: opacity 1.2s ease; }
