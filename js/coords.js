@@ -17,8 +17,8 @@
       'restaurant-idle': { x: 610, y: 252 }, // v9.18 室內入口
       'gym-run': { x: 1652, y: 75 },
       'gym-idle': { x: 1727, y: 180 },
-      'library-study': { x: 1327, y: 195 },
-      'library-idle': { x: 1387, y: 195 },
+      'library-study': { x: 140, y: 235 }, // v9.26 窗邊扶手椅
+      'library-idle': { x: 575, y: 252 }, // v9.26 室內入口旁
       'store-work': { x: 935, y: 150 }, // v9.17 室內場景：收銀台後
       'store-idle': { x: 565, y: 252 }, // v9.17 室內場景：入口內側
       'home-sleep': { x: 840, y: 182 },
@@ -65,7 +65,7 @@
       }
       // v9.17.1：室內場景（住家/超商）被框框縮小，人物補償回大地圖同尺寸（腳底為原點）
       const par = elCharWrap.parentNode;
-      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms' || par.id === 'school-rooms')) { // v9.21 學校場景同尺寸補償
+      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms' || par.id === 'school-rooms' || par.id === 'lib-rooms')) { // v9.21 學校場景同尺寸補償；v9.26 圖書館
         const st = par.parentNode;
         scale *= 300 / ((st && st.clientHeight) || 179);
         elCharWrap.style.transformOrigin = '50% 100%';

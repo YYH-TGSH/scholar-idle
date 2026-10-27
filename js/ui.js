@@ -1529,7 +1529,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.25.1) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.26.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1705,7 +1705,7 @@
     // v9.1 桌上書堆：今日讀得越多，書堆越高 (最多 5 本)
     function updateStudyBooks() {
       const n = Math.min(5, gameState.studyHoursToday || 0);
-      ['study-books-school', 'study-books-library'].forEach(id => {
+      ['study-books-school', 'study-books-library', 'study-books-school-in', 'study-books-library-in'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.querySelectorAll('.book-layer').forEach((b, i) => { b.style.display = i < n ? 'block' : 'none'; });
       });
@@ -2736,8 +2736,8 @@
       el.textContent = COMBO_SUBJECT_CHARS[sub];
       el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#ffd32a';
       // v9.25 使用者指定：泡泡出現在建築「框架內」的隨機位置——大、好點、不被家具擋、也不會疊到老師
-      const frameIds = { school: 'school-stage', store: 'store-stage', restaurant: 'rest-stage', home: 'home-stage', library: 'landmark-library' };
-      const frame = document.getElementById(frameIds[currentLoc] || '') || wrap;
+      const frameIds = { school: 'school-stage', store: 'store-stage', restaurant: 'rest-stage', home: 'home-stage', library: 'lib-stage' };
+      const frame = document.getElementById(frameIds[currentLoc] || '') || document.getElementById('landmark-' + currentLoc) || wrap;
       if (frame === wrap) {
         const sprEl = document.getElementById('student-sprite') || wrap;
         el.style.left = ((sprEl.offsetLeft || 0) + 24 + Math.random() * 12) + 'px';
