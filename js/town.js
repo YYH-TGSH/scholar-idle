@@ -2201,6 +2201,7 @@
     let _gymManualUntil = 0;
     let _gymPanCur = 0; let _gymPanT = 0;
     let _gymWasIn = false;
+    let _gymRunT0 = null; // v9.27.1 跑步迴圈起始時刻（跟拍推算用）
     let _gymLightKey = '';
     function applyGymPan(pan, sc) {
       const rooms = document.getElementById('gym-rooms');
@@ -2310,7 +2311,19 @@
         const inner = (gameState.npcs || []).find(n => n.insideLoc === 'gym');
         if (inner) focus = inner.x;
       }
-      updateGymPan(focus);
+      if (playerIn && currentState === 'sports' && _gymPanManual === null) { // v9.27.1 跑步跟拍：CSS 迴圈位置由動畫時鐘推算，鏡頭直接跟上（跑道比可視窗寬，置中會有一半看不到人）
+        if (_gymRunT0 == null) _gymRunT0 = performance.now();
+        const ph = ((performance.now() - _gymRunT0) % 3400) / 3400;
+        const PTS = [[0, 130], [0.22, 690], [0.30, 745], [0.38, 752], [0.50, 690], [0.72, 130], [0.80, 70], [0.88, 66], [1, 130]];
+        let rx = 130;
+        for (let i = 1; i < PTS.length; i++) { if (ph <= PTS[i][0]) { const a = PTS[i - 1], b = PTS[i]; rx = a[1] + (b[1] - a[1]) * ((ph - a[0]) / (b[0] - a[0])); break; } }
+        const sc2 = stage.clientHeight / 300, vis2 = stage.clientWidth / sc2;
+        const pan2 = vis2 >= 1150 ? (1150 - vis2) / 2 : Math.max(0, Math.min(1150 - vis2, rx - vis2 / 2));
+        applyGymPan(pan2, sc2);
+      } else {
+        if (currentState !== 'sports') _gymRunT0 = null;
+        updateGymPan(focus);
+      }
       updateGymLighting();
     }
     function shootBallAnim(fromX, fromY, make, onText) { // v9.27 投籃動畫：拋物線到籃框，進→穿網落下，不進→彈框飛走

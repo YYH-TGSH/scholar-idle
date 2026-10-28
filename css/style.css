@@ -1004,6 +1004,23 @@ body {
       transition: none !important;
     }
 
+    /* v9.27.1 操場室內化後，跑步動畫要走場景座標（原本的世界座標會把人甩出場景外看不見）；縮放含室內同尺寸補償 ×1.676 */
+    #gym-rooms .character-wrapper.running-on-track {
+      animation: track-loop-scene 3.4s infinite linear !important;
+    }
+
+    @keyframes track-loop-scene {
+      0% { left: 109px; top: 82px; transform: scaleX(1.475); }
+      22% { left: 669px; top: 82px; transform: scaleX(1.475); }
+      30% { left: 724px; top: 108px; transform: scaleX(1.475); }
+      38% { left: 731px; top: 148px; transform: scaleX(-1.55); }
+      50% { left: 669px; top: 192px; transform: scaleX(-1.642); }
+      72% { left: 109px; top: 192px; transform: scaleX(-1.642); }
+      80% { left: 52px; top: 162px; transform: scaleX(-1.55); }
+      88% { left: 45px; top: 112px; transform: scaleX(1.475); }
+      100% { left: 109px; top: 82px; transform: scaleX(1.475); }
+    }
+
     @keyframes track-loop {
       /* 1. 頂部直道往右大步奔跑 (面向右邊 scaleX(1)) */
       0% {
