@@ -556,7 +556,22 @@
       // v9.25.2 午餐鐘聲（平日 11:50–12:59）：跟 NPC 鐘聲同級的硬事件——任何模式（含玩家干預/鎖定）都先去餐廳吃午餐；
       // 13:00 後原本的干預/作息自動接續（干預時數照常計時、不被清除）。在家（書桌自習等）不硬拉出門；吃泡麵中由下方 noodleUntil 優先。
       const lunchBell = !isWeekend && !restaurantLocked && currentLoc !== 'home' && currentLoc !== 'restaurant' && (gameState.hour === 12 || (gameState.hour === 11 && gameState.minute >= 50));
-      if (lunchBell) {
+
+      // v9.28.0 生理鐘聲（盤點 #4）：精力/飢餓見底是跟午餐同級的硬需求——穿透玩家干預與手動鎖定，滿足後原本的干預/作息自動接續
+      // 精力 <= 8：回家睡到 >= 65 才解除；上學時段回不了家（homeLocked）先不觸發，沿用既有規則；泡麵中不打斷
+      if (gameState._needSleep) { if ((gameState.energy || 0) >= 65) gameState._needSleep = false; }
+      else if ((gameState.energy || 0) <= 8 && !homeLocked && !gameState.noodleUntil) { gameState._needSleep = true; if (gameState.overrideAction) queueFloatingText('😴 精力見底了！先回家睡一覺（干預暫停）'); }
+      // 飢餓 <= 8：去餐廳吃到 >= 55 才解除；餐廳打烊不觸發；在家（晚餐/書桌）不硬拉出門（同午餐）；泡麵中本身就在吃
+      if (gameState._needEat) { if ((gameState.hunger || 0) >= 55 || restaurantLocked) gameState._needEat = false; }
+      else if ((gameState.hunger || 0) <= 8 && !restaurantLocked && currentLoc !== 'home' && !gameState.noodleUntil) { gameState._needEat = true; if (gameState.overrideAction) queueFloatingText('🍔 肚子餓扁了！先去吃飯（干預暫停）'); }
+      const needLoc = gameState._needSleep ? 'home' : (gameState._needEat ? 'restaurant' : null);
+
+      if (needLoc) {
+        targetLoc = needLoc;
+        elCalendarMode.innerText = "生理需求優先 😴🍔";
+        elCalendarMode.style.backgroundColor = "var(--accent)";
+        elCalendarMode.style.color = "var(--text-color)";
+      } else if (lunchBell) {
         targetLoc = "restaurant";
       } else if (gameState.overrideAction) {
         // 鎖定模式顯示不同文字
@@ -658,8 +673,8 @@
       }
 
       // 檢查目的地是否已被時間鎖定（避免自動作息時卡入死鎖，自動修正目的地）
-      if (targetLoc === "home" && homeLocked) {
-        targetLoc = "school"; // 強制去學校 (平日上學)
+      if (targetLoc === "home" && homeLocked && !gameState._needSleep) {
+        targetLoc = "school"; // 強制去學校 (平日上學)；生理鐘聲觸發時例外（真的累垮了）
       }
       if (targetLoc === "school" && schoolLocked) {
         targetLoc = "home"; // 放學回家
@@ -702,7 +717,7 @@
         }
         else if (currentLoc === "home") {
           currentState = (gameState.hour === 18 && gameState.energy >= 30 && gameState.overrideAction !== 'sleep') ? "dinner" // v9.13 晚餐同桌
-            : (gameState.energy < 30 || gameState.hour >= 22 || gameState.hour < 7 || (gameState.overrideAction === 'sleep')) ? "sleeping"
+            : (gameState.energy < 30 || gameState.hour >= 22 || gameState.hour < 7 || (gameState.overrideAction === 'sleep') || gameState._needSleep) ? "sleeping"
             : (gameState.deskStudy && gameState.energy >= 30) ? "studying" : "idle"; // v9.14.4 書桌自習
         }
       }
@@ -1260,7 +1275,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.27.1) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.28.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
