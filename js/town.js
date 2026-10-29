@@ -1202,6 +1202,8 @@
   <rect x="1112" y="84" width="6" height="18" fill="#ef5350"/><rect x="1120" y="80" width="6" height="22" fill="#42a5f5"/><rect x="1128" y="86" width="6" height="16" fill="#66bb6a"/>
   <rect x="1112" y="128" width="6" height="18" fill="#ffb74d"/><rect x="1120" y="124" width="6" height="22" fill="#ab47bc"/><rect x="1128" y="130" width="6" height="16" fill="#26a69a"/>
   <text x="800" y="290" font-size="14" font-weight="700" fill="#1565c0" opacity="0.65">我的房間</text>
+  <rect x="505" y="272" width="120" height="28" fill="#8d5a2c"/>
+  <text x="565" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">入 口</text>
 </svg>
 <div id="parents-blanket" style="display:none; position:absolute; left:70px; top:158px; width:184px; height:70px; z-index:260;">
   <svg viewBox="0 0 100 38" style="width:100%; height:100%; display:block;">

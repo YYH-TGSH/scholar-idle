@@ -1275,7 +1275,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.28.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.28.1) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
