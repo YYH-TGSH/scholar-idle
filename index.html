@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.28.2)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.29.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -1570,7 +1570,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.28.2)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.29.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -1746,108 +1746,81 @@
         
       </div>
 
-      <!-- 像素畫畫板介面 (隱藏，點擊 "設計新服飾" 時顯示) -->
-      <div id="wardrobe-editor-view" style="display: none; flex: 1; gap: 20px; overflow: hidden;">
-        <!-- 左側：畫布本體 -->
-        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0;">
-          <div id="pixel-canvas-scroll" style="overflow: auto; max-width: 100%; border-radius: 12px;">
+      <!-- 像素畫畫板介面 v9.29：固定工作區（畫布不捲動）＋底部工具塢＋點開才展開的面板 -->
+      <div id="wardrobe-editor-view" style="display: none; flex: 1; overflow: hidden; position: relative; flex-direction: column;">
+        <!-- 頂欄：返回／名稱／類別／儲存 -->
+        <div class="editor-topbar">
+          <button class="editor-bar-btn" onclick="closePixelEditor()">← 返回</button>
+          <input type="text" id="editor-skin-name" value="我的新服飾" placeholder="服飾名稱...">
+          <div class="editor-type-seg">
+            <label class="help-tab-btn active" id="editor-type-lbl-hat"><input type="radio" name="editor-skin-type" value="hat" checked style="display:none;" onchange="updateEditorTypeUI('hat')">🎩 帽子</label>
+            <label class="help-tab-btn" id="editor-type-lbl-clothes"><input type="radio" name="editor-skin-type" value="clothes" style="display:none;" onchange="updateEditorTypeUI('clothes')">👕 衣服</label>
+            <label class="help-tab-btn" id="editor-type-lbl-shoes"><input type="radio" name="editor-skin-type" value="shoes" style="display:none;" onchange="updateEditorTypeUI('shoes')">👟 鞋子</label>
+          </div>
+          <button class="editor-bar-btn primary" onclick="saveCustomSkin()">💾 儲存並裝備</button>
+        </div>
+        <!-- 畫布舞台（不捲動；放大時才在框內移動） -->
+        <div class="editor-stage">
+          <div id="pixel-canvas-scroll" style="overflow: auto; max-width: 100%; max-height: 100%; border-radius: 12px;">
             <div id="pixel-canvas-container" style="background: rgba(255,255,255,0.4); border: 2px solid var(--border-color); border-radius: 12px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(32, 1fr); touch-action: none; gap: 1px; user-select: none; -webkit-user-select: none;">
               <!-- 32x50 HD 格子 (真角色座標 2x 細分)，用 JS 動態生成 -->
             </div>
           </div>
-          <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">32×50 高解析畫布（1,600 格）・點 🔍 放大後用 ✋ 移動畫布慢慢刻細節</div>
-        </div>
-        
-        <!-- 右側：調色盤與工具 -->
-        <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; padding-right: 5px;">
-          <div>
-            <!-- v8.3 即時預覽：真角色本人 -->
-            <div style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,0.35); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 12px;">
-              <div id="editor-preview-slot" style="display:flex; align-items:center; justify-content:center; min-width:64px; min-height:100px;"></div>
-              <div style="font-size:0.8rem; line-height:1.6; font-weight:700;">👀 即時預覽<br><span style="color:var(--text-muted); font-weight:500;">畫的時候即時看穿在小人身上的樣子，跟地圖上同一隻，不會再畫完才發現歪掉。</span></div>
-            </div>
-
-            <!-- 服飾名稱 -->
-            <div style="margin-bottom: 12px;">
-              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">服飾名稱</label>
-              <input type="text" id="editor-skin-name" value="我的新服飾" placeholder="輸入服飾名稱..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.6); font-family: inherit; font-size: 0.85rem; font-weight: 700; color: var(--text-color);">
-            </div>
-            
-            <!-- 設計種類 -->
-            <div style="margin-bottom: 12px;">
-              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">服飾類別</label>
-              <div style="display: flex; gap: 6px;">
-                <label class="help-tab-btn active" id="editor-type-lbl-hat" style="flex:1; text-align:center; padding: 6px; cursor:pointer;"><input type="radio" name="editor-skin-type" value="hat" checked style="display:none;" onchange="updateEditorTypeUI('hat')">🎩 帽子</label>
-                <label class="help-tab-btn" id="editor-type-lbl-clothes" style="flex:1; text-align:center; padding: 6px; cursor:pointer;"><input type="radio" name="editor-skin-type" value="clothes" style="display:none;" onchange="updateEditorTypeUI('clothes')">👕 衣服</label>
-                <label class="help-tab-btn" id="editor-type-lbl-shoes" style="flex:1; text-align:center; padding: 6px; cursor:pointer;"><input type="radio" name="editor-skin-type" value="shoes" style="display:none;" onchange="updateEditorTypeUI('shoes')">👟 鞋子</label>
-              </div>
-            </div>
-            
-            <!-- 工具列 -->
-            <div style="margin-bottom: 12px;">
-              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">編輯工具</label>
-              <div style="display: flex; gap: 6px;">
-                <button class="speed-btn active" id="tool-pencil" onclick="setEditorTool('pencil')" style="flex: 1; height: 32px;">✏️ 鉛筆</button>
-                <button class="speed-btn" id="tool-eraser" onclick="setEditorTool('eraser')" style="flex: 1; height: 32px;">🧽 橡皮擦</button>
-                <button class="speed-btn" id="tool-fill" onclick="setEditorTool('fill')" style="flex: 1; height: 32px;">🪣 填色</button>
-                <button class="speed-btn" id="tool-picker" onclick="setEditorTool('picker')" style="flex: 1; height: 32px;">💉 吸色</button>
-              </div>
-              <div style="display: flex; gap: 6px; margin-top: 6px; align-items: center;">
-                <button class="speed-btn" onclick="undoEditor()" style="flex: 1; height: 32px;">↩️ 復原</button>
-                <button class="speed-btn" onclick="redoEditor()" style="flex: 1; height: 32px;">↪️ 重做</button>
-                <button class="speed-btn" onclick="clearEditorCanvas()" style="flex: 1; height: 32px;">🗑️ 清空</button>
-                <label style="flex: 1; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 4px; justify-content: center; cursor: pointer;"><input type="checkbox" id="editor-guide-toggle" checked onchange="document.getElementById('pixel-canvas-container').classList.toggle('hide-guide', !this.checked)"> 角色剪影</label>
-              </div>
-              <div style="display: flex; gap: 6px; margin-top: 6px; align-items: center;">
-                <button class="speed-btn" id="tool-mirror" onclick="toggleEditorMirror()" style="flex: 1; height: 32px;">🪞 鏡像：關</button>
-                <button class="speed-btn" id="editor-zoom-btn" onclick="toggleEditorZoom()" style="flex: 1; height: 32px;">🔍 放大 2x</button>
-                <button class="speed-btn" id="tool-pan" onclick="setEditorTool('pan')" style="flex: 1; height: 32px;">✋ 移動畫布</button>
-              </div>
-            </div>
-
-            <!-- 部件範本：一鍵套用再微調 -->
-            <div style="margin-bottom: 12px;">
-              <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">🧩 部件範本（套用後可再改）</label>
-              <div id="template-chips" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
-            </div>
-            
-            <!-- 常用色票與調色盤 -->
-            <div style="margin-bottom: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label style="font-weight: 700; font-size: 0.85rem;">調色盤</label>
-                <input type="color" id="editor-custom-color" value="#ff453a" onchange="selectPaletteColor(this.value)" style="border: none; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; background: transparent;">
-              </div>
-              <div id="palette-groups">
-                <!-- JS 動態生成分組色票 (最近用色/膚色/髮色/常用色) -->
-              </div>
-            </div>
+          <div class="editor-preview-chip">
+            <div id="editor-preview-slot" style="display:flex; align-items:center; justify-content:center;"></div>
+            <div class="editor-preview-lbl">👀 即時預覽</div>
           </div>
-          
-          <div>
-            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-              <button class="status-badge" onclick="exportSkinPNG()" style="flex: 1; padding: 8px; font-size: 0.75rem; border: none; cursor: pointer; background: var(--sky-blue); color: white; display: flex; justify-content: center; align-items: center; gap: 4px; font-family: inherit;">
-                📥 下載 PNG
-              </button>
-              <button class="status-badge" onclick="triggerImportSkinPNG()" style="flex: 1; padding: 8px; font-size: 0.75rem; border: none; cursor: pointer; background: var(--accent); color: white; display: flex; justify-content: center; align-items: center; gap: 4px; font-family: inherit;">
-                📤 上傳 PNG
-              </button>
-              <input type="file" id="skin-import-file" accept="image/png" style="display: none;" onchange="importSkinPNG(event)">
+        </div>
+        <!-- 底部工具塢（永遠固定，不用捲動就摸得到） -->
+        <div class="editor-dock">
+          <button class="speed-btn editor-dock-btn active" id="tool-pencil" onclick="setEditorTool('pencil')" title="鉛筆">✏️</button>
+          <button class="speed-btn editor-dock-btn" id="tool-eraser" onclick="setEditorTool('eraser')" title="橡皮擦">🧽</button>
+          <button class="speed-btn editor-dock-btn" id="tool-fill" onclick="setEditorTool('fill')" title="填色">🪣</button>
+          <button class="speed-btn editor-dock-btn" id="tool-picker" onclick="setEditorTool('picker')" title="吸色">💉</button>
+          <button id="editor-color-btn" onclick="toggleEditorSheet('palette')" title="選顏色"><span id="editor-color-swatch"></span>🎨 顏色</button>
+          <button class="speed-btn editor-dock-btn" onclick="undoEditor()" title="復原">↩️</button>
+          <button class="speed-btn editor-dock-btn" onclick="redoEditor()" title="重做">↪️</button>
+          <button class="speed-btn editor-dock-btn" id="editor-more-btn" onclick="toggleEditorSheet('more')" title="更多功能">⋯ 更多</button>
+        </div>
+        <!-- 收合面板：背景（點了就收） -->
+        <div id="editor-sheet-backdrop" onclick="closeEditorSheets()"></div>
+        <!-- 調色盤面板（點 🎨 才展開） -->
+        <div class="editor-sheet" id="palette-sheet">
+          <div class="editor-sheet-head">
+            <span>🎨 調色盤（點一下就選好）</span>
+            <span style="display:flex; align-items:center; gap:10px;">
+              <label style="font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:5px;">自訂 <input type="color" id="editor-custom-color" value="#ff453a" onchange="selectPaletteColor(this.value)" style="border: none; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; background: transparent;"></label>
+              <button class="editor-sheet-x" onclick="closeEditorSheets()">✕</button>
+            </span>
+          </div>
+          <div class="editor-sheet-body">
+            <div id="palette-groups"></div>
+          </div>
+        </div>
+        <!-- 更多面板（低頻功能全部收進來） -->
+        <div class="editor-sheet" id="more-sheet">
+          <div class="editor-sheet-head">
+            <span>🧰 更多功能</span>
+            <button class="editor-sheet-x" onclick="closeEditorSheets()">✕</button>
+          </div>
+          <div class="editor-sheet-body">
+            <div class="editor-more-row">
+              <button class="speed-btn" id="tool-mirror" onclick="toggleEditorMirror()">🪞 鏡像：關</button>
+              <button class="speed-btn" id="editor-zoom-btn" onclick="toggleEditorZoom()">🔍 放大 2x</button>
+              <button class="speed-btn" id="tool-pan" onclick="setEditorTool('pan')">✋ 移動畫布</button>
+              <button class="speed-btn" onclick="clearEditorCanvas()">🗑️ 清空</button>
             </div>
-            
-            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-              <button class="status-badge" onclick="copySkinShareCode()" style="flex: 1; padding: 8px; font-size: 0.75rem; border: none; cursor: pointer; background: #bf5af2; color: white; display: flex; justify-content: center; align-items: center; gap: 4px; font-family: inherit;">
-                📋 複製分享碼給朋友
-              </button>
+            <label class="editor-guide-row"><input type="checkbox" id="editor-guide-toggle" checked onchange="document.getElementById('pixel-canvas-container').classList.toggle('hide-guide', !this.checked)"> 👤 顯示角色剪影（輔助對位）</label>
+            <div class="palette-group-label" style="margin-top:12px;">🧩 部件範本（套用後可再改）</div>
+            <div id="template-chips" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+            <div class="palette-group-label" style="margin-top:12px;">📦 分享與備份</div>
+            <div class="editor-more-row">
+              <button class="speed-btn" onclick="exportSkinPNG()">📥 下載 PNG</button>
+              <button class="speed-btn" onclick="triggerImportSkinPNG()">📤 上傳 PNG</button>
+              <button class="speed-btn" onclick="copySkinShareCode()">📋 複製分享碼</button>
             </div>
-
-            <div style="display: flex; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; flex-shrink: 0;">
-              <button class="btn-exam-mini" onclick="closePixelEditor()" style="flex: 1; border: none; cursor: pointer; padding: 8px; border-radius: 10px; background: rgba(0,0,0,0.05); font-weight: 700; color: var(--text-color);">
-                返回
-              </button>
-              <button class="btn-exam-mini ready" onclick="saveCustomSkin()" style="flex: 1; border: none; cursor: pointer; padding: 8px; border-radius: 10px; font-weight: 700;">
-                儲存並裝備
-              </button>
-            </div>
+            <input type="file" id="skin-import-file" accept="image/png" style="display: none;" onchange="importSkinPNG(event)">
+            <div class="editor-hint">小提示：顏色按鈕 🎨 隨時在下方，點開選色、選完自動收起；放大後用 ✋ 移動畫布刻細節；💉 吸色點畫布上的顏色就能直接拿來用。</div>
           </div>
         </div>
       </div>
@@ -2004,7 +1977,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.28.2)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.29.0)
   </div>
 
   <!-- ==========================================================================

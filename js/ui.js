@@ -654,6 +654,8 @@
       editorHistory = []; editorFuture = [];
       initEditorCanvas();
       initEditorPalette();
+      syncEditorColorBtn();
+      closeEditorSheets();
     }
 
     function editCustomSkin(type, itemId, event) {
@@ -668,8 +670,27 @@
       queueFloatingText(`✏️ 編輯中：${item.name}（儲存會覆蓋原設計）`);
     }
 
+    function toggleEditorSheet(which) { // v9.29：面板點開才展開（調色盤／更多）
+      const p = document.getElementById('palette-sheet'), m = document.getElementById('more-sheet'), bd = document.getElementById('editor-sheet-backdrop');
+      if (!p || !m || !bd) return;
+      const target = which === 'palette' ? p : m;
+      const willOpen = !target.classList.contains('open');
+      p.classList.remove('open'); m.classList.remove('open');
+      if (willOpen) { target.classList.add('open'); bd.classList.add('show'); playSound('click'); }
+      else bd.classList.remove('show');
+    }
+    function closeEditorSheets() {
+      ['palette-sheet', 'more-sheet'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('open'); });
+      const bd = document.getElementById('editor-sheet-backdrop');
+      if (bd) bd.classList.remove('show');
+    }
+    function syncEditorColorBtn() { // v9.29：工具塢的顏色鈕永遠顯示目前選色
+      const sw = document.getElementById('editor-color-swatch');
+      if (sw) sw.style.backgroundColor = editorSelectedColor;
+    }
     function closePixelEditor() {
       playSound('click');
+      closeEditorSheets();
       editorEditingId = null;
       document.getElementById('wardrobe-editor-view').style.display = 'none';
       document.getElementById('wardrobe-main-view').style.display = 'flex';
@@ -719,7 +740,7 @@
       const type = getEditorType();
       const map = { hat: getEquippedPixels('hat'), clothes: getEquippedPixels('clothes'), shoes: getEquippedPixels('shoes') };
       map[type] = editorCanvasPixels.some(p => p) ? [...editorCanvasPixels] : null;
-      buildCharacterPreview(slot, map, 64);
+      buildCharacterPreview(slot, map, 48); // v9.29：預覽縮小成浮在舞台角落的小晶片
     }
     function floodFillEditor(startIdx) {
       const target = editorCanvasPixels[startIdx];
@@ -871,6 +892,8 @@
       const picker = document.getElementById('editor-custom-color');
       if (picker) picker.value = color;
       initEditorPalette();
+      syncEditorColorBtn();
+      closeEditorSheets(); // v9.29：選完自動收起，馬上能繼續畫（不用滑來滑去）
     }
 
     // ---- 部件範本 (16x25 字串圖，展開成 32x50；'.' = 不動) ----
@@ -938,6 +961,7 @@
       });
       const cont = document.getElementById('pixel-canvas-container');
       if (cont) cont.style.cursor = tool === 'pan' ? 'grab' : 'crosshair';
+      closeEditorSheets(); // v9.29：在「更多」裡選了工具（如 ✋）就收起面板，直接能用
     }
     function toggleEditorMirror() {
       playSound('click');
@@ -1529,7 +1553,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.28.2) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.29.0) | 上次存檔：${ts}`);
       }
     }
 
