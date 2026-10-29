@@ -184,11 +184,18 @@
       if (Math.abs(target - cur) < 0.05 && Math.abs(vel) < 1.5) { cur = target; vel = 0; }
       return [cur, vel];
     }
+    function playerWorldPos() { // v9.28.2 主角的世界座標：在室內時 currentX/Y 是場景座標（跟世界座標不同套），世界鏡頭要對準該建築門口，否則會追到別棟附近（追錯人）
+      if (gameState.isCommuting && _visPos) return _visPos;
+      const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1 };
+      if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return { x: DOOR_X[currentLoc], y: 195 };
+      return { x: gameState.currentX || WORLD_W / 2, y: gameState.currentY || WORLD_H / 2 };
+    }
     function snapCameraToChar() {
       const s = (window.__baseMapScale || 1) * mapZoom;
       _camAnchor = null; _camVX = 0; _camVY = 0;
-      mapPanX = -((gameState.currentX || 175) - WORLD_W / 2) * s;
-      mapPanY = -((gameState.currentY || 190) - WORLD_H / 2) * s;
+      const wp = playerWorldPos();
+      mapPanX = -(wp.x - WORLD_W / 2) * s;
+      mapPanY = -(wp.y - WORLD_H / 2) * s;
       clampMapPan(); applyMapZoom();
     }
     let _renderPrevT = 0;
@@ -220,8 +227,9 @@
       } else {
         // v9.15.2：鏡頭改跟內插後的視覺位置（原本跟 100ms 才跳一次的邏輯位置，前饋又用每 tick 的瞬時位移估速度，
         // 路徑一轉彎目標就跳一下，彈簧追著跳躍目標 = 通勤時鏡頭一頓一頓）
-        const cx = (gameState.isCommuting && _visPos) ? _visPos.x : (gameState.currentX || WORLD_W / 2);
-        const cy = (gameState.isCommuting && _visPos) ? _visPos.y : (gameState.currentY || WORLD_H / 2);
+        const _wp2 = playerWorldPos(); // v9.28.2 在室內時改對準建築門口（原本直接用場景座標，鏡頭會滑去別棟）
+        const cx = _wp2.x;
+        const cy = _wp2.y;
         // 速度前饋：瞄準小人「即將到達」的位置，剛好抵銷彈簧追蹤等速目標時的穩態落後 (2ζ/ω 秒)
         let leadX = 0, leadY = 0;
         if (gameState.isCommuting && _visPos) {
@@ -1275,7 +1283,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.28.1) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.28.2) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
