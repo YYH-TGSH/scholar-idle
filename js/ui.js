@@ -731,7 +731,7 @@
       document.querySelectorAll('.pixel-grid-cell').forEach(cell => {
         const idx = parseInt(cell.dataset.index);
         const c = editorCanvasPixels[idx];
-        cell.style.backgroundColor = c ? c : 'transparent';
+        cell.style.backgroundColor = c ? c : ''; // v9.29.2：空格要清掉 inline 色，剪影 class 的底色才回得來（寫 'transparent' 會把剪影蓋死）
       });
     }
     function refreshEditorPreview() {
@@ -999,7 +999,7 @@
       const val = editorTool === 'eraser' ? null : editorSelectedColor;
       if (editorCanvasPixels[idx] !== val) {
         editorCanvasPixels[idx] = val;
-        cell.style.backgroundColor = val ? val : 'transparent';
+        cell.style.backgroundColor = val ? val : ''; // v9.29.2：擦除後還原剪影（同 refreshEditorCanvas）
       }
       if (editorMirror) { // 鏡像：同一筆同步畫到左右對稱格
         const x = idx % SKIN_W, y = Math.floor(idx / SKIN_W);
@@ -1007,7 +1007,7 @@
         if (midx !== idx && editorCanvasPixels[midx] !== val) {
           editorCanvasPixels[midx] = val;
           const mc = document.querySelector(`.pixel-grid-cell[data-index="${midx}"]`);
-          if (mc) mc.style.backgroundColor = val ? val : 'transparent';
+          if (mc) mc.style.backgroundColor = val ? val : ''; // v9.29.2：鏡像格同規
         }
       }
     }
@@ -1553,7 +1553,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.29.1) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.29.2) | 上次存檔：${ts}`);
       }
     }
 
