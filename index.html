@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.29.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.29.1)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -1570,7 +1570,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.29.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.29.1)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -1750,14 +1750,16 @@
       <div id="wardrobe-editor-view" style="display: none; flex: 1; overflow: hidden; position: relative; flex-direction: column;">
         <!-- 頂欄：返回／名稱／類別／儲存 -->
         <div class="editor-topbar">
-          <button class="editor-bar-btn" onclick="closePixelEditor()">← 返回</button>
+          <div class="editor-toprow">
+          <button class="editor-bar-btn" onclick="closePixelEditor()" title="返回">←</button>
           <input type="text" id="editor-skin-name" value="我的新服飾" placeholder="服飾名稱...">
+          <button class="editor-bar-btn primary" onclick="saveCustomSkin()">💾 儲存</button>
+          </div>
           <div class="editor-type-seg">
             <label class="help-tab-btn active" id="editor-type-lbl-hat"><input type="radio" name="editor-skin-type" value="hat" checked style="display:none;" onchange="updateEditorTypeUI('hat')">🎩 帽子</label>
             <label class="help-tab-btn" id="editor-type-lbl-clothes"><input type="radio" name="editor-skin-type" value="clothes" style="display:none;" onchange="updateEditorTypeUI('clothes')">👕 衣服</label>
             <label class="help-tab-btn" id="editor-type-lbl-shoes"><input type="radio" name="editor-skin-type" value="shoes" style="display:none;" onchange="updateEditorTypeUI('shoes')">👟 鞋子</label>
           </div>
-          <button class="editor-bar-btn primary" onclick="saveCustomSkin()">💾 儲存並裝備</button>
         </div>
         <!-- 畫布舞台（不捲動；放大時才在框內移動） -->
         <div class="editor-stage">
@@ -1777,10 +1779,10 @@
           <button class="speed-btn editor-dock-btn" id="tool-eraser" onclick="setEditorTool('eraser')" title="橡皮擦">🧽</button>
           <button class="speed-btn editor-dock-btn" id="tool-fill" onclick="setEditorTool('fill')" title="填色">🪣</button>
           <button class="speed-btn editor-dock-btn" id="tool-picker" onclick="setEditorTool('picker')" title="吸色">💉</button>
-          <button id="editor-color-btn" onclick="toggleEditorSheet('palette')" title="選顏色"><span id="editor-color-swatch"></span>🎨 顏色</button>
+          <button id="editor-color-btn" onclick="toggleEditorSheet('palette')" title="選顏色"><span id="editor-color-swatch"></span></button>
           <button class="speed-btn editor-dock-btn" onclick="undoEditor()" title="復原">↩️</button>
           <button class="speed-btn editor-dock-btn" onclick="redoEditor()" title="重做">↪️</button>
-          <button class="speed-btn editor-dock-btn" id="editor-more-btn" onclick="toggleEditorSheet('more')" title="更多功能">⋯ 更多</button>
+          <button class="speed-btn editor-dock-btn" id="editor-more-btn" onclick="toggleEditorSheet('more')" title="更多功能">⋯</button>
         </div>
         <!-- 收合面板：背景（點了就收） -->
         <div id="editor-sheet-backdrop" onclick="closeEditorSheets()"></div>
@@ -1977,7 +1979,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.29.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.29.1)
   </div>
 
   <!-- ==========================================================================
