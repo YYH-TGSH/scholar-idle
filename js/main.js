@@ -11,6 +11,7 @@
 
     function initGame() {
       loadGameData();
+      syncSpeedUI(); // v9.29.3：存檔的速度同步到按鈕與標籤（不然畫面只顯示 1x）
       applyEquippedSkins();
 
       const initialCoords = getCharacterCoords(currentLoc, currentState);
@@ -32,6 +33,20 @@
       gameInterval = setInterval(tick, 100);
     }
 
+    // v9.29.3：速度 UI 同步的唯一出口——亮燈的按鈕與觸發鈕標籤都跟著 gameState.speed 走。
+    // 以前只有 setSpeed() 被點擊時才更新，開機載入存檔後沒人同步，畫面就停在 HTML 預設的 1x。
+    const VALID_SPEEDS = [1, 10, 60, 240, 720];
+    function syncSpeedUI() {
+      const n = Number(gameState.speed);
+      gameState.speed = VALID_SPEEDS.includes(n) ? n : 1; // 存檔異常值自我修復回 1x
+      const sp = gameState.speed;
+      document.querySelectorAll(".speed-control-mini .speed-btn").forEach(btn => btn.classList.remove("active"));
+      const activeBtn = document.getElementById(`speed-${sp}x`);
+      if (activeBtn) activeBtn.classList.add("active");
+      const triggerLabel = document.getElementById("speed-trigger-label");
+      if (triggerLabel) triggerLabel.textContent = sp + "x";
+    }
+
     function setSpeed(sp) {
       playSound('click');
       gameState.speed = sp;
@@ -43,13 +58,7 @@
         userScrollTimer = null;
       }
 
-      document.querySelectorAll(".speed-control-mini .speed-btn").forEach(btn => btn.classList.remove("active"));
-
-      const activeBtn = document.getElementById(`speed-${sp}x`);
-      if (activeBtn) activeBtn.classList.add("active");
-
-      const triggerLabel = document.getElementById("speed-trigger-label");
-      if (triggerLabel) triggerLabel.textContent = sp + "x";
+      syncSpeedUI();
 
       startTicker();
     }
@@ -1283,7 +1292,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.29.2) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.29.3) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
@@ -1318,6 +1327,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 5. 初始 UI 更新 (等級、金錢、日曆、鎖定、地標徽章、建設抽屜等)
   if (typeof updateUI === 'function') updateUI();
+  if (typeof syncSpeedUI === 'function') syncSpeedUI(); // v9.29.3 備援開機路徑同補
   if (typeof updateLocksUI === 'function') updateLocksUI();
   if (typeof updateCalendarUI === 'function') updateCalendarUI();
   if (typeof updateSaveTimestamp === 'function') updateSaveTimestamp();
