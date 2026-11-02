@@ -1084,6 +1084,12 @@
         <rect x="4" y="40" width="80" height="5" fill="#8b5a2b" stroke="#182042" stroke-width="1.5" />
         <rect x="10" y="45" width="5" height="9" fill="#795548" />
         <rect x="73" y="45" width="5" height="9" fill="#795548" />
+        </svg>`;
+      layer.appendChild(fg);
+      const food = document.createElement('div');
+      food.id = 'dinner-food';
+      food.style.cssText = 'position:absolute; left:601px; top:118px; width:108px; height:54px; z-index:990; pointer-events:none;';
+      food.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
         <g id="home-dinner-set" style="display:none;">
           <ellipse cx="20" cy="24" rx="7" ry="3.4" fill="#ffffff" stroke="#182042" stroke-width="1.4" /><ellipse cx="20" cy="23" rx="4" ry="1.8" fill="#fff7e0" />
           <ellipse cx="68" cy="24" rx="7" ry="3.4" fill="#ffffff" stroke="#182042" stroke-width="1.4" /><ellipse cx="68" cy="23" rx="4" ry="1.8" fill="#fff7e0" />
@@ -1096,7 +1102,7 @@
           <path class="steam-wisp" d="M40,20 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
           <path class="steam-wisp w2" d="M47,20 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
         </g></svg>`;
-      layer.appendChild(fg);
+      layer.appendChild(food);
     }
     function updateHomeDinnerVisual(phase) {
       ensureDinnerFurniture();
@@ -1348,6 +1354,15 @@
       } else {
         const map = document.getElementById('town-map');
         if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      if (cw && playerIn) cw.style.zIndex = (currentState === 'sleeping' || ((currentState === 'dinner' || currentState === 'studying') && !gameState._playerWalking)) ? '500' : '975'; // v9.30 住家同規（比照其他五棟）：坐定維持夾層，走動/站立在傢俱前景之上
+      { // v9.30 主角自己的晚餐盤（比照餐廳 #player-rest-plate）：坐上晚餐座位才出現，食物置頂 z990
+        let pp = document.getElementById('player-dinner-plate');
+        const showP = playerIn && currentState === 'dinner' && !gameState._playerWalking;
+        if (showP && rooms) {
+          if (!pp) { pp = document.createElement('div'); pp.id = 'player-dinner-plate'; pp.className = 'dish-plate'; pp.textContent = '🍛'; rooms.appendChild(pp); }
+          pp.style.display = 'block'; pp.style.left = ((gameState.currentX || 655) - 9) + 'px'; pp.style.top = ((gameState.currentY || 208) - 32) + 'px'; pp.style.zIndex = '990';
+        } else if (pp) pp.style.display = 'none';
       }
       // 室內鏡頭：主角在家跟主角，否則看在家的爸媽，再否則停客廳
       let focus = 565;
@@ -1678,6 +1693,7 @@
           el.style.zIndex = String(Math.round(npc.y)); // v9.12.3 依深度排序：前方人物蓋後方
           if (npc.insideLoc === 'restaurant' && npc.state === 'seated' && npc.key !== 'chef') el.style.zIndex = '955'; // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
           else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = '975'; // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
+          else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = '975'; // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
           else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = '975'; // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
           const tag = el.querySelector('.npc-zzz-tag');
           if (tag) tag.style.display = npc.state === 'sleeping' ? 'inline' : 'none';
