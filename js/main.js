@@ -587,8 +587,8 @@
       if (needLoc) {
         targetLoc = needLoc;
         elCalendarMode.innerText = "生理需求優先 😴🍔";
-        elCalendarMode.style.backgroundColor = "var(--accent)";
-        elCalendarMode.style.color = "var(--text-color)";
+        elCalendarMode.style.backgroundColor = "var(--leaf)";
+        elCalendarMode.style.color = "var(--ink2)";
       } else if (lunchBell) {
         targetLoc = "restaurant";
       } else if (gameState.overrideAction) {
@@ -598,7 +598,7 @@
         } else {
           elCalendarMode.innerText = `玩家干預中 (${gameState.overrideHoursLeft}h)`;
         }
-        elCalendarMode.style.backgroundColor = "var(--secondary)";
+        elCalendarMode.style.backgroundColor = "var(--rose)";
         elCalendarMode.style.color = "white";
 
         switch (gameState.overrideAction) {
@@ -625,7 +625,7 @@
       else if (!isWeekend) {
         elCalendarMode.innerText = "自動作息模式";
         elCalendarMode.style.backgroundColor = "var(--card-bg)";
-        elCalendarMode.style.color = "var(--text-color)";
+        elCalendarMode.style.color = "var(--ink2)";
 
         const h = gameState.hour;
         if (h === 18 && gameState.parentsStatus === 'alive' && !homeLocked) {
@@ -655,8 +655,8 @@
       }
       else {
         elCalendarMode.innerText = "週末放假中 ☕";
-        elCalendarMode.style.backgroundColor = "var(--accent)";
-        elCalendarMode.style.color = "var(--text-color)";
+        elCalendarMode.style.backgroundColor = "var(--leaf)";
+        elCalendarMode.style.color = "var(--ink2)";
 
         const h = gameState.hour;
         const upcomingRent = 30 + (gameState.gradeIndex * 10);
@@ -1335,7 +1335,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.36.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.37.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

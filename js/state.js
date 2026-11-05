@@ -738,7 +738,7 @@
                 <div class="friend-loc">📍 常駐：${f.locationName} | ❤️ 最愛：${f.favGiftName}</div>
               </div>
             </div>
-            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.35;">${f.desc}</div>
+            <div style="font-size:0.75rem; color:var(--muted); line-height:1.35;">${f.desc}</div>
             <div>
               <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:800; margin-bottom:3px;">
                 <span>💖 好感度進度</span>

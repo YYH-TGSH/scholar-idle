@@ -254,7 +254,7 @@
       if (!el) return;
       el.innerHTML = '<div style="font-weight:900; font-size:0.85rem; margin-bottom:6px;">🔗 建築連動 Combo</div>' + TOWN_COMBOS.map(c => {
         const on = townComboActive(c);
-        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:5px 8px; margin-bottom:5px; border-radius:8px; background:${on ? '#e8f7ee' : '#f3efe8'}; border:1.5px solid ${on ? '#7bc47f' : '#ddd3c2'};"><span><b>${c.name}</b> <span style="color:var(--text-muted); font-size:0.75rem;">${LANDMARK_NAMES[c.a]} Lv.${c.aLv}＋${LANDMARK_NAMES[c.b]} Lv.${c.bLv}</span><br><span style="font-size:0.78rem;">${c.desc}</span></span><span style="font-weight:900; color:${on ? '#2e7d32' : '#a08b6d'};">${on ? '✓ 已啟用' : '未啟用'}</span></div>`;
+        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:5px 8px; margin-bottom:5px; border-radius:8px; background:${on ? '#e8f7ee' : '#f3efe8'}; border:1.5px solid ${on ? '#7bc47f' : '#ddd3c2'};"><span><b>${c.name}</b> <span style="color:var(--muted); font-size:0.75rem;">${LANDMARK_NAMES[c.a]} Lv.${c.aLv}＋${LANDMARK_NAMES[c.b]} Lv.${c.bLv}</span><br><span style="font-size:0.78rem;">${c.desc}</span></span><span style="font-weight:900; color:${on ? '#2e7d32' : '#a08b6d'};">${on ? '✓ 已啟用' : '未啟用'}</span></div>`;
       }).join('');
     }
 
@@ -301,16 +301,16 @@
               <div class="build-card-title">
                 <span>${cfg.icon}</span>
                 <span>${cfg.name}</span>
-                <span style="font-size:0.7rem; color:var(--primary); font-weight:800;">【${cfg.levelNames[curLv - 1]}】</span>
+                <span style="font-size:0.7rem; color:var(--amber); font-weight:800;">【${cfg.levelNames[curLv - 1]}】</span>
               </div>
               <span class="island-lv-badge ${isMax ? 'is-max' : ''}" style="position:static;">Lv.${curLv} ${isMax ? 'MAX' : ''}</span>
             </div>
             <div class="build-card-desc">
-              <div style="color:var(--text-color); font-weight:700; margin-bottom:2px;">當前效果：${cfg.perks[curLv - 1]}</div>
+              <div style="color:var(--ink2); font-weight:700; margin-bottom:2px;">當前效果：${cfg.perks[curLv - 1]}</div>
               ${!isMax ? `<div style="color:#0a84ff; font-weight:600;">下級解鎖：${cfg.perks[curLv]}</div>` : '<div style="color:#bf5af2; font-weight:700;">✨ 已達最高級！享受頂級小鎮特權</div>'}
             </div>
             <div class="build-card-footer">
-              <div style="font-size:0.76rem; color:var(--text-muted); font-weight:700;">
+              <div style="font-size:0.76rem; color:var(--muted); font-weight:700;">
                 ${isMax ? '🏆 滿星榮譽' : `升級需求: <strong style="color:${canAfford ? '#ff9f0a' : '#ff3b30'};">$${nextCost}</strong>`}
               </div>
               <button class="btn-upgrade-island" ${isMax || !canAfford ? 'disabled' : ''} onclick="upgradeLandmark('${loc}')">

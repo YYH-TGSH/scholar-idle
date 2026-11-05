@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.36.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.37.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -16,7 +15,7 @@
   <!-- 引入 Google Fonts 經典點陣字型 (DotGothic16 支援繁體漢字與日文, Press Start 2P 支援經典像素英數) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Serif+TC:wght@600;900&family=Press+Start+2P&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 
   <!-- 引入寶可夢 RPG 雙層像素樣式 -->
   <link rel="stylesheet" href="css/style.css">
@@ -1026,13 +1025,13 @@
     <button class="control-fab fab-menu-toggle" id="fab-menu-toggle" onclick="toggleFabMenu(event)" title="功能選單" style="background-color: var(--ink); color: #fff;">
       <span id="fab-menu-ico">🧭</span> <span class="fab-lbl">選單</span><span class="fab-dot" id="login-dot-menu" style="display:none;"></span>
     </button>
-    <button class="control-fab" onclick="toggleDrawer('status')" style="background-color: var(--sky-blue);" title="查看能力 (S)">
+    <button class="control-fab" onclick="toggleDrawer('status')" style="background-color: var(--sky);" title="查看能力 (S)">
       📊 <span class="fab-lbl">能力</span><span class="fab-dot" id="login-dot" style="display:none;"></span>
     </button>
     <button class="control-fab" onclick="toggleDrawer('build')" style="background-color: #ff9f0a;" title="城鎮建設 (B)">
       🏛️ <span class="fab-lbl">建設</span>
     </button>
-    <button class="control-fab" onclick="toggleDrawer('shop')" style="background-color: var(--accent);" title="零用錢商店 (P)">
+    <button class="control-fab" onclick="toggleDrawer('shop')" style="background-color: var(--leaf);" title="零用錢商店 (P)">
       🛒 <span class="fab-lbl">商店</span>
     </button>
     <button class="control-fab" onclick="toggleDrawer('friends')" style="background-color: #30d158;" title="好友通訊 (F)">
@@ -1044,7 +1043,7 @@
     <button class="control-fab" onclick="openWardrobeModal()" style="background-color: #bf5af2;" title="學生衣櫃 (W)">
       🚪 <span class="fab-lbl">衣櫃</span>
     </button>
-    <button class="control-fab" onclick="toggleDrawer('settings')" style="background-color: var(--purple);" title="系統設定">
+    <button class="control-fab" onclick="toggleDrawer('settings')" style="background-color: var(--grape);" title="系統設定">
       ⚙️ <span class="fab-lbl">系統</span>
     </button>
     <button class="control-fab" onclick="showHelpModal()" style="background-color: #607d8b;" title="玩法說明">
@@ -1125,19 +1124,19 @@
       </div>
 
       <div class="status-group" style="margin-bottom: 14px;">
-        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">📋 今日任務 <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">完成自動發獎勵，每天刷新 3 個</span></div>
+        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">📋 今日任務 <span style="font-size: 0.72rem; color: var(--muted); font-weight: 600;">完成自動發獎勵，每天刷新 3 個</span></div>
         <div id="daily-quests-list"></div>
       </div>
 
       <div class="status-group" style="margin-bottom: 14px;">
-        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">🎯 本週目標 <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">達成獎 $1200，每週一題</span></div>
+        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">🎯 本週目標 <span style="font-size: 0.72rem; color: var(--muted); font-weight: 600;">達成獎 $1200，每週一題</span></div>
         <div id="weekly-goal-box"></div>
       </div>
 
       <div class="status-group" style="margin-bottom: 14px;">
-        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">🏁 每週競賽 <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">拚獎學金・週五結算</span></div>
+        <div style="font-weight: 900; font-size: 0.95rem; margin-bottom: 6px;">🏁 每週競賽 <span style="font-size: 0.72rem; color: var(--muted); font-weight: 600;">拚獎學金・週五結算</span></div>
         <div id="rivals-list"></div>
-        <div id="rival-taunt" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-weight: 700;"></div>
+        <div id="rival-taunt" style="font-size: 0.78rem; color: var(--muted); margin-top: 6px; font-weight: 700;"></div>
       </div>
 
       <div class="status-group" style="margin-bottom: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
@@ -1148,7 +1147,7 @@
       <div class="academic-section-group">
         <!-- 學科能力 -->
         <h4 class="drawer-section-title">📚 學科能力</h4>
-        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px; line-height:1.3;">
+        <p style="font-size:0.75rem; color:var(--muted); margin-bottom:12px; line-height:1.3;">
           * 聽講上限 60 分（虛線左側黃色），必須在放學/週末點擊「圖書館」複習解鎖剩餘 40 分（虛線右側綠色）。
         </p>
 
@@ -1262,13 +1261,13 @@
             </div>
           </div>
           <div class="shop-item-action">
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--primary);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--amber);"
               onclick="buyItem('chicken', 20)">$20 購買</button>
             <div style="display:flex; align-items:center; gap:6px;">
               <span style="font-size:0.75rem; font-weight:900;">持有:</span>
               <div class="item-count-badge" id="bag-chicken">0</div>
             </div>
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--leaf);"
               onclick="useItem('chicken')" id="btn-use-chicken" disabled>使用</button>
           </div>
         </div>
@@ -1283,13 +1282,13 @@
             </div>
           </div>
           <div class="shop-item-action">
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--primary);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--amber);"
               onclick="buyItem('drink', 15)">$15 購買</button>
             <div style="display:flex; align-items:center; gap:6px;">
               <span style="font-size:0.75rem; font-weight:900;">持有:</span>
               <div class="item-count-badge" id="bag-drink">0</div>
             </div>
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--leaf);"
               onclick="useItem('drink')" id="btn-use-drink" disabled>使用</button>
           </div>
         </div>
@@ -1336,13 +1335,13 @@
             </div>
           </div>
           <div class="shop-item-action">
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--purple);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--grape);"
               onclick="buyItem('mentalbook', 30)">$30 購買</button>
             <div style="display:flex; align-items:center; gap:6px;">
               <span style="font-size:0.75rem; font-weight:900;">持有:</span>
               <div class="item-count-badge" id="bag-mentalbook">0</div>
             </div>
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--leaf);"
               onclick="useItem('mentalbook')" id="btn-use-mentalbook" disabled>使用</button>
           </div>
         </div>
@@ -1357,13 +1356,13 @@
             </div>
           </div>
           <div class="shop-item-action">
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--sky-blue);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--sky);"
               onclick="buyItem('bento', 50)">$50 購買</button>
             <div style="display:flex; align-items:center; gap:6px;">
               <span style="font-size:0.75rem; font-weight:900;">持有:</span>
               <div class="item-count-badge" id="bag-bento">0</div>
             </div>
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--leaf);"
               onclick="useItem('bento')" id="btn-use-bento" disabled>使用</button>
           </div>
         </div>
@@ -1384,7 +1383,7 @@
               <span style="font-size:0.75rem; font-weight:900;">持有:</span>
               <div class="item-count-badge" id="bag-vitamin">0</div>
             </div>
-            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--accent);"
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem; background: var(--leaf);"
               onclick="useItem('vitamin')" id="btn-use-vitamin" disabled>使用</button>
           </div>
         </div>
@@ -1577,7 +1576,7 @@
       <button class="drawer-close" onclick="closeAllDrawers()">✕</button>
     </div>
     <div class="drawer-body">
-      <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px; line-height:1.4;">
+      <p style="font-size:0.78rem; color:var(--muted); margin-bottom:12px; line-height:1.4;">
         💡 與夥伴在同一場所活動會<strong>自動增加好感</strong>！也可消耗 5 精力聊天（每日 1 次）或贈送背包裡的點心快速拉近距離，解鎖超強專屬加成！
       </p>
       <div id="friends-list-container">
@@ -1595,7 +1594,7 @@
     </div>
     <div class="drawer-body">
       <div style="padding: 10px 0;">
-        <p style="font-size:0.85rem; line-height:1.6; margin-bottom:15px; color:var(--text-muted);">
+        <p style="font-size:0.85rem; line-height:1.6; margin-bottom:15px; color:var(--muted);">
           歡迎來到學霸養成記！本遊戲會自動在本地存檔。離線收益規則：你不在時，角色會照著作息繼續生活，收益效率 50%，最多累積 8 小時（成就解鎖滿 15 個升至 12 小時、25 個升至 24 小時），離線期間照樣扣除每日生活費，回來時會附上逐項報告。
         </p>
         <button class="btn" id="btn-sound-toggle" style="width:100%; margin-bottom:10px;" onclick="toggleSound()">🔊 音效：開</button>
@@ -1628,10 +1627,10 @@
     <div class="game-modal" style="width: 440px; max-width: 92%; text-align: left; padding: 22px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <div class="game-modal-title" id="re-modal-title" style="margin:0; border:none; padding:0;">❗ 校園突發事件</div>
-        <span id="re-modal-badge" style="font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:12px; background:rgba(255,159,10,0.15); color:var(--primary);">日常奇遇</span>
+        <span id="re-modal-badge" style="font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:12px; background:rgba(255,159,10,0.15); color:var(--amber);">日常奇遇</span>
       </div>
       <div style="text-align:center; font-size:2.8rem; margin: 6px 0;" id="re-modal-icon">🎲</div>
-      <p id="re-modal-desc" style="font-size:0.9rem; font-weight:600; line-height:1.55; margin-bottom:14px; color:var(--text-color);"></p>
+      <p id="re-modal-desc" style="font-size:0.9rem; font-weight:600; line-height:1.55; margin-bottom:14px; color:var(--ink2);"></p>
       <div id="re-modal-choices">
         <!-- 動態渲染 2~3 個選項按鈕 -->
       </div>
@@ -1648,7 +1647,7 @@
         <div class="exam-progress-container">
           <div class="exam-progress-bar" id="exam-pb"></div>
         </div>
-        <p style="font-size: 0.85rem; color: var(--text-muted);" id="modal-status-lbl">正在答題中...</p>
+        <p style="font-size: 0.85rem; color: var(--muted);" id="modal-status-lbl">正在答題中...</p>
       </div>
       <button class="btn" id="btn-modal-close" style="display: none;" onclick="closeExamModal()">確定</button>
     </div>
@@ -1659,8 +1658,8 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.36.0)</span>
-        <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.37.0)</span>
+        <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--ink2);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
         <button class="help-tab-btn active" onclick="switchHelpTab('tab-daily', this)">⏰ 基本作息</button>
@@ -1670,10 +1669,10 @@
         <button class="help-tab-btn" onclick="switchHelpTab('tab-wardrobe', this)">👕 衣櫃換裝</button>
       </div>
       
-      <div style="max-height:300px; overflow-y:auto; line-height:1.6; font-size:0.9rem; color:var(--text-color);">
+      <div style="max-height:300px; overflow-y:auto; line-height:1.6; font-size:0.9rem; color:var(--ink2);">
         <!-- 基本作息 -->
         <div id="tab-daily" class="help-tab-content">
-          <h4 style="margin-top:0; color:var(--sky-blue); font-size:1rem; margin-bottom: 8px;">🌅 學霸的一天是怎麼過的？</h4>
+          <h4 style="margin-top:0; color:var(--sky); font-size:1rem; margin-bottom: 8px;">🌅 學霸的一天是怎麼過的？</h4>
           <p>小學霸會自動根據時間調度起居作息，你也可以點擊地圖上的建築手動進行<strong>派遣</strong>（一次派遣將持續 2 小時）：</p>
           <ul style="padding-left:16px; margin: 8px 0;">
             <li><strong>🏠 住家 (僅睡覺)</strong>：半夜與深夜的歸宿，提供安穩的睡眠。爸媽會在旁邊陪睡喔！</li>
@@ -1682,14 +1681,14 @@
             <li><strong>🍔 餐廳 (7:00~22:00)</strong>：肚子餓時，自動或手動派遣至此享用鐵板燒，迅速恢復<strong>飽足感</strong>！去餐廳時還可以看到廚師在鐵板前炒菜喔！</li>
             <li><strong>📖 圖書館 (8:00~21:00)</strong>：複習的重要場所，當學科複習度不足時，來此與同儕一起自修。</li>
           </ul>
-          <p style="font-size:0.8rem; opacity: 0.8; background:rgba(0,0,0,0.03); padding:8px; border-radius:6px; border-left:3px solid var(--accent); margin:0;">
+          <p style="font-size:0.8rem; opacity: 0.8; background:rgba(0,0,0,0.03); padding:8px; border-radius:6px; border-left:3px solid var(--leaf); margin:0;">
             💡 <strong>防卡死小技巧</strong>：半夜建築關門時，小人若在外面會自動折返住家；平日上課時也會強制留在學校。
           </p>
         </div>
 
         <!-- 生理指標 -->
         <div id="tab-status" class="help-tab-content" style="display:none;">
-          <h4 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom: 8px;">⚡ 生理平衡是學霸的基礎</h4>
+          <h4 style="margin-top:0; color:var(--leaf); font-size:1rem; margin-bottom: 8px;">⚡ 生理平衡是學霸的基礎</h4>
           <p>保持健康的生理狀態，才能高效學習：</p>
           <table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.82rem;">
             <thead>
@@ -1717,7 +1716,7 @@
 
         <!-- 學科與考試 -->
         <div id="tab-study" class="help-tab-content" style="display:none;">
-          <h4 style="margin-top:0; color:var(--purple); font-size:1rem; margin-bottom: 8px;">🎓 學科累積與升學大考</h4>
+          <h4 style="margin-top:0; color:var(--grape); font-size:1rem; margin-bottom: 8px;">🎓 學科累積與升學大考</h4>
           <p>點擊左側「能力」面板，可以看到國、英、數、自、社五個學科的進度條。每個科目都包含：</p>
           <ul style="padding-left:16px; margin:8px 0;">
             <li><span style="color:#2a9d8f; font-weight:bold;">● 聽講進度</span>：在<strong>學校</strong>上課獲得，上限為 60 分。</li>
@@ -1736,7 +1735,7 @@
             <li><strong>🛌 爸媽出事壓力釋放</strong>：當父母因為事件不在時，在住家睡覺大床空無一人，壓力每小時大幅減少 <strong>-8</strong>（沒有爸媽盯著，睡得極為自由）。</li>
           </ul>
           
-          <h5 style="margin: 8px 0 4px 0; font-size:0.9rem; color:var(--text-color);">📅 每週日 00:00 隨機彩蛋機率：</h5>
+          <h5 style="margin: 8px 0 4px 0; font-size:0.9rem; color:var(--ink2);">📅 每週日 00:00 隨機彩蛋機率：</h5>
           <p style="font-size:0.82rem; line-height: 1.4;">
             <strong>【父母出事事件】</strong>（若父母健在時）：<br>
             出事機率隨著玩家教育程度提升（年級變高）而大幅上升。可能發生的慘劇有：自然老死👵👴、吵架離婚💔、離家出走尋求真理🏃‍♂️🏃‍♀️、過馬路被撞🚗💨、因為算不出微積分作業太笨被笨死🧠❌。<br>
@@ -1757,7 +1756,7 @@
 
         <!-- 衣櫃換裝 -->
         <div id="tab-wardrobe" class="help-tab-content" style="display:none;">
-          <h4 style="margin-top:0; color:var(--primary); font-size:1rem; margin-bottom: 8px;">👕 換上你的專屬穿搭！</h4>
+          <h4 style="margin-top:0; color:var(--amber); font-size:1rem; margin-bottom: 8px;">👕 換上你的專屬穿搭！</h4>
           <p>點擊住家內的<strong>實體衣櫃 (🚪)</strong>，即可打開更衣間！你可以裝備現成的精美帽子、衣服與皮鞋，或是發揮創意繪製專屬作品：</p>
           <ul style="padding-left:16px; margin:8px 0; font-size:0.85rem;">
             <li><strong>🎨 18x30 手繪畫板</strong>：提供 ✏️鉛筆、🧽橡皮擦、與精選 16 色常用色票（支援自定義 RGB 調色），頭頂上方特意留白 6 排以利繪製各式高聳、華麗的帽子！</li>
@@ -1780,7 +1779,7 @@
       <div class="game-modal-title" id="parents-modal-title">👨‍👩‍👦 父母事件紀錄</div>
       <div class="game-modal-content">
         <div id="parents-modal-icon" style="font-size: 3.5rem; margin-bottom: 12px;">🪦</div>
-        <p id="parents-modal-reason" style="font-size: 0.95rem; font-weight: 700; line-height: 1.6; color: var(--text-color);"></p>
+        <p id="parents-modal-reason" style="font-size: 0.95rem; font-weight: 700; line-height: 1.6; color: var(--ink2);"></p>
       </div>
       <button class="btn-exam-mini ready" onclick="closeParentsEventModal()" style="border:none; cursor:pointer; padding: 6px 24px; font-size: 0.85rem; border-radius: 20px;">我知道了</button>
     </div>
@@ -1926,7 +1925,7 @@
         <span style="font-weight:900; background:#ffe9a8; border-radius:999px; padding:4px 12px;">⏱ <span id="mock-time">60</span> 秒</span>
       </div>
       <div id="mock-quiz">
-        <div id="mock-progress" style="font-size:0.78rem; color:var(--text-muted); font-weight:700; margin-bottom:6px;"></div>
+        <div id="mock-progress" style="font-size:0.78rem; color:var(--muted); font-weight:700; margin-bottom:6px;"></div>
         <div id="mock-q" style="font-size:1.02rem; font-weight:900; margin-bottom:12px;"></div>
         <div id="mock-opts" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -1967,7 +1966,7 @@
         style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,0,0,0.08); padding-bottom:10px; margin-bottom:12px; flex-shrink:0;">
         <h3 style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">🏅 成就殿堂</h3>
         <div style="display:flex; align-items:center; gap:10px;">
-          <span id="ach-progress-text" style="font-size:0.8rem; font-weight:700; color:var(--primary);">0 / 0</span>
+          <span id="ach-progress-text" style="font-size:0.8rem; font-weight:700; color:var(--amber);">0 / 0</span>
           <button onclick="closeAchievementPanel()"
             style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px;">✕</button>
         </div>
@@ -2001,7 +2000,7 @@
         <button id="mg-close-btn" onclick="closeMinigame()"
           style="background:none; border:none; font-size:1.2rem; cursor:pointer; display:none; min-width:40px; min-height:40px; padding:8px;">✕</button>
       </div>
-      <p id="mg-desc" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;"></p>
+      <p id="mg-desc" style="font-size:0.85rem; color:var(--muted); margin-bottom:10px;"></p>
       <div class="mg-timer-bar">
         <div class="mg-timer-fill" id="mg-timer-fill" style="width:100%"></div>
       </div>
@@ -2029,11 +2028,11 @@
   <div class="overlay" id="rebirth-overlay">
     <div class="game-modal" style="width: 480px; max-width: 92%; padding: 24px; text-align: left;">
       <div class="game-modal-title" style="text-align:center;">🔄 轉世加點 — 選擇永久加成</div>
-      <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-bottom:8px;">
+      <p style="font-size:0.85rem; color:var(--muted); text-align:center; margin-bottom:8px;">
         根據上一世的表現，你獲得了轉世點數！將點數分配到永久加成上吧。
       </p>
       <div style="text-align:center; margin-bottom:12px;">
-        <span style="font-size:1.3rem; font-weight:900; color:var(--primary);">可用點數：<span
+        <span style="font-size:1.3rem; font-weight:900; color:var(--amber);">可用點數：<span
             id="rebirth-points-display">0</span></span>
       </div>
       <div class="rebirth-alloc-grid" id="rebirth-alloc-grid">
@@ -2081,7 +2080,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.36.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.37.0)
   </div>
 
   <!-- ==========================================================================

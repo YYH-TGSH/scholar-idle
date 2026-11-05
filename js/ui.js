@@ -597,10 +597,10 @@
 
         card.innerHTML = `
           ${previewHtml}
-          <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--text-color); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</div>
+          <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--ink2); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</div>
           <div style="display:flex; gap:4px; width:100%;">
-            <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.7rem; padding:9px 3px; border:none; border-radius:6px; background:var(--primary); color:white; font-weight:700; cursor:pointer;">裝備</button>
-            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#30d158; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--secondary); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
+            <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.7rem; padding:9px 3px; border:none; border-radius:6px; background:var(--amber); color:white; font-weight:700; cursor:pointer;">裝備</button>
+            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#30d158; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--rose); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
           </div>
         `;
 
@@ -1385,7 +1385,7 @@
         gameState.examCooldownEndHour = 0;
         gameState.examCooldownEndMinute = 0;
 
-        desc.innerHTML = `${distinction ? '🏆 特優合格' : '🎉 恭喜你'}！你的成績：<b>${score} 分</b>（及格線 ${passMark} 分）<br>你現在是：<b style="color:#2a9d8f; font-size:1.4rem;">${nextGradeName}</b>${distinction ? '<br>特優獎學金 <b>+$150</b>！' : ''}<br><br><span style="font-size:0.85rem; color:var(--text-muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，及格線也會提高，但超商打工時薪同步加薪！</span>`;
+        desc.innerHTML = `${distinction ? '🏆 特優合格' : '🎉 恭喜你'}！你的成績：<b>${score} 分</b>（及格線 ${passMark} 分）<br>你現在是：<b style="color:#2a9d8f; font-size:1.4rem;">${nextGradeName}</b>${distinction ? '<br>特優獎學金 <b>+$150</b>！' : ''}<br><br><span style="font-size:0.85rem; color:var(--muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，及格線也會提高，但超商打工時薪同步加薪！</span>`;
         statusLbl.innerText = "繼續衝刺下一個學歷目標吧！";
         // UX4：升學成功撒彩花
         setTimeout(() => celebrateGraduation(), 300);
@@ -1437,7 +1437,7 @@
         ['最親近的好友', bestFriend]
       ];
       const sum = document.getElementById('semester-summary');
-      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #d8cfc0;"><span style="color:var(--text-muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
+      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #d8cfc0;"><span style="color:var(--muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
       const cv = document.getElementById('semester-canvas');
       const dl = document.getElementById('semester-download');
       if (cv && dl) {
@@ -1722,7 +1722,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.36.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.37.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2382,7 +2382,7 @@
         addBuff(cfg.type, cfg.winMult, cfg.winMin, cfg.icon, true, `${cfg.desc} x${cfg.winMult}`);
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">🎉</span>
-          <div class="result-title" style="color:var(--accent);">勝利！</div>
+          <div class="result-title" style="color:var(--leaf);">勝利！</div>
           <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 秒！${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examSuccess');
@@ -2390,7 +2390,7 @@
         addBuff(cfg.type, cfg.loseMult, cfg.loseMin, cfg.icon, false, `${cfg.desc} x${cfg.loseMult}`);
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">😅</span>
-          <div class="result-title" style="color:var(--secondary);">失敗...</div>
+          <div class="result-title" style="color:var(--rose);">失敗...</div>
           <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 秒${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examFail');
@@ -2605,10 +2605,10 @@
         <div id="balloon-zone" style="width:100%; height:180px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; user-select:none;" onclick="handleBalloonClick()">
           <div id="balloon-body" style="width:60px; height:70px; border-radius:50% 50% 50% 50% / 55% 55% 45% 45%; display:flex; align-items:center; justify-content:center; font-size:2rem; transition: width 0.08s, height 0.08s; position:relative;">
             🎈
-            <div style="position:absolute; bottom:-15px; font-size:0.7rem; font-weight:700; color:var(--text-muted);" id="balloon-clicks">0 / ?</div>
+            <div style="position:absolute; bottom:-15px; font-size:0.7rem; font-weight:700; color:var(--muted);" id="balloon-clicks">0 / ?</div>
           </div>
         </div>
-        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">瘋狂點擊氣球！也可以按空白鍵！</div>
+        <div style="font-size:0.8rem; color:var(--muted); margin-top:6px;">瘋狂點擊氣球！也可以按空白鍵！</div>
       `;
 
       function spawnBalloon() {
@@ -2622,7 +2622,7 @@
         balloon.style.height = '70px';
         balloon.style.opacity = '1';
         balloon.style.borderRadius = '50% 50% 50% 50% / 55% 55% 45% 45%';
-        balloon.innerHTML = `🎈<div style="position:absolute; bottom:-15px; font-size:0.7rem; font-weight:700; color:var(--text-muted);" id="balloon-clicks">0 / ${clickTarget}</div>`;
+        balloon.innerHTML = `🎈<div style="position:absolute; bottom:-15px; font-size:0.7rem; font-weight:700; color:var(--muted);" id="balloon-clicks">0 / ${clickTarget}</div>`;
       }
 
       window.handleBalloonClick = function () {
@@ -2788,7 +2788,7 @@
 
       area.innerHTML = `
         <div style="font-weight:800; font-size:0.9rem; margin-bottom:10px; text-align:center;">
-          已刷條碼：<span id="store-scan-count" style="color:var(--accent);">0</span> / ${targetScan}
+          已刷條碼：<span id="store-scan-count" style="color:var(--leaf);">0</span> / ${targetScan}
         </div>
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; width:100%;">
           ${allItems.map((it, idx) => `
@@ -3065,7 +3065,7 @@
       document.getElementById('mock-quiz').style.display = 'none';
       const res = document.getElementById('mock-result');
       res.style.display = 'block';
-      res.innerHTML = `<div style="font-size:2rem;">${mockScore >= 8 ? '🏆' : (mockScore >= 5 ? '💪' : '😅')}</div><div style="font-weight:900; font-size:1.05rem; margin:6px 0;">答對 ${mockScore} / ${mockList.length} 題</div><div style="color:var(--text-muted); font-size:0.85rem;">正式考試成功率 <b style="color:#2a9d8f;">+${buff}%</b>（用於下一次升學考）</div>`;
+      res.innerHTML = `<div style="font-size:2rem;">${mockScore >= 8 ? '🏆' : (mockScore >= 5 ? '💪' : '😅')}</div><div style="font-weight:900; font-size:1.05rem; margin:6px 0;">答對 ${mockScore} / ${mockList.length} 題</div><div style="color:var(--muted); font-size:0.85rem;">正式考試成功率 <b style="color:#2a9d8f;">+${buff}%</b>（用於下一次升學考）</div>`;
       playSound(mockScore >= 5 ? 'examSuccess' : 'click');
       saveGameData();
       updateUI();
@@ -3400,7 +3400,7 @@
             stage.textContent = '🎉';
             if (!gameState.unlockedParts) gameState.unlockedParts = [];
             gameState.unlockedParts.push(result.part.id);
-            if (res) res.innerHTML = `抽中限定部件：<b>${result.part.name}</b>！<br><span style="font-size:0.8rem; color:var(--text-muted);">到衣櫃編輯器的範本區套用它，湊滿一套還有加成</span>`;
+            if (res) res.innerHTML = `抽中限定部件：<b>${result.part.name}</b>！<br><span style="font-size:0.8rem; color:var(--muted);">到衣櫃編輯器的範本區套用它，湊滿一套還有加成</span>`;
             playSound('examSuccess');
           } else {
             stage.textContent = '💰';
