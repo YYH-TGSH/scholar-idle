@@ -1812,7 +1812,8 @@
           el.style.zIndex = String(Math.round(npc.y)); // v9.12.3 依深度排序：前方人物蓋後方
           if (npc.atDinner && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.DINNER_CLIP); // v9.45 晚餐爸媽夾層：椅背(172)之後、桌前板(196)之前，臉不再被椅背蓋住
           else if (npc.insideLoc === 'store' && npc.state === 'seated' && !npc.shopStage) el.style.zIndex = String(npc.x >= 700 ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.45 超商坐姿分流：櫃檯崗位 945（櫃檯拆兩帶之間）、窗邊客 955（吧台兩帶之間）
-          else if (npc.insideLoc === 'restaurant' && npc.state === 'seated' && npc.key !== 'chef') el.style.zIndex = String(Z_LAYER.SEATED_CLIP); // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
+          else if (npc.insideLoc === 'restaurant' && npc.state === 'seated') el.style.zIndex = String(npc.key === 'chef' ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.47 廚師納入夾層 945（鐵板拆兩帶之間，臉不再被鐵板蓋住）
+          else if (npc.insideLoc === 'school' && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.POST_CLIP); // v9.47 學校坐姿站前板兩帶之間 945：臉在上帶之上、下帶只蓋腿（學生/講台老師/辦公室老師同規） // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
           else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
           else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = String(Z_LAYER.WALK); // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
           else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
@@ -2166,10 +2167,11 @@
 
 
     // ================= v9.21 學校大場景（比照住家/超商/餐廳：大教室塞框框、課桌前景層） =================
-    const _deskBack = [], _deskFront = [];
+    const _deskBack = [], _deskFront = [], _deskFrontBack = [];
     [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]].forEach(([sx, sy]) => { // v9.22 教室只留 6 張課桌（左右改辦公室/閱讀角）
       _deskBack.push(`<rect x="${sx - 28}" y="${sy - 38}" width="56" height="14" fill="#b08968" stroke="#182042" stroke-width="1.8"/><rect x="${sx - 16}" y="${sy - 35}" width="13" height="8" fill="#e74c3c"/><rect x="${sx + 4}" y="${sy - 34}" width="12" height="7" fill="#f5f0e6" stroke="#b0a58e" stroke-width="1"/><rect x="${sx - 20}" y="${sy + 3}" width="40" height="9" fill="#795548" stroke="#182042" stroke-width="1.5"/>`);
-      _deskFront.push(`<rect x="${sx - 28}" y="${sy - 24}" width="56" height="26" fill="#a9743f" stroke="#182042" stroke-width="1.8"/><line x1="${sx - 28}" y1="${sy - 24}" x2="${sx + 28}" y2="${sy - 24}" stroke="#d9a066" stroke-width="2"/>`);
+      _deskFrontBack.push(`<rect x="${sx - 28}" y="${sy - 24}" width="56" height="12" fill="#a9743f" stroke="#182042" stroke-width="1.8"/><line x1="${sx - 28}" y1="${sy - 24}" x2="${sx + 28}" y2="${sy - 24}" stroke="#d9a066" stroke-width="2"/>`);
+      _deskFront.push(`<rect x="${sx - 28}" y="${sy - 12}" width="56" height="14" fill="#a9743f"/>`);
     });
     const SCHOOL_ROOMS_HTML = `
 <svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
@@ -2234,10 +2236,15 @@
   <text x="553" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
 <g id="school-tank"><rect x="876" y="118" width="140" height="4" fill="#8d5a2c"/><rect x="880" y="72" width="132" height="46" fill="#bfe3ff" stroke="#182042" stroke-width="2"/><rect x="884" y="76" width="124" height="38" fill="#7ec8e3" opacity="0.7"/><g class="fish-a"><rect x="896" y="88" width="10" height="5" fill="#ff8c42"/><rect x="893" y="89" width="3" height="3" fill="#ff8c42"/><rect x="903" y="89" width="1" height="1" fill="#182042"/></g><g class="fish-b"><rect x="966" y="98" width="9" height="4" fill="#ffd166"/><rect x="974" y="99" width="3" height="2" fill="#ffd166"/></g><circle class="fish-bub" cx="998" cy="106" r="2" fill="#ffffff" opacity="0.85"/><rect x="884" y="108" width="124" height="6" fill="#58a05c"/></g>
 </svg>
-<svg id="school-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="524" y="102" width="102" height="20" fill="#795548" stroke="#182042" stroke-width="2"/>
+<svg id="school-front-back" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:940; pointer-events:none;">
+  <rect x="524" y="102" width="102" height="10" fill="#795548" stroke="#182042" stroke-width="2"/>
   <line x1="524" y1="102" x2="626" y2="102" stroke="#a1887f" stroke-width="2"/>
-  <rect x="104" y="124" width="108" height="20" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
+  <rect x="104" y="124" width="108" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
+  ${_deskFrontBack.join('')}
+</svg>
+<svg id="school-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
+  <rect x="524" y="112" width="102" height="10" fill="#795548"/>
+  <rect x="104" y="134" width="108" height="10" fill="#8d5a2c"/>
   ${_deskFront.join('')}
 </svg>`;
     function ensureSchoolInterior() {
@@ -2608,8 +2615,8 @@
 <svg id="lib-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
   <rect x="474" y="124" width="202" height="26" fill="#795548" stroke="#182042" stroke-width="2"/>
   <line x1="474" y1="124" x2="676" y2="124" stroke="#a1887f" stroke-width="2"/>
-  <rect x="196" y="186" width="268" height="10" fill="#6d4c41"/>
-  <rect x="686" y="186" width="268" height="10" fill="#6d4c41"/>
+  <rect x="196" y="184" width="268" height="10" fill="#6d4c41"/>
+  <rect x="686" y="184" width="268" height="10" fill="#6d4c41"/>
 </svg>
 <button class="lib-rec-book" onpointerdown="event.stopPropagation()" onclick="borrowBook()">📖 借推薦書</button>`;
     let _libPanManual = null;
@@ -2786,19 +2793,22 @@
   <rect x="550" y="272" width="120" height="28" fill="#8d5a2c"/>
   <text x="588" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
 </svg>
-<svg id="rest-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="60" y="108" width="520" height="32" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
+<svg id="rest-front-back" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:940; pointer-events:none;">
+  <rect x="60" y="108" width="520" height="16" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
   <line x1="60" y1="108" x2="580" y2="108" stroke="#d9a441" stroke-width="3"/>
   <g stroke="#5d4037" stroke-width="2">
     <line x1="125" y1="112" x2="125" y2="136"/><line x1="190" y1="112" x2="190" y2="136"/><line x1="255" y1="112" x2="255" y2="136"/><line x1="320" y1="112" x2="320" y2="136"/><line x1="385" y1="112" x2="385" y2="136"/><line x1="450" y1="112" x2="450" y2="136"/><line x1="515" y1="112" x2="515" y2="136"/>
   </g>
 </svg>
+<svg id="rest-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
+  <rect x="60" y="124" width="520" height="16" fill="#6d4c41"/>
+  <path d="M734,160 A36,36 0 0 0 806,160 Z" fill="#f5f0e6" stroke="#182042" stroke-width="2"/>
+  <path d="M954,208 A36,36 0 0 0 1026,208 Z" fill="#f5f0e6" stroke="#182042" stroke-width="2"/>
+</svg>
 <svg id="rest-front2" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:960; pointer-events:none;">
   <rect x="60" y="166" width="520" height="14" fill="#5d4037" stroke="#182042" stroke-width="2.5"/>
   <line x1="60" y1="166" x2="580" y2="166" stroke="#8d6e63" stroke-width="2"/>
   <text x="282" y="177" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">鐵 板 燒</text>
-  <path d="M734,160 A36,36 0 0 0 806,160 Z" fill="#f5f0e6" stroke="#182042" stroke-width="2"/>
-  <path d="M954,208 A36,36 0 0 0 1026,208 Z" fill="#f5f0e6" stroke="#182042" stroke-width="2"/>
 </svg>`;
     function ensureRestInterior() {
       if (document.getElementById('rest-stage')) return;
