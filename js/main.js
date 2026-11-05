@@ -292,11 +292,7 @@
     // 校園就 center 在「看得到的空位」裡，不再對著整個螢幕置中、上下留兩大片空白。
     function layoutMapInsets() {
       const rootEl = document.documentElement;
-      if (window.innerWidth > 820 && !(window.innerWidth > window.innerHeight && window.innerHeight <= 520)) {
-        rootEl.style.setProperty('--chrome-top', '0px');
-        rootEl.style.setProperty('--chrome-bottom', '0px');
-        return;
-      }
+      // v9.46 寬版不再回傳 0：全寬度都量測真實保留空間（實機報告 A1/A3——寬螢幕在版面系統裡原本不存在）
       const header = document.querySelector('.floating-header');
       const controls = document.querySelector('.floating-controls');
       const nav = document.getElementById('room-nav');
@@ -323,7 +319,11 @@
       // v8.7 預設視角 = 嚴格 contain：整個校園在可用矩形裡一次看完、跟著螢幕尺寸縮放定位，
       // 不再放大溢出。想看細節用雙指縮放，或點底部房間膠囊直接放大跳到那一間。
       // v9.0 橫向捲軸：基準縮放讓畫面約涵蓋 720px 寬的世界 (約 2.3 棟建築)，其餘靠跟隨相機/拖曳探索
-      const fit = Math.min(availW / 720, availH / 560, 1.25);
+      // v9.46 寬版改 fit-to-world（實機報告 A2）：舊公式分母停在舊世界 720x560，新世界 1150x920 在寬螢幕被系統性放大裁切（1600x900 開局裁掉約 27% 高度）
+      const _wideFit = window.innerWidth > 820 && !(window.innerWidth > window.innerHeight && window.innerHeight <= 520);
+      const _ww = (typeof WORLD_W !== 'undefined') ? WORLD_W : 1150;
+      const _wh = (typeof WORLD_H !== 'undefined') ? WORLD_H : 920;
+      const fit = _wideFit ? Math.min(availW / _ww, availH / _wh, 1.25) : Math.min(availW / 720, availH / 560, 1.25);
       let scale = Math.max(Math.min(fit, 1.25), 0.15);
       window.__baseMapScale = scale;
       try { if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; } } catch (e) { }
@@ -1339,7 +1339,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.45.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.46.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

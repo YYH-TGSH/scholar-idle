@@ -3901,3 +3901,25 @@ input, select, textarea { border-radius: 14px !important; }
 .pix-ico { width: 18px; height: 18px; vertical-align: -3px; }
 .hv .pix-ico { width: 15px; height: 15px; vertical-align: -2px; }
 .fab-ico { width: 20px; height: 20px; }
+
+/* ================= v9.46 寬版設計層（實機報告 A1/A3/A4） ================= */
+.map-viewport {
+  top: var(--chrome-top, 0px);
+  bottom: var(--chrome-bottom, 0px);
+  height: auto;
+}
+@media (min-width: 821px) {
+  .floating-header {
+    left: 50%;
+    right: auto;
+    width: min(1100px, calc(100vw - 40px));
+    transform: translateX(-50%);
+  }
+  .floating-controls.fab-open {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+    max-width: min(580px, calc(100vw - 40px));
+  }
+}
