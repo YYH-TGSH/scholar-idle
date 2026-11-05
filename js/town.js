@@ -529,9 +529,9 @@
         gameState.bag[type] -= 1;
 
         if (type === 'chicken') {
-          gameState.hunger = 100;
+          gameState.hunger = Math.min(100, gameState.hunger + 65); // v9.32 雞排 $20 不再一鍵全滿（便當 $50 才是全滿）
           gameState.stress = Math.max(0, gameState.stress - 15);
-          queueFloatingText("🍗 吃雞排！真香！(飽足全滿,壓力-15)");
+          queueFloatingText("🍗 吃雞排！真香！(飽足+65,壓力-15)");
         } else if (type === 'drink') {
           gameState.energy = Math.min(100, gameState.energy + 30);
           gameState.stress = Math.min(100, gameState.stress + 5);
@@ -559,6 +559,8 @@
 
     function buyPassive(type, cost) {
       const priceMut = typeof getMutationMult === 'function' ? getMutationMult('shop_price') : 1.0;
+      const PASSIVE_CAPS = { book: 10, shoes: 10, headphone: 5, tablet: 5, sofa: 3, trophy: 3 }; // v9.32 被動裝備上限（報告：原本無上限可無限疊）
+      if ((gameState.passive[type] || 0) >= (PASSIVE_CAPS[type] || 99)) { createFloatingText('⚠️ 這項裝備已達購買上限！'); return; }
       const finalCost = Math.round(cost * priceMut);
       if (gameState.money >= finalCost) {
         playSound('buy');
@@ -571,6 +573,29 @@
       } else {
         createFloatingText(`❌ 零用錢不夠喔！(需 $${finalCost})`);
       }
+    }
+
+    // v9.32 收藏品（金錢出口）：一次性珍藏＋小幅永久效果 — 後期收入終於有地方去（報告：金錢只進不出）
+    const COLLECTIBLES = {
+      stamp: { name: '📮 郵票冊', price: 2000 },
+      watch: { name: '⌚ 名錶', price: 8000 },
+      painting: { name: '🖼️ 名畫', price: 20000 }
+    };
+    function buyCollectible(id) {
+      const def = COLLECTIBLES[id];
+      if (!def) return;
+      gameState.collectibles = gameState.collectibles || {};
+      if (gameState.collectibles[id]) { createFloatingText('已收藏這件珍品了！'); return; }
+      const priceMut = typeof getMutationMult === 'function' ? getMutationMult('shop_price') : 1.0;
+      const finalCost = Math.round(def.price * priceMut);
+      if (gameState.money < finalCost) { createFloatingText(`❌ 零用錢不夠喔！(需 $${finalCost})`); return; }
+      playSound('buy');
+      gameState.money -= finalCost;
+      gameState.totalSpent = (gameState.totalSpent || 0) + finalCost;
+      gameState.collectibles[id] = true;
+      createFloatingText(`🏆 收藏了${def.name}！(-$${finalCost})`);
+      updateUI();
+      saveGameData();
     }
 
     // ================= v9.8 精緻化：座位池＋門口排隊＋全員步行職員＋爸媽 =================

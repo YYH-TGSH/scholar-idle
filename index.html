@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.31.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.32.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -1446,6 +1446,79 @@
           </div>
         </div>
 
+        <!-- 🛋️ 高級沙發 (v9.32 實裝：原本是買不到、也沒有效果的死欄位) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🛋️</span>
+            <div>
+              <span class="shop-item-name">高級沙發 (被動)</span>
+              <div class="shop-item-desc">睡眠減壓每級 +1、精力恢復每級 +2（上限 3 級）</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" onclick="buyPassive('sofa', 1200)">$1200
+              購買</button>
+            <span style="font-size:0.8rem; font-weight:900;" id="lbl-sofa-owned">已擁有: 0</span>
+          </div>
+        </div>
+
+        <!-- 🏆 獎盃展示櫃 (v9.32 實裝) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🏆</span>
+            <div>
+              <span class="shop-item-name">獎盃展示櫃 (被動)</span>
+              <div class="shop-item-desc">考試預估成績每級 +2 分（上限 3 級）</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" onclick="buyPassive('trophy', 1500)">$1500
+              購買</button>
+            <span style="font-size:0.8rem; font-weight:900;" id="lbl-trophy-owned">已擁有: 0</span>
+          </div>
+        </div>
+
+        <!-- 🏆 收藏品 (v9.32 金錢出口：一次性珍藏) -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">📮</span>
+            <div>
+              <span class="shop-item-name">郵票冊 (收藏)</span>
+              <div class="shop-item-desc">傳家珍藏：讀書效率永久 +2%</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" id="btn-collect-stamp" data-price="$2,000 購買" onclick="buyCollectible('stamp')">$2,000
+              購買</button>
+          </div>
+        </div>
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">⌚</span>
+            <div>
+              <span class="shop-item-name">名錶 (收藏)</span>
+              <div class="shop-item-desc">傳家珍藏：打工時薪永久 +5%</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" id="btn-collect-watch" data-price="$8,000 購買" onclick="buyCollectible('watch')">$8,000
+              購買</button>
+          </div>
+        </div>
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <span class="shop-item-icon">🖼️</span>
+            <div>
+              <span class="shop-item-name">名畫 (收藏)</span>
+              <div class="shop-item-desc">傳家珍藏：每日零用錢永久 +$15</div>
+            </div>
+          </div>
+          <div class="shop-item-action">
+            <button class="btn" style="padding:6px 12px; font-size:0.8rem;" id="btn-collect-painting" data-price="$20,000 購買" onclick="buyCollectible('painting')">$20,000
+              購買</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1519,6 +1592,15 @@
           歡迎來到學霸養成記！本遊戲會自動在本地存檔。離線收益規則：你不在時，角色會照著作息繼續生活，收益效率 50%，最多累積 8 小時（成就解鎖滿 15 個升至 12 小時、25 個升至 24 小時），離線期間照樣扣除每日生活費，回來時會附上逐項報告。
         </p>
         <button class="btn" id="btn-sound-toggle" style="width:100%; margin-bottom:10px;" onclick="toggleSound()">🔊 音效：開</button>
+        <button class="btn" style="width:100%; margin-bottom:10px;" onclick="earlyRebirth()">🌱 下一屆傳承（提前結算這一屆）</button>
+        <div style="margin-bottom:12px;">
+          <div style="font-weight:900; font-size:0.85rem; margin-bottom:6px;">💾 存檔碼（備份／換裝置用）</div>
+          <textarea id="save-code-area" rows="3" style="width:100%; font-size:0.7rem; padding:8px; border-radius:8px; border:2px solid #d8cfc0; box-sizing:border-box;" placeholder="按「產生存檔碼」取得，或把存檔碼貼到這裡還原"></textarea>
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button class="btn" style="flex:1;" onclick="exportSaveCode()">📋 產生存檔碼</button>
+            <button class="btn" style="flex:1;" onclick="importSaveCode()">📥 用存檔碼還原</button>
+          </div>
+        </div>
         <button class="btn" style="width:100%; background-color:#ff8a8a;" onclick="resetGameData()">⚠️ 重置所有進度</button>
       </div>
     </div>
@@ -1570,7 +1652,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.31.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.32.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -1922,7 +2004,20 @@
     </div>
   </div>
 
-  <!-- 🔄 輪迴加點面板 (投胎前彈出) -->
+  <!-- 🎓 v9.32 學期成績單分享卡 -->
+  <div class="overlay" id="semester-overlay">
+    <div class="game-modal" style="width: 480px; max-width: 94%; text-align: left; padding: 22px;">
+      <div class="game-modal-title" style="text-align:center;">🎓 學期成績單</div>
+      <div id="semester-summary" style="margin: 10px 0 14px;"></div>
+      <canvas id="semester-canvas" width="640" height="400" style="display:none;"></canvas>
+      <div style="display:flex; gap:8px; justify-content:center;">
+        <a class="btn" id="semester-download" download="semester-card.png" style="display:none; text-decoration:none;">⬇️ 下載圖片</a>
+        <button class="btn" onclick="closeSemesterCard()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔄 傳承加點面板 (傳承前彈出) -->
 
   <div class="overlay" id="rebirth-overlay">
     <div class="game-modal" style="width: 480px; max-width: 92%; padding: 24px; text-align: left;">
@@ -1946,7 +2041,7 @@
       <div style="display:flex; gap:10px; margin-top:16px;">
         <button class="btn-exam-mini" onclick="confirmRebirth()"
           style="flex:1; border:none; cursor:pointer; padding:12px; border-radius:14px; font-weight:800; font-size:0.95rem;">
-          ✨ 確認投胎！開啟新的一世
+          ✨ 確認傳承！開啟新的一屆
         </button>
       </div>
     </div>
@@ -1961,9 +2056,9 @@
       <p class="clear-stats" id="clear-stats"></p>
       <p class="clear-desc">
         學無止境，宇宙深處還有更多知識等你探索...<br>
-        是時候投胎重來，再創巔峰了。
+        是時候把這一身本事，傳承給下一屆的自己了。
       </p>
-      <button id="btn-reincarnate" onclick="startRebirthAllocation()">✨ 投胎重來！成為新的幼兒園神童</button>
+      <button id="btn-reincarnate" onclick="startRebirthAllocation()">✨ 傳承給下一屆！帶著天賦重新開始</button>
     </div>
   </div>
 
@@ -1979,7 +2074,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.31.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.32.0)
   </div>
 
   <!-- ==========================================================================

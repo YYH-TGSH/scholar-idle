@@ -1116,10 +1116,15 @@
       achievementData[id] = { unlocked: true, time: Date.now() };
       saveAchievements();
       const ach = ACHIEVEMENTS.find(a => a.id === id);
-      if (ach) showAchievementToast(ach);
+      if (ach) {
+        // v9.32 成就獎勵：解鎖不再只有 toast — 依類別發獎金（學業 $120／經濟 $150／其餘 $80，隱藏成就 +$70）
+        const reward = (ach.category === 'academic' ? 120 : (ach.category === 'economy' ? 150 : 80)) + (ach.hidden ? 70 : 0);
+        if (typeof gameState !== 'undefined' && gameState) { gameState.money = (gameState.money || 0) + reward; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + reward; }
+        showAchievementToast(ach, reward);
+      }
     }
 
-    function showAchievementToast(ach) {
+    function showAchievementToast(ach, reward) {
       playSound('examSuccess');
       const toast = document.createElement('div');
       toast.className = 'achievement-toast';
@@ -1127,7 +1132,7 @@
         <span class="toast-icon">${ach.icon}</span>
         <div>
           <div class="toast-text">🏅 成就解鎖：${ach.name}</div>
-          <div class="toast-sub">${ach.desc}</div>
+          <div class="toast-sub">${ach.desc}${reward ? `（獎勵 +$${reward}）` : ''}</div>
         </div>
       `;
       document.body.appendChild(toast);
@@ -1282,10 +1287,19 @@
     ];
 
     function calculateRebirthPoints() {
-      const days = gameState.totalGameDays || 0;
-      const money = gameState.money || 0;
-      const gradeBonus = (gameState.gradeIndex || 0) * 5;
-      return Math.floor(days * 0.5 + money * 0.01 + gradeBonus);
+      // v9.32 次線性計價（報告診斷 C）：以本屆表現計價 — 通過考試與年級為主、累計收入與天數開根號；
+      // 舊制「現金 ×0.01」讓賺 4 倍錢只多 1 點、第一屆幾乎換不到東西，現在第一屆就能換到有感天賦。
+      const exams = gameState.examsPassedTotal || 0;
+      const gradeBonus = (gameState.gradeIndex || 0) * 6;
+      const earnPts = Math.floor(Math.sqrt((gameState.totalLifetimeEarnings || 0) / 50));
+      const dayPts = Math.floor(Math.sqrt(gameState.totalGameDays || 0));
+      return exams * 8 + gradeBonus + earnPts + dayPts;
+    }
+
+    function earlyRebirth() {
+      // v9.32 提前傳承：不必等到博士畢業 — 通過至少一次升學考，就能把這一屆的成果傳承給下一屆
+      if ((gameState.examsPassedTotal || 0) < 1) { queueFloatingText('🌱 至少通過一次升學考，才能把成果傳承給下一屆'); playSound('examFail'); return; }
+      startRebirthAllocation();
     }
 
     function startRebirthAllocation() {
@@ -1374,6 +1388,9 @@
 
       // 套用永久加成
       gameState.money = (rebirthData.bonuses.richKid || 0) * 50;
+      // v9.32 傳承見效：新一屆開局專注 50＋「傳承祝福」讀書 buff — 開局就有感，不再只是面板數字
+      gameState.focus = 50;
+      if (typeof addBuff === 'function') addBuff('study_boost', 1.3, 30, '🌱', true, '傳承祝福：讀書效率 x1.3');
 
       currentLoc = 'home';
       currentState = 'idle';

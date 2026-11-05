@@ -1218,6 +1218,33 @@
       return Math.min(100, Math.max(5, Math.round((baseRate + examBonus + landmarkExamBonus + (gameState.mockBuff || 0)) * examMut))); // v9.3 模擬考加成
     }
 
+    // v9.32 分數制考試：預估成績（0–100）由知識決定 — 沒有 5% 幸運下限，裸考不可能靠運氣及格；
+    // 及格線隨年級上升（60→84），這才是成長曲線（舊制每級只是重灌同樣的 500 點＋摩擦）。
+    function examPassMark() { return 60 + (gameState.gradeIndex || 0) * 4; }
+    function getExamExpectedScore() {
+      let totalScore = 0;
+      for (let key in gameState.subjects) {
+        totalScore += (gameState.subjects[key].school + gameState.subjects[key].home);
+      }
+      let score = (totalScore / 500) * 100;
+      if (gameState.stress > 70) score -= (gameState.stress - 70);
+      if (gameState.energy < 30) score -= (30 - gameState.energy) * 0.6;
+      const examBonus = typeof getFriendBonus === 'function' ? getFriendBonus('exam_rate_add') : 0;
+      let landmarkExamBonus = 0;
+      try {
+        if (typeof getLandmarkLevel === 'function' && getLandmarkLevel('school') >= 3) landmarkExamBonus += 5;
+        if (typeof getTownProsperityTotal === 'function' && getTownProsperityTotal() >= 18) landmarkExamBonus += 5;
+      } catch (e) { }
+      const trophyBonus = (gameState.passive.trophy || 0) * 2; // v9.32 獎盃展示櫃實裝：考試預估 +2/級
+      const examMut = typeof getMutationMult === 'function' ? getMutationMult('exam_rate') : 1.0;
+      score = (score + examBonus + landmarkExamBonus + trophyBonus + (gameState.mockBuff || 0)) * examMut;
+      return Math.round(Math.min(100, Math.max(0, score)));
+    }
+    function rollExamScore() {
+      const exp = getExamExpectedScore();
+      return Math.round(Math.min(100, Math.max(0, exp + (Math.random() * 26 - 16)))); // 運氣 −16..+10：準備比運氣重要
+    }
+
     function getExamCooldownRemaining() {
       if (!gameState.examCooldownEndDays) return 0;
 
@@ -1256,6 +1283,8 @@
 
         playSound('click');
         const passRate = getExamSuccessRate();
+        const expectedScore = getExamExpectedScore();
+        const passMark = examPassMark();
 
         const overlay = document.getElementById("exam-overlay");
         const pb = document.getElementById("exam-pb");
@@ -1277,7 +1306,7 @@
         const nextGradeName = gameState.gradeIndex < GRADES.length - 1 ? GRADES[gameState.gradeIndex + 1].name : "學無止境學神";
 
         if (desc) {
-          desc.innerHTML = `正在進行 <b>${currentGradeName}</b> 的升學考試。<br>考取下一階段：<b>${nextGradeName}</b><br>成功率：<span style="color:red; font-weight:900;">${passRate}%</span><br>報名費：<b>$50</b>（首次應考免費）`;
+          desc.innerHTML = `正在進行 <b>${currentGradeName}</b> 的升學考試。<br>考取下一階段：<b>${nextGradeName}</b><br>預估成績：<span style="color:red; font-weight:900;">約 ${expectedScore} 分</span>（及格線 ${passMark} 分、特優 ${passMark + 25} 分）<br>報名費：<b>$50</b>（首次應考免費）`;
         }
         if (statusLbl) {
           statusLbl.innerText = "正在填寫試卷...";
@@ -1308,12 +1337,14 @@
 
     function finishExam(passRate, nextGradeName) {
       gameState.mockBuff = 0; // v9.3 模擬考加成：用於本次考試後失效
-      const roll = Math.random() * 100;
+      const score = rollExamScore(); // v9.32 分數制：成績由知識決定
+      const passMark = examPassMark();
+      gameState.lastExamScore = score;
       const desc = document.getElementById("modal-desc");
       const statusLbl = document.getElementById("modal-status-lbl");
       const btnClose = document.getElementById("btn-modal-close");
 
-      if (roll <= passRate) {
+      if (score >= passMark) {
         gameState._examPassedDay = gameState.totalGameDays; // v9.1 每日任務
         playSound('examSuccess');
         if (gameState.gradeIndex < GRADES.length - 1) {
@@ -1324,9 +1355,11 @@
         if (typeof bumpWeekly === 'function') bumpWeekly('exams');
         if (typeof onPlayerExamPassed === 'function') onPlayerExamPassed();
 
+        const distinction = score >= passMark + 25;
+        if (distinction) { gameState.money = (gameState.money || 0) + 150; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 150; }
         for (let key in gameState.subjects) {
-          gameState.subjects[key].school = 0;
-          gameState.subjects[key].home = 0;
+          gameState.subjects[key].school = Math.floor(gameState.subjects[key].school * 0.1); // v9.32 保留 10% 底子：新年級不是從零重灌
+          gameState.subjects[key].home = Math.floor(gameState.subjects[key].home * 0.1);
         }
 
         // 升學成功，清除冷卻
@@ -1334,7 +1367,7 @@
         gameState.examCooldownEndHour = 0;
         gameState.examCooldownEndMinute = 0;
 
-        desc.innerHTML = `🎉 恭喜你！升學成功！<br>你現在是：<b style="color:#2a9d8f; font-size:1.4rem;">${nextGradeName}</b><br><br><span style="font-size:0.85rem; color:var(--text-muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，但超商打工時薪也同步加薪！</span>`;
+        desc.innerHTML = `${distinction ? '🏆 特優合格' : '🎉 恭喜你'}！你的成績：<b>${score} 分</b>（及格線 ${passMark} 分）<br>你現在是：<b style="color:#2a9d8f; font-size:1.4rem;">${nextGradeName}</b>${distinction ? '<br>特優獎學金 <b>+$150</b>！' : ''}<br><br><span style="font-size:0.85rem; color:var(--text-muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，及格線也會提高，但超商打工時薪同步加薪！</span>`;
         statusLbl.innerText = "繼續衝刺下一個學歷目標吧！";
         // UX4：升學成功撒彩花
         setTimeout(() => celebrateGraduation(), 300);
@@ -1342,14 +1375,23 @@
         if (gameState.gradeIndex === GRADES.length - 1) {
           setTimeout(() => showGameClear(), 2500);
         }
+        if (typeof showSemesterCard === 'function') setTimeout(() => showSemesterCard(score, nextGradeName, distinction), 600);
+      } else if (score >= passMark - 15) {
+        // v9.32 差一點帶：不升等、知識全保留、只冷卻 1 天（舊制一律當落榜罰 7 天）
+        playSound('examFail');
+        desc.innerHTML = `😖 差一點！你的成績：<b>${score} 分</b>，及格線 ${passMark} 分，就差 ${passMark - score} 分。<br>知識都保留著，休息 1 天、把最弱的科目補起來再來！`;
+        statusLbl.innerText = "就差臨門一腳。";
+        gameState.examCooldownEndDays = (gameState.totalGameDays || 0) + 1;
+        gameState.examCooldownEndHour = gameState.hour;
+        gameState.examCooldownEndMinute = gameState.minute;
       } else {
         playSound('examFail');
-        desc.innerHTML = `😢 很遺憾，考試不合格...<br>再接再厲！提升科目分數，並維持精力、降低壓力再來挑戰。<br><br><span style="color:red; font-weight:800;">由於考試失敗，須等待 7 遊戲天後才能再次挑戰！</span>`;
+        desc.innerHTML = `😢 這次成績：<b>${score} 分</b>，未達及格線 ${passMark} 分...<br>提升科目分數，並維持精力、降低壓力再來挑戰。<br><br><span style="color:red; font-weight:800;">等待 2 遊戲天後可再次挑戰（舊制 7 天已縮短）。</span>`;
         statusLbl.innerText = "失敗為成功之母。";
 
-        // 設定 7 天冷卻結束時刻
+        // v9.32 落榜冷卻 7 天 → 2 天
         if (typeof onPlayerExamFailed === 'function') onPlayerExamFailed(); // v9.3 宿敵搶先
-        gameState.examCooldownEndDays = (gameState.totalGameDays || 0) + 7;
+        gameState.examCooldownEndDays = (gameState.totalGameDays || 0) + 2;
         gameState.examCooldownEndHour = gameState.hour;
         gameState.examCooldownEndMinute = gameState.minute;
       }
@@ -1357,6 +1399,110 @@
       if (btnClose) btnClose.style.display = "inline-block";
       updateUI();
       saveGameData();
+    }
+
+    // v9.32 學期成績單分享卡：考試通過後生成一張可下載的成績單（報告 P0 學期摘要）
+    function showSemesterCard(score, gradeName, distinction) {
+      const ov = document.getElementById('semester-overlay');
+      if (!ov) return;
+      const days = (gameState.totalGameDays || 0) - (gameState._semStartDay || 0);
+      gameState._semStartDay = gameState.totalGameDays || 0;
+      let bestFriend = '—', bestAff = -1;
+      const FDEF = (typeof FRIENDS_DEFS !== 'undefined') ? FRIENDS_DEFS : [];
+      for (const f of FDEF) { const a = (gameState.friends && gameState.friends[f.id]) || 0; if (a > bestAff) { bestAff = a; bestFriend = f.name; } }
+      const rows = [
+        ['考試成績', score + ' 分' + (distinction ? '（特優 🏆）' : '')],
+        ['新學歷', gradeName],
+        ['本學期天數', days + ' 天'],
+        ['累計通過考試', (gameState.examsPassedTotal || 0) + ' 次'],
+        ['目前零用錢', '$' + (gameState.money || 0)],
+        ['最親近的好友', bestFriend]
+      ];
+      const sum = document.getElementById('semester-summary');
+      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #d8cfc0;"><span style="color:var(--text-muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
+      const cv = document.getElementById('semester-canvas');
+      const dl = document.getElementById('semester-download');
+      if (cv && dl) {
+        dl.style.display = 'none';
+        try {
+          const ctx = cv.getContext('2d');
+          if (ctx) {
+            const g = ctx.createLinearGradient(0, 0, 0, 400); g.addColorStop(0, '#fdf6e3'); g.addColorStop(1, '#f5e6c4');
+            ctx.fillStyle = g; ctx.fillRect(0, 0, 640, 400);
+            ctx.strokeStyle = '#b08968'; ctx.lineWidth = 6; ctx.strokeRect(8, 8, 624, 384);
+            ctx.fillStyle = '#3c2415'; ctx.textAlign = 'center';
+            ctx.font = '900 34px sans-serif'; ctx.fillText('🎓 學期成績單', 320, 62);
+            ctx.font = '700 20px sans-serif'; ctx.fillText('學霸養成記', 320, 94);
+            ctx.textAlign = 'left'; ctx.font = '700 22px sans-serif';
+            rows.forEach((r, i) => { const y = 148 + i * 38; ctx.fillStyle = '#8a7360'; ctx.fillText(r[0], 70, y); ctx.fillStyle = '#3c2415'; const w = ctx.measureText(r[1]).width; ctx.fillText(r[1], 570 - w, y); });
+            dl.href = cv.toDataURL('image/png'); dl.style.display = 'inline-block';
+          }
+        } catch (e) { }
+      }
+      ov.classList.add('active');
+    }
+    function closeSemesterCard() { const ov = document.getElementById('semester-overlay'); if (ov) ov.classList.remove('active'); if (typeof playSound === 'function') playSound('click'); }
+
+    // v9.32 主修科目：玩家指定讀書優先科（分科決策），不再只有自動補最弱一條路
+    function setFocusSubject(key) {
+      gameState.focusSubject = (gameState.focusSubject === key) ? null : key;
+      playSound('click');
+      queueFloatingText(gameState.focusSubject ? `⭐ 主修科目設為「${gameState.subjects[key].name}」：讀書優先累積這一科` : '⭐ 主修取消：恢復自動補最弱科');
+      refreshFocusSubjectButtons();
+      saveGameData();
+    }
+    function refreshFocusSubjectButtons() {
+      document.querySelectorAll('.focus-subj-btn').forEach(b => {
+        const on = gameState.focusSubject === b.dataset.subj;
+        b.textContent = on ? '⭐ 主修中' : '設主修';
+        b.classList.toggle('active', on);
+      });
+    }
+    function decorateFocusSubjectButtons() {
+      const items = document.querySelectorAll('#drawer-status .subject-item');
+      const keys = ['cn', 'en', 'ma', 'sc', 'so'];
+      items.forEach((it, i) => {
+        if (it.dataset.focusBtn || !keys[i]) return;
+        it.dataset.focusBtn = '1';
+        const label = it.querySelector('.subject-label');
+        if (!label) return;
+        const btn = document.createElement('button');
+        btn.className = 'focus-subj-btn';
+        btn.dataset.subj = keys[i];
+        btn.setAttribute('onclick', `setFocusSubject('${keys[i]}')`);
+        btn.textContent = '設主修';
+        label.appendChild(btn);
+      });
+      refreshFocusSubjectButtons();
+    }
+
+    // v9.32 存檔碼：匯出/匯入主存檔＋轉生＋成就（SafeStore 存的是 JSON 字串，整包帶走）
+    function exportSaveCode() {
+      try {
+        saveGameData();
+        const payload = { v: 1, save: SafeStore.get('scholar_idle_savegame_v136'), reb: SafeStore.get('scholar_rebirth_v1'), ach: SafeStore.get('scholar_achievements_v1') };
+        if (!payload.save) { queueFloatingText('❌ 尚無存檔可匯出'); return; }
+        const code = 'XUEBA1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        const ta = document.getElementById('save-code-area');
+        if (ta) { ta.value = code; ta.select(); }
+        if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => { });
+        queueFloatingText('📋 存檔碼已產生（也試著複製到剪貼簿）— 存到記事本就能跨裝置還原');
+      } catch (e) { queueFloatingText('❌ 產生存檔碼失敗'); }
+    }
+    function importSaveCode() {
+      const ta = document.getElementById('save-code-area');
+      const raw = ta ? ta.value.trim() : '';
+      try {
+        if (!raw.startsWith('XUEBA1.')) throw new Error('prefix');
+        const payload = JSON.parse(decodeURIComponent(escape(atob(raw.slice(7)))));
+        const parsedSave = JSON.parse(payload.save);
+        if (!parsedSave || !parsedSave.subjects) throw new Error('shape');
+        SafeStore.set('scholar_idle_savegame_v136', payload.save);
+        if (payload.reb) SafeStore.set('scholar_rebirth_v1', payload.reb);
+        if (payload.ach) SafeStore.set('scholar_achievements_v1', payload.ach);
+        queueFloatingText('✅ 存檔碼還原成功，重新載入中…');
+        setTimeout(() => location.reload(), 800);
+      } catch (e) { queueFloatingText('❌ 存檔碼格式不正確，還原失敗（原存檔未更動）'); }
     }
 
     function closeExamModal() {
@@ -1515,6 +1661,11 @@
       const elTabletOwned = document.getElementById('lbl-tablet-owned');
       if (elHeadphoneOwned) elHeadphoneOwned.innerText = `已擁有: ${gameState.passive.headphone || 0}`;
       if (elTabletOwned) elTabletOwned.innerText = `已擁有: ${gameState.passive.tablet || 0}`;
+      const elSofaOwned = document.getElementById('lbl-sofa-owned');
+      const elTrophyOwned = document.getElementById('lbl-trophy-owned');
+      if (elSofaOwned) elSofaOwned.innerText = `已擁有: ${gameState.passive.sofa || 0} / 3`;
+      if (elTrophyOwned) elTrophyOwned.innerText = `已擁有: ${gameState.passive.trophy || 0} / 3`;
+      ['stamp', 'watch', 'painting'].forEach(cid => { const b = document.getElementById('btn-collect-' + cid); if (b) { const owned = !!(gameState.collectibles && gameState.collectibles[cid]); b.disabled = owned; b.textContent = owned ? '✓ 已收藏' : b.dataset.price; } });
 
       // 如果好友面板開啟中，同步更新按鈕與好感度狀態
       const friendsDrawer = document.getElementById('drawer-friends');
@@ -1553,7 +1704,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.31.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.32.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1682,8 +1833,8 @@
 
     // UX2：考試按鈕冷卻計時顯示
     function updateExamProgress() {
-      const rate = getExamSuccessRate();
-      elExamRate.innerText = `考取合格率: ${rate}%`;
+      const expScore = getExamExpectedScore();
+      elExamRate.innerText = `預估成績: ${expScore} 分 (及格 ${examPassMark()})`;
 
       const remaining = getExamCooldownRemaining();
       if (remaining > 0) {
@@ -1697,7 +1848,7 @@
         elBtnExam.style.cursor = 'not-allowed';
         elBtnExam.style.background = 'linear-gradient(135deg, #86868b, #636366)';
       } else {
-        elBtnExam.innerText = `參加考試 ${rate}%${(gameState.examAttempts || 0) === 0 ? '（首次免費）' : '（$50）'}${gameState.mockBuff ? ' 模擬+' + gameState.mockBuff + '%' : ''}`; // v9.4 按鈕直接顯示成功率
+        elBtnExam.innerText = `參加考試（預估 ${expScore} 分）${(gameState.examAttempts || 0) === 0 ? '（首次免費）' : '（$50）'}${gameState.mockBuff ? ' 模擬+' + gameState.mockBuff + '分' : ''}`; // v9.32 分數制：按鈕顯示預估成績
         elBtnExam.disabled = false;
         elBtnExam.style.opacity = '1';
         elBtnExam.style.cursor = 'pointer';
@@ -3288,8 +3439,7 @@
       const eb = document.getElementById('btn-exam-trigger');
       if (eb && typeof getExamSuccessRate === 'function') {
         const cd = typeof getExamCooldownRemaining === 'function' ? getExamCooldownRemaining() : 0;
-        const rate = getExamSuccessRate();
-        eb.classList.toggle('exam-hot', cd <= 0 && rate >= 70); // 按鈕文字由 updateExamProgress 統一管理（含成功率）
+        eb.classList.toggle('exam-hot', cd <= 0 && getExamExpectedScore() >= examPassMark()); // v9.32 分數制：預估達及格線才亮
       }
     }
 

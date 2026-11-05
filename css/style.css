@@ -3846,3 +3846,7 @@ input, select, textarea { border-radius: 14px !important; }
 .editor-guide-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 700; font-size: 0.85rem; padding: 10px; background: rgba(0,0,0,0.04); border-radius: 8px; cursor: pointer; }
 .editor-guide-row input { width: 20px; height: 20px; }
 .editor-hint { margin-top: 12px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.6; font-weight: 500; }
+
+/* v9.32 主修科目鈕 */
+.focus-subj-btn { margin-left: auto; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 12px; border: 2px solid #d8cfc0; background: #fff; cursor: pointer; }
+.focus-subj-btn.active { background: #ffd93d; border-color: #e0a800; }

@@ -832,12 +832,12 @@
         const sleepBuff = typeof getBuffMultiplier === 'function' ? getBuffMultiplier('sleep_boost') : 1.0;
         const energyMut = typeof getMutationMult === 'function' ? getMutationMult('energy_recover') : 1.0;
         const homeEnergyBase = homeLv === 3 ? 40 : (homeLv === 2 ? 25 : 15);
-        gameState.energy = Math.min(100, gameState.energy + homeEnergyBase * sleepBuff * energyMut * (1 + (gameState.homeDecor || 0) * 0.04)); // v9.1 裝潢加成
+        gameState.energy = Math.min(100, gameState.energy + homeEnergyBase * sleepBuff * energyMut * (1 + (gameState.homeDecor || 0) * 0.04) + (gameState.passive.sofa || 0) * 2); // v9.1 裝潢加成／v9.32 沙發實裝：精力 +2/級
         const homeStressBonus = homeLv === 3 ? 5 : (homeLv === 2 ? 2 : 0);
         if (gameState.parentsStatus === 'alive') {
-          gameState.stress = Math.max(0, gameState.stress - (3 + homeStressBonus));
+          gameState.stress = Math.max(0, gameState.stress - (3 + homeStressBonus + (gameState.passive.sofa || 0))); // v9.32 沙發：減壓 +1/級
         } else {
-          gameState.stress = Math.max(0, gameState.stress - (8 + homeStressBonus));
+          gameState.stress = Math.max(0, gameState.stress - (8 + homeStressBonus + (gameState.passive.sofa || 0))); // v9.32 沙發：減壓 +1/級
         }
       }
       else if (currentState === "eating") {
@@ -871,7 +871,7 @@
         const xiaohaoWageMult = typeof getFriendBonus === 'function' ? getFriendBonus('store_wage') : 1.0;
         const storeWageMult = storeLv === 3 ? 1.80 : (storeLv === 2 ? 1.35 : 1.0);
 
-        const hourlyWage = Math.max(5, Math.round(baseWage * workBuff * salaryMut * xiaohaoWageMult * storeWageMult * (typeof setWageMult === 'function' ? setWageMult() : 1)));
+        const hourlyWage = Math.max(5, Math.round(baseWage * workBuff * salaryMut * xiaohaoWageMult * storeWageMult * (typeof setWageMult === 'function' ? setWageMult() : 1) * ((gameState.collectibles && gameState.collectibles.watch) ? 1.05 : 1))); // v9.32 收藏：名錶 時薪 +5%
         gameState.money += hourlyWage;
         gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + hourlyWage;
         gameState.workHoursTotal = (gameState.workHoursTotal || 0) + 1;
@@ -995,7 +995,7 @@
       } else { // v9.14.4 在家書桌：只有書本/平板加成
         mult = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3); type = 'library';
       }
-      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (progressMinutes / 60);
+      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (progressMinutes / 60) * ((gameState.collectibles && gameState.collectibles.stamp) ? 1.02 : 1); // v9.32 收藏：郵票冊 讀書 +2%
       if (gameState._studyFrac < 1) return;
       const propKey = type === 'school' ? 'school' : 'home';
       const limit = type === 'school' ? 60 : 40;
@@ -1003,7 +1003,9 @@
       const gained = {};
       while (gameState._studyFrac >= 1) {
         let targetKey = null, minScore = Infinity;
-        for (const k of subKeys) { const sc = gameState.subjects[k][propKey]; if (sc < limit && sc < minScore) { minScore = sc; targetKey = k; } }
+        const fk = gameState.focusSubject; // v9.32 主修科目：玩家指定且未達上限時優先累積該科
+        if (fk && gameState.subjects[fk] && gameState.subjects[fk][propKey] < limit) targetKey = fk;
+        if (!targetKey) for (const k of subKeys) { const sc = gameState.subjects[k][propKey]; if (sc < limit && sc < minScore) { minScore = sc; targetKey = k; } }
         if (!targetKey) { gameState._studyFrac = 0; break; }
         gameState.subjects[targetKey][propKey] = Math.min(limit, gameState.subjects[targetKey][propKey] + 1);
         gained[targetKey] = (gained[targetKey] || 0) + 1;
@@ -1034,6 +1036,9 @@
         }
       }
 
+      // v9.32 主修科目：事件/整點贈點也優先給主修科
+      if (gameState.focusSubject && gameState.subjects[gameState.focusSubject] && gameState.subjects[gameState.focusSubject][propKey] < limit) targetKey = gameState.focusSubject;
+
       if (!targetKey) {
         // 所有科目已達上限
         queueFloatingText('🌟 所有學科已達滿分！');
@@ -1061,6 +1066,7 @@
       let dailyBonus = Math.round((10 + Math.floor(totalScore / 10) + friendAllowance) * salaryMut);
       const parentsGone = gameState.parentsStatus !== 'alive';
       if (parentsGone) dailyBonus = Math.round(dailyBonus * 0.7); // v9.31 報告 P2-3 對沖：父母不在 → 零用錢 −30%，睡眠減壓 buff 不再是純賺
+      if (gameState.collectibles && gameState.collectibles.painting) dailyBonus += 15; // v9.32 收藏：名畫 每日零用錢 +$15
       // v9.1 生活費：隨年級與小鎮繁榮成長，後期不再只進不出 (金額不大，是壓力來源之一)
       let totalLevels = 0; try { totalLevels = ['home', 'store', 'restaurant', 'school', 'library', 'gym'].reduce((s, k) => s + getLandmarkLevel(k), 0); } catch (e) { }
       const livingCost = 8 + gameState.gradeIndex * 8 + totalLevels * 2;
@@ -1177,6 +1183,7 @@
       updateBuffDisplay();
       updateMiniGameTriggers();
       renderFriendsList();
+      if (typeof decorateFocusSubjectButtons === 'function') decorateFocusSubjectButtons(); // v9.32 主修科目鈕
       updateLandmarkVisuals();
       resizeMapScale();
       if (typeof setupMapPinchZoom === 'function') setupMapPinchZoom();
@@ -1295,7 +1302,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.31.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.32.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
