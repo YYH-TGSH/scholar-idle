@@ -50,6 +50,23 @@
     const elAlertBar = document.getElementById("alert-bar");
     const elLockBtn = document.getElementById("btn-lock-mode");
 
+    // v9.36 功能選單：低頻功能鈕收成一顆選單鈕（點開才展開），地圖不再被整列按鈕包圍
+    function toggleFabMenu(e) {
+      if (e) e.stopPropagation();
+      const c = document.querySelector('.floating-controls');
+      if (!c) return;
+      const open = c.classList.toggle('fab-open');
+      const ico = document.getElementById('fab-menu-ico');
+      if (ico) ico.textContent = open ? '✕' : '🧭';
+      if (typeof resizeMapScale === 'function') resizeMapScale(); // 底部列高度變了，地圖可用區重算
+    }
+    document.addEventListener('click', (e) => {
+      const c = document.querySelector('.floating-controls');
+      if (!c || !c.classList.contains('fab-open')) return;
+      const b = e.target && e.target.closest ? e.target.closest('.control-fab') : null;
+      if (b && b.id !== 'fab-menu-toggle') { c.classList.remove('fab-open'); const ico = document.getElementById('fab-menu-ico'); if (ico) ico.textContent = '🧭'; if (typeof resizeMapScale === 'function') resizeMapScale(); }
+    });
+
     // ------------------------------------------
     // 側邊抽屜面版控制
     // ------------------------------------------
@@ -1705,7 +1722,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.35.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.36.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -3318,6 +3335,8 @@
       if (el.textContent !== txt) el.textContent = txt;
          const dot = document.getElementById('login-dot'); // v9.4 主畫面紅點
       if (dot) dot.style.display = L.claimed ? 'none' : 'block';
+      const dotM = document.getElementById('login-dot-menu'); // v9.36 選單鈕上的紅點鏡像（選單收合時也要看得到可領獎勵）
+      if (dotM) dotM.style.display = L.claimed ? 'none' : 'block';
     }
     setTimeout(() => { try { checkLoginReward(); } catch (e) { } }, 1600);
 

@@ -3883,3 +3883,10 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* v9.33 無障礙地板：焦點可見（鍵盤/切換導覽時不再無跡可尋） */
 :focus-visible { outline: 3px solid var(--sky-blue); outline-offset: 2px; }
+
+/* v9.36 HUD 收斂：功能鈕選單制（低頻收成一顆、高頻留在頂欄與選單外） */
+.floating-controls:not(.fab-open) .control-fab:not(.fab-menu-toggle) { display: none !important; }
+@media (max-width: 768px) {
+  .hud-vitals { gap: 8px; }
+  .hv-bar { width: 40px; }
+}

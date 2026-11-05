@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#70b848">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.35.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.36.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -1023,6 +1023,9 @@
 
   <!-- 2. 右側懸浮控制小圓鈕 -->
   <div class="floating-controls">
+    <button class="control-fab fab-menu-toggle" id="fab-menu-toggle" onclick="toggleFabMenu(event)" title="功能選單" style="background-color: var(--ink); color: #fff;">
+      <span id="fab-menu-ico">🧭</span> <span class="fab-lbl">選單</span><span class="fab-dot" id="login-dot-menu" style="display:none;"></span>
+    </button>
     <button class="control-fab" onclick="toggleDrawer('status')" style="background-color: var(--sky-blue);" title="查看能力 (S)">
       📊 <span class="fab-lbl">能力</span><span class="fab-dot" id="login-dot" style="display:none;"></span>
     </button>
@@ -1043,6 +1046,9 @@
     </button>
     <button class="control-fab" onclick="toggleDrawer('settings')" style="background-color: var(--purple);" title="系統設定">
       ⚙️ <span class="fab-lbl">系統</span>
+    </button>
+    <button class="control-fab" onclick="showHelpModal()" style="background-color: #607d8b;" title="玩法說明">
+      ❓ <span class="fab-lbl">說明</span>
     </button>
   </div>
 
@@ -1653,7 +1659,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.35.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.36.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--text-color);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -2075,7 +2081,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.35.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.36.0)
   </div>
 
   <!-- ==========================================================================
