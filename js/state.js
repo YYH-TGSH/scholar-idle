@@ -1558,16 +1558,20 @@
       if (!isFinite(offlineMs) || offlineMs < 0) return;
       if (offlineMs < 60000) return;
 
-      // Bug3 修正：離線收益固定用 1x 速度，避免高速模式對離線周期算動
-      // (1ms = 0.001 遊戲分鐘，上限 12 遊戲小時)
-      let offlineGameMinutes = Math.floor(offlineMs * 0.001);
-      const maxOfflineMinutes = 720;
-      if (offlineGameMinutes > maxOfflineMinutes) {
-        offlineGameMinutes = maxOfflineMinutes;
-      }
+      // v9.31 離線誠實模擬（報告 P2-2）：固定 1x 速率換算（1ms = 0.001 遊戲分鐘）、效率 50% 套在產出（知識/工資）、
+      // 上限依成就解鎖數 8/12/24 現實小時；產率與在線同一套（地標等級/好友/被動/轉生/世界變異），每日照扣生活費。
+      // 回撥時鐘（offlineMs < 0）在上方已直接 return：收益歸零，不額外懲罰。
+      const achN = (typeof achievementData !== 'undefined' && achievementData) ? Object.keys(achievementData).length : 0;
+      const capHours = achN >= 25 ? 24 : (achN >= 15 ? 12 : 8);
+      let offlineGameMinutes = Math.floor(Math.min(offlineMs, capHours * 3600000) * 0.001);
 
       let tempState = JSON.parse(JSON.stringify(savedState));
       let tempLoc = tempState.currentLoc || "home";
+      // v9.31 誠實模擬輔助：好友等級門檻與 getFriendLevel 相同；地標等級讀存檔本身（不再固定 Lv.1）
+      const tmpFriendLv = (id) => { const a = (tempState.friends && tempState.friends[id]) || 0; return a >= 100 ? 3 : (a >= 50 ? 2 : (a >= 20 ? 1 : 0)); };
+      const tmpLv = (loc) => (tempState.landmarkLevels && tempState.landmarkLevels[loc]) || 1;
+      const moneyBefore = tempState.money || 0;
+      let knowTotal = 0, wageTotal = 0, allowTotal = 0, livingTotal = 0;
       const offlineHours = Math.floor(offlineGameMinutes / 60);
 
       function needsLibraryReviewTemp(state) {
@@ -1667,19 +1671,23 @@
         if (currentTempState !== "sleeping") {
           tempState.energy = Math.max(0, tempState.energy - (3 * tempState.difficulty));
         } else {
-          tempState.energy = Math.min(100, tempState.energy + 15 * hourlyRatio);
+          const sleepRateT = tmpLv('home') === 3 ? 40 : (tmpLv('home') === 2 ? 25 : 15);
+          tempState.energy = Math.min(100, tempState.energy + sleepRateT * hourlyRatio);
+          const homeStressBonusT = tmpLv('home') === 3 ? 5 : (tmpLv('home') === 2 ? 2 : 0);
           if (tempState.parentsStatus === 'alive') {
-            tempState.stress = Math.max(0, tempState.stress - 3 * hourlyRatio);
+            tempState.stress = Math.max(0, tempState.stress - (3 + homeStressBonusT) * hourlyRatio);
           } else {
-            tempState.stress = Math.max(0, tempState.stress - 8 * hourlyRatio);
+            tempState.stress = Math.max(0, tempState.stress - (8 + homeStressBonusT) * hourlyRatio);
           }
         }
 
         if (currentTempState !== "eating") {
           tempState.hunger = Math.max(0, tempState.hunger - (4 * tempState.difficulty));
         } else {
-          tempState.hunger = Math.min(100, tempState.hunger + 45 * hourlyRatio);
-          tempState.stress = Math.max(0, tempState.stress - 2 * hourlyRatio); // 餐廳吃飯很療癒
+          const eatRateT = tmpLv('restaurant') === 3 ? 85 : (tmpLv('restaurant') === 2 ? 60 : 45);
+          tempState.hunger = Math.min(100, tempState.hunger + eatRateT * hourlyRatio);
+          const eatStressT = tmpLv('restaurant') === 3 ? 8 : (tmpLv('restaurant') === 2 ? 4 : 2);
+          tempState.stress = Math.max(0, tempState.stress - eatStressT * hourlyRatio); // 餐廳吃飯很療癒
         }
 
         if (currentTempState === "sports") {
@@ -1690,28 +1698,39 @@
         }
 
         if (currentTempState === "working" && hourlyWorkMinutes > 0) {
-          const wage = Math.round((18 + ((tempState.gradeIndex || 0) * 6)) * hourlyRatio);
+          const wageMultT = [1.0, 1.15, 1.30, 1.50][tmpFriendLv('xiaohao')] * (tmpLv('store') === 3 ? 1.80 : (tmpLv('store') === 2 ? 1.35 : 1.0));
+          const wage = Math.round((18 + ((tempState.gradeIndex || 0) * 6)) * wageMultT * 0.5 * hourlyRatio); // 離線效率 50%
           tempState.money += wage;
+          wageTotal += wage;
           tempState.workHoursTotal = (tempState.workHoursTotal || 0) + 1;
           tempState.stress = Math.min(100, tempState.stress + 4 * tempState.difficulty * hourlyRatio);
         }
 
         if (currentTempState === "studying" && hourlyWorkMinutes > 0) {
-          let efficiency = 1.0 * hourlyRatio;
+          let efficiency = 1.0 * hourlyRatio * 0.5; // 離線效率 50%
           if (tempState.energy < 20) efficiency *= 0.2;
           else if (tempState.hunger < 30) efficiency *= 0.5;
 
-          const subKeys = ['cn', 'en', 'ma', 'sc', 'so'];
-          const randomSub = subKeys[Math.floor(Math.random() * subKeys.length)];
-          const sub = tempState.subjects[randomSub];
-          const baseGain = Math.round((2 + Math.random() * 2) * efficiency);
-
-          if (baseGain > 0) {
-            if (tempLoc === "school" && sub.school < 60) {
-              sub.school = Math.min(60, sub.school + baseGain);
-            } else if (tempLoc === "library" && sub.home < 40) {
-              let bookBonus = 1 + (tempState.passive.book * 0.2) + ((tempState.passive.tablet || 0) * 0.3);
-              sub.home = Math.min(40, sub.home + Math.round(baseGain * bookBonus));
+          // 與在線 processStudyTick 同一套加成鏈（轉生天賦讀 rebirthData、世界變異 scholar、好友、地標、被動）
+          const smartT = 1 + (((typeof rebirthData !== 'undefined' && rebirthData.bonuses) || {}).smartness || 0) * 0.05;
+          const memT = 1 + (((typeof rebirthData !== 'undefined' && rebirthData.bonuses) || {}).memory || 0) * 0.05;
+          const scholarT = (tempState.worldMutations || []).some(m => m.id === 'scholar') ? 1.2 : 1.0;
+          let pool = 0, propT = null, limitT = 0;
+          if (tempLoc === "school") {
+            const multT = (1 + (tempState.passive.headphone || 0) * 0.10) * (tmpLv('school') === 3 ? 1.60 : (tmpLv('school') === 2 ? 1.25 : 1.0)) * [1.0, 1.10, 1.20, 1.35][tmpFriendLv('xiaoxuan')] * smartT * scholarT;
+            pool = 3 * efficiency * multT; propT = 'school'; limitT = 60;
+          } else if (tempLoc === "library") {
+            const multT = (1 + (tempState.passive.book * 0.2) + ((tempState.passive.tablet || 0) * 0.3)) * (tmpLv('library') === 3 ? 1.75 : (tmpLv('library') === 2 ? 1.30 : 1.0)) * [1.0, 1.15, 1.30, 1.45][tmpFriendLv('yuqing')] * memT * scholarT;
+            pool = 3 * efficiency * multT; propT = 'home'; limitT = 40;
+          }
+          if (propT) {
+            const subKeysT = ['cn', 'en', 'ma', 'sc', 'so'];
+            while (pool >= 1) {
+              let tk = null, mn = Infinity;
+              for (const k of subKeysT) { const sc = tempState.subjects[k][propT]; if (sc < limitT && sc < mn) { mn = sc; tk = k; } }
+              if (!tk) break;
+              tempState.subjects[tk][propT] = Math.min(limitT, tempState.subjects[tk][propT] + 1);
+              pool -= 1; knowTotal += 1;
             }
           }
 
@@ -1728,7 +1747,15 @@
           for (let key in tempState.subjects) {
             totalScore += (tempState.subjects[key].school + tempState.subjects[key].home);
           }
-          tempState.money += (10 + Math.floor(totalScore / 10));
+          const salaryMutT = (tempState.worldMutations || []).some(m => m.id === 'happy') ? 0.7 : 1.0;
+          let dailyBonusT = Math.round((10 + Math.floor(totalScore / 10) + (tmpFriendLv('xiaohao') >= 3 ? 20 : 0)) * salaryMutT);
+          if (tempState.parentsStatus !== 'alive') dailyBonusT = Math.round(dailyBonusT * 0.7); // v9.31 對沖與在線同步
+          let totalLevelsT = 0; ['home', 'store', 'restaurant', 'school', 'library', 'gym'].forEach(k => { totalLevelsT += tmpLv(k); });
+          const livingCostT = 8 + (tempState.gradeIndex || 0) * 8 + totalLevelsT * 2;
+          tempState.money = Math.max(0, tempState.money + dailyBonusT - livingCostT);
+          allowTotal += dailyBonusT; livingTotal += livingCostT;
+          tempState.totalGameDays = (tempState.totalGameDays || 0) + 1;
+          tempState.totalLifetimeEarnings = (tempState.totalLifetimeEarnings || 0) + dailyBonusT;
         }
         if (tempState.dayOfWeek > 7) tempState.dayOfWeek = 1;
       }
@@ -1738,9 +1765,12 @@
 
       Object.assign(savedState, tempState);
 
-      const offlineHoursRounded = (offlineMs / 3600000).toFixed(1);
+      const offlineHoursRounded = (Math.min(offlineMs, capHours * 3600000) / 3600000).toFixed(1);
+      const netMoney = (tempState.money || 0) - moneyBefore;
+      const cappedNote = offlineMs > capHours * 3600000 ? '（超過上限的部分不計）' : '';
       setTimeout(() => {
-        queueFloatingText(`離線模擬了 ${offlineHoursRounded} 小時（已計入通勤與鎖定）`);
+        queueFloatingText(`🌙 離線報告：離開 ${offlineHoursRounded} 小時${cappedNote} — 離線照著作息繼續、效率 50%、上限 ${capHours} 小時`);
+        queueFloatingText(`📈 知識 +${knowTotal}｜打工 +$${wageTotal}｜零用錢 +$${allowTotal}｜生活費 −$${livingTotal}｜金錢淨變化 ${netMoney >= 0 ? '+' : ''}$${netMoney}`);
       }, 1200);
     }
 

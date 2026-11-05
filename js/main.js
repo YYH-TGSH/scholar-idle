@@ -494,6 +494,7 @@
         if (_prevDow >= 1 && _prevDow <= 5) { gameState.skipSchoolDays = gameState._wentSchoolToday ? 0 : ((gameState.skipSchoolDays || 0) + 1); }
         gameState._wentSchoolToday = false;
         settleDailySalary();
+        if (_prevDow === 5 && typeof settleWeeklyRace === 'function') settleWeeklyRace('friday'); // v9.31 手冊承諾的週五結算（週五結束跨入週六時）
         settleTownProsperityDividend();
 
         // 剛跨入週日 00:00，觸發週日父母彩蛋事件
@@ -1057,7 +1058,9 @@
       }
       const salaryMut = typeof getMutationMult === 'function' ? getMutationMult('salary') : 1.0;
       const friendAllowance = typeof getFriendBonus === 'function' ? getFriendBonus('daily_allowance') : 0;
-      const dailyBonus = Math.round((10 + Math.floor(totalScore / 10) + friendAllowance) * salaryMut);
+      let dailyBonus = Math.round((10 + Math.floor(totalScore / 10) + friendAllowance) * salaryMut);
+      const parentsGone = gameState.parentsStatus !== 'alive';
+      if (parentsGone) dailyBonus = Math.round(dailyBonus * 0.7); // v9.31 報告 P2-3 對沖：父母不在 → 零用錢 −30%，睡眠減壓 buff 不再是純賺
       // v9.1 生活費：隨年級與小鎮繁榮成長，後期不再只進不出 (金額不大，是壓力來源之一)
       let totalLevels = 0; try { totalLevels = ['home', 'store', 'restaurant', 'school', 'library', 'gym'].reduce((s, k) => s + getLandmarkLevel(k), 0); } catch (e) { }
       const livingCost = 8 + gameState.gradeIndex * 8 + totalLevels * 2;
@@ -1065,7 +1068,7 @@
       gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + dailyBonus;
       updateUI();
       saveGameData(); // 立即存檔，確保零用錢累積
-      queueFloatingText(`📅 每日結算：零用錢 +$${dailyBonus}・生活費 −$${livingCost}`);
+      queueFloatingText(`📅 每日結算：零用錢 +$${dailyBonus}${parentsGone ? '（父母不在 −30%）' : ''}・生活費 −$${livingCost}`);
       playSound('buy');
     }
 
@@ -1292,7 +1295,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.30.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.31.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

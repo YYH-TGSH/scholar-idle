@@ -1553,7 +1553,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.30.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.31.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2946,6 +2946,34 @@
         else { const d = RIVAL_DEFS.find(x => x.key === leader); queueFloatingText(`🏁 ${d.name} 超前你了，加油！`); }
       }
       renderRivals();
+      const winner = rs.find(r => r.prog >= 100);
+      if (winner) settleWeeklyRace('rival'); // v9.31 宿敵率先達標：當場結算本週競賽（冠軍是他，你的名次照發獎金）
+    }
+    const RACE_PRIZES = [150, 80, 40];
+    function settleWeeklyRace(reason) {
+      // v9.31 手冊承諾實裝：每週競賽結算 — 依公佈欄名次發獎學金（冠軍 $150、亞軍 $80、季軍 $40），結算後新一週開始
+      const rs = ensureRivals();
+      const rows = boardRows();
+      const myRank = rows.findIndex(r => r.you);
+      if (myRank >= 0 && myRank < 3) {
+        const prize = RACE_PRIZES[myRank];
+        gameState.money = (gameState.money || 0) + prize;
+        gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + prize;
+        queueFloatingText(`🏁 每週競賽結算：你拿下第 ${myRank + 1} 名，獎學金 +$${prize}！`);
+        playSound('levelUp');
+      } else {
+        queueFloatingText(`🏁 每週競賽結算：冠軍是 ${rows[0].name}，你第 ${myRank + 1} 名 — 下週贏回來！`);
+      }
+      if (!rows[0].you) {
+        const def = RIVAL_DEFS.find(x => x.name === rows[0].name);
+        const champ = def && rs.find(r => r.key === def.key);
+        if (champ) champ.wins = (champ.wins || 0) + 1;
+      }
+      rs.forEach(r => { r.prog = 4 + Math.round(Math.random() * 10); });
+      gameState._weekBaseProg = playerGradeProgress();
+      gameState._rivalLeader = null;
+      renderRivals();
+      saveGameData();
     }
     function onPlayerExamPassed() {
       ensureRivals().forEach(r => { r.prog = 4 + Math.round(Math.random() * 10); });
