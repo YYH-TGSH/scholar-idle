@@ -1090,6 +1090,7 @@
           svg.querySelectorAll('[id^="char-custom-"]').forEach(n => n.remove());
           const cap = svg.querySelector('.pixel-cap-default');
           if (cap) cap.style.display = 'none';
+          svg.querySelectorAll('.cap-badge').forEach(n => n.remove()); // v9.43 「學」徽是主角專屬識別，NPC 帽子不掛
           svg.querySelectorAll('.pixel-head-group rect[y="5"]').forEach(r => r.setAttribute('fill', d.palette.hair));
           const jacket = svg.querySelector('.pixel-body-group rect[x="3"][y="11"]');
           if (jacket) jacket.setAttribute('fill', d.palette.outfit);
@@ -1104,7 +1105,7 @@
             const capEl = svg.querySelector('.pixel-cap-default');
             if (capEl) {
               capEl.style.display = '';
-              capEl.querySelectorAll('rect').forEach(r => { const f = r.getAttribute('fill'); if (f === '#e74c3c') r.setAttribute('fill', d.palette.cap[0]); else if (f === '#c0392b') r.setAttribute('fill', d.palette.cap[1]); else if (f === '#962d22') r.setAttribute('fill', d.palette.cap[2]); });
+              capEl.querySelectorAll('rect').forEach(r => { const f = r.getAttribute('fill'); if (f === '#ffcc00') r.setAttribute('fill', d.palette.cap[0]); else if (f === '#e0a800') r.setAttribute('fill', d.palette.cap[1]); else if (f === '#b8860b') r.setAttribute('fill', d.palette.cap[2]); });
             }
           }
           if (d.palette.headband) { const hb = svg.querySelector('.pixel-headband'); if (hb) { hb.style.display = ''; hb.setAttribute('fill', d.palette.headband); } }
@@ -1962,6 +1963,8 @@
       if (key === _skyLastKey) return; // v9.10.4: 值沒變就不寫 style (減少每 tick 的版面重算，鏡頭更順)
       _skyLastKey = key;
       _skyEls.sn.style.clipPath = skyNightClip(openSig); // v9.23 開著的建築挖空（不被夜色蓋）、休息的變黑
+      const blossom = document.getElementById('big-tree-blossom'); // v9.43 地標大樹花季（現實 3–5 月變粉）
+      if (blossom) { const m = new Date().getMonth() + 1; const on = m >= 3 && m <= 5; const want = on ? '' : 'none'; if (blossom.style.display !== want) blossom.style.display = want; }
       const r3 = v => String(Math.round(v * 1000) / 1000);
       _skyEls.sn.style.opacity = r3(nf * 0.9);
       _skyEls.sw.style.opacity = r3(wf);
