@@ -624,27 +624,29 @@
 
     // ================= v9.8 精緻化：座位池＋門口排隊＋全員步行職員＋爸媽 =================
     const NPC_DEFS = [
-      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 620, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93', skin: '#fed7aa' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
-      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 1240, speed: 62, palette: { hair: '#ff8fab', outfit: '#ff6b9d', shorts: '#5b2a86', skin: '#fed7aa', hairStyle: 'long' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
-      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1830, speed: 58, palette: { hair: '#2f6b33', outfit: '#27ae60', shorts: '#0e4d2e', skin: '#c98a4b' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
+      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 300, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93', skin: '#fed7aa' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
+      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 820, speed: 62, palette: { hair: '#ff8fab', outfit: '#ff6b9d', shorts: '#5b2a86', skin: '#fed7aa', hairStyle: 'long' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
+      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1080, speed: 58, palette: { hair: '#2f6b33', outfit: '#27ae60', shorts: '#0e4d2e', skin: '#c98a4b' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
       { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#1a1a24', outfit: '#3b6ea5', shorts: '#6c3483', skin: '#fed7aa', hairStyle: 'long' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
       { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#784212', skin: '#dfa05e', cap: ['#ff7f27', '#d35400', '#a04000'] }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
       { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#4a235a', skin: '#f5c48b', hairStyle: 'bun' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
       { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#943126', skin: '#f5c48b', cap: ['#ffd60a', '#d9a400', '#b8860b'] }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#6b6f76', outfit: '#2c3e50', shorts: '#2c3e50', skin: '#f5c48b' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
-      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#1e6f5c', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
-      { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#1a5276', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
-      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#922b21', skin: '#dfa05e', cap: ['#ffffff', '#d5dbdb', '#aab7b8'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
-      { key: 'coach', kind: 'staff', name: '阿力', homeX: 1370, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#154360', skin: '#c98a4b', headband: '#e74c3c' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
-      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1690, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#4d342e', skin: '#dfa05e', headband: '#8e44ad' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 560, speed: 62, palette: { hair: '#6b6f76', outfit: '#2c3e50', shorts: '#2c3e50', skin: '#f5c48b' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
+      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 950, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#1e6f5c', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
+      { key: 'librarian', kind: 'staff', name: '小林', homeX: 430, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#1a5276', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
+      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 700, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#922b21', skin: '#dfa05e', cap: ['#ffffff', '#d5dbdb', '#aab7b8'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
+      { key: 'coach', kind: 'staff', name: '阿力', homeX: 880, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#154360', skin: '#c98a4b', headband: '#e74c3c' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
+      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1010, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#4d342e', skin: '#dfa05e', headband: '#8e44ad' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
       { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#5d4037', skin: '#f5c48b' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
       { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#7d3c98', skin: '#fed7aa', hairStyle: 'bun' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
     ];
-    const NPC_STREET_Y = 300;
-    const NPC_DOOR_Y = 240;
+    const NPC_STREET_Y = 300; // A 街步行線（spawn/預設用；跨棟路徑一律走 streetYOf/streetLegs）
+    const NPC_DOOR_Y = 245;
+    const npcStreetY = (loc) => STREET_Y[LOC_STREET[loc] || 'A'];
+    const npcCurStreet = (npc) => npc.insideLoc ? (LOC_STREET[npc.insideLoc] || 'A') : (npc.y < 545 ? 'A' : 'B');
     const NPC_HOUSE_Y = 505;
     const NPC_PARK_Y = 440;
-    const NPC_DOOR_X = { home: 175, store: 485, restaurant: 795, school: 1105, library: 1415, gym: 1732 };
+    const NPC_DOOR_X = DOOR_X; // v9.38 起門口 x 以 coords.js 註冊表為單一來源
     // 玩家專屬位子：座位池永遠保留，NPC 絕不坐上去跟玩家重疊
     const PLAYER_RESERVED = { school: { x: 590, y: 250 }, library: { x: 140, y: 235 }, restaurant: { x: 440, y: 184 }, store: { x: 565, y: 252 }, gym: { x: 1652, y: 75 } };
     const SPECIAL_MENU = [
@@ -791,17 +793,17 @@
     const GYM_DOOR_IN = { x: 1732, y: 240, door: 'in', loc: 'gym', ix: 575, iy: 278 }; // v9.27 操場門口瞬移
     const GYM_DOOR_OUT = { x: 575, y: 278, door: 'out', loc: 'gym', wx: 1732, wy: 240 };
     const INTERIORS = { // v9.18 室內場景通用表
-      store: { roomsId: 'store-rooms', doorIn: STORE_DOOR_IN, doorOut: STORE_DOOR_OUT, worldDoorX: 485, inDoor: { x: 565, y: 278 } },
-      restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 795, inDoor: { x: 610, y: 278 } },
-      school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 1105, inDoor: { x: 575, y: 278 } },
-      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 1415, inDoor: { x: 575, y: 278 } },
-      gym: { roomsId: 'gym-rooms', doorIn: GYM_DOOR_IN, doorOut: GYM_DOOR_OUT, worldDoorX: 1732, inDoor: { x: 575, y: 278 } }
+      store: { roomsId: 'store-rooms', doorIn: STORE_DOOR_IN, doorOut: STORE_DOOR_OUT, worldDoorX: 571, inDoor: { x: 565, y: 278 } },
+      restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 951, inDoor: { x: 610, y: 278 } },
+      school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } },
+      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 571, inDoor: { x: 575, y: 278 } },
+      gym: { roomsId: 'gym-rooms', doorIn: GYM_DOOR_IN, doorOut: GYM_DOOR_OUT, worldDoorX: 958, inDoor: { x: 575, y: 278 } }
     };
     function npcExitPrefix(npc) { // v9.24 在室內的人要先走正門出去，路徑才不會在別間的座標系裡亂走（繞去隱藏的邊邊）
-      if (npc.insideLoc && INTERIORS[npc.insideLoc]) { const c = INTERIORS[npc.insideLoc]; return [c.inDoor, c.doorOut, { x: c.worldDoorX, y: NPC_STREET_Y }]; }
+      if (npc.insideLoc && INTERIORS[npc.insideLoc]) { const c = INTERIORS[npc.insideLoc]; return [c.inDoor, c.doorOut, { x: c.worldDoorX, y: npcStreetY(npc.insideLoc) }]; }
       return [];
     }
-    function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; if (npc.insideLoc === loc) return [pt]; return [...npcExitPrefix(npc), { x: c.worldDoorX, y: NPC_STREET_Y }, c.doorIn, pt]; }
+    function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; if (npc.insideLoc === loc) return [pt]; const fromX = npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x; return [...npcExitPrefix(npc), ...streetLegs(fromX, npcCurStreet(npc), c.worldDoorX, LOC_STREET[loc] || 'A'), c.doorIn, pt]; }
     function storePathTo(npc, pt) { return interiorPathTo(npc, 'store', pt); }
     function npcDef(key) { return NPC_DEFS.find(d => d.key === key); }
     function npcIndex(key) { return NPC_DEFS.findIndex(d => d.key === key); }
@@ -820,14 +822,14 @@
       }
       npc.seatIdx = null;
     }
-    function queueSlotPos(building, i) { return { x: NPC_DOOR_X[building] - 60 + i * 34, y: NPC_STREET_Y }; }
+    function queueSlotPos(building, i) { return { x: NPC_DOOR_X[building] - 60 + i * 34, y: npcStreetY(building) }; }
     function recomputeQueueSlots(building) {
       QUEUES[building].forEach((key, i) => {
         const npc = (gameState.npcs || []).find(n => n.key === key);
         if (!npc) return;
         const slot = queueSlotPos(building, i);
-        const atSlot = npc.x === slot.x && npc.y === NPC_STREET_Y;
-        const headingThere = npc.path.length === 1 && npc.path[0].x === slot.x && npc.path[0].y === NPC_STREET_Y;
+        const atSlot = npc.x === slot.x && npc.y === npcStreetY(building);
+        const headingThere = npc.path.length === 1 && npc.path[0].x === slot.x && npc.path[0].y === npcStreetY(building);
         if (!atSlot && !headingThere) { npc.path = [slot]; npc.arrive = 'queue'; }
       });
     }
@@ -844,7 +846,7 @@
       npc.queueFor = building;
       npc.queueWait = 0;
       const slot = queueSlotPos(building, QUEUES[building].length - 1);
-      npc.path = [{ x: slot.x, y: NPC_STREET_Y }];
+      npc.path = [{ x: slot.x, y: npcStreetY(building) }];
       npc.arrive = 'queue';
       npc.state = 'path';
     }
@@ -860,7 +862,7 @@
       const seat = npcRequestSeat(npc, building);
       if (seat) {
         QUEUES[building].shift();
-        npc.path = INTERIORS[building] ? interiorPathTo(npc, building, seat) : [{ x: NPC_DOOR_X[building], y: NPC_STREET_Y }, seat];
+        npc.path = INTERIORS[building] ? interiorPathTo(npc, building, seat) : [...streetLegs(npc.x, npcCurStreet(npc), NPC_DOOR_X[building], LOC_STREET[building] || 'A'), seat];
         npc.arrive = 'seat';
         npc.state = 'path';
         npc.queueFor = '';
@@ -882,7 +884,7 @@
       gameState.npcs = NPC_DEFS.map((d, i) => {
         if (d.kind === 'parent') return { key: d.key, kind: d.kind, x: d.sleepSpot.x, y: d.sleepSpot.y, state: 'sleeping', dest: 'home', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0, inside: true }; // v9.14
         if (d.kind === 'rival' || d.kind === 'staff') return { key: d.key, kind: d.kind, x: -80, y: NPC_STREET_Y, state: 'away', dest: 'away', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 }; // v9.15 家在地圖外
-        return { key: d.key, kind: d.kind, x: 300 + i * 240, y: NPC_STREET_Y, state: 'path', dest: '', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 };
+        return { key: d.key, kind: d.kind, x: 120 + i * 160, y: NPC_STREET_Y, state: 'path', dest: '', path: [], arrive: '', dwell: 0, dir: 1, seatIdx: null, queueFor: '', queueWait: 0, orderLeft: 0 };
       });
       gameState.npcs.forEach(n => { if (npcDef(n.key).kind === 'friend') npcPickTarget(n); });
       return gameState.npcs;
@@ -913,16 +915,16 @@
       }
       if (dest === 'away') {
         const fromX = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? INTERIORS[npc.insideLoc].worldDoorX : npc.x;
-        npc.path = [...npcExitPrefix(npc), { x: fromX < 960 ? -80 : 2000, y: NPC_STREET_Y }];
+        npc.path = [...npcExitPrefix(npc), { x: fromX < WORLD_W / 2 ? -80 : WORLD_W + 80, y: STREET_Y[npcCurStreet(npc)] }];
         npc.arrive = 'away';
       } else if (dest === 'park') {
-        const px = 200 + Math.floor(Math.random() * 1550);
-        npc.path = [...npcExitPrefix(npc), { x: px, y: NPC_STREET_Y }, { x: px, y: NPC_PARK_Y }];
+        const px = 120 + Math.floor(Math.random() * 880);
+        npc.path = [...npcExitPrefix(npc), ...streetLegs(npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x, npcCurStreet(npc), px, 'A'), { x: px, y: NPC_PARK_Y }];
         npc.arrive = 'idle';
       } else {
         const seat = npcRequestSeat(npc, dest);
         if (seat) {
-          npc.path = INTERIORS[dest] ? interiorPathTo(npc, dest, seat) : [...npcExitPrefix(npc), { x: NPC_DOOR_X[dest], y: NPC_STREET_Y }, seat];
+          npc.path = INTERIORS[dest] ? interiorPathTo(npc, dest, seat) : [...npcExitPrefix(npc), ...streetLegs(npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x, npcCurStreet(npc), NPC_DOOR_X[dest], LOC_STREET[dest] || 'A'), seat];
           npc.arrive = 'seat';
         } else {
           npcEnqueue(npc, dest);
@@ -943,7 +945,7 @@
         npc._lunchForce = null;
         npc.dest = 'restaurant';
         const lseat = npcRequestSeat(npc, 'restaurant');
-        if (lseat) { npc.path = [...npcExitPrefix(npc), { x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, INTERIORS.restaurant.doorIn, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
+        if (lseat) { npc.path = [...npcExitPrefix(npc), ...streetLegs(npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x, npcCurStreet(npc), NPC_DOOR_X.restaurant, 'A'), INTERIORS.restaurant.doorIn, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
         else npcEnqueue(npc, 'restaurant');
         return 'restaurant';
       }
@@ -965,7 +967,7 @@
           npc.arrive = 'athome'; npc.state = 'path'; return 'home';
         } else {
           npc.dest = 'away';
-          npc.path = npc.inside ? [DOOR_OUT, { x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }] : [{ x: npc.x < 960 ? -80 : 2000, y: NPC_STREET_Y }];
+          npc.path = npc.inside ? [DOOR_OUT, { x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: npc.x < WORLD_W / 2 ? -80 : WORLD_W + 80, y: NPC_STREET_Y }] : [{ x: npc.x < WORLD_W / 2 ? -80 : WORLD_W + 80, y: STREET_Y[npcCurStreet(npc)] }];
           npc.arrive = 'away'; npc.state = 'path'; return 'away';
         }
       }
@@ -1837,7 +1839,7 @@
       });
     }
     // v9.23 每間建築的夜間挖空：平台矩形（CDP 實測 map 座標）＋營業時間（跟遊戲 locks 同步）
-    const SKY_HOLES = { home: [40, 25, 278, 179], store: [350, 25, 264, 179], restaurant: [660, 25, 264, 179], school: [970, 25, 264, 179], library: [1280, 25, 264, 179], gym: [1590, 25, 278, 179] };
+    const SKY_HOLES = { home: [56, 30, 284, 179], store: [436, 30, 264, 179], restaurant: [816, 30, 264, 179], school: [56, 520, 264, 179], library: [436, 520, 264, 179], gym: [816, 520, 284, 179] };
     function skyOpenSig() {
       const h = (gameState.hour || 0) + (gameState.minute || 0) / 60;
       const dow = gameState.dayOfWeek || 1;
@@ -2978,7 +2980,7 @@
       npcFreeSeat(npc);
       npc.dest = 'restaurant';
       const lseat = npcRequestSeat(npc, 'restaurant');
-      if (lseat) { npc.path = [...npcExitPrefix(npc), { x: NPC_DOOR_X.restaurant, y: NPC_STREET_Y }, INTERIORS.restaurant.doorIn, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
+      if (lseat) { npc.path = [...npcExitPrefix(npc), ...streetLegs(npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x, npcCurStreet(npc), NPC_DOOR_X.restaurant, 'A'), INTERIORS.restaurant.doorIn, lseat]; npc.arrive = 'seat'; npc.state = 'path'; }
       else npcEnqueue(npc, 'restaurant');
       return;
       npcFreeSeat(npc);

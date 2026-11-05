@@ -125,8 +125,8 @@ body {
 
     /* 960x540 緊湊六角等角聚落地圖舞台 */
     .town-map {
-      width: 1920px;
-      height: 540px;
+      width: 1150px;
+      height: 920px;
       position: relative;
       margin: 0 auto;
       overflow: visible;
@@ -302,44 +302,44 @@ body {
     /* 6 大建築固定座標 (960x540 Viewport - 開羅 2.5D 正向街區佈局) */
     /* 上排 3 棟 */
     .landmark-school {
-      left: 970px;
-      top: 25px;
+      left: 56px;
+      top: 520px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-library {
-      left: 1280px;
-      top: 25px;
+      left: 436px;
+      top: 520px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-gym {
-      left: 1590px;
-      top: 25px;
+      left: 816px;
+      top: 520px;
       width: 284px;
       height: 185px;
     }
 
     /* 下排 3 棟 */
     .landmark-restaurant {
-      left: 660px;
-      top: 25px;
+      left: 816px;
+      top: 30px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-store {
-      left: 350px;
-      top: 25px;
+      left: 436px;
+      top: 30px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-home {
-      left: 40px;
-      top: 25px;
+      left: 56px;
+      top: 30px;
       width: 284px;
       height: 185px;
     }

@@ -4,10 +4,22 @@
    ========================================================================== */
 
     // 世界與街道常數 (通勤路徑/相機/地面共用同一套座標)
-    const WORLD_W = 1920, WORLD_H = 540;
-    const WALK_Y = 296; // 主街馬路中央的步行線
-    const DOOR_X = { home: 175, store: 485, restaurant: 795, school: 1105, library: 1415, gym: 1732 }; // 各建築門口 x
-    const DOOR_OUT_Y = 230; // 走出大門後、踏上馬路前的門前點 y
+    // v9.38 A 案雙排小鎮：世界 1150x920，北排（住家/超商/餐廳）面 A 街、南排（學校/圖書館/操場）面 B 街，
+    // 中間是公園帶，東西兩條連通巷接兩條街。所有世界座標以本註冊表為單一來源。
+    const WORLD_W = 1150, WORLD_H = 920;
+    const LOC_STREET = { home: 'A', store: 'A', restaurant: 'A', school: 'B', library: 'B', gym: 'B' };
+    const STREET_Y = { A: 300, B: 790 }; // 兩條街的步行線
+    const CONNECTOR_X = [28, 1122]; // 東西連通巷的步行線 x
+    const WALK_Y = 300; // 相容舊引用：A 街步行線（新路徑一律走 streetYOf/streetLegs）
+    const DOOR_X = { home: 198, store: 571, restaurant: 951, school: 198, library: 571, gym: 958 }; // 各建築門口 x
+    const DOOR_FRONT_Y = { home: 200, store: 200, restaurant: 200, school: 690, library: 690, gym: 690 }; // 門口落腳點 y（島上）
+    const DOOR_OUT_Y = { A: 232, B: 722 }; // 走出大門後、踏上馬路前的門前點 y（依街別）
+    function streetYOf(loc) { return STREET_Y[LOC_STREET[loc] || 'A']; }
+    function streetLegs(x1, s1, x2, s2) { // 街面轉接點（保證軸向）：回傳含終點 {x2, STREET_Y[s2]} 的陣列
+      if (s1 === s2) return [{ x: x2, y: STREET_Y[s2] }];
+      const cx = Math.abs(x1 - CONNECTOR_X[0]) + Math.abs(x2 - CONNECTOR_X[0]) <= Math.abs(x1 - CONNECTOR_X[1]) + Math.abs(x2 - CONNECTOR_X[1]) ? CONNECTOR_X[0] : CONNECTOR_X[1];
+      return [{ x: cx, y: STREET_Y[s1] }, { x: cx, y: STREET_Y[s2] }, { x: x2, y: STREET_Y[s2] }];
+    }
 
     // 各室內互動點 (由舊 960 佈局的島內相對座標平移而來，室內陳設不變)
     const COORDS = {

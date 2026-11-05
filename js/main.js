@@ -95,9 +95,13 @@
     function buildCommutePath(fromLoc, toLoc) {
       const fromIdle = COORDS[fromLoc + '-idle'] || COORDS['home-idle'];
       const start = { x: gameState.currentX || fromIdle.x, y: gameState.currentY || fromIdle.y };
-      const end = (toLoc === 'home' || toLoc === 'store' || toLoc === 'restaurant' || toLoc === 'school' || toLoc === 'library' || toLoc === 'gym') ? { x: DOOR_X[toLoc], y: 195 } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // v9.14/v9.17/v9.18：回家/進超商/進餐廳路徑只到門口，室內由 stage 接手；v9.25.1 補學校、v9.26 補圖書館、v9.27 補操場（全棟到齊）
+      const end = (toLoc === 'home' || toLoc === 'store' || toLoc === 'restaurant' || toLoc === 'school' || toLoc === 'library' || toLoc === 'gym') ? { x: DOOR_X[toLoc], y: DOOR_FRONT_Y[toLoc] } : (COORDS[toLoc + '-idle'] || COORDS['home-idle']); // 路徑只到門口，室內由 stage 接手（六棟同規）
       const fx = DOOR_X[fromLoc] || start.x, tx = DOOR_X[toLoc] || end.x;
-      const raw = [start, { x: fx, y: DOOR_OUT_Y }, { x: fx, y: WALK_Y }, { x: tx, y: WALK_Y }, { x: tx, y: DOOR_OUT_Y }, end];
+      const sF = LOC_STREET[fromLoc] || (start.y < 545 ? 'A' : 'B'), sT = LOC_STREET[toLoc] || 'A';
+      // v9.38 雙街路網：出門→本站街面→（跨街才繞連通巷）→對站街面→門前→門口，全程軸向
+      const raw = DOOR_X[fromLoc]
+        ? [start, { x: fx, y: DOOR_OUT_Y[sF] }, { x: fx, y: STREET_Y[sF] }, ...streetLegs(fx, sF, tx, sT), { x: tx, y: DOOR_OUT_Y[sT] }, end]
+        : [start, { x: fx, y: STREET_Y[sF] }, ...streetLegs(fx, sF, tx, sT), { x: tx, y: DOOR_OUT_Y[sT] }, end];
       const pts = [raw[0]];
       for (let i = 1; i < raw.length; i++) {
         const p = raw[i], q = pts[pts.length - 1];
@@ -128,12 +132,12 @@
     function startCommuteTo(targetLoc) {
       if (targetLoc !== 'home') gameState.deskStudy = false; // v9.14.4 離家就結束書桌自習
       if (targetLoc !== 'store' && gameState.noodleUntil) endNoodleSession(false); // v9.16 離開超商 = 泡麵中斷
-      if (currentLoc === 'home' && targetLoc !== 'home') { gameState.currentX = DOOR_X.home; gameState.currentY = 195; } // v9.14：離家先回到門口再出發（stage 同步關閉）
-      if (currentLoc === 'store' && targetLoc !== 'store') { gameState.currentX = DOOR_X.store; gameState.currentY = 195; } // v9.17：離開超商先回到門口再出發
-      if (currentLoc === 'restaurant' && targetLoc !== 'restaurant') { gameState.currentX = DOOR_X.restaurant; gameState.currentY = 195; } // v9.18：離開餐廳先回到門口再出發
-      if (currentLoc === 'school' && targetLoc !== 'school') { gameState.currentX = DOOR_X.school; gameState.currentY = 195; } // v9.25.1：離開學校先回到校門口再出發（v9.21 室內化漏了這條——主角原本從教室座位座標瞬移，把教室座標當世界座標走出幽靈路徑）
-      if (currentLoc === 'library' && targetLoc !== 'library') { gameState.currentX = DOOR_X.library; gameState.currentY = 195; } // v9.26：離開圖書館先回到門口再出發（新室內上線清單）
-      if (currentLoc === 'gym' && targetLoc !== 'gym') { gameState.currentX = DOOR_X.gym; gameState.currentY = 195; } // v9.27：離開操場先回到門口再出發（新室內上線清單）
+      if (currentLoc === 'home' && targetLoc !== 'home') { gameState.currentX = DOOR_X.home; gameState.currentY = DOOR_FRONT_Y.home; } // v9.14：離家先回到門口再出發（stage 同步關閉）
+      if (currentLoc === 'store' && targetLoc !== 'store') { gameState.currentX = DOOR_X.store; gameState.currentY = DOOR_FRONT_Y.store; } // v9.17：離開超商先回到門口再出發
+      if (currentLoc === 'restaurant' && targetLoc !== 'restaurant') { gameState.currentX = DOOR_X.restaurant; gameState.currentY = DOOR_FRONT_Y.restaurant; } // v9.18：離開餐廳先回到門口再出發
+      if (currentLoc === 'school' && targetLoc !== 'school') { gameState.currentX = DOOR_X.school; gameState.currentY = DOOR_FRONT_Y.school; } // v9.25.1：離開學校先回到校門口再出發（v9.21 室內化漏了這條——主角原本從教室座位座標瞬移，把教室座標當世界座標走出幽靈路徑）
+      if (currentLoc === 'library' && targetLoc !== 'library') { gameState.currentX = DOOR_X.library; gameState.currentY = DOOR_FRONT_Y.library; } // v9.26：離開圖書館先回到門口再出發（新室內上線清單）
+      if (currentLoc === 'gym' && targetLoc !== 'gym') { gameState.currentX = DOOR_X.gym; gameState.currentY = DOOR_FRONT_Y.gym; } // v9.27：離開操場先回到門口再出發（新室內上線清單）
       if (gameState.isCommuting) return; // v9.1：通勤中不改道——大腦每 tick 都在決策，沒這道防線會半路重建路徑、把小人拉回起點門口 (測試實測會半路改去別棟)
       const pts = buildCommutePath(currentLoc, targetLoc);
       const total = pathTotalLength(pts);
@@ -196,7 +200,7 @@
     function playerWorldPos() { // v9.28.2 主角的世界座標：在室內時 currentX/Y 是場景座標（跟世界座標不同套），世界鏡頭要對準該建築門口，否則會追到別棟附近（追錯人）
       if (gameState.isCommuting && _visPos) return _visPos;
       const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1 };
-      if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return { x: DOOR_X[currentLoc], y: 195 };
+      if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return { x: DOOR_X[currentLoc], y: DOOR_FRONT_Y[currentLoc] };
       return { x: gameState.currentX || WORLD_W / 2, y: gameState.currentY || WORLD_H / 2 };
     }
     function snapCameraToChar() {
@@ -1335,7 +1339,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.37.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.38.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
