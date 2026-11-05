@@ -1722,7 +1722,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.40.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.41.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1748,22 +1748,7 @@
         elCalendarTime.innerText = timeStr;
       }
 
-      // 動態晝夜光影濾鏡 (開羅復古地圖光影變化)
-      const overlayEl = document.getElementById("map-night-overlay");
-      if (overlayEl) {
-        const hour = gameState.hour;
-        let overlayBg = "rgba(0, 0, 0, 0)";
-        if (hour >= 17 && hour < 19) {
-          overlayBg = "rgba(243, 156, 18, 0.16)"; // 黃昏暖橘夕陽光
-        } else if (hour >= 19 || hour < 5) {
-          overlayBg = "rgba(15, 23, 42, 0.36)"; // 深夜靜謐藏青星空光影
-        } else if (hour >= 5 && hour < 7) {
-          overlayBg = "rgba(255, 177, 66, 0.10)"; // 清晨朝霞柔光
-        }
-        if (overlayEl.style.fill !== overlayBg) {
-          overlayEl.style.fill = overlayBg; // v9.0 修正：SVG rect 要改 fill，寫 background 永遠不會上色 (夜間色調一直沒生效)
-        }
-      }
+      // v9.41 #map-night-overlay 第三套疊色機制退役：夜色統一由 town.js 的 #sky-night（挖空）＋光源清單光暈負責
     }
 
     function updateStatusBars() {

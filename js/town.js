@@ -1871,6 +1871,7 @@
         const sg = document.createElement('div');
         sg.id = 'street-glows';
         map.appendChild(sg);
+        sg.style.background = TOWN_LAMPS.map(l => 'radial-gradient(circle 110px at ' + l.x + 'px ' + l.y + 'px, rgba(255, 200, 110, 0.36), rgba(255, 200, 110, 0) 70%)').join(', '); // v9.41 光暈自光源清單生成（舊版手寫四團、兩團不在燈上、兩團在地圖外）
         const sw = document.createElement('div'); // v9.22.1 store-beacon/store-lit 補光片退役：改由 #sky-night 在超商處挖空
         sw.id = 'sky-warm';
         map.appendChild(sw);
@@ -1887,8 +1888,24 @@
         }
       });
     }
-    // v9.23 每間建築的夜間挖空：平台矩形（CDP 實測 map 座標）＋營業時間（跟遊戲 locks 同步）
-    const SKY_HOLES = { home: [56, 30, 284, 179], store: [436, 30, 264, 179], restaurant: [816, 30, 264, 179], school: [56, 520, 264, 179], library: [436, 520, 264, 179], gym: [816, 520, 284, 179] };
+    // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
+    const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696 }, { x: 660, y: 696 }, { x: 1050, y: 696 }];
+    // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
+    const SKY_HOLES_FALLBACK = { home: [56, 30, 284, 179], store: [436, 30, 264, 179], restaurant: [816, 30, 264, 179], school: [56, 520, 264, 179], library: [436, 520, 264, 179], gym: [816, 520, 284, 179] };
+    let _skyHolesCache = null;
+    function skyHoles() {
+      if (_skyHolesCache) return _skyHolesCache;
+      const out = {};
+      for (const k in SKY_HOLES_FALLBACK) {
+        const el = document.getElementById('landmark-' + k);
+        if (!el) { out[k] = SKY_HOLES_FALLBACK[k]; continue; }
+        const cs = getComputedStyle(el);
+        const L = parseFloat(cs.left), T = parseFloat(cs.top), W = parseFloat(cs.width);
+        out[k] = (isFinite(L) && isFinite(T) && isFinite(W)) ? [L, T, W - 6, 179] : SKY_HOLES_FALLBACK[k];
+      }
+      _skyHolesCache = out;
+      return out;
+    }
     function skyOpenSig() {
       const h = (gameState.hour || 0) + (gameState.minute || 0) / 60;
       const dow = gameState.dayOfWeek || 1;
@@ -1903,9 +1920,10 @@
       return sig;
     }
     function skyNightClip(sig) {
-      let pts = '0px 0px, 1920px 0px, 1920px 540px, 0px 540px, 0px 0px';
+      let pts = '0px 0px, ' + WORLD_W + 'px 0px, ' + WORLD_W + 'px ' + WORLD_H + 'px, 0px ' + WORLD_H + 'px, 0px 0px';
+      const holes = skyHoles();
       sig.split(',').forEach(k => {
-        const r = SKY_HOLES[k]; if (!r) return;
+        const r = holes[k]; if (!r) return;
         pts += ', ' + r[0] + 'px ' + r[1] + 'px, ' + r[0] + 'px ' + (r[1] + r[3]) + 'px, ' + (r[0] + r[2]) + 'px ' + (r[1] + r[3]) + 'px, ' + (r[0] + r[2]) + 'px ' + r[1] + 'px, ' + r[0] + 'px ' + r[1] + 'px';
       });
       return 'polygon(evenodd, ' + pts + ')';
