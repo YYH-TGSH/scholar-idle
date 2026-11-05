@@ -337,6 +337,7 @@
     // 雙指捏合縮放、桌機滾輪縮放、雙擊重置；拖曳超過門檻會吞掉隨後的 click，避免拖完誤點房間。
     let mapZoom = 1, mapPanX = 0, mapPanY = 0;
     let _pointers = new Map(), _pinchDist0 = 0, _pinchZoom0 = 1, _dragMoved = 0, _suppressClickUntil = 0, _mapSetupDone = false;
+    window.resetMapView = function () { mapZoom = 1; mapPanX = 0; mapPanY = 0; resizeMapScale(); }; // v9.49 寬版全圖回正鈕（實機報告 A9）
     function applyMapZoom() {
       const map = document.getElementById('town-map');
       if (!map) return;
@@ -1339,7 +1340,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.48.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.49.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

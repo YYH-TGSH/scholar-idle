@@ -58,8 +58,15 @@
       if (lbl) lbl.textContent = open ? '關閉' : '選單';
       const t = document.getElementById('fab-menu-toggle');
       if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const scrim = document.getElementById('fab-scrim');
+      if (scrim) scrim.style.display = open ? 'block' : 'none'; // v9.49 點外關閉守衛（實機報告 B3）
       if (typeof layoutMapInsets === 'function') layoutMapInsets(); // v9.45 只更新保留空間變數；不再呼叫 resizeMapScale 重置視角（實機報告 B6）
     }
+    function closeFabMenu() {
+      const c = document.querySelector('.floating-controls');
+      if (c && c.classList.contains('fab-open')) { c.classList.remove('fab-open'); fabMenuSync(false); }
+    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFabMenu(); });
     function toggleFabMenu(e) {
       if (e) e.stopPropagation();
       const c = document.querySelector('.floating-controls');
@@ -1728,7 +1735,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.48.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.49.0) | 上次存檔：${ts}`);
       }
     }
 

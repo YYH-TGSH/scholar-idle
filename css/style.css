@@ -369,7 +369,7 @@ body {
       right: auto;
       left: 50%;
       transform: translateX(-50%); /* v9.15.2：改到畫面底端中間（使用者指定），不壓頂欄 */
-      bottom: calc(158px + env(safe-area-inset-bottom));
+      bottom: calc(var(--chrome-bottom, 120px) + 12px + env(safe-area-inset-bottom));
       max-width: calc(100vw - 24px);
       white-space: nowrap;
       z-index: 90;
@@ -2184,7 +2184,7 @@ body {
     #alert-bar {
       display: none;
       position: absolute;
-      top: 72px;
+      top: calc(var(--chrome-top, 64px) + 8px); /* v9.49 全寬度吃保留空間變數（A8） */
       left: 50%;
       transform: translateX(-50%);
       background: rgba(var(--rgb-secondary), 0.92);
@@ -2448,7 +2448,7 @@ body {
 
     .achievement-toast {
       position: absolute;
-      top: 80px;
+      top: calc(var(--chrome-top, 64px) + 10px); /* v9.49 全寬度吃保留空間變數（A8） */
       right: 20px;
       background: linear-gradient(135deg, rgba(var(--rgb-gold), 0.92), rgba(var(--rgb-primary), 0.92));
       backdrop-filter: blur(15px);
@@ -3281,7 +3281,7 @@ input, select, textarea { border-radius: 14px !important; }
   .btn-exam-mini { min-height: 40px; }
   .island-tag { font-size: 0.78rem !important; }
   .island-lv-badge { font-size: 0.78rem !important; padding: 4px 8px !important; }
-  .random-event-capsule { left: 50%; right: auto; bottom: calc(158px + env(safe-area-inset-bottom)); }
+  .random-event-capsule { left: 50%; right: auto; bottom: calc(var(--chrome-bottom, 120px) + 12px + env(safe-area-inset-bottom)); }
 }
 
 /* 減少動態偏好：停掉常駐動畫 */
@@ -3349,7 +3349,7 @@ input, select, textarea { border-radius: 14px !important; }
   /* 所有彈窗在手機上限制高度可捲動 (輪迴彈窗內容 ~900px，矮螢幕原本會切掉確認鈕) */
   .overlay .game-modal { max-height: 92dvh !important; overflow-y: auto !important; }
   /* 突發事件膠囊原本 bottom:120px 會壓到房間導覽列 (96~146px 帶) → 抬到導覽列上方 */
-  .random-event-capsule { bottom: calc(158px + env(safe-area-inset-bottom)) !important; }
+  .random-event-capsule { bottom: calc(var(--chrome-bottom, 120px) + 12px + env(safe-area-inset-bottom)) !important; }
   /* 警示條/成就吐司原本 top:72/80px 會蓋進三行高的手機頂欄 → 改到頂欄下方 */
   #alert-bar { top: calc(var(--chrome-top, 150px) + 6px) !important; }
   .achievement-toast { top: calc(var(--chrome-top, 150px) + 8px) !important; right: 12px !important; left: 12px; max-width: none !important; z-index: 99998 !important; }
@@ -3922,4 +3922,14 @@ input, select, textarea { border-radius: 14px !important; }
     align-items: flex-end;
     max-width: min(580px, calc(100vw - 40px));
   }
+}
+
+/* ================= v9.49 打磨（實機報告 P4） ================= */
+#fab-menu-toggle { background-color: var(--sun) !important; color: var(--ink) !important; } /* 品牌黃底＋墨字：深色街道上也醒目，邊框不再與底色同色（B4） */
+.floating-controls.fab-open { z-index: 80; } /* 展開時高於 room-nav(75)，橫排項目不再被蓋（B5） */
+#btn-map-reset { display: none; }
+@media (min-width: 821px) {
+  #btn-map-reset { display: inline-flex; }
+  .game-modal { width: min(600px, 92vw) !important; max-width: 600px !important; } /* 寬版彈窗用真寬版尺寸（A7） */
+  .random-event-capsule { left: auto; right: 20px; transform: none; } /* 寬版事件膠囊停靠右下、不佔畫面正中（A8） */
 }
