@@ -2142,9 +2142,7 @@ body {
       }
     }
 
-    @keyframes float-up-bouncy {
-      0% { opacity: 0; transform: translate(-50%, 20px) scale(0.5); }
-      20% { opacity: 1; transform: translate(-50%, 0px) scale(1.1); }
+          20% { opacity: 1; transform: translate(-50%, 0px) scale(1.1); }
       40% { transform: translate(-50%, 0px) scale(1); }
       80% { opacity: 1; transform: translate(-50%, -30px) scale(1); }
       100% { opacity: 0; transform: translate(-50%, -50px) scale(0.8); }
@@ -3288,7 +3286,9 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* 減少動態偏好：停掉常駐動畫 */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; transition-duration: 0.01s !important; }
+  /* v9.44 分級：停 ambient（漂浮/游動/搖擺/走路循環），保留轉場與事件回饋（不再全域核彈） */
+  .npc-walking .npc-flip, .npc-walking .foot-l, .npc-walking .foot-r, .walking .foot-l, .walking .foot-r,
+  .steam-wisp, .steam-puff, .fish-a, .fish-b, .fish-bub, .cat-tail, .zzz-float, .combo-bubble, .pick-pop { animation: none !important; }
 }
 
 /* ================= v8.3 紙娃娃修復層 ================= */
@@ -3896,3 +3896,8 @@ input, select, textarea { border-radius: 14px !important; }
 @keyframes fishSwimB { from { transform: translateX(0); } to { transform: translateX(-44px); } }
 .fish-bub { animation: bubRise 3.2s linear infinite; }
 @keyframes bubRise { 0% { transform: translateY(0); opacity: 0.85; } 100% { transform: translateY(-26px); opacity: 0; } }
+
+/* ================= v9.44 像素圖示 ================= */
+.pix-ico { width: 18px; height: 18px; vertical-align: -3px; }
+.hv .pix-ico { width: 15px; height: 15px; vertical-align: -2px; }
+.fab-ico { width: 20px; height: 20px; }

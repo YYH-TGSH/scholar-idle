@@ -643,6 +643,7 @@
     const NPC_STREET_Y = 300; // A 街步行線（spawn/預設用；跨棟路徑一律走 streetYOf/streetLegs）
     const NPC_DOOR_Y = 245;
     const npcStreetY = (loc) => STREET_Y[LOC_STREET[loc] || 'A'];
+    const Z_LAYER = { FRONT: 950, SEATED_CLIP: 955, FRONT2: 960, WALK: 975, CHIP: 980, FOOD: 990, BUBBLE: 995 }; // v9.44 室內圖層憲法（單一出處；世界深度層與 HUD 層界線見站規）
     const npcCurStreet = (npc) => npc.insideLoc ? (LOC_STREET[npc.insideLoc] || 'A') : (npc.y < 545 ? 'A' : 'B');
     const NPC_HOUSE_Y = 505;
     const NPC_PARK_Y = 440;
@@ -1809,10 +1810,10 @@
           el.classList.toggle('seated', npc.state === 'seated' && (npc.dest === 'restaurant' || npc.dest === 'home' || npc.windowSeat != null)); // v9.13 在家晚餐也坐；v9.16 窗邊也坐
           el.classList.toggle('on-break', npc.state === 'seated' && npc.dest === 'school' && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break');
           el.style.zIndex = String(Math.round(npc.y)); // v9.12.3 依深度排序：前方人物蓋後方
-          if (npc.insideLoc === 'restaurant' && npc.state === 'seated' && npc.key !== 'chef') el.style.zIndex = '955'; // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
-          else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = '975'; // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
-          else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = '975'; // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
-          else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = '975'; // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
+          if (npc.insideLoc === 'restaurant' && npc.state === 'seated' && npc.key !== 'chef') el.style.zIndex = String(Z_LAYER.SEATED_CLIP); // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
+          else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
+          else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = String(Z_LAYER.WALK); // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
+          else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
           const tag = el.querySelector('.npc-zzz-tag');
           if (tag) tag.style.display = npc.state === 'sleeping' ? 'inline' : 'none';
           // v9.40 表情接線：睡覺閉眼／宿敵競賽超前生氣／用餐咀嚼嘴（素材本來就在精靈裡，只差接線）
@@ -1837,12 +1838,12 @@
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               const _dt = npc.phase === 'eat' ? todaysSpecial().emoji : (npc.phase === 'wait' ? '🍳' : '📋');
               if (dishEl.textContent !== _dt) dishEl.textContent = _dt;
-              syncDishPlate(npc, npc.phase === 'eat' && npc.insideLoc === 'restaurant', todaysSpecial().emoji, npc.x - 9, npc.y - (npc.y > 200 ? 52 : 32), 'rest-rooms', 990); // v9.19 菜上桌；v9.20 食物置頂
+              syncDishPlate(npc, npc.phase === 'eat' && npc.insideLoc === 'restaurant', todaysSpecial().emoji, npc.x - 9, npc.y - (npc.y > 200 ? 52 : 32), 'rest-rooms', Z_LAYER.FOOD); // v9.19 菜上桌；v9.20 食物置頂
             } else if (npc.state === 'seated' && npc.windowSeat != null) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               if (dishEl.textContent !== '🍜') dishEl.textContent = '🍜';
               if (Math.random() < 0.002) npcSay(npc, NOODLE_NIGHT_LINES[Math.floor(Math.random() * NOODLE_NIGHT_LINES.length)]); // v9.16 深夜窗邊對話
-              syncDishPlate(npc, npc.insideLoc === 'store', '🍜', npc.x - 9, npc.y - 40, 'store-rooms', 990); // v9.19 泡麵碗放窗邊吧台上；v9.20 食物置頂
+              syncDishPlate(npc, npc.insideLoc === 'store', '🍜', npc.x - 9, npc.y - 40, 'store-rooms', Z_LAYER.FOOD); // v9.19 泡麵碗放窗邊吧台上；v9.20 食物置頂
             } else if (npc.state === 'seated' && npc.dest === 'store' && npc.windowSeat == null && !(npc.kind === 'staff' && npcDef(npc.key) && npcDef(npc.key).work === 'store')) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               const _tag = npc.shopStage === 'pay' ? '🧾' : (npc.picked ? '🧺' : '🛒'); // v9.20 結帳中；v9.19 拿過東西＝提籃
