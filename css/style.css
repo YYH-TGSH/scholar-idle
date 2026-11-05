@@ -3874,3 +3874,25 @@ input, select, textarea { border-radius: 14px !important; }
 @keyframes walkStep { 0%, 49% { transform: translateY(-2px); } 50%, 100% { transform: translateY(0); } }
 .walking .foot-l, .npc-walking .foot-l { animation: walkStep 0.28s linear infinite; }
 .walking .foot-r, .npc-walking .foot-r { animation: walkStep 0.28s linear infinite; animation-delay: -0.14s; }
+
+/* ================= v9.42 建築識別色＋場景活物 ================= */
+.iso-island.landmark-home .island-tag { background: #e67e22 !important; color: #fff !important; }
+.iso-island.landmark-store .island-tag { background: #2ed573 !important; color: var(--ink2) !important; }
+.iso-island.landmark-restaurant .island-tag { background: #c0392b !important; color: #fff !important; }
+.iso-island.landmark-school .island-tag { background: #2c3e50 !important; color: #fff !important; }
+.iso-island.landmark-library .island-tag { background: #1e8449 !important; color: #fff !important; }
+.iso-island.landmark-gym .island-tag { background: #ca6f1e !important; color: #fff !important; }
+.room-chip[data-loc="home"] { border-left: 8px solid #e67e22; }
+.room-chip[data-loc="store"] { border-left: 8px solid #2ed573; }
+.room-chip[data-loc="restaurant"] { border-left: 8px solid #c0392b; }
+.room-chip[data-loc="school"] { border-left: 8px solid #2c3e50; }
+.room-chip[data-loc="library"] { border-left: 8px solid #1e8449; }
+.room-chip[data-loc="gym"] { border-left: 8px solid #ca6f1e; }
+.cat-tail { transform-box: fill-box; transform-origin: right center; animation: catTail 1.6s ease-in-out infinite alternate; }
+@keyframes catTail { from { transform: rotate(-16deg); } to { transform: rotate(20deg); } }
+.fish-a { animation: fishSwimA 6s ease-in-out infinite alternate; }
+.fish-b { animation: fishSwimB 7.5s ease-in-out infinite alternate; }
+@keyframes fishSwimA { from { transform: translateX(0); } to { transform: translateX(52px); } }
+@keyframes fishSwimB { from { transform: translateX(0); } to { transform: translateX(-44px); } }
+.fish-bub { animation: bubRise 3.2s linear infinite; }
+@keyframes bubRise { 0% { transform: translateY(0); opacity: 0.85; } 100% { transform: translateY(-26px); opacity: 0; } }

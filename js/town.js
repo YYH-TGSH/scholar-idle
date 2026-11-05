@@ -1313,6 +1313,7 @@
   <text x="800" y="290" font-size="14" font-weight="700" fill="#1565c0" opacity="0.65">我的房間</text>
   <rect x="505" y="272" width="120" height="28" fill="#8d5a2c"/>
   <text x="565" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">入 口</text>
+<g id="home-cat" transform="translate(300,248)"><rect class="cat-tail" x="-4" y="1" width="5" height="2" fill="#e67e22"/><rect x="0" y="4" width="10" height="5" fill="#f39c12"/><rect x="2" y="4" width="1" height="5" fill="#e67e22"/><rect x="5" y="4" width="1" height="5" fill="#e67e22"/><rect x="8" y="0" width="6" height="6" fill="#f39c12"/><rect x="8" y="-1" width="2" height="2" fill="#f39c12"/><rect x="12" y="-1" width="2" height="2" fill="#f39c12"/><rect x="10" y="2" width="1" height="1" fill="#182042"/><rect x="13" y="2" width="1" height="1" fill="#182042"/><rect x="0" y="9" width="3" height="1" fill="#e67e22"/><rect x="7" y="9" width="3" height="1" fill="#e67e22"/></g>
 </svg>
 <div id="parents-blanket" style="display:none; position:absolute; left:70px; top:158px; width:184px; height:70px; z-index:260;">
   <svg viewBox="0 0 100 38" style="width:100%; height:100%; display:block;">
@@ -1437,8 +1438,21 @@
       const _nowHome = performance.now(); const _dtHome = _homePanT ? (_nowHome - _homePanT) : 16; _homePanT = _nowHome;
       applyHomePan(smoothPanStep(_homePanCur, pan, focusX, visible, _dtHome), sc);
     }
+    const CAT_SPOTS = [{ x: 300, y: 248 }, { x: 640, y: 256 }, { x: 980, y: 250 }, { x: 120, y: 252 }];
+    let _catIdx = 0, _catCd = 20;
+    function updateHomeCat(dtMin) { // v9.42 場景最低規格：住家的「活物」——貓會自己換地方窩著
+      const cat = document.getElementById('home-cat');
+      if (!cat) return;
+      _catCd -= dtMin;
+      if (_catCd > 0) return;
+      _catCd = 18 + Math.random() * 25;
+      _catIdx = (_catIdx + 1 + Math.floor(Math.random() * (CAT_SPOTS.length - 1))) % CAT_SPOTS.length;
+      const sp = CAT_SPOTS[_catIdx];
+      cat.setAttribute('transform', 'translate(' + sp.x + ',' + sp.y + ')');
+    }
     function updateHomeStage() {
       ensureHomeInterior();
+      updateHomeCat(0.5);
       const stage = document.getElementById('home-stage');
       if (!stage) return;
       const rooms = document.getElementById('home-rooms');
@@ -1871,7 +1885,7 @@
         const sg = document.createElement('div');
         sg.id = 'street-glows';
         map.appendChild(sg);
-        sg.style.background = TOWN_LAMPS.map(l => 'radial-gradient(circle 110px at ' + l.x + 'px ' + l.y + 'px, rgba(255, 200, 110, 0.36), rgba(255, 200, 110, 0) 70%)').join(', '); // v9.41 光暈自光源清單生成（舊版手寫四團、兩團不在燈上、兩團在地圖外）
+        sg.style.background = TOWN_LAMPS.map(l => 'radial-gradient(circle ' + (l.r || 110) + 'px at ' + l.x + 'px ' + l.y + 'px, rgba(' + (l.c || '255, 200, 110') + ', 0.36), rgba(' + (l.c || '255, 200, 110') + ', 0) 70%)').join(', '); // v9.41 光暈自光源清單生成（舊版手寫四團、兩團不在燈上、兩團在地圖外）
         const sw = document.createElement('div'); // v9.22.1 store-beacon/store-lit 補光片退役：改由 #sky-night 在超商處挖空
         sw.id = 'sky-warm';
         map.appendChild(sw);
@@ -1889,7 +1903,7 @@
       });
     }
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
-    const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696 }, { x: 660, y: 696 }, { x: 1050, y: 696 }];
+    const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696 }, { x: 660, y: 696 }, { x: 1050, y: 696 }, { x: 1092, y: 696, r: 55, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈）
     // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
     const SKY_HOLES_FALLBACK = { home: [56, 30, 284, 179], store: [436, 30, 264, 179], restaurant: [816, 30, 264, 179], school: [56, 520, 264, 179], library: [436, 520, 264, 179], gym: [816, 520, 284, 179] };
     let _skyHolesCache = null;
@@ -2204,6 +2218,7 @@
   <g id="study-books-school-in" class="study-books"><rect class="book-layer" x="560" y="238" width="20" height="4" fill="#c0392b"/><rect class="book-layer" x="560" y="234" width="20" height="4" fill="#2980b9"/><rect class="book-layer" x="560" y="230" width="20" height="4" fill="#27ae60"/><rect class="book-layer" x="560" y="226" width="20" height="4" fill="#8e44ad"/><rect class="book-layer" x="560" y="222" width="20" height="4" fill="#f39c12"/></g>
   <rect x="515" y="272" width="120" height="28" fill="#8d5a2c"/>
   <text x="553" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
+<g id="school-tank"><rect x="876" y="118" width="140" height="4" fill="#8d5a2c"/><rect x="880" y="72" width="132" height="46" fill="#bfe3ff" stroke="#182042" stroke-width="2"/><rect x="884" y="76" width="124" height="38" fill="#7ec8e3" opacity="0.7"/><g class="fish-a"><rect x="896" y="88" width="10" height="5" fill="#ff8c42"/><rect x="893" y="89" width="3" height="3" fill="#ff8c42"/><rect x="903" y="89" width="1" height="1" fill="#182042"/></g><g class="fish-b"><rect x="966" y="98" width="9" height="4" fill="#ffd166"/><rect x="974" y="99" width="3" height="2" fill="#ffd166"/></g><circle class="fish-bub" cx="998" cy="106" r="2" fill="#ffffff" opacity="0.85"/><rect x="884" y="108" width="124" height="6" fill="#58a05c"/></g>
 </svg>
 <svg id="school-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
   <rect x="524" y="102" width="102" height="20" fill="#795548" stroke="#182042" stroke-width="2"/>
