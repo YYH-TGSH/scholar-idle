@@ -3867,3 +3867,10 @@ input, select, textarea { border-radius: 14px !important; }
 .hv-num { font-size: 0.69rem; font-weight: 700; margin-left: 4px; }
 .floating-controls #btn-lock-mode { backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 0 6px 16px var(--shadow-color); }
 .floating-controls #btn-lock-mode.locked { color: #fff; }
+
+/* ================= v9.40 人物規格：走路 2 幀＋坐姿規格 ================= */
+/* 坐姿規格（主角/NPC 共用一份定義）：下沉 6px、藏腳——NPC 走 .npc.seated（margin-top:6px＋.pixel-feet 隱藏），
+   主角走 updateCharacterAnimation 的 transform+viewBox 裁切（同一下沉量、裁掉腳部 4 列）。 */
+@keyframes walkStep { 0%, 49% { transform: translateY(-2px); } 50%, 100% { transform: translateY(0); } }
+.walking .foot-l, .npc-walking .foot-l { animation: walkStep 0.28s linear infinite; }
+.walking .foot-r, .npc-walking .foot-r { animation: walkStep 0.28s linear infinite; animation-delay: -0.14s; }

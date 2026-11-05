@@ -57,6 +57,7 @@
         }
       } else if (typeof gameState !== 'undefined') { gameState._playerWalking = false; _pw = null; }
       // v8.2 效能：座標沒變就不重寫 style (原本每 tick 10 次/秒強制 layout)
+      elCharWrap.classList.toggle('walking', typeof gameState !== 'undefined' && (!!gameState.isCommuting || !!gameState._playerWalking)); // v9.40 走路 2 幀動畫開關
       const posKey = `${x}|${y}|${flipH ? 1 : 0}|${elCharWrap.parentNode ? elCharWrap.parentNode.id : ''}`; // v9.17.1：換容器（進出室內）也要重套縮放
       if (_lastCharPos === posKey && !gameState.isCommuting) return;
       _lastCharPos = posKey;

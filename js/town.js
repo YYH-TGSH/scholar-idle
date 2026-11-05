@@ -1039,6 +1039,39 @@
       }
       return 'state-idle';
     }
+    const NPC_SPR_H = { chef: 58, shu: 53 }; // v9.40 剪影身高：廚師高帽 +8、高大樹 +3（viewBox 向上擴，腳底線不動）
+    function applySilhouette(svg, d) { // v9.40 剪影差異化：縮到 50% 也認得出的大形標記
+      const NS = 'http://www.w3.org/2000/svg';
+      const headG = svg.querySelector('.pixel-head-group');
+      const bodyG = svg.querySelector('.pixel-body-group');
+      const mk = (parent, tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); n.setAttribute('class', 'npc-silhouette'); parent.appendChild(n); return n; };
+      if (d.key === 'chef') { // 真高帽：viewBox 上擴 4 格（v9.35 的白棒球帽退役）
+        const oldCap = svg.querySelector('.pixel-cap-default'); if (oldCap) oldCap.style.display = 'none';
+        svg.setAttribute('viewBox', '0 -4 16 29');
+        mk(headG, 'rect', { x: 4, y: -4, width: 8, height: 5, fill: '#ffffff', stroke: '#182042', 'stroke-width': 0.8 });
+        mk(headG, 'rect', { x: 4, y: 0, width: 8, height: 1, fill: '#d5dbdb' });
+      }
+      if (d.key === 'shu') svg.setAttribute('viewBox', '0 -1.5 16 26.5'); // 全員最高
+      if (d.key === 'teacher') { // 高馬尾＋紅框眼鏡
+        mk(headG, 'rect', { x: 12, y: 5, width: 2, height: 8, fill: d.palette.hair });
+        mk(headG, 'rect', { x: 4.5, y: 6.5, width: 3, height: 3, fill: 'none', stroke: '#e03131', 'stroke-width': 0.7 });
+        mk(headG, 'rect', { x: 8.5, y: 6.5, width: 3, height: 3, fill: 'none', stroke: '#e03131', 'stroke-width': 0.7 });
+      }
+      if (d.key === 'kui') { // 雙丸子頭
+        mk(headG, 'circle', { cx: 3, cy: 2, r: 1.7, fill: d.palette.hair });
+        mk(headG, 'circle', { cx: 13, cy: 2, r: 1.7, fill: d.palette.hair });
+      }
+      if (d.key === 'coach' && bodyG) { // 寬肩＋哨子
+        const jacket = bodyG.querySelector('rect[x="3"][y="11"]');
+        if (jacket) { jacket.setAttribute('x', '2'); jacket.setAttribute('width', '12'); }
+        mk(bodyG, 'rect', { x: 7, y: 11, width: 2, height: 2, fill: '#f5f5f5', stroke: '#182042', 'stroke-width': 0.5 });
+      }
+      if (d.key === 'mom' && bodyG) mk(bodyG, 'rect', { x: 5, y: 13, width: 6, height: 5, fill: '#ffffff', opacity: 0.92 }); // 圍裙色塊
+      if (d.key === 'dad') { // 灰髮＋微駝
+        svg.querySelectorAll('.pixel-head-group rect[y="5"]').forEach(r => r.setAttribute('fill', '#9aa0a6'));
+        if (headG) headG.style.transform = 'translate(0.6px, 0.8px)';
+      }
+    }
     function buildNPCLayer() {
       const map = document.getElementById('town-map');
       if (!map) return;
@@ -1081,9 +1114,11 @@
             if (d.palette.hairStyle === 'long') { addRect(3, 7, 1, 6); addRect(12, 7, 1, 6); addRect(4, 11, 8, 1); }
             else { addRect(7, 3, 2, 2); }
           }
+          // v9.40 人物規格統一：NPC 與主角同為 32x50、同一腳底線（舊 26x41 矮一截是規格事故）
           svg.setAttribute('class', 'sprite-pixel npc-sprite state-idle');
-          svg.style.width = '26px';
-          svg.style.height = '41px';
+          svg.style.width = '32px';
+          svg.style.height = (NPC_SPR_H[d.key] || 50) + 'px';
+          applySilhouette(svg, d);
           el.innerHTML = `<span class="npc-name">${d.name}</span><span class="npc-role" style="display:none;"></span><span class="npc-zzz-tag" style="display:none;">💤</span><span class="npc-flip"></span><span class="npc-dish" style="display:none;"></span>`;
           el.querySelector('.npc-flip').appendChild(svg);
           el.addEventListener('click', () => npcSay(gameState.npcs.find(n => n.key === d.key)));
@@ -1748,7 +1783,7 @@
         if (el) {
           const lying = npc.state === 'sleeping' && npc.kind === 'parent';
           el.style.left = npc.x + 'px';
-          el.style.top = (lying ? (npc.y - 35) : (npc.y - 55)) + 'px';
+          el.style.top = (lying ? (npc.y - 35) : (npc.y - 14 - (NPC_SPR_H[npc.key] || 50))) + 'px'; // v9.40 名牌 14 + 精靈高（規格統一後 50）
           const flipEl = el.querySelector('.npc-flip');
           if (flipEl) flipEl.style.transform = `scaleX(${npc.dir < 0 ? -1 : 1})`;
           const svg = el.querySelector('.npc-sprite');
@@ -1765,6 +1800,20 @@
           else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = '975'; // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
           const tag = el.querySelector('.npc-zzz-tag');
           if (tag) tag.style.display = npc.state === 'sleeping' ? 'inline' : 'none';
+          // v9.40 表情接線：睡覺閉眼／宿敵競賽超前生氣／用餐咀嚼嘴（素材本來就在精靈裡，只差接線）
+          if (svg) {
+            const rv = npc.kind === 'rival' && Array.isArray(gameState.rivals) ? gameState.rivals.find(r => r.key === npc.key) : null;
+            const you = typeof raceProgYou === 'function' ? raceProgYou() : 0;
+            const wantFace = npc.state === 'sleeping' ? 'sleeping' : (rv && rv.prog > you ? 'angry' : 'normal');
+            const wantMouth = wantFace === 'sleeping' ? 'sleeping' : (npc.state === 'seated' && npc.dest === 'restaurant' && npc.phase === 'eat' ? 'eating' : 'normal');
+            const fk = wantFace + '/' + wantMouth;
+            if (svg._fk !== fk) {
+              svg._fk = fk;
+              const tog = (cls, on) => { const g = svg.querySelector(cls); if (g) g.style.display = on ? '' : 'none'; };
+              tog('.pixel-eyes-normal', wantFace === 'normal'); tog('.pixel-eyes-sleeping', wantFace === 'sleeping'); tog('.pixel-eyes-angry', wantFace === 'angry');
+              tog('.pixel-mouth-normal', wantMouth === 'normal'); tog('.pixel-mouth-sleeping', wantMouth === 'sleeping'); tog('.pixel-mouth-eating', wantMouth === 'eating');
+            }
+          }
           const roleEl = el.querySelector('.npc-role');
           if (roleEl) { const rd = npcDef(npc.key); const onDuty = npc.kind === 'staff' && npc.state === 'seated' && rd && npc.dest === rd.work; roleEl.style.display = onDuty ? 'inline' : 'none'; if (onDuty) { const ic = { store: '🏪', restaurant: '🍳', school: '📚', library: '📖', gym: '🏋️' }[rd.work] || '💼'; if (roleEl.textContent !== ic) roleEl.textContent = ic; } } // v9.16.1 值班標籤：一眼看出誰在上班、在做什麼
           const dishEl = el.querySelector('.npc-dish');
