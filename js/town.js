@@ -1890,7 +1890,7 @@
         const sg = document.createElement('div');
         sg.id = 'street-glows';
         map.appendChild(sg);
-        sg.style.background = TOWN_LAMPS.map(l => 'radial-gradient(circle ' + (l.r || 110) + 'px at ' + l.x + 'px ' + l.y + 'px, rgba(' + (l.c || '255, 200, 110') + ', 0.36), rgba(' + (l.c || '255, 200, 110') + ', 0) 70%)').join(', '); // v9.41 光暈自光源清單生成（舊版手寫四團、兩團不在燈上、兩團在地圖外）
+        sg.style.background = TOWN_LAMPS.map(l => 'radial-gradient(circle ' + (l.r || 175) + 'px at ' + l.x + 'px ' + (l.gy || l.y) + 'px, rgba(' + (l.c || '255, 200, 110') + ', 0.5), rgba(' + (l.c || '255, 200, 110') + ', 0) 70%)').join(', '); // v9.48 光暈移到夜色層之上、半徑放大讓相鄰光池相交成帶、B 街光池心南移到步行線（gy）——實機報告光1/光2
         const sw = document.createElement('div'); // v9.22.1 store-beacon/store-lit 補光片退役：改由 #sky-night 在超商處挖空
         sw.id = 'sky-warm';
         map.appendChild(sw);
@@ -1899,16 +1899,16 @@
         map.appendChild(sn);
       }
       document.querySelectorAll('.iso-island').forEach(island => {
-        if (!island.querySelector('.island-glow')) {
+        if (!island.querySelector('.island-shade')) {
           const g = document.createElement('div');
-          g.className = 'island-glow';
-          if (island.id === 'landmark-store') g.dataset.store = '1';
+          g.className = 'island-shade'; // v9.48 每島局部夜色（取代 island-glow 與動態挖空）：暗度由營業權重連續決定，室內外共用一層
+          g.dataset.loc = island.id.replace('landmark-', '');
           island.appendChild(g);
         }
       });
     }
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
-    const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696 }, { x: 660, y: 696 }, { x: 1050, y: 696 }, { x: 1092, y: 696, r: 55, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈）
+    const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696, gy: 760 }, { x: 660, y: 696, gy: 760 }, { x: 1050, y: 696, gy: 760 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
     // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
     const SKY_HOLES_FALLBACK = { home: [56, 30, 284, 179], store: [436, 30, 264, 179], restaurant: [816, 30, 264, 179], school: [56, 520, 264, 179], library: [436, 520, 264, 179], gym: [816, 520, 284, 179] };
     let _skyHolesCache = null;
@@ -1920,31 +1920,31 @@
         if (!el) { out[k] = SKY_HOLES_FALLBACK[k]; continue; }
         const cs = getComputedStyle(el);
         const L = parseFloat(cs.left), T = parseFloat(cs.top), W = parseFloat(cs.width);
-        out[k] = (isFinite(L) && isFinite(T) && isFinite(W)) ? [L, T, W - 6, 179] : SKY_HOLES_FALLBACK[k];
+        out[k] = (isFinite(L) && isFinite(T) && isFinite(W)) ? [L - 2, T - 2, W + 4, 183] : SKY_HOLES_FALLBACK[k]; // v9.48 外擴蓋滿島嶼（舊 W-6 在右/底邊各留 6px 暗框——光4）
       }
       _skyHolesCache = out;
       return out;
     }
-    function skyOpenSig() {
+    function skyOpenWeights() {
+      // v9.48 營業權重（連續版，取代開/關二值的 skyOpenSig）：開門後/關門前 30 分鐘線性過渡，
+      // 每島局部夜色 alpha = nf x (1-w) —— 開關店不再瞬間翻轉（實機報告光5）
       const h = (gameState.hour || 0) + (gameState.minute || 0) / 60;
       const dow = gameState.dayOfWeek || 1;
       const weekday = dow >= 1 && dow <= 5;
-      let sig = '';
-      if (h >= 6 && h < 23) sig += 'home,'; // 住家 06–23 有人醒著亮著，23 後全家睡了變暗
-      sig += 'store,'; // 24H 超商永遠亮
-      if (h >= 7 && h < 22) sig += 'restaurant,'; // 食堂 07–22
-      if (weekday && h >= 8 && h < 16) sig += 'school,'; // 學校 平日 08–16
-      if (h >= 8 && h < 21) sig += 'library,'; // 圖書館 08–21
-      if (h >= 6 && h < 22) sig += 'gym,'; // 操場夜間照明 06–22
-      return sig;
+      const ramp = (o, c) => (h < o || h >= c) ? 0 : Math.min(1, Math.min((h - o) * 2, (c - h) * 2, 1));
+      return {
+        home: ramp(6, 23), store: 1, restaurant: ramp(7, 22),
+        school: weekday ? ramp(8, 16) : 0, library: ramp(8, 21), gym: ramp(6, 22),
+      };
     }
-    function skyNightClip(sig) {
+    function skyNightClip() {
+      // v9.48 靜態全挖六島：全域夜色只蓋街道/公園，島的暗度改由各自的 .island-shade 連續決定（不再隨開關改 clip）
       let pts = '0px 0px, ' + WORLD_W + 'px 0px, ' + WORLD_W + 'px ' + WORLD_H + 'px, 0px ' + WORLD_H + 'px, 0px 0px';
       const holes = skyHoles();
-      sig.split(',').forEach(k => {
-        const r = holes[k]; if (!r) return;
+      for (const k in holes) {
+        const r = holes[k];
         pts += ', ' + r[0] + 'px ' + r[1] + 'px, ' + r[0] + 'px ' + (r[1] + r[3]) + 'px, ' + (r[0] + r[2]) + 'px ' + (r[1] + r[3]) + 'px, ' + (r[0] + r[2]) + 'px ' + r[1] + 'px, ' + r[0] + 'px ' + r[1] + 'px';
-      });
+      }
       return 'polygon(evenodd, ' + pts + ')';
     }
     let _skyEls = null, _skyLastKey = '';
@@ -1954,7 +1954,8 @@
         _skyEls = {
           sn: document.getElementById('sky-night'), sw: document.getElementById('sky-warm'),
           sg: document.getElementById('street-glows'),
-          glows: [...document.querySelectorAll('.island-glow')],
+          shades: [...document.querySelectorAll('.island-shade')],
+          map: document.getElementById('town-map'),
         };
         if (!_skyEls.sn) _skyEls = null;
       }
@@ -1962,17 +1963,18 @@
       const hf = (gameState.hour || 0) + (gameState.minute || 0) / 60;
       const nf = nightFactorAt(hf);
       const wf = warmFactorAt(hf);
-      const openSig = skyOpenSig();
-      const key = Math.round(nf * 40) + '|' + Math.round(wf * 40) + '|' + openSig;
+      const weights = skyOpenWeights();
+      const key = Math.round(nf * 40) + '|' + Math.round(wf * 40) + '|' + Object.values(weights).map(w => Math.round(w * 20)).join(',');
       if (key === _skyLastKey) return; // v9.10.4: 值沒變就不寫 style (減少每 tick 的版面重算，鏡頭更順)
       _skyLastKey = key;
-      _skyEls.sn.style.clipPath = skyNightClip(openSig); // v9.23 開著的建築挖空（不被夜色蓋）、休息的變黑
+      if (!_skyEls.sn.style.clipPath) _skyEls.sn.style.clipPath = skyNightClip(); // v9.48 靜態全挖，設一次即可
       const blossom = document.getElementById('big-tree-blossom'); // v9.43 地標大樹花季（現實 3–5 月變粉）
       if (blossom) { const m = new Date().getMonth() + 1; const on = m >= 3 && m <= 5; const want = on ? '' : 'none'; if (blossom.style.display !== want) blossom.style.display = want; }
       const r3 = v => String(Math.round(v * 1000) / 1000);
       _skyEls.sn.style.opacity = r3(nf * 0.9);
       _skyEls.sw.style.opacity = r3(wf);
-      _skyEls.glows.forEach(g => { g.style.opacity = r3(nf * (g.dataset.store ? 1 : 0.75)); });
+      _skyEls.shades.forEach(g => { g.style.opacity = r3(nf * (1 - (weights[g.dataset.loc] || 0)) * 0.9); }); // v9.48 局部夜色：營業中 0、關店與街道同暗、邊界連續過渡；室內共用同一層（光7）
+      if (_skyEls.map) _skyEls.map.classList.toggle('night-on', nf > 0.5); // 光10：夜裡上鎖建築停用 brightness，避免暗上加暗
       const storeIsl = document.getElementById('landmark-store'); if (storeIsl) storeIsl.classList.toggle('night-lit', nf > 0.45); // v9.16.1 整間店自己亮，不補光暈
       _skyEls.sg.style.opacity = r3(nf * 0.85); // v9.22.1 超商的亮來自 #sky-night 的挖空（見 style.css），不再疊補光片
     }

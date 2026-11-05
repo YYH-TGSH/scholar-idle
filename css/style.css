@@ -3660,9 +3660,9 @@ input, select, textarea { border-radius: 14px !important; }
 .npc-sprite { display: block; margin: 0 auto; }
 .npc-walking .npc-flip { animation: npc-bob 0.55s ease-in-out infinite alternate; }
 .npc-zzz-tag { position: absolute; top: -4px; right: 0; font-size: 0.78rem; filter: drop-shadow(0 1px 2px rgba(var(--rgb-black),0.4)); }
-#sky-night { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(6,10,38,0.62), rgba(6,10,38,0.46)); } /* v9.23 挖空改由 updateSkyLighting 動態寫入 clip-path：開著的建築不被夜色蓋住、休息就變黑 */
+#sky-night { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 夜色改均勻單值（舊垂直漸層讓北排無理由地比南排暗——光8）；島嶼由靜態 clip 全挖＋各島 .island-shade 連續決定暗度 */
 #sky-warm { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
-#street-glows { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 40; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
+#street-glows { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
 #landmark-store .island-platform-top { transition: filter 0.9s linear; }
 #landmark-store .facade-roof { transition: filter 0.9s linear; }
 #landmark-store.night-lit .facade-roof { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* 招牌燈箱發光（店面本體的亮度改由 #sky-night 挖空達成，不再用 brightness 濾鏡硬拉） */
@@ -3701,8 +3701,8 @@ input, select, textarea { border-radius: 14px !important; }
 .dish-plate { position:absolute; width:20px; height:20px; font-size: 0.875rem; line-height:20px; text-align:center; background:rgba(var(--rgb-white),0.92); border:1.5px solid var(--ink2); border-radius:50%; pointer-events:none; }
 .pick-pop { position:absolute; z-index:990; font-size: 0.875rem; pointer-events:none; animation: pick-float 1.9s ease-out forwards; }
 @keyframes pick-float { 0% { transform: translateY(6px) scale(0.6); opacity: 0; } 18% { transform: translateY(0) scale(1.15); opacity: 1; } 35% { transform: translateY(-3px) scale(1); opacity: 1; } 100% { transform: translateY(-16px) scale(1); opacity: 0; } }
-.island-glow { position: absolute; inset: 0; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: radial-gradient(ellipse at 50% 62%, rgba(255,196,96,0.55), rgba(255,196,96,0) 72%); }
-.island-glow[data-store] { background: radial-gradient(ellipse at 50% 62%, rgba(200,228,255,0.62), rgba(200,228,255,0) 72%); }
+.island-shade { position: absolute; inset: 0; z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 每島局部夜色（取代 island-glow 雙重打亮——光6）：opacity 由 updateSkyLighting 依營業權重連續寫入 */
+#town-map.night-on .iso-island.light-off { filter: grayscale(0.5); } /* v9.48 夜裡上鎖只留灰階語意、停用 brightness（光10） */
 .special-sign { position: absolute; left: 10px; top: 190px; z-index: 20; background: #fff8e1; border: 2px solid var(--ink2); border-radius: 8px; padding: 2px 8px; font-size: 0.69rem; font-weight: 700; color: #8d5a2c; box-shadow: 0 2px 0 rgba(var(--rgb-black),0.25); pointer-events: none; }
 #teppan-fx { position: absolute; left: 190px; top: 88px; width: 70px; height: 36px; z-index: 22; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
 #teppan-fx .flame { position: absolute; left: 26px; bottom: 2px; font-size: 1rem; animation: flick 0.5s ease-in-out infinite alternate; }
