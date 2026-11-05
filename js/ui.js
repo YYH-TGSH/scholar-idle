@@ -1722,7 +1722,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.38.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.39.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -3443,6 +3443,12 @@
       setW('hud-hunger', gameState.hunger);
       setW('hud-stress', gameState.stress);
       setW('hud-focus', gameState.focus || 0);
+      // v9.39 vitals 情境化：健康時整排消失；異常才亮該條＋數字（遲滯防閃爍；壓力反向、高才異常）
+      const hvOn = renderHud._hv || (renderHud._hv = {});
+      const hvDefs = [['energy', gameState.energy, v => v < 30, v => v > 35], ['hunger', gameState.hunger, v => v < 30, v => v > 35], ['stress', gameState.stress, v => v > 70, v => v < 65], ['focus', gameState.focus || 0, v => v < 30, v => v > 35]];
+      let hvAny = false;
+      hvDefs.forEach(([k, v, isBad, isOk]) => { const w = document.getElementById('hv-w-' + k); if (!w) return; hvOn[k] = hvOn[k] ? !isOk(v) : isBad(v); w.style.display = hvOn[k] ? '' : 'none'; const n = document.getElementById('hv-num-' + k); if (n) n.textContent = Math.round(v); if (hvOn[k]) hvAny = true; });
+      const hvBox = document.querySelector('.hud-vitals'); if (hvBox) hvBox.style.display = hvAny ? '' : 'none';
       const q = document.getElementById('glance-quest-txt');
       if (q && typeof ensureDailyQuests === 'function') {
         const dq = ensureDailyQuests();
@@ -3459,7 +3465,9 @@
       const eb = document.getElementById('btn-exam-trigger');
       if (eb && typeof getExamSuccessRate === 'function') {
         const cd = typeof getExamCooldownRemaining === 'function' ? getExamCooldownRemaining() : 0;
-        eb.classList.toggle('exam-hot', cd <= 0 && getExamExpectedScore() >= examPassMark()); // v9.32 分數制：預估達及格線才亮
+        const examHot = cd <= 0 && getExamExpectedScore() >= examPassMark();
+        eb.classList.toggle('exam-hot', examHot); // v9.32 分數制：預估達及格線才亮
+        eb.style.display = examHot ? '' : 'none'; // v9.39 情境出現：可考而且預估會過才長出來
       }
     }
 

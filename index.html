@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.38.0)</title>
+  <title>學霸養成記 - 經典寶可夢 RPG 像素冒險版 (v9.39.0)</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -973,25 +973,20 @@
   <!-- 1. 頂部懸浮狀態與控制列 -->
   <div class="floating-header">
     <div class="header-left">
-      <div class="status-badge" id="grade-title">🎓 幼兒園神童</div>
-      <div class="status-badge">💰 <span id="money-val">$0</span></div>
-      <button class="status-badge btn-help" onclick="showHelpModal()"
-        style="cursor: pointer; border: none; font-family: inherit;">❓ 說明</button>
-    </div>
-
-    <div class="header-center">
       <div class="calendar-badge">
         <span class="cal-day" id="calendar-day">星期一</span>
         <span class="cal-time" id="calendar-time">08:00</span>
-        <!-- 狀態看板完美融入頂部 Widget，不再隨地圖滾動 -->
-        <div id="stage-board">正在上學：<span>國文上課中</span></div>
-        <span class="cal-mode" id="calendar-mode">自動作息模式</span>
       </div>
-      <!-- 手動鎖定按鈕 -->
-      <button id="btn-lock-mode" onclick="toggleLockMode()">🤖 自動</button>
+    </div>
+
+    <div class="header-center">
+      <!-- 狀態看板扶正為頂欄中央主角；模式小字在它下方（年級與模式鈕已移入選單/抽屜） -->
+      <div id="stage-board">正在上學：<span>國文上課中</span></div>
+      <span class="cal-mode" id="calendar-mode">自動作息模式</span>
     </div>
 
     <div class="header-right">
+      <div class="status-badge">💰 <span id="money-val">$0</span></div>
       <div class="speed-control-mini">
         <button id="speed-trigger" class="speed-trigger" onclick="toggleSpeedPopover(event)" title="調整時間速度">⏩ <span id="speed-trigger-label">1x</span></button>
         <div class="speed-popover" id="speed-popover">
@@ -1005,10 +1000,10 @@
       <button id="btn-exam-trigger" class="btn-exam-mini" onclick="triggerExam()">參加考試</button>
     </div>
     <div class="hud-vitals">
-      <span class="hv"><span class="hv-ico">🔋</span><span class="hv-bar"><span id="hud-energy" class="hv-e"></span></span></span>
-      <span class="hv"><span class="hv-ico">🍔</span><span class="hv-bar"><span id="hud-hunger" class="hv-h"></span></span></span>
-      <span class="hv"><span class="hv-ico">😖</span><span class="hv-bar"><span id="hud-stress" class="hv-s"></span></span></span>
-      <span class="hv"><span class="hv-ico">🔥</span><span class="hv-bar"><span id="hud-focus" class="hv-f"></span></span></span>
+      <span class="hv" id="hv-w-energy"><span class="hv-ico">🔋</span><span class="hv-bar"><span id="hud-energy" class="hv-e"></span></span><span class="hv-num" id="hv-num-energy"></span></span>
+      <span class="hv" id="hv-w-hunger"><span class="hv-ico">🍔</span><span class="hv-bar"><span id="hud-hunger" class="hv-h"></span></span><span class="hv-num" id="hv-num-hunger"></span></span>
+      <span class="hv" id="hv-w-stress"><span class="hv-ico">😖</span><span class="hv-bar"><span id="hud-stress" class="hv-s"></span></span><span class="hv-num" id="hv-num-stress"></span></span>
+      <span class="hv" id="hv-w-focus"><span class="hv-ico">🔥</span><span class="hv-bar"><span id="hud-focus" class="hv-f"></span></span><span class="hv-num" id="hv-num-focus"></span></span>
     </div>
   </div>
 
@@ -1024,6 +1019,7 @@
     <button class="control-fab fab-menu-toggle" id="fab-menu-toggle" onclick="toggleFabMenu(event)" title="功能選單" style="background-color: var(--ink); color: #fff;">
       <span id="fab-menu-ico">🧭</span> <span class="fab-lbl">選單</span><span class="fab-dot" id="login-dot-menu" style="display:none;"></span>
     </button>
+    <button class="control-fab" id="btn-lock-mode" onclick="toggleLockMode()" style="background-color: var(--grape);" title="作息模式（自動/鎖定）">🤖 自動</button>
     <button class="control-fab" onclick="toggleDrawer('status')" style="background-color: var(--sky);" title="查看能力 (S)">
       📊 <span class="fab-lbl">能力</span><span class="fab-dot" id="login-dot" style="display:none;"></span>
     </button>
@@ -1063,6 +1059,7 @@
         style="width: 24px; height: 24px; font-size: 0.75rem;">✕</button>
     </div>
     <div class="drawer-body">
+      <div style="margin-bottom: 10px;"><div class="status-badge" id="grade-title">🎓 幼兒園神童</div></div>
 
       <div class="status-section-group">
         <!-- 生理狀態 -->
@@ -1657,7 +1654,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.38.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;">❓ 遊戲說明書 (v9.39.0)</span>
         <button onclick="closeHelpModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; min-width:40px; min-height:40px; padding:8px; color:var(--ink2);">✕</button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -2079,7 +2076,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.38.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.39.0)
   </div>
 
   <!-- ==========================================================================
