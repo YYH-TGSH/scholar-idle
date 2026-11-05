@@ -624,21 +624,21 @@
 
     // ================= v9.8 精緻化：座位池＋門口排隊＋全員步行職員＋爸媽 =================
     const NPC_DEFS = [
-      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 620, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
-      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 1240, speed: 62, palette: { hair: '#ff8fab', outfit: '#ff6b9d', shorts: '#5b2a86' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
-      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1830, speed: 58, palette: { hair: '#2f6b33', outfit: '#27ae60', shorts: '#1e8449' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
-      { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#1a1a24', outfit: '#3b6ea5', shorts: '#2c3e50' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
-      { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#2c3e50' }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
-      { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#2c3e50' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
-      { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#2c3e50' }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
-      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#2c3e50' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
-      { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#2c3e50' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
-      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#2c3e50' }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
-      { key: 'coach', kind: 'staff', name: '阿力', homeX: 1370, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#2c3e50' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
-      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1690, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#2c3e50' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
-      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#2c3e50' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
-      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#2c3e50' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
+      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 620, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93', skin: '#fed7aa' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
+      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 1240, speed: 62, palette: { hair: '#ff8fab', outfit: '#ff6b9d', shorts: '#5b2a86', skin: '#fed7aa', hairStyle: 'long' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
+      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1830, speed: 58, palette: { hair: '#2f6b33', outfit: '#27ae60', shorts: '#0e4d2e', skin: '#c98a4b' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
+      { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#1a1a24', outfit: '#3b6ea5', shorts: '#6c3483', skin: '#fed7aa', hairStyle: 'long' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
+      { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#784212', skin: '#dfa05e', cap: ['#ff7f27', '#d35400', '#a04000'] }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
+      { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#4a235a', skin: '#f5c48b', hairStyle: 'bun' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
+      { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#943126', skin: '#f5c48b', cap: ['#ffd60a', '#d9a400', '#b8860b'] }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 940, speed: 62, palette: { hair: '#6b6f76', outfit: '#2c3e50', shorts: '#2c3e50', skin: '#f5c48b' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
+      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 1550, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#1e6f5c', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
+      { key: 'librarian', kind: 'staff', name: '小林', homeX: 780, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#1a5276', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
+      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 1090, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#922b21', skin: '#dfa05e', cap: ['#ffffff', '#d5dbdb', '#aab7b8'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
+      { key: 'coach', kind: 'staff', name: '阿力', homeX: 1370, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#154360', skin: '#c98a4b', headband: '#e74c3c' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
+      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1690, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#4d342e', skin: '#dfa05e', headband: '#8e44ad' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
+      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#5d4037', skin: '#f5c48b' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
+      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#7d3c98', skin: '#fed7aa', hairStyle: 'bun' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
     ];
     const NPC_STREET_Y = 300;
     const NPC_DOOR_Y = 240;
@@ -1062,6 +1062,23 @@
           svg.querySelectorAll('.pixel-foot-l rect[width="4"], .pixel-foot-r rect[width="4"]').forEach(r => r.setAttribute('fill', d.palette.outfit));
           const shorts = svg.querySelector('.pixel-body-group rect[x="4"][y="17"]');
           if (shorts) shorts.setAttribute('fill', d.palette.shorts);
+          // v9.35 NPC 差異化（同模三色退役）：膚色／髮型（長髮・包頭）／招牌配件（帽子・頭巾）
+          if (d.palette.skin) svg.querySelectorAll('.pixel-head-group rect[fill="#fed7aa"]').forEach(r => r.setAttribute('fill', d.palette.skin));
+          const headG = svg.querySelector('.pixel-head-group');
+          if (d.palette.cap) {
+            const capEl = svg.querySelector('.pixel-cap-default');
+            if (capEl) {
+              capEl.style.display = '';
+              capEl.querySelectorAll('rect').forEach(r => { const f = r.getAttribute('fill'); if (f === '#e74c3c') r.setAttribute('fill', d.palette.cap[0]); else if (f === '#c0392b') r.setAttribute('fill', d.palette.cap[1]); else if (f === '#962d22') r.setAttribute('fill', d.palette.cap[2]); });
+            }
+          }
+          if (d.palette.headband) { const hb = svg.querySelector('.pixel-headband'); if (hb) { hb.style.display = ''; hb.setAttribute('fill', d.palette.headband); } }
+          if (headG && (d.palette.hairStyle === 'long' || d.palette.hairStyle === 'bun')) {
+            const NS = 'http://www.w3.org/2000/svg';
+            const addRect = (x, y, w, h) => { const r = document.createElementNS(NS, 'rect'); r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', w); r.setAttribute('height', h); r.setAttribute('fill', d.palette.hair); r.setAttribute('class', 'npc-hair-ext'); headG.appendChild(r); };
+            if (d.palette.hairStyle === 'long') { addRect(3, 7, 1, 6); addRect(12, 7, 1, 6); addRect(4, 11, 8, 1); }
+            else { addRect(7, 3, 2, 2); }
+          }
           svg.setAttribute('class', 'sprite-pixel npc-sprite state-idle');
           svg.style.width = '26px';
           svg.style.height = '41px';
