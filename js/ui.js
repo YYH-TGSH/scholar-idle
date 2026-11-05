@@ -51,20 +51,26 @@
     const elLockBtn = document.getElementById("btn-lock-mode");
 
     // v9.36 功能選單：低頻功能鈕收成一顆選單鈕（點開才展開），地圖不再被整列按鈕包圍
+    function fabMenuSync(open) {
+      const ico = document.getElementById('fab-menu-ico');
+      if (ico) ico.textContent = open ? '✕' : '🧭';
+      const lbl = document.getElementById('fab-menu-lbl');
+      if (lbl) lbl.textContent = open ? '關閉' : '選單';
+      const t = document.getElementById('fab-menu-toggle');
+      if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (typeof layoutMapInsets === 'function') layoutMapInsets(); // v9.45 只更新保留空間變數；不再呼叫 resizeMapScale 重置視角（實機報告 B6）
+    }
     function toggleFabMenu(e) {
       if (e) e.stopPropagation();
       const c = document.querySelector('.floating-controls');
       if (!c) return;
-      const open = c.classList.toggle('fab-open');
-      const ico = document.getElementById('fab-menu-ico');
-      if (ico) ico.textContent = open ? '✕' : '🧭';
-      if (typeof resizeMapScale === 'function') resizeMapScale(); // 底部列高度變了，地圖可用區重算
+      fabMenuSync(c.classList.toggle('fab-open'));
     }
     document.addEventListener('click', (e) => {
       const c = document.querySelector('.floating-controls');
       if (!c || !c.classList.contains('fab-open')) return;
       const b = e.target && e.target.closest ? e.target.closest('.control-fab') : null;
-      if (b && b.id !== 'fab-menu-toggle') { c.classList.remove('fab-open'); const ico = document.getElementById('fab-menu-ico'); if (ico) ico.textContent = '🧭'; if (typeof resizeMapScale === 'function') resizeMapScale(); }
+      if (b && b.id !== 'fab-menu-toggle') { c.classList.remove('fab-open'); fabMenuSync(false); }
     });
 
     // ------------------------------------------
@@ -1722,7 +1728,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.44.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.45.0) | 上次存檔：${ts}`);
       }
     }
 

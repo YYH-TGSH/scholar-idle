@@ -643,7 +643,7 @@
     const NPC_STREET_Y = 300; // A 街步行線（spawn/預設用；跨棟路徑一律走 streetYOf/streetLegs）
     const NPC_DOOR_Y = 245;
     const npcStreetY = (loc) => STREET_Y[LOC_STREET[loc] || 'A'];
-    const Z_LAYER = { FRONT: 950, SEATED_CLIP: 955, FRONT2: 960, WALK: 975, CHIP: 980, FOOD: 990, BUBBLE: 995 }; // v9.44 室內圖層憲法（單一出處；世界深度層與 HUD 層界線見站規）
+    const Z_LAYER = { FRONT_BACK: 940, POST_CLIP: 945, FRONT: 950, SEATED_CLIP: 955, FRONT2: 960, WALK: 975, CHIP: 980, FOOD: 990, BUBBLE: 995, DINNER_CLIP: 185 }; // v9.44 室內圖層憲法（單一出處；世界深度層與 HUD 層界線見站規）
     const npcCurStreet = (npc) => npc.insideLoc ? (LOC_STREET[npc.insideLoc] || 'A') : (npc.y < 545 ? 'A' : 'B');
     const NPC_HOUSE_Y = 505;
     const NPC_PARK_Y = 440;
@@ -1810,7 +1810,9 @@
           el.classList.toggle('seated', npc.state === 'seated' && (npc.dest === 'restaurant' || npc.dest === 'home' || npc.windowSeat != null)); // v9.13 在家晚餐也坐；v9.16 窗邊也坐
           el.classList.toggle('on-break', npc.state === 'seated' && npc.dest === 'school' && typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break');
           el.style.zIndex = String(Math.round(npc.y)); // v9.12.3 依深度排序：前方人物蓋後方
-          if (npc.insideLoc === 'restaurant' && npc.state === 'seated' && npc.key !== 'chef') el.style.zIndex = String(Z_LAYER.SEATED_CLIP); // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
+          if (npc.atDinner && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.DINNER_CLIP); // v9.45 晚餐爸媽夾層：椅背(172)之後、桌前板(196)之前，臉不再被椅背蓋住
+          else if (npc.insideLoc === 'store' && npc.state === 'seated' && !npc.shopStage) el.style.zIndex = String(npc.x >= 700 ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.45 超商坐姿分流：櫃檯崗位 945（櫃檯拆兩帶之間）、窗邊客 955（吧台兩帶之間）
+          else if (npc.insideLoc === 'restaurant' && npc.state === 'seated' && npc.key !== 'chef') el.style.zIndex = String(Z_LAYER.SEATED_CLIP); // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
           else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
           else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = String(Z_LAYER.WALK); // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
           else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
@@ -2027,18 +2029,26 @@
   <text x="540" y="290" font-size="11" fill="#14532d" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
   <circle cx="36" cy="86" r="12" fill="#2ed573"/><circle cx="1114" cy="86" r="12" fill="#2ed573"/>
 </svg>
-<svg id="store-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="16" y="228" width="396" height="38" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
+<svg id="store-front-back" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:940; pointer-events:none;">
+  <rect x="16" y="228" width="396" height="18" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
   <line x1="16" y1="228" x2="412" y2="228" stroke="#caa06a" stroke-width="2"/>
-  <rect x="796" y="114" width="328" height="54" fill="#ffffff" stroke="#182042" stroke-width="2.5"/>
+  <rect x="796" y="114" width="328" height="24" fill="#ffffff" stroke="#182042" stroke-width="2.5"/>
   <rect x="796" y="124" width="328" height="6" fill="#22b573"/>
-  <text x="922" y="160" font-size="11" fill="#14532d" font-family="'DotGothic16', monospace" font-weight="900">歡迎光臨</text>
   <rect x="896" y="100" width="24" height="14" fill="#334155" stroke="#182042" stroke-width="1.5"/>
   <rect x="898" y="102" width="20" height="9" fill="#38bdf8"/>
   <rect x="950" y="100" width="24" height="14" fill="#334155" stroke="#182042" stroke-width="1.5"/>
   <rect x="952" y="102" width="20" height="9" fill="#38bdf8"/>
   <rect x="806" y="96" width="44" height="18" fill="#d97706" stroke="#182042" stroke-width="1.5"/>
   <text x="810" y="109" font-size="9" fill="#fef08a" font-family="'DotGothic16', monospace" font-weight="900">🍢關東煮</text>
+</svg>
+<svg id="store-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
+  <rect x="796" y="138" width="328" height="30" fill="#ffffff"/>
+  <line x1="796" y1="138" x2="796" y2="168" stroke="#182042" stroke-width="2.5"/><line x1="1124" y1="138" x2="1124" y2="168" stroke="#182042" stroke-width="2.5"/><line x1="796" y1="168" x2="1124" y2="168" stroke="#182042" stroke-width="2.5"/>
+  <text x="922" y="160" font-size="11" fill="#14532d" font-family="'DotGothic16', monospace" font-weight="900">歡迎光臨</text>
+</svg>
+<svg id="store-front2" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:960; pointer-events:none;">
+  <rect x="16" y="246" width="396" height="20" fill="#8a5a33"/>
+  <line x1="16" y1="246" x2="16" y2="266" stroke="#182042" stroke-width="2"/><line x1="412" y1="246" x2="412" y2="266" stroke="#182042" stroke-width="2"/><line x1="16" y1="266" x2="412" y2="266" stroke="#182042" stroke-width="2"/>
 </svg>
 <div class="store-chip" style="left:424px; top:192px;" onclick="noodleHitClick(event)">🍜 窗邊泡麵</div>`;
     function ensureStoreInterior() {
@@ -2143,7 +2153,7 @@
           np2.style.display = 'block'; np2.style.left = (gameState.noodleSeat.x - 9) + 'px'; np2.style.top = (gameState.noodleSeat.y - 40) + 'px'; np2.style.zIndex = '990'; // v9.20 食物置頂
         } else if (np2) np2.style.display = 'none';
       }
-      if (cw && playerIn) cw.style.zIndex = (currentState === 'working' || gameState.noodleUntil) ? '500' : '975'; // v9.20.1 站櫃檯後/窗邊吃麵維持夾層；走動/站立在傢俱前景之上
+      if (cw && playerIn) cw.style.zIndex = (currentState === 'working') ? String(Z_LAYER.POST_CLIP) : (gameState.noodleUntil ? String(Z_LAYER.SEATED_CLIP) : '975'); // v9.45 主角打工站櫃檯兩帶之間(945)、窗邊吃麵在吧台兩帶之間(955)，臉不再沉到櫃檯後 // v9.20.1 站櫃檯後/窗邊吃麵維持夾層；走動/站立在傢俱前景之上
       let focus = 935;
       if (playerIn) focus = gameState.currentX || 565;
       else {
