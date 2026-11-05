@@ -1236,8 +1236,9 @@
         if (typeof getTownProsperityTotal === 'function' && getTownProsperityTotal() >= 18) landmarkExamBonus += 5;
       } catch (e) { }
       const trophyBonus = (gameState.passive.trophy || 0) * 2; // v9.32 獎盃展示櫃實裝：考試預估 +2/級
+      const comboExamBonus = (typeof getComboExamBonus === 'function') ? getComboExamBonus() : 0; // v9.33 文武雙全 combo
       const examMut = typeof getMutationMult === 'function' ? getMutationMult('exam_rate') : 1.0;
-      score = (score + examBonus + landmarkExamBonus + trophyBonus + (gameState.mockBuff || 0)) * examMut;
+      score = (score + examBonus + landmarkExamBonus + trophyBonus + comboExamBonus + (gameState.mockBuff || 0)) * examMut;
       return Math.round(Math.min(100, Math.max(0, score)));
     }
     function rollExamScore() {
@@ -1704,7 +1705,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.32.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.33.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2240,15 +2241,15 @@
     // ==========================================
     // 🎮 小遊戲系統 (含第 6 站：🏪 收銀刷條碼)
     // ==========================================
-    const MG_COOLDOWN_MINUTES = 30; // 每 30 遊戲分鐘可玩一次
+    const MG_COOLDOWN_SECONDS = 180; // v9.33 現實秒：每 180 秒可玩一次（與遊戲速度無關）
     let currentMinigame = null;
     let mgTimerInterval = null;
 
-    function tickMiniGameCooldowns(progressMinutes) {
+    function tickMiniGameCooldowns(dtSeconds) {
       if (!gameState.miniGameCooldowns) return;
       for (let loc in gameState.miniGameCooldowns) {
         if (gameState.miniGameCooldowns[loc] > 0) {
-          gameState.miniGameCooldowns[loc] = Math.max(0, gameState.miniGameCooldowns[loc] - progressMinutes);
+          gameState.miniGameCooldowns[loc] = Math.max(0, gameState.miniGameCooldowns[loc] - dtSeconds);
         }
       }
       updateMiniGameTriggers();
@@ -2326,7 +2327,7 @@
       gameState.noodleUntil = 0; gameState.noodleSeatIdx = null; gameState.noodleSeat = null;
       if (completed) {
         gameState.noodleCount = (gameState.noodleCount || 0) + 1;
-        addBuff('study_boost', 1.25, 60, '🍜', true, '深夜食堂：讀書效率 x1.25');
+        addBuff('study_boost', 1.25, 120, '🍜', true, '深夜食堂：讀書效率 x1.25');
         if (typeof queueFloatingText === 'function') queueFloatingText('🍜 深夜食堂：讀書效率提升！');
         playSound('examSuccess');
       }
@@ -2342,7 +2343,7 @@
     }
 
     function showMinigameResult(win, loc, score) {
-      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_MINUTES; // v8.9.1 完成才起算冷卻
+      gameState.miniGameCooldowns[loc] = MG_COOLDOWN_SECONDS; // v8.9.1 完成才起算冷卻
       if (!gameState.miniGameWins) gameState.miniGameWins = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
       if (win) gameState.miniGameWins[loc] = (gameState.miniGameWins[loc] || 0) + 1;
 
@@ -2351,12 +2352,12 @@
       closeBtn.style.display = 'block';
 
       const buffConfigs = {
-        school: { type: 'study_boost', winMult: 1.5, loseMult: 0.7, winMin: 30, loseMin: 15, icon: '📚', desc: '學科增長' },
-        restaurant: { type: 'eat_boost', winMult: 1.5, loseMult: 0.8, winMin: 30, loseMin: 15, icon: '🍔', desc: '飽足恢復' },
-        gym: { type: 'sport_boost', winMult: 2.0, loseMult: 0.5, winMin: 30, loseMin: 15, icon: '🏃', desc: '壓力降低' },
-        library: { type: 'review_boost', winMult: 1.5, loseMult: 0.7, winMin: 30, loseMin: 15, icon: '📖', desc: '複習效率' },
-        store: { type: 'work_boost', winMult: 1.8, loseMult: 0.8, winMin: 30, loseMin: 15, icon: '🏪', desc: '打工時薪' },
-        home: { type: 'sleep_boost', winMult: 1.5, loseMult: 0.8, winMin: 30, loseMin: 15, icon: '😴', desc: '睡眠恢復' }
+        school: { type: 'study_boost', winMult: 1.5, loseMult: 0.7, winMin: 90, loseMin: 45, icon: '📚', desc: '學科增長' },
+        restaurant: { type: 'eat_boost', winMult: 1.5, loseMult: 0.8, winMin: 90, loseMin: 45, icon: '🍔', desc: '飽足恢復' },
+        gym: { type: 'sport_boost', winMult: 2.0, loseMult: 0.5, winMin: 90, loseMin: 45, icon: '🏃', desc: '壓力降低' },
+        library: { type: 'review_boost', winMult: 1.5, loseMult: 0.7, winMin: 90, loseMin: 45, icon: '📖', desc: '複習效率' },
+        store: { type: 'work_boost', winMult: 1.8, loseMult: 0.8, winMin: 90, loseMin: 45, icon: '🏪', desc: '打工時薪' },
+        home: { type: 'sleep_boost', winMult: 1.5, loseMult: 0.8, winMin: 90, loseMin: 45, icon: '😴', desc: '睡眠恢復' }
       };
 
       const cfg = buffConfigs[loc];
@@ -2365,7 +2366,7 @@
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">🎉</span>
           <div class="result-title" style="color:var(--accent);">勝利！</div>
-          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 分鐘！${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
+          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 秒！${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examSuccess');
       } else {
@@ -2373,7 +2374,7 @@
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">😅</span>
           <div class="result-title" style="color:var(--secondary);">失敗...</div>
-          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 分鐘${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
+          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 秒${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examFail');
       }
@@ -2942,6 +2943,7 @@
     function popComboBubble(el) {
       if (!el || el.dataset.done) return;
       el.dataset.done = '1';
+      playSound('pop'); // v9.33 新音效
       const sub = el._sub || 'cn';
       el.remove();
       gameState.combo = (gameState.combo || 0) + 1;
@@ -3111,7 +3113,7 @@
         gameState.money = (gameState.money || 0) + prize;
         gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + prize;
         queueFloatingText(`🏁 每週競賽結算：你拿下第 ${myRank + 1} 名，獎學金 +$${prize}！`);
-        playSound('levelUp');
+        playSound('coin'); // v9.33 新音效
       } else {
         queueFloatingText(`🏁 每週競賽結算：冠軍是 ${rows[0].name}，你第 ${myRank + 1} 名 — 下週贏回來！`);
       }
@@ -3203,9 +3205,8 @@
     ];
     const WEEKLY_REWARD = 1200;
     function weekKeyOf() {
-      const d = new Date(); const s = new Date(d.getFullYear(), 0, 1);
-      const w = Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7);
-      return d.getFullYear() + '-W' + w;
+      // v9.33 改遊戲週（原現實行事曆週：1x 玩家一週等不到結算、720x 一下就跨週 — 報告時間軸矛盾）
+      return 'G' + Math.floor((gameState.totalGameDays || 0) / 7);
     }
     function ensureWeeklyGoal() {
       const key = weekKeyOf();

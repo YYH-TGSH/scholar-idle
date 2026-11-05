@@ -236,9 +236,32 @@
       if (dn) dn.textContent = `累計捐贈 $${gameState.donatedTotal || 0}・稱號：${donorTitle()}`;
     }
 
+    // v9.33 建築 Combo：兩棟地標都升到指定等級 → 永久連動效果。建設面板明示條件與狀態，文案與公式一致（不再是隱藏規則）
+    const TOWN_COMBOS = [
+      { a: 'school', aLv: 3, b: 'library', bLv: 3, name: '🎓 學術特區', desc: '讀書效率 +10%' },
+      { a: 'store', aLv: 3, b: 'restaurant', bLv: 3, name: '🍜 美食商圈', desc: '打工時薪 +15%' },
+      { a: 'gym', aLv: 3, b: 'home', bLv: 3, name: '💪 健康生活', desc: '睡眠精力恢復 +15%' },
+      { a: 'school', aLv: 3, b: 'gym', bLv: 2, name: '🏅 文武雙全', desc: '考試預估 +3 分' }
+    ];
+    const LANDMARK_NAMES = { home: '住家', store: '超商', restaurant: '餐廳', school: '學校', library: '圖書館', gym: '操場' };
+    function townComboActive(c) { return getLandmarkLevel(c.a) >= c.aLv && getLandmarkLevel(c.b) >= c.bLv; }
+    function getComboStudyMult() { return townComboActive(TOWN_COMBOS[0]) ? 1.10 : 1; }
+    function getComboWageMult() { return townComboActive(TOWN_COMBOS[1]) ? 1.15 : 1; }
+    function getComboSleepMult() { return townComboActive(TOWN_COMBOS[2]) ? 1.15 : 1; }
+    function getComboExamBonus() { return townComboActive(TOWN_COMBOS[3]) ? 3 : 0; }
+    function renderTownCombos() {
+      const el = document.getElementById('town-combos');
+      if (!el) return;
+      el.innerHTML = '<div style="font-weight:900; font-size:0.85rem; margin-bottom:6px;">🔗 建築連動 Combo</div>' + TOWN_COMBOS.map(c => {
+        const on = townComboActive(c);
+        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:5px 8px; margin-bottom:5px; border-radius:8px; background:${on ? '#e8f7ee' : '#f3efe8'}; border:1.5px solid ${on ? '#7bc47f' : '#ddd3c2'};"><span><b>${c.name}</b> <span style="color:var(--text-muted); font-size:0.75rem;">${LANDMARK_NAMES[c.a]} Lv.${c.aLv}＋${LANDMARK_NAMES[c.b]} Lv.${c.bLv}</span><br><span style="font-size:0.78rem;">${c.desc}</span></span><span style="font-weight:900; color:${on ? '#2e7d32' : '#a08b6d'};">${on ? '✓ 已啟用' : '未啟用'}</span></div>`;
+      }).join('');
+    }
+
     function renderBuildDrawer() {
       const listEl = document.getElementById("build-island-list");
       if (!listEl) return;
+      renderTownCombos();
       const totalStars = getTownProsperityTotal();
 
       // 總覽評級
@@ -527,6 +550,7 @@
       if ((gameState.bag[type] || 0) > 0) {
         playSound('click');
         gameState.bag[type] -= 1;
+        if (type === 'chicken' || type === 'bento') playSound('eat'); // v9.33 新音效
 
         if (type === 'chicken') {
           gameState.hunger = Math.min(100, gameState.hunger + 65); // v9.32 雞排 $20 不再一鍵全滿（便當 $50 才是全滿）

@@ -3765,7 +3765,7 @@ input, select, textarea { border-radius: 14px !important; }
 .dd-cover-foot { margin-top:auto; font-size:11.5px; color:var(--dd-soft); letter-spacing:.06em; text-align:center; }
 .dd-spacer { flex:1; }
 .dd-demo { border:1px solid var(--dd-hair); border-radius:8px; background:#fff; padding:26px 10px 10px; position:relative; }
-.dd-tag { position:absolute; left:10px; top:8px; font-size:10px; letter-spacing:.14em; color:var(--dd-soft); font-weight:700; }
+.dd-tag { position:absolute; left:10px; top:8px; font-size:11px; letter-spacing:.14em; color:var(--dd-soft); font-weight:700; }
 .dd-demo .manual-demo { background:transparent; border-radius:0; margin:0; height:104px; }
 .dd-manual .manual-card { text-align:left; }
 .dd-card { margin-top:12px; border:1px solid var(--dd-hair); border-radius:8px; background:#fff; padding:14px 16px; }
@@ -3850,3 +3850,6 @@ input, select, textarea { border-radius: 14px !important; }
 /* v9.32 主修科目鈕 */
 .focus-subj-btn { margin-left: auto; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 12px; border: 2px solid #d8cfc0; background: #fff; cursor: pointer; }
 .focus-subj-btn.active { background: #ffd93d; border-color: #e0a800; }
+
+/* v9.33 無障礙地板：焦點可見（鍵盤/切換導覽時不再無跡可尋） */
+:focus-visible { outline: 3px solid #0a84ff; outline-offset: 2px; }

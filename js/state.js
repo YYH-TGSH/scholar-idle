@@ -133,6 +133,38 @@
           gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
           osc.start(now);
           osc.stop(now + 0.5);
+        } else if (type === 'coin') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(987.77, now);
+          osc.frequency.setValueAtTime(1318.51, now + 0.07);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'pop') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(720, now + 0.07);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'heart') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(659.25, now);
+          osc.frequency.setValueAtTime(880, now + 0.1);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'eat') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
         }
       } catch (e) {
         console.warn("Error playing sound:", e);
@@ -369,10 +401,10 @@
     // ==========================================
     // ✨ Buff 系統
     // ==========================================
-    function addBuff(type, multiplier, minutes, icon, positive, desc) {
-      // 移除同類型的舊 buff
+    function addBuff(type, multiplier, seconds, icon, positive, desc) {
+      // v9.33 時間軸統一：第三參數改「現實秒」（與遊戲速度無關）；minutesLeft 欄位名沿用（存檔相容），存的是秒
       gameState.buffs = gameState.buffs.filter(b => b.type !== type);
-      gameState.buffs.push({ type, multiplier, minutesLeft: minutes, icon, positive, desc: desc || '' });
+      gameState.buffs.push({ type, multiplier, minutesLeft: seconds, icon, positive, desc: desc || '' });
       updateBuffDisplay();
     }
 
@@ -381,9 +413,9 @@
       return buff ? buff.multiplier : 1.0;
     }
 
-    function tickBuffs(progressMinutes) {
+    function tickBuffs(dtSeconds) {
       if (!gameState.buffs || gameState.buffs.length === 0) return;
-      gameState.buffs.forEach(b => { b.minutesLeft -= progressMinutes; });
+      gameState.buffs.forEach(b => { b.minutesLeft -= dtSeconds; });
       const expiredBuffs = gameState.buffs.filter(b => b.minutesLeft <= 0);
       if (expiredBuffs.length > 0) {
         expiredBuffs.forEach(b => queueFloatingText(`${b.icon} Buff 結束：${b.desc}`));
@@ -407,7 +439,7 @@
         const el = document.createElement('div');
         el.className = `buff-icon ${b.positive ? 'positive' : 'negative'}`;
         el.innerText = b.icon;
-        el.title = `${b.desc} (${Math.ceil(b.minutesLeft)}分鐘)`;
+        el.title = `${b.desc} (${Math.ceil(b.minutesLeft)}秒)`;
         container.appendChild(el);
       });
     }
@@ -520,6 +552,25 @@
       }
     }
 
+    // v9.33 好友里程碑：好感升等不再只有一行浮字 — 每級一份專屬心意（有事件進行中改直送，不遺失）
+    function triggerFriendMilestone(id, lv) {
+      const def = FRIENDS_DEFS.find(f => f.id === id);
+      if (!def) return;
+      const rewards = {
+        1: { label: '零用錢 +$30', apply: () => { gameState.money = (gameState.money || 0) + 30; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 30; return '💰 收下小紅包！'; } },
+        2: { label: '一起讀書（知識補給）', apply: () => { if (typeof gainKnowledge === 'function') gainKnowledge('school', 1.5); return '📚 一起讀書，收穫滿滿！'; } },
+        3: { label: '零用錢 +$120＋好友祝福 Buff', apply: () => { gameState.money = (gameState.money || 0) + 120; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 120; addBuff('study_boost', 1.3, 90, '💖', true, '好友祝福：讀書效率 x1.3'); return '💖 這份情誼，比獎學金還珍貴。'; } }
+      };
+      const rw = rewards[lv] || rewards[1];
+      const lines = { 1: '「我們是朋友了！這點心意你收著。」', 2: '「跟你在一起，連讀書都變有趣了。」', 3: '「你是我最珍惜的朋友，這是我的壓箱寶。」' };
+      if (activeRandomEvent) { const msg = rw.apply(); queueFloatingText(`💖 ${def.name} 的里程碑心意：${rw.label} — ${msg}`); return; }
+      triggerRandomEvent({
+        title: `💖 ${def.name}的心意`, badge: '好友里程碑', icon: def.avatar,
+        desc: `${def.name}紅著臉把東西塞到你手裡：${lines[lv] || lines[1]}（好感 Lv.${lv} 里程碑）`,
+        choices: [{ label: '🤲 收下心意', sub: rw.label, exec: () => rw.apply() }]
+      });
+    }
+
     function gainFriendAffinity(id, amount, isSilent) {
       if (!gameState.friends) gameState.friends = { xiaoxuan: 0, dameng: 0, yuqing: 0, xiaohao: 0 };
       const oldLv = getFriendLevel(id);
@@ -531,8 +582,9 @@
       const def = FRIENDS_DEFS.find(f => f.id === id);
 
       if (newLv > oldLv && def) {
-        playSound('examSuccess');
+        playSound('heart'); // v9.33 新音效
         queueFloatingText(`💖 與【${def.name}】好感升至 Lv.${newLv}！解鎖新加成！`);
+        triggerFriendMilestone(id, newLv); // v9.33 里程碑心意事件
       } else if (!isSilent && def) {
         queueFloatingText(`🤝 ${def.name} 好感度 +${amount}`);
       }
@@ -816,11 +868,11 @@
             }
           },
           {
-            label: '⚡ 開啟 30 分鐘學科衝刺 Buff',
-            sub: '獲得 30 遊戲分鐘「學科增長 x1.5」強效狀態',
+            label: '⚡ 開啟學科衝刺 Buff',
+            sub: '獲得 90 秒「學科增長 x1.5」強效狀態（現實時間）',
             exec: () => {
-              addBuff('study_boost', 1.5, 30, '📚', true, '學科增長 x1.5');
-              return '⚡ 靈感爆發！獲得 30 分鐘學科增長 x1.5 Buff';
+              addBuff('study_boost', 1.5, 90, '📚', true, '學科增長 x1.5');
+              return '⚡ 靈感爆發！獲得 90 秒學科增長 x1.5 Buff';
             }
           }
         ]
@@ -880,6 +932,54 @@
             }
           }
         ]
+      },
+      {
+        title: '🤒 感冒了', badge: '健康警訊', icon: '🤒', minG: 0, maxG: 6,
+        desc: '喉嚨痛、頭昏昏，身體在抗議了。',
+        choices: [
+          { label: '🏥 去看醫生', sub: '花 $40，精力 +10', exec: () => { gameState.money = Math.max(0, (gameState.money || 0) - 40); gameState.energy = Math.min(100, gameState.energy + 10); return '🏥 看完醫生好多了，錢包瘦了一點。'; } },
+          { label: '💪 硬撐著', sub: '壓力 +8，精力 −10', exec: () => { gameState.stress = Math.min(100, gameState.stress + 8); gameState.energy = Math.max(0, gameState.energy - 10); return '💪 撐過去了，但身體更累了。'; } },
+        ],
+      },
+      {
+        title: '💸 弄丟零用錢', badge: '倒楣日常', icon: '💸', minG: 0, maxG: 6,
+        desc: '摸摸口袋 — 錢包不見了！裡面還有 $30。',
+        choices: [
+          { label: '🔍 回頭找找看', sub: '精力 −5，50% 找回', exec: () => { gameState.energy = Math.max(0, gameState.energy - 5); if (Math.random() < 0.5) return '🔍 在草叢邊找到了！虛驚一場。'; gameState.money = Math.max(0, (gameState.money || 0) - 30); return '🔍 找了半天沒找到，損失 $30…'; } },
+          { label: '😮‍💨 自認倒楣', sub: '直接損失 $30', exec: () => { gameState.money = Math.max(0, (gameState.money || 0) - 30); return '😮‍💨 破財消災，下次把錢包收好。'; } },
+        ],
+      },
+      {
+        title: '🎪 園遊會', badge: '校園活動', icon: '🎪', minG: 0, maxG: 1,
+        desc: '學校園遊會熱鬧滾滾，攤位一字排開，摸彩箱就在眼前。',
+        choices: [
+          { label: '🎟️ 試手氣摸彩', sub: '花 $15，50% 中 $40', exec: () => { gameState.money = Math.max(0, (gameState.money || 0) - 15); if (Math.random() < 0.5) { gameState.money += 40; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 40; return '🎉 中獎了！$40 入袋！'; } return '🎟️ 沒中，就當贊助班費。'; } },
+          { label: '🧹 幫忙顧攤位', sub: '壓力 −8，專注 +5', exec: () => { gameState.stress = Math.max(0, gameState.stress - 8); gameState.focus = Math.min(100, (gameState.focus || 0) + 5); return '🧹 顧攤顧到被誇獎，心情放鬆。'; } },
+        ],
+      },
+      {
+        title: '📚 學測倒數', badge: '升學壓力', icon: '📚', minG: 2, maxG: 3,
+        desc: '黑板角落寫著大大的倒數天數，教室裡的空氣都緊繃了起來。',
+        choices: [
+          { label: '📒 收下學長的筆記', sub: '知識補給（最弱科）', exec: () => { if (typeof gainKnowledge === 'function') gainKnowledge('school', 1.5); return '📒 狀元筆記到手，如虎添翼！'; } },
+          { label: '🧘 深呼吸放鬆', sub: '壓力 −10，專注 +10', exec: () => { gameState.stress = Math.max(0, gameState.stress - 10); gameState.focus = Math.min(100, (gameState.focus || 0) + 10); return '🧘 穩住心態，比多讀一章更重要。'; } },
+        ],
+      },
+      {
+        title: '🧑‍🏫 家教邀約', badge: '打工機會', icon: '🧑‍🏫', minG: 4, maxG: 6,
+        desc: '鄰居想請你幫國中生補習，開出的鐘點費很誘人。',
+        choices: [
+          { label: '✅ 接下來', sub: '+$120，精力 −15', exec: () => { gameState.money = (gameState.money || 0) + 120; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 120; gameState.energy = Math.max(0, gameState.energy - 15); return '🧑‍🏫 教完一堂課，$120 入袋，教學相長！'; } },
+          { label: '🙏 婉拒，專心讀書', sub: '專注 +15', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 15); return '🙏 守住自己的節奏，婉拒了邀約。'; } },
+        ],
+      },
+      {
+        title: '🏅 傑出表現獎', badge: '榮譽時刻', icon: '🏅', minG: 3, maxG: 6,
+        desc: '老師在全班面前宣布：這學期的傑出表現獎，頒給你！',
+        choices: [
+          { label: '🏆 上台領獎', sub: '獎金 +$60', exec: () => { gameState.money = (gameState.money || 0) + 60; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 60; return '🏅 掌聲之中領下 $60 獎金！'; } },
+          { label: '😌 低調一點', sub: '獎金 +$60，壓力 −5', exec: () => { gameState.money = (gameState.money || 0) + 60; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 60; gameState.stress = Math.max(0, gameState.stress - 5); return '😌 獎金照領，心情平靜。'; } },
+        ],
       }
     ];
 
@@ -941,10 +1041,19 @@
           { label: '🙏 婉拒，專心讀書', sub: '專注 +8', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 8); return '🙏 守住自己的讀書節奏。'; } },
         ],
       },
+      {
+        title: '📱 手機跳通知', badge: '讀書事件', icon: '📱',
+        desc: '讀到一半，手機螢幕亮了 — 群組訊息一則接一則。',
+        choices: [
+          { label: '📱 滑一下再說', sub: '專注 −25，壓力 −5', exec: () => { gameState.focus = Math.max(0, (gameState.focus || 0) - 25); gameState.stress = Math.max(0, gameState.stress - 5); return '📱 滑了五分鐘，心情放鬆但專注散了。'; } },
+          { label: '🔕 直接關機', sub: '專注 +10', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 10); return '🔕 世界清靜了，讀書效率回來了。'; } },
+        ],
+      },
     ];
     function triggerRandomEvent(forcedEvent) {
       if (activeRandomEvent) return;
-      const ev = forcedEvent || RANDOM_EVENTS_POOL[Math.floor(Math.random() * RANDOM_EVENTS_POOL.length)];
+      // v9.33 事件分年級：隨機抽選先依目前年級 band 過濾（低年級不會遇到學測/家教、高年級不再辦園遊會）
+      const ev = forcedEvent || (() => { const gi = gameState.gradeIndex || 0; const pool = RANDOM_EVENTS_POOL.filter(e => gi >= (e.minG || 0) && gi <= (e.maxG == null ? 99 : e.maxG)); const src = pool.length ? pool : RANDOM_EVENTS_POOL; return src[Math.floor(Math.random() * src.length)]; })();
       activeRandomEvent = ev;
       randomEventDeadline = Date.now() + 15000; // 15 秒倒數
       randomEventModalOpen = false;
@@ -1390,7 +1499,7 @@
       gameState.money = (rebirthData.bonuses.richKid || 0) * 50;
       // v9.32 傳承見效：新一屆開局專注 50＋「傳承祝福」讀書 buff — 開局就有感，不再只是面板數字
       gameState.focus = 50;
-      if (typeof addBuff === 'function') addBuff('study_boost', 1.3, 30, '🌱', true, '傳承祝福：讀書效率 x1.3');
+      if (typeof addBuff === 'function') addBuff('study_boost', 1.3, 90, '🌱', true, '傳承祝福：讀書效率 x1.3');
 
       currentLoc = 'home';
       currentState = 'idle';
