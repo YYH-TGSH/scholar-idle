@@ -218,9 +218,9 @@
         if (g) g.style.display = decor >= i ? 'block' : 'none';
         const b = document.getElementById('btn-decor-' + i);
         if (b) {
-          if (decor >= i) { b.textContent = '✅ 已完成'; b.disabled = true; }
+          if (decor >= i) { b.innerHTML = icoSvg('check') + ' 已完成'; b.disabled = true; }
           else if (decor === i - 1) { b.textContent = `$${HOME_DECOR_TIERS[i].price} 裝潢`; b.disabled = false; }
-          else { b.textContent = '🔒 先完成前一階'; b.disabled = true; }
+          else { b.innerHTML = icoSvg('lock') + ' 先完成前一階'; b.disabled = true; }
         }
       }
       const ds = document.getElementById('decor-status');
@@ -265,25 +265,25 @@
       const totalStars = getTownProsperityTotal();
 
       // 總覽評級
-      let title = `🏕️ 初興小鎮 (${totalStars}★)`;
+      let title = `初興小鎮 (${totalStars}★)`;
       let perks = "每日小鎮紅利：尚未解鎖（島嶼累計達 10★ 解鎖）";
       if (totalStars >= 18) {
-        title = `🌌 傳奇宇宙學霸城 (18★ MAX)`;
+        title = `傳奇宇宙學霸城 (18★ MAX)`;
         perks = "每日小鎮紅利 +$100、考試合格率永久 +5%、全小遊戲獎金翻倍！";
       } else if (totalStars >= 15) {
-        title = `🌟 卓越文教城 (${totalStars}★)`;
+        title = `卓越文教城 (${totalStars}★)`;
         perks = "每日小鎮紅利 +$50、全學科學科獲取速度額外 +10%！";
       } else if (totalStars >= 10) {
-        title = `🏙️ 繁華聚落 (${totalStars}★)`;
+        title = `繁華聚落 (${totalStars}★)`;
         perks = "每日小鎮紅利 +$20（每日 00:00 自動結算發放）";
       }
 
       const titleEl = document.getElementById("town-prosperity-title");
-      if (titleEl) titleEl.innerText = title;
+      if (titleEl) titleEl.innerHTML = icoSvg('building') + ' ' + title;
       const perksEl = document.getElementById("town-prosperity-perks");
       if (perksEl) perksEl.innerText = perks;
       const starsEl = document.getElementById("town-prosperity-stars");
-      if (starsEl) starsEl.innerText = "⭐".repeat(Math.min(18, totalStars));
+      if (starsEl) starsEl.innerHTML = icoSvg('star').repeat(Math.min(18, totalStars));
       const fillEl = document.getElementById("town-prosperity-fill");
       if (fillEl) fillEl.style.width = `${Math.min(100, Math.round((totalStars / 18) * 100))}%`;
 
@@ -693,6 +693,14 @@
     };
     // v9.19 桌上餐點：開吃時把對應的菜放到桌上（不只頭上泡泡）
     const PICK_ITEMS = ['🍙', '🍞', '🥛', '🧃', '🍫', '🍩', '🍎', '🧴', '🥫', '🍮'];
+    function setIco(el, emoji) { // v9.59 圖示管線：emoji 一律轉自繪圖示（對照表外才留文字）
+      // (window.setIco 在函式後暴露，供測試與跨檔呼叫）
+      if (el.dataset.ico === emoji) return;
+      el.dataset.ico = emoji;
+      const h = (typeof emojiIcon === 'function') ? emojiIcon(emoji) : null;
+      if (h) el.innerHTML = h; else el.textContent = emoji;
+    }
+    window.setIco = setIco;
     function syncDishPlate(npc, show, emoji, px, py, roomsId, z) {
       let pl = (npc._plateEl && npc._plateEl.nodeType === 1) ? npc._plateEl : null; // v9.20 存檔會把 DOM 參照序列化成 {} —— 不是元素就重建（v9.19 實機存檔中毒修正）
       if (show) {
@@ -702,7 +710,7 @@
         if (pl.parentNode !== rooms) rooms.appendChild(pl);
         pl.style.display = 'block';
         pl.style.left = px + 'px'; pl.style.top = py + 'px'; pl.style.zIndex = String(z || 958);
-        if (pl.textContent !== emoji) pl.textContent = emoji;
+        setIco(pl, emoji);
       } else if (pl && pl.style.display !== 'none') pl.style.display = 'none';
     }
     // ================= v9.20 超商顧客完整購物流程：逛→看→拿→(放回)→排隊→結帳→離開 =================
@@ -714,7 +722,7 @@
       if (!rooms) return;
       const pop = document.createElement('div');
       pop.className = 'pick-pop';
-      pop.textContent = emoji;
+      setIco(pop, emoji);
       pop.style.left = (npc.x - 8) + 'px'; pop.style.top = (npc.y + (dy || -52)) + 'px';
       rooms.appendChild(pop);
       setTimeout(() => { if (pop.parentNode) pop.parentNode.removeChild(pop); }, 2000);
@@ -1122,7 +1130,7 @@
           svg.style.width = '32px';
           svg.style.height = (NPC_SPR_H[d.key] || 50) + 'px';
           applySilhouette(svg, d);
-          el.innerHTML = `<span class="npc-name">${d.name}</span><span class="npc-role" style="display:none;"></span><span class="npc-zzz-tag" style="display:none;">💤</span><span class="npc-flip"></span><span class="npc-dish" style="display:none;"></span>`;
+          el.innerHTML = `<span class="npc-name">${d.name}</span><span class="npc-role" style="display:none;"></span><span class="npc-zzz-tag" style="display:none;"><svg class="pix-ico" aria-hidden="true"><use href="#i-zzz"/></svg></span><span class="npc-flip"></span><span class="npc-dish" style="display:none;"></span>`;
           el.querySelector('.npc-flip').appendChild(svg);
           el.addEventListener('click', () => npcSay(gameState.npcs.find(n => n.key === d.key)));
           layer.appendChild(el);
@@ -1462,7 +1470,7 @@
         let pp = document.getElementById('player-dinner-plate');
         const showP = playerIn && currentState === 'dinner' && !gameState._playerWalking;
         if (showP && rooms) {
-          if (!pp) { pp = document.createElement('div'); pp.id = 'player-dinner-plate'; pp.className = 'dish-plate'; pp.textContent = '🍛'; rooms.appendChild(pp); }
+          if (!pp) { pp = document.createElement('div'); pp.id = 'player-dinner-plate'; pp.className = 'dish-plate'; pp.innerHTML = icoSvg('curry'); rooms.appendChild(pp); }
           const _pdp = HOME_PROJ.P(gameState.currentX || 655, 190, 14);
           pp.style.display = 'block'; pp.style.left = (_pdp.x - 9) + 'px'; pp.style.top = (_pdp.y - 9) + 'px'; pp.style.zIndex = '990';
         } else if (pp) pp.style.display = 'none';
@@ -1820,23 +1828,23 @@
             }
           }
           const roleEl = el.querySelector('.npc-role');
-          if (roleEl) { const rd = npcDef(npc.key); const onDuty = npc.kind === 'staff' && npc.state === 'seated' && rd && npc.dest === rd.work; roleEl.style.display = onDuty ? 'inline' : 'none'; if (onDuty) { const ic = { store: '🏪', restaurant: '🍳', school: '📚', library: '📖', gym: '🏋️' }[rd.work] || '💼'; if (roleEl.textContent !== ic) roleEl.textContent = ic; } } // v9.16.1 值班標籤：一眼看出誰在上班、在做什麼
+          if (roleEl) { const rd = npcDef(npc.key); const onDuty = npc.kind === 'staff' && npc.state === 'seated' && rd && npc.dest === rd.work; roleEl.style.display = onDuty ? 'inline' : 'none'; if (onDuty) { const ic = { store: '🏪', restaurant: '🍳', school: '📚', library: '📖', gym: '🏋️' }[rd.work] || '💼'; setIco(roleEl, ic); } } // v9.16.1 值班標籤：一眼看出誰在上班、在做什麼
           const dishEl = el.querySelector('.npc-dish');
           if (dishEl) {
             if (npc.state === 'seated' && npc.dest === 'restaurant') {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               const _dt = npc.phase === 'eat' ? todaysSpecial().emoji : (npc.phase === 'wait' ? '🍳' : '📋');
-              if (dishEl.textContent !== _dt) dishEl.textContent = _dt;
+              setIco(dishEl, _dt);
               const _rp = restPlateScreen(npc.x, npc.y); syncDishPlate(npc, npc.phase === 'eat' && npc.insideLoc === 'restaurant', todaysSpecial().emoji, _rp.x, _rp.y, 'rest-rooms', Z_LAYER.FOOD); // v9.19 菜上桌；v9.20 食物置頂；v9.51 盤子放投影桌面上
             } else if (npc.state === 'seated' && npc.windowSeat != null) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
-              if (dishEl.textContent !== '🍜') dishEl.textContent = '🍜';
+              setIco(dishEl, '🍜');
               if (Math.random() < 0.002) npcSay(npc, NOODLE_NIGHT_LINES[Math.floor(Math.random() * NOODLE_NIGHT_LINES.length)]); // v9.16 深夜窗邊對話
               syncDishPlate(npc, npc.insideLoc === 'store', '🍜', npc.x - 9, npc.y - 40, 'store-rooms', Z_LAYER.FOOD); // v9.19 泡麵碗放窗邊吧台上；v9.20 食物置頂
             } else if (npc.state === 'seated' && npc.dest === 'store' && npc.windowSeat == null && !(npc.kind === 'staff' && npcDef(npc.key) && npcDef(npc.key).work === 'store')) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               const _tag = npc.shopStage === 'pay' ? '🧾' : (npc.picked ? '🧺' : '🛒'); // v9.20 結帳中；v9.19 拿過東西＝提籃
-              if (dishEl.textContent !== _tag) dishEl.textContent = _tag;
+              setIco(dishEl, _tag);
               npc.pickCd = (npc.pickCd == null ? 2 + Math.random() * 6 : npc.pickCd) - progressMinutes; // v9.19 逛貨架會真的伸手拿商品
               if (npc.pickCd <= 0 && (!npc.shopStage || npc.shopStage === 'look')) { // v9.20 排隊/結帳時不再拿貨
                 npc.pickCd = 8 + Math.random() * 14;
@@ -2143,7 +2151,7 @@
       bg += txt(pr.P(540, 283, 4), '入 口', 11, '#14532d');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + STORE_PW + ' 300" style="position:absolute; left:0; top:0; width:' + STORE_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       return svgOpen('store-bg25', 0) + bg + '</svg>' + svgOpen('store-front25', 950) + front + '</svg>' + svgOpen('store-front25b', 960) + frontB + '</svg>'
-        + '<div class="store-chip" style="left:452px; top:214px;" onclick="noodleHitClick(event)">🍜 窗邊泡麵</div>';
+        + '<div class="store-chip" style="left:452px; top:214px;" onclick="noodleHitClick(event)">' + icoSvg('noodle') + ' 窗邊泡麵</div>';
     }
 
     function ensureStoreInterior() {
@@ -2244,7 +2252,7 @@
         let np2 = document.getElementById('player-noodle-plate');
         const showN = gameState.noodleUntil && gameState.noodleSeat && playerIn;
         if (showN && rooms) {
-          if (!np2) { np2 = document.createElement('div'); np2.id = 'player-noodle-plate'; np2.className = 'dish-plate'; np2.textContent = '🍜'; rooms.appendChild(np2); }
+          if (!np2) { np2 = document.createElement('div'); np2.id = 'player-noodle-plate'; np2.className = 'dish-plate'; np2.innerHTML = icoSvg('noodle'); rooms.appendChild(np2); }
           const _np = STORE_PROJ.P(gameState.noodleSeat.x, 246, 11);
           np2.style.display = 'block'; np2.style.left = (_np.x - 9) + 'px'; np2.style.top = (_np.y - 9) + 'px'; np2.style.zIndex = '990'; // v9.20 食物置頂（v9.54 改放投影吧台面）
         } else if (np2) np2.style.display = 'none';
@@ -2685,7 +2693,7 @@
       const rooms = document.getElementById('gym-rooms');
       const ball = rooms && document.createElement('div');
       if (ball && typeof ball.animate === 'function') {
-        ball.className = 'shot-ball'; ball.textContent = '🏀';
+        ball.className = 'shot-ball'; ball.innerHTML = icoSvg('ball');
         const _sa = GYM_PROJ.P(fromX, fromY, 0), _sr = GYM_PROJ.P(GYM_HOOP.x, GYM_HOOP.y, 30);
         ball.style.left = (_sa.x - 10) + 'px'; ball.style.top = (_sa.y - 54) + 'px';
         rooms.appendChild(ball);
@@ -3134,7 +3142,7 @@
           if (!pp) { pp = document.createElement('div'); pp.id = 'player-rest-plate'; pp.className = 'dish-plate'; rooms.appendChild(pp); }
           const _rps = restPlateScreen(gameState.currentX || 440, gameState.currentY || 184);
           pp.style.display = 'block'; pp.style.left = _rps.x + 'px'; pp.style.top = _rps.y + 'px'; pp.style.zIndex = '990'; // v9.20 食物置頂；v9.51 盤子改放投影桌面上
-          const _pe = todaysSpecial().emoji; if (pp.textContent !== _pe) pp.textContent = _pe;
+          setIco(pp, todaysSpecial().emoji);
         } else if (pp) pp.style.display = 'none';
       }
       let focus = 300;
@@ -3232,7 +3240,7 @@
       if (!layer) return;
       const pop = document.createElement('div');
       pop.className = 'pick-pop';
-      pop.textContent = emoji;
+      setIco(pop, emoji);
       const _prC = (typeof PROJ !== 'undefined') ? PROJ.forRooms(layer.id) : null;
       const _anC = _prC ? _prC.P(npc.x, npc.y, 0) : null;
       pop.style.left = ((_anC ? _anC.x : npc.x) - 8) + 'px'; pop.style.top = ((_anC ? _anC.y : npc.y) - 70) + 'px';

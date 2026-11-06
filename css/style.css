@@ -3971,3 +3971,13 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .mt8 { margin-top: 8px; }
 .mt10 { margin-top: 10px; }
 .mb10 { margin-bottom: 10px; }
+
+/* v9.59 圖示尺寸情境（自繪圖示取代 emoji 後，各容器內的 .pix-ico 大小） */
+.island-tag .pix-ico { width: 14px; height: 14px; vertical-align: -2px; }
+.room-chip .pix-ico { width: 15px; height: 15px; vertical-align: -2px; }
+.shop-item-icon .pix-ico { width: 26px; height: 26px; }
+.dish-plate .pix-ico, .pick-pop .pix-ico { width: 16px; height: 16px; vertical-align: 0; }
+#gacha-stage .pix-ico { width: 64px; height: 64px; }
+#parents-modal-icon .pix-ico, #re-modal-icon .pix-ico { width: 48px; height: 48px; }
+.store-chip .pix-ico { width: 13px; height: 13px; vertical-align: -2px; }
+.help-tab-btn .pix-ico, .ach-cat-btn .pix-ico { width: 15px; height: 15px; vertical-align: -2px; }

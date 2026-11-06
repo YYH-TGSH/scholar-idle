@@ -1076,7 +1076,7 @@
       const overlay = document.getElementById('random-event-overlay');
       document.getElementById('re-modal-title').innerText = activeRandomEvent.title;
       document.getElementById('re-modal-badge').innerText = activeRandomEvent.badge;
-      document.getElementById('re-modal-icon').innerText = activeRandomEvent.icon;
+      document.getElementById('re-modal-icon').innerHTML = (typeof emojiIcon === 'function' && emojiIcon(activeRandomEvent.icon)) || activeRandomEvent.icon;
       document.getElementById('re-modal-desc').innerText = activeRandomEvent.desc;
 
       const choicesEl = document.getElementById('re-modal-choices');
@@ -1353,7 +1353,7 @@
         const displayIcon = (ach.hidden && !isUnlocked) ? '❓' : ach.icon;
 
         card.innerHTML = `
-          <span class="ach-icon">${displayIcon}</span>
+          <span class="ach-icon">${(typeof emojiIcon === 'function' && emojiIcon(displayIcon)) || displayIcon}</span>
           <div class="ach-name">${displayName}</div>
           <div class="ach-desc">${displayDesc}</div>
         `;
@@ -1907,7 +1907,7 @@
         isManualLocked = false;
         gameState.overrideAction = null;
         gameState.overrideHoursLeft = 0;
-        elLockBtn.innerText = '🤖 自動';
+        elLockBtn.innerHTML = icoSvg('robot') + ' 自動';
         elLockBtn.classList.remove('locked');
         queueFloatingText('已恢復自動作息模式');
       } else {
@@ -1920,7 +1920,7 @@
         gameState.overrideAction = actionMap[currentLoc] || null;
         gameState.overrideHoursLeft = 9999; // 無限持續
         const locNameMap = { home: '住家', school: '學校', gym: '運動場', restaurant: '餐廳', library: '圖書館', store: '便利商店' };
-        elLockBtn.innerText = '🔒 鎖定中';
+        elLockBtn.innerHTML = icoSvg('lock') + ' 鎖定中';
         elLockBtn.classList.add('locked');
         queueFloatingText(`🔒 已鎖定在 ${locNameMap[currentLoc] || currentLoc}，直到手動解除`);
       }

@@ -61,3 +61,32 @@ window.BIBLE = {
     OVERLAY: 'rgba(24, 32, 66, 0.55)'
   }
 };
+
+// ---- 圖示管線（批次 2）：emoji → 自繪 symbol 對照＋SVG 字串產生器 ----
+// 場景/UI 一律經 emojiIcon() 轉換；對照表沒有的 emoji 回傳 null（呼叫端決定保留文字或用預設圖示）。
+window.ICONMAP = {
+  '🍛': 'curry', '🍜': 'noodle', '🍱': 'bento', '🍗': 'chicken', '🍔': 'burger', '🍙': 'rice',
+  '🍚': 'rice', '🍲': 'soup', '🥗': 'bento', '🧃': 'drink', '🥤': 'drink', '🍦': 'icecream',
+  '🍎': 'apple', '🍰': 'cake', '🍩': 'snack', '🍫': 'snack', '🍞': 'snack', '🥛': 'drink',
+  '🤯': 'stress', '🔋': 'battery',
+  '🍳': 'soup', '🏋️': 'dumbbell', '💼': 'clipboard',
+  '💯': 'star', '🍖': 'chicken', '😌': 'heart', '💀': 'close', '🤬': 'stress', '💪': 'dumbbell', '🦉': 'book', '🤝': 'people', '💳': 'cash', '🛍️': 'basket', '❗': 'warn', '😢': 'stress', '🧠': 'flask', '⛪': 'building', '🌀': 'refresh', '💎': 'sparkle', '👔': 'shirt', '🏖️': 'home', '👑': 'medal',
+  '⚠️': 'warn', '❌': 'close', '🎒': 'basket', '✍️': 'pencil', '🧬': 'flask', '🌌': 'sparkle', '🏛️': 'building', '🏙️': 'building', '🏕️': 'home',
+  '🏠': 'home', '🏫': 'school', '📚': 'book', '📖': 'book', '🏃': 'run', '🏪': 'store',
+  '📕': 'book', '📗': 'book', '📘': 'book', '🍮': 'cake', '🥫': 'snack', '🧴': 'drink',
+  '🎓': 'cap', '🔔': 'bell', '🕐': 'clock', '⏰': 'clock', '✅': 'check', '✔️': 'check', '✕': 'close', '✖️': 'close',
+  '🧭': 'compass', '🤖': 'robot', '🔒': 'lock', '❤️': 'heart', '💖': 'heart', '⭐': 'star', '🌟': 'star',
+  '⚡': 'bolt', '📋': 'clipboard', '👕': 'shirt', '🎵': 'music', '🎶': 'music', '🎮': 'game',
+  '🎁': 'gift', '💤': 'zzz', '☕': 'tea', '🖨️': 'print', '📄': 'print', '🛒': 'cart', '🧺': 'basket',
+  '🧾': 'receipt', '💵': 'cash', '💰': 'coin', '↩️': 'back', '↩': 'back', '💬': 'chat',
+  '✨': 'sparkle', '🏆': 'trophy', '🥇': 'medal', '✏️': 'pencil', '🏀': 'ball', '⚽': 'ball',
+  '🛏️': 'bed', '🎰': 'dice', '🌙': 'moon', '📈': 'chartup', '🔥': 'flame', '🎨': 'pencil',
+  '🧑': 'people', '👥': 'people', '🏗️': 'building', '⚙️': 'gear', '❓': 'help', '🪦': 'sign', '📜': 'receipt', '🎉': 'sparkle'
+};
+window.icoSvg = function (name, cls) {
+  return '<svg class="pix-ico ' + (cls || '') + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
+};
+window.emojiIcon = function (emoji, cls) {
+  const n = window.ICONMAP[emoji];
+  return n ? window.icoSvg(n, cls) : null;
+};

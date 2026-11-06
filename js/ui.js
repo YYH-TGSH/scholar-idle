@@ -53,7 +53,7 @@
     // v9.36 功能選單：低頻功能鈕收成一顆選單鈕（點開才展開），地圖不再被整列按鈕包圍
     function fabMenuSync(open) {
       const ico = document.getElementById('fab-menu-ico');
-      if (ico) ico.textContent = open ? '✕' : '🧭';
+      if (ico) ico.innerHTML = open ? icoSvg('close') : icoSvg('compass');
       const lbl = document.getElementById('fab-menu-lbl');
       if (lbl) lbl.textContent = open ? '關閉' : '選單';
       const t = document.getElementById('fab-menu-toggle');
@@ -1573,12 +1573,12 @@
       playSound('click');
 
       if (gameState.parentsStatus !== 'alive') {
-        titleEl.innerText = "⚠️ 父母突發事件";
-        iconEl.innerText = "🪦";
+        titleEl.innerHTML = icoText("⚠️ 父母突發事件");
+        iconEl.innerHTML = icoSvg('sign');
         reasonEl.innerText = gameState.parentsStatusReason || "父母離奇消失了...";
       } else if (gameState.parentsRebornReason) {
-        titleEl.innerText = "✨ 父母光榮奇蹟";
-        iconEl.innerText = "📜";
+        titleEl.innerHTML = icoText("✨ 父母光榮奇蹟");
+        iconEl.innerHTML = icoSvg('receipt');
         reasonEl.innerText = gameState.parentsRebornReason || "父母平安回來了！";
       }
 
@@ -1649,7 +1649,7 @@
         const q = DAILY_QUEST_POOL.find(x => x.id === id);
         if (!q) return '';
         const p = q.prog(); const done = !!dq.rewarded[id] || p >= q.target;
-        return `<div class="quest-row ${done ? 'done' : ''}"><span class="quest-icon">${q.icon}</span><span class="quest-desc">${q.desc}</span><span class="quest-prog">${Math.min(p, q.target)}/${q.target}</span><span class="quest-reward">${done ? '✅ 已領 $' + q.reward : '$' + q.reward}</span></div>`;
+        return `<div class="quest-row ${done ? 'done' : ''}"><span class="quest-icon">${icoHtml(q.icon)}</span><span class="quest-desc">${q.desc}</span><span class="quest-prog">${Math.min(p, q.target)}/${q.target}</span><span class="quest-reward">${done ? icoSvg('check') + ' 已領 $' + q.reward : '$' + q.reward}</span></div>`;
       }).join('');
     }
     function updateUI() {
@@ -1660,7 +1660,7 @@
       if (typeof renderLoginBtn === 'function') renderLoginBtn(); // v9.3
       if (typeof renderHud === 'function') renderHud(); // v9.4
       if (typeof refreshMoneySinks === 'function') refreshMoneySinks();
-      elGradeTitle.innerText = GRADES[gameState.gradeIndex].name;
+      elGradeTitle.innerHTML = icoText(GRADES[gameState.gradeIndex].name);
       elMoneyVal.innerText = '$' + gameState.money;
 
       // 更新背包顯示（含心靈書）
@@ -1735,7 +1735,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.58.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.59.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1806,7 +1806,7 @@
         uiCache.alert = alertKey;
         if (alertMsg) {
           elAlertBar.style.display = 'block';
-          elAlertBar.innerText = alertMsg;
+          elAlertBar.innerHTML = icoText(alertMsg);
           elAlertBar.style.background = alertColor;
         } else {
           elAlertBar.style.display = 'none';
@@ -2227,7 +2227,7 @@
       floatTxt.style.boxShadow = "2px 2px 0px #4a3728";
       floatTxt.style.animation = "float-up 1.2s forwards ease-out";
       // 移除心了：const style = ... / document.head.appendChild(style)
-      floatTxt.innerText = txt;
+      floatTxt.innerHTML = icoText(txt);
       elCharWrap.appendChild(floatTxt);
       setTimeout(() => {
         floatTxt.remove();
@@ -2236,6 +2236,9 @@
     }
 
     // UX1：浮字訊息佇列（防止重疊展示）
+    // v9.59 圖示管線：資料表的 emoji 圖示欄位與浮字/警報的前綴 emoji 一律轉自繪圖示
+    const icoHtml = e => (typeof emojiIcon === 'function' && emojiIcon(e)) || e;
+    const icoText = t => { const m = /^(\S{1,2}️?)\s/.exec(t); if (m && typeof emojiIcon === 'function') { const h = emojiIcon(m[1]); if (h) return h + ' ' + t.slice(m[0].length).replace(/</g, ''); } return t; };
     function queueFloatingText(txt) {
       if (floatQueue.length >= 5) return; // 佇列最多 5 則
       floatQueue.push(txt);
@@ -2381,7 +2384,7 @@
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">🎉</span>
           <div class="result-title" style="color:var(--leaf);">勝利！</div>
-          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 秒！${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
+          <div class="result-desc">${icoHtml(cfg.icon)} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 秒！${score != null ? `<br>${icoSvg('star')} 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examSuccess');
       } else {
@@ -2389,7 +2392,7 @@
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">😅</span>
           <div class="result-title" style="color:var(--rose);">失敗...</div>
-          <div class="result-desc">${cfg.icon} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 秒${score != null ? `<br>⭐ 本局得分 ${score}` : ''}</div>
+          <div class="result-desc">${icoHtml(cfg.icon)} ${cfg.desc}速度 x${cfg.loseMult}，持續 ${cfg.loseMin} 秒${score != null ? `<br>${icoSvg('star')} 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examFail');
       }
@@ -3256,7 +3259,7 @@
       const sig = w.key + cur + w.rewarded;
       if (box.dataset.sig === sig) return;
       box.dataset.sig = sig;
-      box.innerHTML = `<div class="quest-row${w.rewarded ? ' done' : ''}"><span class="quest-icon">${def.icon}</span><span class="quest-desc">${def.desc.replace('{t}', def.target)}</span><span class="quest-prog">${w.rewarded ? '✅ 已領獎' : cur + ' / ' + def.target}</span><span class="quest-reward">$${WEEKLY_REWARD}</span></div>`;
+      box.innerHTML = `<div class="quest-row${w.rewarded ? ' done' : ''}"><span class="quest-icon">${icoHtml(def.icon)}</span><span class="quest-desc">${def.desc.replace('{t}', def.target)}</span><span class="quest-prog">${w.rewarded ? icoSvg('check') + ' 已領獎' : cur + ' / ' + def.target}</span><span class="quest-reward">$${WEEKLY_REWARD}</span></div>`;
     }
 
     // ---------- 每日登入獎勵 ----------
@@ -3295,13 +3298,13 @@
       if (grid) {
         grid.innerHTML = LOGIN_REWARDS.map((r, i) => {
           const d = i + 1; const cls = d < day ? ' past' : (d === day ? ' today' : '');
-          return `<div class="login-cell${cls}"><div class="login-day">第 ${d} 天</div><div class="login-reward">${r.label}</div>${d === day ? `<div class="login-state">${L.claimed ? '✅ 已領取' : '🎁 今天'}</div>` : ''}</div>`;
+          return `<div class="login-cell${cls}"><div class="login-day">第 ${d} 天</div><div class="login-reward">${r.label}</div>${d === day ? `<div class="login-state">${L.claimed ? icoSvg('check') + ' 已領取' : icoSvg('gift') + ' 今天'}</div>` : ''}</div>`;
         }).join('');
       }
       const st = document.getElementById('login-streak');
-      if (st) st.textContent = `🔥 連續登入 ${L.streak || 1} 天`;
+      if (st) st.innerHTML = icoSvg('flame') + ` 連續登入 ${L.streak || 1} 天`;
       const btn = document.getElementById('btn-login-claim');
-      if (btn) { btn.disabled = !!L.claimed; btn.textContent = L.claimed ? '✅ 今天已領取（明天再來）' : '🎁 領取今天的獎勵'; }
+      if (btn) { btn.disabled = !!L.claimed; btn.innerHTML = L.claimed ? icoSvg('check') + ' 今天已領取（明天再來）' : icoSvg('gift') + ' 領取今天的獎勵'; }
     }
     function claimLoginReward() {
       const L = ensureLogin();
@@ -3385,23 +3388,23 @@
       if (res) res.textContent = '';
       const pool = GACHA_PARTS.filter(pt => !(gameState.unlockedParts || []).includes(pt.id));
       const result = pool.length ? { part: pool[Math.floor(Math.random() * pool.length)] } : { money: 150 };
-      const emojis = ['🎁', '🧢', '👕', '👟', '⭐', '🎩', '🌌'];
+      const emojis = ['gift', 'hat', 'shirt', 'shoe', 'star', 'cap', 'sparkle']; // v9.59 轉蛋動畫改自繪圖示輪播
       let n = 0;
       clearInterval(gachaTimer);
       gachaTimer = setInterval(() => {
-        stage.textContent = emojis[n % emojis.length];
+        stage.innerHTML = icoSvg(emojis[n % emojis.length]);
         stage.style.transform = `scale(${1 + ((n % 3) * 0.12)})`;
         n++;
         if (n > 11) {
           clearInterval(gachaTimer);
           if (result.part) {
-            stage.textContent = '🎉';
+            stage.innerHTML = icoSvg('sparkle');
             if (!gameState.unlockedParts) gameState.unlockedParts = [];
             gameState.unlockedParts.push(result.part.id);
             if (res) res.innerHTML = `抽中限定部件：<b>${result.part.name}</b>！<br><span style="font-size:0.8rem; color:var(--muted);">到衣櫃編輯器的範本區套用它，湊滿一套還有加成</span>`;
             playSound('examSuccess');
           } else {
-            stage.textContent = '💰';
+            stage.innerHTML = icoSvg('coin');
             gameState.money = (gameState.money || 0) + 150;
             if (res) res.innerHTML = '部件全收集了！殘念獎 <b>$150</b>';
             playSound('levelUp');
@@ -3578,7 +3581,7 @@
       if (!container) return;
       MANUAL_STATE[prefix] = { idx: 0 };
       const cover = `<section class="manual-page dd-cover"><div class="dd-eyebrow">HOW TO PLAY · 玩法說明<span class="dd-pg">1 / ${MANUAL_TOTAL}</span></div><div class="dd-h1">學霸養成記，<br>你只需要<span class="dd-hl">陪他衝</span>。</div><p class="dd-lede">小學霸會自己過一天：上學、吃飯、讀書、睡覺都自動進行。你的工作只有在關鍵時刻下場 — 其他時間，看著他長大就好。</p><div class="dd-rule"></div><div class="dd-sec"><span class="dd-no">01</span><span class="dd-sec-t">他的一天</span><span class="dd-en">DAILY LOOP</span></div><div class="dd-flow"><div class="dd-node"><div class="dd-emo">🌅</div><div class="dd-lb">起床</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🏫</div><div class="dd-lb">上學</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🍜</div><div class="dd-lb">吃飯</div></div><div class="dd-arrow">→</div><div class="dd-node focal"><div class="dd-emo">📚</div><div class="dd-lb">讀書</div></div><div class="dd-arrow">→</div><div class="dd-node"><div class="dd-emo">🌙</div><div class="dd-lb">睡覺</div></div></div><div class="dd-callout"><p>讀書<b>放著就會自己慢慢變強</b>；點掉身邊的知識泡泡是額外獎勵，連擊越高、讀得越快。</p></div><div class="dd-cover-foot">共 ${MANUAL_TOTAL} 頁 · 按「下一頁」一頁一頁看</div></section>`;
-      const pages = MANUAL_CARDS.map((c, i) => `<section class="manual-page dd-page"><div class="dd-eyebrow">THE SYSTEM · 六件事<span class="dd-pg">${i + 2} / ${MANUAL_TOTAL}</span></div><div class="dd-spacer"></div><div class="dd-demo"><span class="dd-tag">DEMO · ${c.title}</span><div class="manual-demo">${manualDemoHtml(c.demo)}</div></div><div class="manual-card dd-card${i === 0 ? ' focal' : ''}"><div class="dd-top"><span class="dd-num">No.${i + 1}</span><span class="dd-title">${c.title}</span><span class="dd-ico">${c.icon}</span></div><p>${c.text}</p></div><div class="dd-spacer"></div></section>`).join('');
+      const pages = MANUAL_CARDS.map((c, i) => `<section class="manual-page dd-page"><div class="dd-eyebrow">THE SYSTEM · 六件事<span class="dd-pg">${i + 2} / ${MANUAL_TOTAL}</span></div><div class="dd-spacer"></div><div class="dd-demo"><span class="dd-tag">DEMO · ${c.title}</span><div class="manual-demo">${manualDemoHtml(c.demo)}</div></div><div class="manual-card dd-card${i === 0 ? ' focal' : ''}"><div class="dd-top"><span class="dd-num">No.${i + 1}</span><span class="dd-title">${c.title}</span><span class="dd-ico">${icoHtml(c.icon)}</span></div><p>${c.text}</p></div><div class="dd-spacer"></div></section>`).join('');
       const dots = Array.from({ length: MANUAL_TOTAL }, (_, i) => `<span class="manual-dot${i === 0 ? ' active' : ''}"></span>`).join('');
       container.innerHTML = `<div class="dd-manual"><div class="manual-viewport dd-viewport"><div class="manual-track" id="${prefix}-track">${cover}${pages}</div></div><div class="dd-nav"><button class="dd-prev" id="${prefix}-prev" onclick="manualMove('${prefix}', -1)" aria-label="上一頁" disabled>‹</button><div class="manual-dots dd-dots" id="${prefix}-dots">${dots}</div><button class="dd-next" id="${prefix}-next" onclick="manualNext('${prefix}')">下一頁 →</button></div></div>`;
     }
