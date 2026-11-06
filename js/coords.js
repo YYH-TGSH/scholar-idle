@@ -8,12 +8,12 @@
     // 中間是公園帶，東西兩條連通巷接兩條街。所有世界座標以本註冊表為單一來源。
     const WORLD_W = 1150, WORLD_H = 920;
     const WORLD_PW = 1715, WORLD_PH = 695; // v9.64 高 215+920*0.462≈640＋南緣餘裕（OY 下移後重算） // v9.55 投影後世界螢幕尺寸（TOWN_PROJ K=1.1、OX8/OY170：寬 1150+920*0.605≈1715、高 170+920*0.462≈595＋南緣餘裕）
-    const LOC_STREET = { home: 'A', store: 'A', restaurant: 'A', school: 'B', library: 'B', gym: 'B' };
+    const LOC_STREET = { home: 'A', store: 'A', restaurant: 'A', school: 'B', library: 'B', gym: 'B', club: 'B' }; // v9.65 club = 學校 3F
     const STREET_Y = { A: 300, B: 790 }; // 兩條街的步行線
     const CONNECTOR_X = [28, 1122]; // 東西連通巷的步行線 x
     const WALK_Y = 300; // 相容舊引用：A 街步行線（新路徑一律走 streetYOf/streetLegs）
-    const DOOR_X = { home: 198, store: 571, restaurant: 951, school: 198, library: 571, gym: 958 }; // 各建築門口 x
-    const DOOR_FRONT_Y = { home: 200, store: 200, restaurant: 200, school: 690, library: 690, gym: 690 }; // 門口落腳點 y（島上）
+    const DOOR_X = { home: 198, store: 571, restaurant: 951, school: 198, library: 571, gym: 958, club: 198 }; // v9.65 club 走學校大門 // 各建築門口 x
+    const DOOR_FRONT_Y = { home: 200, store: 200, restaurant: 200, school: 690, library: 690, gym: 690 , club: 690 }; // 門口落腳點 y（島上）
     const DOOR_OUT_Y = { A: 232, B: 722 }; // 走出大門後、踏上馬路前的門前點 y（依街別）
     function streetYOf(loc) { return STREET_Y[LOC_STREET[loc] || 'A']; }
     function streetLegs(x1, s1, x2, s2) { // 街面轉接點（保證軸向）：回傳含終點 {x2, STREET_Y[s2]} 的陣列
@@ -31,6 +31,7 @@
       'gym-run': { x: 300, y: 238 }, // v9.27 跑道上
       'gym-idle': { x: 575, y: 252 }, // v9.27 場景入口旁
       'library-study': { x: 140, y: 235 }, // v9.26 窗邊扶手椅
+      'club-idle': { x: 575, y: 252 }, // v9.65 社團活動室入口旁
       'library-idle': { x: 575, y: 252 }, // v9.26 室內入口旁
       'store-work': { x: 935, y: 150 }, // v9.17 室內場景：收銀台後
       'store-idle': { x: 565, y: 252 }, // v9.17 室內場景：入口內側
@@ -79,7 +80,7 @@
       let scale = 1; // v9.60 尺度定版：全鎮單一尺度（廢 y=260 門檻 ×0.88/×0.98——走過一條線就變矮 10% 是稽核頭號人物不一致）
       // v9.17.1：室內場景（住家/超商）被框框縮小，人物補償回大地圖同尺寸（腳底為原點）
       const par = elCharWrap.parentNode;
-      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms' || par.id === 'school-rooms' || par.id === 'lib-rooms' || par.id === 'gym-rooms')) { // v9.21 學校場景同尺寸補償；v9.26 圖書館；v9.27 操場
+      if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms' || par.id === 'school-rooms' || par.id === 'lib-rooms' || par.id === 'gym-rooms' || par.id === 'club-rooms')) { // v9.21 學校場景同尺寸補償；v9.26 圖書館；v9.27 操場
         scale *= (window.BIBLE ? BIBLE.SCALE.INDOOR_SCALE : 1.676); // v9.60：定版常數（廢 300/clientHeight 浮動反推——版面一改人物就跟著變尺寸）
         elCharWrap.style.transformOrigin = '50% 100%';
       } else if (elCharWrap.style.transformOrigin) {

@@ -363,13 +363,13 @@
     }
     // 房間快捷導覽 (手機底部膠囊列)：把該房間滑到畫面中央並脈衝提示，玩家再點大房間派遣
     function focusLandmark(loc) {
-      const centers = { home: [198, 122], store: [571, 122], restaurant: [951, 122], school: [191, 612], library: [571, 612], gym: [958, 612] }; // v9.55 改為六島邏輯中心（舊值是單排時代遺留，學校/圖書館/操場 x 全錯位）
+      const centers = { home: [198, 122], store: [571, 122], restaurant: [951, 122], school: [191, 612], library: [191, 612], gym: [958, 612] }; // v9.55 六島邏輯中心；v9.65 圖書館併入學校棟，中心改學校
       const c = centers[loc];
       if (!c) return;
       const _cz = (window.BIBLE ? BIBLE.SCALE.CAM_INDOOR_ZOOM : 2.4); if (mapZoom < _cz) _camZoomTarget = _cz; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間（v9.56 島嶼視覺縮放 0.7 → 補償倍率；v9.60 數字收進聖經常數）
       _camHoldUntil = Date.now() + 30000; // v9.14.4 手動操控後 30 秒不自動回追主角
       centerMapOn(c[0], c[1]);
-      const el = document.getElementById('landmark-' + loc);
+      const el = document.getElementById('landmark-' + (loc === 'library' ? 'school' : loc)); // v9.65 圖書館併入學校：聚焦與脈衝都對學校棟
       if (el) { el.classList.remove('nav-pulse'); void el.offsetWidth; el.classList.add('nav-pulse'); }
       if (typeof playSound === 'function') playSound('click');
     }
@@ -516,6 +516,7 @@
       if (typeof updateRestStage === 'function') updateRestStage(); // v9.18
       if (typeof updateSchoolStage === 'function') updateSchoolStage(); // v9.21
       if (typeof updateLibraryStage === 'function') updateLibraryStage(); // v9.26
+      if (typeof updateClubStage === 'function') updateClubStage(); // v9.65 學校 3F
       if (typeof updateGymStage === 'function') updateGymStage(); // v9.27
 
       // 4. 行為決策
@@ -771,6 +772,9 @@
       if (loc === 'library') {
         if (state === 'studying') return COORDS['library-study'];
         return COORDS['library-idle'];
+      }
+      if (loc === 'club') {
+        return COORDS['club-idle']; // v9.65 學校 3F 社團活動室
       }
       if (loc === 'gym') {
         if (state === 'sports') return COORDS['gym-run'];
@@ -1342,7 +1346,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.64.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.65.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

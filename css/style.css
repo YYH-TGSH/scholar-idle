@@ -3675,6 +3675,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* ===== v9.21 學校大場景（比照超商/餐廳 stage） ===== */
 #school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
 #lib-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3e2c7; cursor:grab; touch-action:none; }
+#club-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ead9; cursor:grab; touch-action:none; }
+#school-stage, #lib-stage, #club-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
 #gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#5da85f; cursor:grab; touch-action:none; }
 #gym-stage:active { cursor:grabbing; }
 #gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
@@ -3994,3 +3996,9 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     .bld-ext { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 6; transition: opacity 0.25s ease; }
     .iso-island.ext-mode .facade-roof, .iso-island.ext-mode svg.house-room, .iso-island.ext-mode .dollhouse-art { display: none !important; }
     .iso-island.inside-now .bld-ext { display: none; }
+
+    /* ---- v9.65 樓層切換膠囊（比照模擬圖右上） ---- */
+    #floor-switcher { position: absolute; top: 10px; right: 12px; z-index: 220; display: none; align-items: center; gap: 6px; background: rgba(38, 50, 75, 0.88); border-radius: var(--r-pill); padding: 5px 8px; box-shadow: var(--sh-hard-sm); }
+    #floor-switcher .fs-label { color: #cfe8f5; font-size: 0.69rem; font-weight: 700; padding: 0 2px 0 4px; }
+    #floor-switcher button { border: none; cursor: pointer; background: rgba(255, 255, 255, 0.14); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 12px; }
+    #floor-switcher button.active { background: var(--yellow); color: var(--ink); }

@@ -691,6 +691,7 @@
       restaurant: { activity: 'dine', grid: [[120, 184], [200, 184], [280, 184], [360, 184], [440, 184], [520, 184], [738, 190], [802, 190], [958, 238], [1022, 238]] }, // v9.19 吧台排（南移不被擋）＋圓桌座
       store: { activity: 'browse', grid: [[420, 205], [500, 205], [580, 205], [660, 205], [460, 255], [620, 255]] }, // v9.17 室內貨架走道
       gym: { activity: 'sport', grid: [[240, 208], [390, 150], [540, 208], [800, 190], [900, 215], [980, 170]] }, // v9.27 操場場景內（前三跑道側、後三球場側）
+      club: { activity: 'study', grid: [[330, 208], [445, 208], [560, 208], [675, 208], [790, 208], [905, 208]] }, // v9.65 社團活動室長桌南側
     };
     // v9.19 桌上餐點：開吃時把對應的菜放到桌上（不只頭上泡泡）
     const PICK_ITEMS = ['🍙', '🍞', '🥛', '🧃', '🍫', '🍩', '🍎', '🧴', '🥫', '🍮'];
@@ -781,7 +782,7 @@
       });
     }
     let SEAT_MAP = null;
-    const QUEUES = { school: [], library: [], restaurant: [], store: [], gym: [] };
+    const QUEUES = { school: [], library: [], restaurant: [], store: [], gym: [], club: [] };
     function ensureSeats() {
       if (SEAT_MAP) return SEAT_MAP;
       SEAT_MAP = {};
@@ -807,14 +808,20 @@
       store: { roomsId: 'store-rooms', doorIn: STORE_DOOR_IN, doorOut: STORE_DOOR_OUT, worldDoorX: 571, inDoor: { x: 565, y: 278 } },
       restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 951, inDoor: { x: 610, y: 278 } },
       school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } },
-      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 571, inDoor: { x: 575, y: 278 } },
+      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } }, // v9.65 併入學校 2F：街口改學校大門（worldDoorX 571->198）
+      club: { roomsId: 'club-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } }, // v9.65 學校 3F 社團活動室
       gym: { roomsId: 'gym-rooms', doorIn: GYM_DOOR_IN, doorOut: GYM_DOOR_OUT, worldDoorX: 958, inDoor: { x: 575, y: 278 } }
     };
-    function npcExitPrefix(npc) { // v9.24 在室內的人要先走正門出去，路徑才不會在別間的座標系裡亂走（繞去隱藏的邊邊）
+    // v9.65 學校多樓層：school=1F / library=2F / club=3F 同棟；樓梯點三層同座標（東北角），跨層必經此點換層，不瞬移穿牆
+    const SCHOOL_GROUP = { school: 1, library: 2, club: 3 };
+    const STAIR_PT = { x: 1085, y: 70 };
+    const stairWp = (loc) => ({ x: STAIR_PT.x, y: STAIR_PT.y, door: 'in', loc: loc, ix: STAIR_PT.x, iy: STAIR_PT.y });
+    function npcExitPrefix(npc) { // v9.24 在室內的人要先走正門出去；v9.65：2F/3F 的人先下樓梯回 1F 再走大門
+      if (npc.insideLoc && SCHOOL_GROUP[npc.insideLoc] && npc.insideLoc !== 'school') return [stairWp('school'), { x: 575, y: 278 }, SCHOOL_DOOR_OUT, { x: INTERIORS.school.worldDoorX, y: npcStreetY('school') }];
       if (npc.insideLoc && INTERIORS[npc.insideLoc]) { const c = INTERIORS[npc.insideLoc]; return [c.inDoor, c.doorOut, { x: c.worldDoorX, y: npcStreetY(npc.insideLoc) }]; }
       return [];
     }
-    function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; if (npc.insideLoc === loc) return [pt]; const fromX = npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x; return [...npcExitPrefix(npc), ...streetLegs(fromX, npcCurStreet(npc), c.worldDoorX, LOC_STREET[loc] || 'A'), c.doorIn, pt]; }
+    function interiorPathTo(npc, loc, pt) { const c = INTERIORS[loc]; if (!c) return [pt]; if (npc.insideLoc === loc) return [pt]; if (npc.insideLoc && SCHOOL_GROUP[npc.insideLoc] && SCHOOL_GROUP[loc]) return [stairWp(loc), pt]; if (SCHOOL_GROUP[loc] && loc !== 'school') { const fromX = npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x; return [...npcExitPrefix(npc), ...streetLegs(fromX, npcCurStreet(npc), INTERIORS.school.worldDoorX, 'B'), SCHOOL_DOOR_IN, stairWp(loc), pt]; } const fromX = npc.insideLoc ? INTERIORS[npc.insideLoc].worldDoorX : npc.x; return [...npcExitPrefix(npc), ...streetLegs(fromX, npcCurStreet(npc), c.worldDoorX, LOC_STREET[loc] || 'A'), c.doorIn, pt]; }
     function storePathTo(npc, pt) { return interiorPathTo(npc, 'store', pt); }
     function npcDef(key) { return NPC_DEFS.find(d => d.key === key); }
     function npcIndex(key) { return NPC_DEFS.findIndex(d => d.key === key); }
@@ -1005,12 +1012,13 @@
         if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away'; // v9.15 21:00 後陸續回家
         else if (weekend) dest = ['library', 'gym', 'restaurant', 'store', 'park'][Math.floor(Math.random() * 5)];
         else if (hour >= 8 && hour < 16) dest = 'school';
-        else if (hour >= 17 && hour < 21) dest = ['library', 'library', 'park', 'gym'][Math.floor(Math.random() * 4)];
+        else if (hour >= 17 && hour < 21) dest = ['library', 'club', 'park', 'gym'][Math.floor(Math.random() * 4)]; // v9.65 社團時間
         else dest = ['restaurant', 'store', 'gym', 'park'][Math.floor(Math.random() * 4)];
       } else {
         if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away';
         else {
           let pool = [...def.spots, 'park', 'park'];
+          if (hour >= 16 && hour < 19 && !weekend) pool.push('club', 'club'); // v9.65 放學社團時間（16-19 點、平日）
           if (!schoolPhaseNow()) pool = pool.filter(d => d !== 'school'); // v9.23.1 放學/週末學校不開放，不能再進去坐
           if (!pool.length) pool = ['park'];
           dest = pool[Math.floor(Math.random() * pool.length)];
@@ -1781,6 +1789,7 @@
         if (npc.insideLoc === 'restaurant' && !document.getElementById('rest-rooms')) ensureRestInterior(); // v9.18
         if (npc.insideLoc === 'school' && !document.getElementById('school-rooms')) ensureSchoolInterior(); // v9.21
         if (npc.insideLoc === 'library' && !document.getElementById('lib-rooms')) ensureLibraryInterior(); // v9.26
+        if (npc.insideLoc === 'club' && !document.getElementById('club-rooms')) ensureClubInterior(); // v9.65
         if (npc.insideLoc === 'gym' && !document.getElementById('gym-rooms')) ensureGymInterior(); // v9.27
         const el = document.getElementById('npc-' + npc.key);
         if (el) { // v9.14：室內外容器切換；v9.17：insideLoc（一般 NPC 的 inside 未初始化，不能當守衛）
@@ -1812,7 +1821,7 @@
           if (npc.atDinner && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.DINNER_CLIP); // v9.45 晚餐爸媽夾層：椅背(172)之後、桌前板(196)之前，臉不再被椅背蓋住
           else if (npc.insideLoc === 'store' && npc.state === 'seated' && !npc.shopStage) el.style.zIndex = String(npc.x >= 700 ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.45 超商坐姿分流：櫃檯崗位 945（櫃檯拆兩帶之間）、窗邊客 955（吧台兩帶之間）
           else if (npc.insideLoc === 'restaurant' && npc.state === 'seated') el.style.zIndex = String(npc.key === 'chef' ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.47 廚師納入夾層 945（鐵板拆兩帶之間，臉不再被鐵板蓋住）
-          else if (npc.insideLoc === 'school' && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.POST_CLIP); // v9.47 學校坐姿站前板兩帶之間 945：臉在上帶之上、下帶只蓋腿（學生/講台老師/辦公室老師同規） // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
+          else if ((npc.insideLoc === 'school' || npc.insideLoc === 'club') && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.POST_CLIP); // v9.47 學校坐姿站前；v9.65 社團室同規板兩帶之間 945：臉在上帶之上、下帶只蓋腿（學生/講台老師/辦公室老師同規） // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
           else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
           else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = String(Z_LAYER.WALK); // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
           else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
@@ -2111,7 +2120,46 @@
         const want = hit ? '0.4' : '1';
         if (svg.dataset.fade !== want) { svg.dataset.fade = want; svg.style.opacity = want; }
       }
+      syncFloorStack(); // v9.65 樓層疊層/膠囊跟著每 tick 同步
     }
+    // ===== v9.65 樓層疊層呈現＋切換（拍板透明制：目前層 1 / 樓下 0.35 / 樓上 0.22、250ms 淡換、錯位暗示堆疊） =====
+    const FLOOR_STAGE = { school: 'school-stage', library: 'lib-stage', club: 'club-stage' };
+    const FLOOR_NAME = { school: '1F 教室', library: '2F 圖書館', club: '3F 社團活動室' };
+    function syncFloorStack() {
+      const cur = (typeof currentLoc !== 'undefined') ? currentLoc : null;
+      if (SCHOOL_GROUP[cur]) { ensureSchoolInterior(); ensureLibraryInterior(); ensureClubInterior(); }
+      const active = SCHOOL_GROUP[cur] || 1;
+      for (const loc in SCHOOL_GROUP) {
+        const st = document.getElementById(FLOOR_STAGE[loc]);
+        if (!st) continue;
+        const rel = SCHOOL_GROUP[loc] - active;
+        if (st.dataset.frel === String(rel)) continue;
+        st.dataset.frel = String(rel);
+        st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
+        st.style.zIndex = rel === 0 ? '32' : String(30 - Math.abs(rel));
+        st.style.transform = rel === 0 ? '' : 'translateY(' + (rel < 0 ? 10 : -10) + 'px) scale(0.97)';
+        st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+      }
+      const sw = document.getElementById('floor-switcher');
+      if (sw) {
+        if (!sw.dataset.wired) { sw.dataset.wired = '1'; sw.querySelectorAll('button').forEach(b2 => b2.addEventListener('click', () => switchFloor(b2.dataset.loc))); }
+        const show = !!SCHOOL_GROUP[cur];
+        if (sw.dataset.show !== String(show)) { sw.dataset.show = String(show); sw.style.display = show ? 'flex' : 'none'; }
+        if (show) sw.querySelectorAll('button').forEach(b2 => b2.classList.toggle('active', b2.dataset.loc === cur));
+      }
+    }
+    function switchFloor(loc) {
+      if (!SCHOOL_GROUP[loc]) return;
+      if (typeof currentLoc === 'undefined' || !SCHOOL_GROUP[currentLoc]) return;
+      if (loc === currentLoc) return;
+      currentLoc = loc;
+      currentState = 'idle';
+      if (typeof playSound === 'function') playSound('click');
+      if (typeof createFloatingText === 'function') createFloatingText(FLOOR_NAME[loc]);
+      syncFloorStack();
+    }
+    window.switchFloor = switchFloor;
+
     // v9.64 夜間挖孔 = 新外觀剪影（BLD3D 規格直算，不再量島框）
     let _skyHolesCache = null;
     function skyHoles() {
@@ -2381,6 +2429,13 @@
     const SCHOOL_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
     const SCHOOL_PW = 1340;
     PROJ.registerRooms('school-rooms', SCHOOL_PROJ);
+    function stairSvg(pr) { // v9.65 三層共用樓梯間（東北角，STAIR_PT 對位）：階梯向北爬升＋牆上標示
+      let o = '';
+      for (let i = 0; i < 5; i++) o += pr.box3(1046, 108 - i * 16, 78, 16, 5 + i * 6, i % 2 ? '#a9743f' : '#c98d54');
+      const lp = pr.P(1085, 0, 128);
+      o += '<text x="' + lp.x.toFixed(1) + '" y="' + lp.y.toFixed(1) + '" font-size="12" font-weight="900" fill="#8a6248" text-anchor="middle">樓 梯</text>';
+      return o;
+    }
     function buildSchoolRoomsHTML() {
       const pr = SCHOOL_PROJ, WH = 156;
       const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
@@ -2484,6 +2539,7 @@
       bg += pr.box3(515, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + SCHOOL_PW + ' 300" style="position:absolute; left:0; top:0; width:' + SCHOOL_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      bg += stairSvg(pr); // v9.65 樓梯間（1F 看是上樓梯）
       return svgOpen('school-bg25', 0) + bg + '</svg>' + svgOpen('school-front25', 950) + front + '</svg>';
     }
 
@@ -2946,6 +3002,7 @@
       bg += pr.box3(515, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + LIB_PW + ' 300" style="position:absolute; left:0; top:0; width:' + LIB_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      bg += stairSvg(pr); // v9.65 樓梯間（2F 上下樓）
       return svgOpen('lib-bg25', 0) + bg + '</svg>' + svgOpen('lib-front25', 950) + front + '</svg>'
         + '<button class="lib-rec-book" onpointerdown="event.stopPropagation()" onclick="borrowBook()">📖 借推薦書</button>';
     }
@@ -2981,7 +3038,7 @@
     }
     function ensureLibraryInterior() {
       if (document.getElementById('lib-stage')) return;
-      const host = document.querySelector('#landmark-library .island-platform-top') || document.querySelector('#landmark-library .island-platform') || document.getElementById('landmark-library');
+      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school'); // v9.65 圖書館併入學校 2F：stage 改住學校島
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'lib-stage';
@@ -3074,6 +3131,167 @@
       queueFloatingText('借了本好書！專注 +20、知識小漲 📖');
       if (typeof playSound === 'function') playSound('click');
       if (typeof saveGameData === 'function') saveGameData();
+    }
+
+    // ================= v9.65 學校 3F 社團活動室（多樓層批次 B1：與 1F 教室/2F 圖書館同棟疊層） =================
+    const CLUB_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const CLUB_PW = 1340;
+    PROJ.registerRooms('club-rooms', CLUB_PROJ);
+    function buildClubRoomsHTML() {
+      const pr = CLUB_PROJ, WH = 156;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
+      const PAL = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#2c3e50', '#c0392b', '#ffcc00'];
+      const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 7); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
+      let bg = '', front = '';
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f7ead9');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f7ead9', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      bg += floorBands(pr, poly, '#c98d54', 0.45, 44, 0, 1150, 0, 300);
+      // 社團名牌＋海報牆
+      bg += pr.wallDecoN(330, 700, 96, 150, '#2c3e50');
+      bg += txt(pr.P(515, 0, 132), '社團活動室', 15, '#ffffff', 'middle');
+      bg += txt(pr.P(515, 0, 112), 'CLUB ROOM ・ 3F', 9, '#aee6fa', 'middle');
+      bg += faceRect(52, 0.6, 92, 66, 128, '#c0392b') + txt(pr.P(66, 0, 108), '美術社', 10, '#ffffff');
+      bg += faceRect(168, 0.6, 92, 66, 128, '#5b7fa6') + txt(pr.P(182, 0, 108), '音樂社', 10, '#ffffff');
+      bg += faceRect(724, 0.6, 92, 66, 128, '#5da85f') + txt(pr.P(738, 0, 108), '棋藝社', 10, '#ffffff');
+      bg += faceRect(840, 0.6, 92, 66, 128, '#f39c12') + txt(pr.P(854, 0, 108), '天文社', 10, '#ffffff');
+      // 東窗
+      bg += pr.wallDecoN(968, 1104, 66, 142, '#bedcfe');
+      const wx1 = pr.P(1036, 0, 66), wx2 = pr.P(1036, 0, 142), wy1 = pr.P(968, 0, 104), wy2 = pr.P(1104, 0, 104);
+      bg += '<line x1="' + wx1.x.toFixed(1) + '" y1="' + wx1.y.toFixed(1) + '" x2="' + wx2.x.toFixed(1) + '" y2="' + wx2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/><line x1="' + wy1.x.toFixed(1) + '" y1="' + wy1.y.toFixed(1) + '" x2="' + wy2.x.toFixed(1) + '" y2="' + wy2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
+      // 西側書櫃（社團資料/作品）
+      bg += pr.box3(30, 6, 200, 20, 130, '#6d4c41');
+      bg += spineRow(38, 222, 26.6, 92, 122, 4) + spineRow(38, 222, 26.6, 48, 78, 9);
+      bg += faceRect(27, 26.6, 206, 86, 89, '#8a6248') + faceRect(27, 26.6, 206, 42, 45, '#8a6248');
+      // 鋼琴（西北）：琴身＋掀蓋＋琴鍵
+      bg += pr.box3(268, 92, 120, 64, 26, '#1a1a24');
+      bg += poly([pr.P(268, 92, 26), pr.P(388, 92, 26), pr.P(388, 128, 46), pr.P(268, 128, 46)], '#26324b');
+      bg += faceRect(270, 156.6, 116, 17, 24, '#ffffff');
+      bg += faceRect(270, 156.6, 116, 21, 24, '#1a1a24');
+      // 中央地毯＋三張社團長桌（南面進 front）＋椅子
+      bg += pr.planeCircle(575, 218, 0, 165, '#aee6fa', 0.30);
+      [[300], [545], [790]].forEach(([tx]) => {
+        const tb = pr.boxFaces(tx, 148, 150, 46, 12, '#a9743f');
+        bg += tb.back; front += tb.front;
+        bg += poly([pr.P(tx + 18, 158, 12.4), pr.P(tx + 44, 158, 12.4), pr.P(tx + 44, 176, 12.4), pr.P(tx + 18, 176, 12.4)], '#f5f0e6');
+        bg += poly([pr.P(tx + 96, 160, 12.4), pr.P(tx + 118, 160, 12.4), pr.P(tx + 118, 174, 12.4), pr.P(tx + 96, 174, 12.4)], '#c0392b');
+      });
+      [[330], [445], [560], [675], [790], [905]].forEach(([sx]) => { bg += pr.box3(sx - 15, 200, 30, 10, 9, '#6d4c41'); });
+      // 沙發（東南，避開樓梯間）
+      const sofa = pr.boxFaces(856, 234, 118, 38, 13, '#8e44ad');
+      bg += sofa.back; front += sofa.front;
+      bg += pr.box3(856, 226, 118, 8, 26, '#8e44ad');
+      // 樓梯間＋入口墊
+      bg += stairSvg(pr);
+      bg += pr.box3(515, 264, 120, 28, 2, '#8a6248');
+      bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + CLUB_PW + ' 300" style="position:absolute; left:0; top:0; width:' + CLUB_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      return svgOpen('club-bg25', 0) + bg + '</svg>' + svgOpen('club-front25', 950) + front + '</svg>';
+    }
+    let _clubPanManual = null;
+    let _clubManualUntil = 0;
+    let _clubPanCur = 0; let _clubPanT = 0;
+    let _clubWasIn = false;
+    function applyClubPan(pan, sc) {
+      const rooms = document.getElementById('club-rooms');
+      if (!rooms) return;
+      _clubPanCur = pan;
+      rooms.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, 0px) scale(' + sc.toFixed(3) + ')';
+    }
+    function updateClubPan(focusX) {
+      const stage = document.getElementById('club-stage');
+      if (!stage) return;
+      const vpW = stage.clientWidth, vpH = stage.clientHeight;
+      if (!vpW || !vpH) return;
+      const sc = vpH / 300;
+      const visible = vpW / sc;
+      if (_clubPanManual !== null) {
+        if (Date.now() > _clubManualUntil) _clubPanManual = null;
+        else { applyClubPan(_clubPanManual, sc); return; }
+      }
+      if (typeof focusX !== 'number') focusX = 575;
+      let pan;
+      if (visible >= CLUB_PW) pan = (CLUB_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(CLUB_PW - visible, focusX - visible / 2));
+      const _nowClub = performance.now(); const _dtClub = _clubPanT ? (_nowClub - _clubPanT) : 16; _clubPanT = _nowClub;
+      applyClubPan(smoothPanStep(_clubPanCur, pan, focusX, visible, _dtClub), sc);
+    }
+    function ensureClubInterior() {
+      if (document.getElementById('club-stage')) return;
+      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
+      if (!host) return;
+      const stage = document.createElement('div');
+      stage.id = 'club-stage';
+      stage.innerHTML = '<div id="club-rooms">' + buildClubRoomsHTML() + '</div>';
+      host.appendChild(stage);
+      let drag = null;
+      const activePtrs = new Set();
+      stage.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        activePtrs.add(e.pointerId);
+        if (activePtrs.size > 1) { drag = null; const rooms = document.getElementById('club-rooms'); if (rooms) rooms.style.transition = ''; return; }
+        drag = { x: e.clientX, pan: (_clubPanManual !== null ? _clubPanManual : _clubPanCur), moved: 0 };
+        _clubPanManual = drag.pan;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        const rooms = document.getElementById('club-rooms');
+        if (rooms) rooms.style.transition = 'none';
+      });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const sc = (stage.clientHeight || 179) / 300;
+        const visible = (stage.clientWidth || 278) / sc;
+        const maxPan = Math.max(0, CLUB_PW - visible);
+        const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
+        drag.moved += Math.abs(next - _clubPanManual);
+        _clubManualUntil = Date.now() + 30000;
+        _clubPanManual = next;
+        applyClubPan(_clubPanManual, sc);
+      });
+      const endDrag = e => {
+        activePtrs.delete(e.pointerId);
+        _clubManualUntil = Date.now() + 30000;
+        if (!drag) return;
+        const wasDrag = drag.moved > 0.5;
+        drag = null;
+        const rooms = document.getElementById('club-rooms');
+        if (rooms) rooms.style.transition = '';
+        if (wasDrag) stage.addEventListener('click', ev2 => { ev2.stopPropagation(); ev2.preventDefault(); }, { capture: true, once: true });
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('dblclick', () => { _clubPanManual = null; });
+    }
+    function updateClubStage() {
+      ensureClubInterior();
+      const stage = document.getElementById('club-stage');
+      if (!stage) return;
+      const rooms = document.getElementById('club-rooms');
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'club' && !gameState.isCommuting;
+      if (playerIn !== _clubWasIn) { _clubPanManual = null; _clubWasIn = playerIn; }
+      const cw = document.getElementById('char-wrap');
+      if (playerIn) {
+        if (cw && rooms && cw.parentNode !== rooms) {
+          rooms.appendChild(cw);
+          cw.style.zIndex = '500';
+          if (typeof getCharacterCoords === 'function' && typeof updateCharacterPositionAndScale === 'function') {
+            const dc = getCharacterCoords(currentLoc, currentState);
+            updateCharacterPositionAndScale(dc.x, dc.y, false);
+          }
+        }
+      } else {
+        const map = document.getElementById('town-map');
+        if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      if (cw && playerIn) cw.style.zIndex = '975';
+      let focus = CLUB_PROJ.P(575, 200, 0).x;
+      if (playerIn) focus = CLUB_PROJ.P(gameState.currentX || 560, gameState.currentY || 212, 0).x;
+      else {
+        const inner = (gameState.npcs || []).find(n => n.insideLoc === 'club');
+        if (inner) focus = CLUB_PROJ.P(inner.x, inner.y, 0).x;
+      }
+      updateClubPan(focus);
     }
 
     // ================= v9.18 餐廳大場景（比照住家/超商：大室內塞框框、鐵板台前景層） =================
