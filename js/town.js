@@ -2155,86 +2155,117 @@
 
 
     // ================= v9.21 學校大場景（比照住家/超商/餐廳：大教室塞框框、課桌前景層） =================
-    const _deskBack = [], _deskFront = [], _deskFrontBack = [];
-    [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]].forEach(([sx, sy]) => { // v9.22 教室只留 6 張課桌（左右改辦公室/閱讀角）
-      _deskBack.push(`<rect x="${sx - 28}" y="${sy - 38}" width="56" height="14" fill="#b08968" stroke="#182042" stroke-width="1.8"/><rect x="${sx - 16}" y="${sy - 35}" width="13" height="8" fill="#e74c3c"/><rect x="${sx + 4}" y="${sy - 34}" width="12" height="7" fill="#f5f0e6" stroke="#b0a58e" stroke-width="1"/><rect x="${sx - 20}" y="${sy + 3}" width="40" height="9" fill="#795548" stroke="#182042" stroke-width="1.5"/>`);
-      _deskFrontBack.push(`<rect x="${sx - 28}" y="${sy - 24}" width="56" height="12" fill="#a9743f" stroke="#182042" stroke-width="1.8"/><line x1="${sx - 28}" y1="${sy - 24}" x2="${sx + 28}" y2="${sy - 24}" stroke="#d9a066" stroke-width="2"/>`);
-      _deskFront.push(`<rect x="${sx - 28}" y="${sy - 12}" width="56" height="14" fill="#a9743f"/>`);
-    });
-    const SCHOOL_ROOMS_HTML = `
-<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
-  <rect x="0" y="0" width="1150" height="124" fill="#f7ecd2"/>
-  <rect x="0" y="118" width="1150" height="6" fill="#d9c9a3"/>
-  <rect x="0" y="124" width="1150" height="176" fill="#d9a066"/>
-  <g stroke="#b57e46" stroke-width="2"><line x1="0" y1="168" x2="1150" y2="168"/><line x1="0" y1="212" x2="1150" y2="212"/><line x1="0" y1="256" x2="1150" y2="256"/></g>
-  <!-- 左：教師辦公室 -->
-  <rect x="36" y="26" width="104" height="70" fill="#bfe6f5" stroke="#182042" stroke-width="2"/><line x1="88" y1="26" x2="88" y2="96" stroke="#182042" stroke-width="2"/><line x1="36" y1="61" x2="140" y2="61" stroke="#182042" stroke-width="2"/><circle cx="60" cy="42" r="9" fill="#ffd93b"/>
-  <g>
-    <rect x="160" y="28" width="122" height="68" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
-    <rect x="168" y="36" width="10" height="24" fill="#e74c3c"/><rect x="180" y="36" width="8" height="24" fill="#f5f0e6"/><rect x="190" y="36" width="11" height="24" fill="#3498db"/><rect x="203" y="36" width="8" height="24" fill="#f1c40f"/><rect x="213" y="36" width="10" height="24" fill="#27ae60"/><rect x="225" y="36" width="8" height="24" fill="#9b59b6"/><rect x="235" y="36" width="11" height="24" fill="#e67e22"/><rect x="248" y="36" width="8" height="24" fill="#f5f0e6"/><rect x="258" y="36" width="10" height="24" fill="#e74c3c"/>
-    <line x1="160" y1="64" x2="282" y2="64" stroke="#182042" stroke-width="2"/>
-    <rect x="168" y="68" width="9" height="22" fill="#3498db"/><rect x="179" y="68" width="10" height="22" fill="#f1c40f"/><rect x="191" y="68" width="8" height="22" fill="#27ae60"/><rect x="201" y="68" width="11" height="22" fill="#e74c3c"/><rect x="214" y="68" width="8" height="22" fill="#f5f0e6"/><rect x="224" y="68" width="10" height="22" fill="#9b59b6"/><rect x="236" y="68" width="9" height="22" fill="#e67e22"/><rect x="247" y="68" width="11" height="22" fill="#3498db"/><rect x="260" y="68" width="8" height="22" fill="#f1c40f"/>
-  </g>
-  <rect x="48" y="102" width="118" height="18" fill="#fff8e1" stroke="#182042" stroke-width="1.8"/>
-  <text x="60" y="115" font-size="11" fill="#8d5a2c" font-family="'DotGothic16', monospace" font-weight="900">教師辦公室</text>
-  <rect x="222" y="106" width="66" height="9" fill="#6d4c41"/>
-  <rect x="228" y="82" width="54" height="24" fill="#cfd8dc" stroke="#182042" stroke-width="2"/>
-  <rect x="236" y="70" width="38" height="14" fill="#ffffff" stroke="#b0a58e" stroke-width="1"/>
-  <circle cx="274" cy="92" r="3" fill="#27ae60"/>
-  <rect x="104" y="104" width="108" height="12" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
-  <rect x="118" y="94" width="11" height="9" fill="#ffffff" stroke="#182042" stroke-width="1.2"/><path d="M121 94 q2 -5 5 0" stroke="#90a4ae" stroke-width="1.6" fill="none"/>
-  <rect x="146" y="97" width="20" height="7" fill="#f5f0e6" stroke="#b0a58e" stroke-width="1"/>
-  <rect x="186" y="92" width="10" height="12" fill="#27ae60"/><circle cx="191" cy="88" r="7" fill="#66bb6a"/>
-  <rect x="135" y="154" width="42" height="9" fill="#5d4037" stroke="#182042" stroke-width="1.5"/>
-  <rect x="302" y="14" width="10" height="196" fill="#a1887f" stroke="#182042" stroke-width="1.8"/>
-  <rect x="284" y="120" width="46" height="20" fill="#fff8e1" stroke="#182042" stroke-width="1.8"/>
-  <text x="289" y="134" font-size="10" fill="#8d5a2c" font-family="'DotGothic16', monospace" font-weight="900">三年二班</text>
-  <!-- 中：黑板 -->
-  <g>
-    <rect x="346" y="20" width="468" height="92" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
-    <rect x="354" y="28" width="452" height="76" fill="#2f5d3a"/>
-    <text x="374" y="58" font-size="14" fill="#e8f5e9" font-family="'DotGothic16', monospace" font-weight="900">今日課程：數學・國文・自然</text>
-    <text x="374" y="84" font-size="13" fill="#c8e6c9" font-family="'DotGothic16', monospace" font-weight="900">3/4 ＋ 1/2 ＝ ？　（這題考試會考！）</text>
-    <rect x="752" y="94" width="34" height="5" fill="#f5f0e6"/><rect x="722" y="94" width="16" height="5" fill="#ffb3c1"/>
-  </g>
-  <circle cx="838" cy="42" r="15" fill="#ffffff" stroke="#182042" stroke-width="2"/><line x1="838" y1="42" x2="838" y2="32" stroke="#182042" stroke-width="2"/><line x1="838" y1="42" x2="845" y2="46" stroke="#182042" stroke-width="2"/>
-  <!-- 右：榮譽榜＋閱讀角 -->
-  <g>
-    <rect x="866" y="18" width="256" height="66" fill="#c9a06b" stroke="#182042" stroke-width="2"/>
-    <text x="878" y="38" font-size="12" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🏆 榮譽榜</text>
-    <text id="board-r1i" x="878" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥇</text>
-    <text id="board-r2i" x="972" y="58" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥈</text>
-    <text id="board-r3i" x="878" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">🥉</text>
-    <text id="board-4i" x="972" y="74" font-size="11" fill="#5d4037" font-family="'DotGothic16', monospace" font-weight="900">⭐</text>
-  </g>
-  <ellipse cx="1000" cy="228" rx="128" ry="46" fill="#b2dfdb" opacity="0.55"/>
-  <ellipse cx="1000" cy="228" rx="104" ry="36" fill="none" stroke="#80cbc4" stroke-width="2"/>
-  <rect x="888" y="138" width="224" height="30" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
-  <rect x="896" y="144" width="9" height="18" fill="#e74c3c"/><rect x="907" y="144" width="7" height="18" fill="#f5f0e6"/><rect x="916" y="144" width="9" height="18" fill="#3498db"/><rect x="927" y="144" width="7" height="18" fill="#f1c40f"/><rect x="936" y="144" width="9" height="18" fill="#27ae60"/><rect x="947" y="144" width="7" height="18" fill="#9b59b6"/><rect x="956" y="144" width="9" height="18" fill="#e67e22"/><rect x="1036" y="144" width="9" height="18" fill="#e74c3c"/><rect x="1047" y="144" width="7" height="18" fill="#3498db"/><rect x="1056" y="144" width="9" height="18" fill="#f1c40f"/><rect x="1067" y="144" width="7" height="18" fill="#27ae60"/><rect x="1076" y="144" width="9" height="18" fill="#9b59b6"/><rect x="1087" y="144" width="7" height="18" fill="#f5f0e6"/><rect x="1096" y="144" width="9" height="18" fill="#e67e22"/>
-  <rect x="952" y="122" width="96" height="16" fill="#fff8e1" stroke="#182042" stroke-width="1.6"/>
-  <text x="964" y="134" font-size="10" fill="#8d5a2c" font-family="'DotGothic16', monospace" font-weight="900">📚 閱讀角</text>
-  <ellipse cx="935" cy="246" rx="30" ry="13" fill="#ffab91" stroke="#182042" stroke-width="1.6"/>
-  <ellipse cx="1065" cy="250" rx="30" ry="13" fill="#90caf9" stroke="#182042" stroke-width="1.6"/>
-  <rect x="1108" y="196" width="16" height="12" fill="#8d5a2c"/><circle cx="1116" cy="186" r="10" fill="#66bb6a"/><circle cx="1108" cy="192" r="7" fill="#81c784"/>
-  <line x1="884" y1="196" x2="884" y2="234" stroke="#182042" stroke-width="2.5"/><path d="M876 196 L892 196 L888 182 L880 182 Z" fill="#ffd93b" stroke="#182042" stroke-width="1.5"/>
-  <rect x="524" y="94" width="102" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
-  ${_deskBack.join('')}
-  <g id="study-books-school-in" class="study-books"><rect class="book-layer" x="560" y="238" width="20" height="4" fill="#c0392b"/><rect class="book-layer" x="560" y="234" width="20" height="4" fill="#2980b9"/><rect class="book-layer" x="560" y="230" width="20" height="4" fill="#27ae60"/><rect class="book-layer" x="560" y="226" width="20" height="4" fill="#8e44ad"/><rect class="book-layer" x="560" y="222" width="20" height="4" fill="#f39c12"/></g>
-  <rect x="515" y="272" width="120" height="28" fill="#8d5a2c"/>
-  <text x="553" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
-<g id="school-tank"><rect x="876" y="118" width="140" height="4" fill="#8d5a2c"/><rect x="880" y="72" width="132" height="46" fill="#bfe3ff" stroke="#182042" stroke-width="2"/><rect x="884" y="76" width="124" height="38" fill="#7ec8e3" opacity="0.7"/><g class="fish-a"><rect x="896" y="88" width="10" height="5" fill="#ff8c42"/><rect x="893" y="89" width="3" height="3" fill="#ff8c42"/><rect x="903" y="89" width="1" height="1" fill="#182042"/></g><g class="fish-b"><rect x="966" y="98" width="9" height="4" fill="#ffd166"/><rect x="974" y="99" width="3" height="2" fill="#ffd166"/></g><circle class="fish-bub" cx="998" cy="106" r="2" fill="#ffffff" opacity="0.85"/><rect x="884" y="108" width="124" height="6" fill="#58a05c"/></g>
-</svg>
-<svg id="school-front-back" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:940; pointer-events:none;">
-  <rect x="524" y="102" width="102" height="10" fill="#795548" stroke="#182042" stroke-width="2"/>
-  <line x1="524" y1="102" x2="626" y2="102" stroke="#a1887f" stroke-width="2"/>
-  <rect x="104" y="124" width="108" height="10" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
-  ${_deskFrontBack.join('')}
-</svg>
-<svg id="school-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="524" y="112" width="102" height="10" fill="#795548"/>
-  <rect x="104" y="134" width="108" height="10" fill="#8d5a2c"/>
-  ${_deskFront.join('')}
-</svg>`;
+    // ================= v9.53 學校 2.5D 化（報告批次 3a）：場景改投影生成 =================
+    // 分層同範本：#school-bg25＋#school-front25（z950）——講台/課桌南面在坐姿 945 之上、與舊 940/950 雙層同構，舊層退役。
+    // 講台足跡 (524,104,102x18,h16)：老師崗位 (575,134) 在南緣之南 12（frontHMax(12,25,6)=23.5）；課桌 (sx-28,sy-40,56x26,h11)，座位在南緣之南 14。
+    const SCHOOL_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const SCHOOL_PW = 1340;
+    PROJ.registerRooms('school-rooms', SCHOOL_PROJ);
+    function buildSchoolRoomsHTML() {
+      const pr = SCHOOL_PROJ, WH = 156;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
+      const PAL = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#d35400', '#16a085', '#e74c3c', '#f1c40f', '#f5f0e6'];
+      const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 7); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
+      let bg = '', front = '';
+      // 牆＋地板
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f7ecd2');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f7ecd2', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      let lines = '';
+      for (let z = 42; z < 300; z += 44) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
+      bg += '<g stroke="#b57e46" stroke-width="2">' + lines + '</g>';
+      // 辦公室窗＋書架牆板＋標籤
+      bg += pr.wallDecoN(36, 140, 76, 146, '#bfe6f5');
+      const wx1 = pr.P(88, 0, 76), wx2 = pr.P(88, 0, 146), wy1 = pr.P(36, 0, 111), wy2 = pr.P(140, 0, 111);
+      bg += '<line x1="' + wx1.x.toFixed(1) + '" y1="' + wx1.y.toFixed(1) + '" x2="' + wx2.x.toFixed(1) + '" y2="' + wx2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/><line x1="' + wy1.x.toFixed(1) + '" y1="' + wy1.y.toFixed(1) + '" x2="' + wy2.x.toFixed(1) + '" y2="' + wy2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
+      const osun = pr.P(60, 0, 128); bg += '<circle cx="' + osun.x.toFixed(1) + '" cy="' + osun.y.toFixed(1) + '" r="9" fill="#ffd93b"/>';
+      bg += pr.wallDecoN(160, 282, 74, 148, '#8d5a2c');
+      bg += spineRow(168, 274, 0.6, 116, 140, 3) + spineRow(168, 274, 0.6, 80, 102, 11);
+      bg += faceRect(157, 0.6, 128, 110, 113, '#5d4028');
+      bg += pr.wallDecoN(48, 166, 54, 72, '#fff8e1');
+      bg += txt(pr.P(58, 0, 63), '教師辦公室', 11, '#8d5a2c');
+      // 老師桌（南面進 front）＋桌上物＋電腦小桌＋辦公椅背
+      const tdesk = pr.boxFaces(104, 128, 108, 20, 13, '#8d5a2c');
+      bg += tdesk.back; front += tdesk.front;
+      bg += pr.planeCircle(126, 136, 13.4, 5, '#ffffff');
+      bg += poly([pr.P(146, 132, 13.4), pr.P(166, 132, 13.4), pr.P(166, 142, 13.4), pr.P(146, 142, 13.4)], '#f5f0e6');
+      bg += pr.box3(186, 130, 10, 8, 17, '#27ae60');
+      const plf = pr.P(191, 134, 23); bg += '<circle cx="' + plf.x.toFixed(1) + '" cy="' + plf.y.toFixed(1) + '" r="7" fill="#66bb6a"/>';
+      bg += pr.box3(222, 100, 66, 16, 12, '#6d4c41');
+      bg += pr.box3(232, 102, 38, 4, 38, '#cfd8dc');
+      bg += faceRect(234, 106.6, 34, 16, 34, '#e8f5e9');
+      const mdot = pr.P(266, 106.6, 20); bg += '<circle cx="' + mdot.x.toFixed(1) + '" cy="' + mdot.y.toFixed(1) + '" r="3" fill="#27ae60"/>';
+      bg += pr.box3(134, 138, 42, 8, 20, '#5d4037');
+      // 隔間柱面（半透明）＋班牌
+      bg += poly([pr.P(302, 6, 0), pr.P(302, 206, 0), pr.P(302, 206, 132), pr.P(302, 6, 132)], '#a1887f', ' opacity="0.45"');
+      bg += poly([pr.P(302, 96, 80), pr.P(302, 142, 80), pr.P(302, 142, 100), pr.P(302, 96, 100)], '#fff8e1');
+      bg += txt(pr.P(308, 119, 90), '三年二班', 10, '#8d5a2c');
+      // 黑板＋粉筆
+      bg += pr.wallDecoN(340, 820, 54, 158, '#6d4c41');
+      bg += pr.wallDecoN(346, 814, 60, 152, '#2f5d3a');
+      bg += txt(pr.P(374, 0, 130), '今日課程：數學・國文・自然', 14, '#e8f5e9');
+      bg += txt(pr.P(374, 0, 104), '3/4 ＋ 1/2 ＝ ？　（這題考試會考！）', 13, '#c8e6c9');
+      bg += faceRect(752, 0.6, 34, 72, 76, '#f5f0e6') + faceRect(722, 0.6, 16, 72, 76, '#ffb3c1');
+      // 時鐘
+      const ck = pr.P(838, 0, 130);
+      bg += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="15" fill="#ffffff" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + ck.x.toFixed(1) + '" y2="' + (ck.y - 10).toFixed(1) + '" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + (ck.x + 7).toFixed(1) + '" y2="' + (ck.y + 4).toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
+      // 榮譽榜（四個名次文字 id 保留，其他系統會寫入）
+      bg += pr.wallDecoN(860, 1128, 86, 156, '#c9a06b');
+      bg += txt(pr.P(878, 0, 140), '🏆 榮譽榜', 12, '#5d4037');
+      bg += '<text id="board-r1i" x="' + pr.P(878, 0, 120).x.toFixed(1) + '" y="' + pr.P(878, 0, 120).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">🥇</text>';
+      bg += '<text id="board-r2i" x="' + pr.P(972, 0, 120).x.toFixed(1) + '" y="' + pr.P(972, 0, 120).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">🥈</text>';
+      bg += '<text id="board-r3i" x="' + pr.P(878, 0, 104).x.toFixed(1) + '" y="' + pr.P(878, 0, 104).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">🥉</text>';
+      bg += '<text id="board-4i" x="' + pr.P(972, 0, 104).x.toFixed(1) + '" y="' + pr.P(972, 0, 104).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">⭐</text>';
+      // 講台（南面進 front）＋課桌 x6（南面進 front、桌上書）
+      const podium = pr.boxFaces(524, 104, 102, 18, 16, '#795548');
+      bg += podium.back; front += podium.front;
+      bg += poly([pr.P(540, 108, 16.4), pr.P(560, 108, 16.4), pr.P(560, 118, 16.4), pr.P(540, 118, 16.4)], '#f5f0e6');
+      [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]].forEach(([sx, sy]) => {
+        const dk = pr.boxFaces(sx - 28, sy - 40, 56, 26, 11, '#a9743f');
+        bg += dk.back; front += dk.front;
+        bg += poly([pr.P(sx - 16, sy - 36, 11.4), pr.P(sx - 3, sy - 36, 11.4), pr.P(sx - 3, sy - 27, 11.4), pr.P(sx - 16, sy - 27, 11.4)], '#e74c3c');
+        bg += poly([pr.P(sx + 4, sy - 35, 11.4), pr.P(sx + 16, sy - 35, 11.4), pr.P(sx + 16, sy - 27, 11.4), pr.P(sx + 4, sy - 27, 11.4)], '#f5f0e6');
+      });
+      // 主角桌上的自習書堆（class/數量與舊版相同，updateStudyBooks 以 index 控制顯示）
+      const bookCols = ['#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#f39c12'];
+      let books = '';
+      bookCols.forEach((c, i) => { books += '<polygon class="book-layer" points="' + pr.pts([pr.P(564, 216, 11.5 + i * 2.2), pr.P(584, 216, 11.5 + i * 2.2), pr.P(584, 228, 11.5 + i * 2.2), pr.P(564, 228, 11.5 + i * 2.2)]) + '" fill="' + c + '"/>'; });
+      bg += '<g id="study-books-school-in" class="study-books">' + books + '</g>';
+      // 閱讀角：地毯＋書架＋坐墊＋盆栽＋立燈
+      bg += pr.planeCircle(1000, 228, 0, 110, '#b2dfdb', 0.55);
+      bg += '<polygon points="' + pr.planeCirclePts(1000, 228, 0.5, 88) + '" fill="none" stroke="#80cbc4" stroke-width="2"/>';
+      bg += pr.box3(888, 120, 224, 24, 26, '#8d5a2c');
+      bg += spineRow(896, 958, 144.6, 6, 24, 5) + spineRow(1040, 1104, 144.6, 6, 24, 9);
+      bg += poly([pr.P(952, 124, 26.5), pr.P(1048, 124, 26.5), pr.P(1048, 140, 26.5), pr.P(952, 140, 26.5)], '#fff8e1');
+      bg += txt(pr.P(964, 132, 32), '📚 閱讀角', 10, '#8d5a2c');
+      bg += pr.planeCircle(935, 246, 0, 30, '#ffab91');
+      bg += pr.planeCircle(1065, 250, 0, 30, '#90caf9');
+      bg += pr.box3(1108, 196, 16, 12, 10, '#8d5a2c');
+      const pf1 = pr.P(1116, 202, 17), pf2 = pr.P(1108, 200, 13);
+      bg += '<circle cx="' + pf1.x.toFixed(1) + '" cy="' + pf1.y.toFixed(1) + '" r="10" fill="#66bb6a"/><circle cx="' + pf2.x.toFixed(1) + '" cy="' + pf2.y.toFixed(1) + '" r="7" fill="#81c784"/>';
+      const lp0 = pr.P(884, 196, 0), lp1 = pr.P(884, 196, 34);
+      bg += pr.planeCircle(884, 212, 0, 30, '#ffd93b', 0.18);
+      bg += '<line x1="' + lp0.x.toFixed(1) + '" y1="' + lp0.y.toFixed(1) + '" x2="' + lp1.x.toFixed(1) + '" y2="' + lp1.y.toFixed(1) + '" stroke="#182042" stroke-width="2.5"/>';
+      bg += '<polygon points="' + (lp1.x - 8).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 8).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 4).toFixed(1) + ',' + (lp1.y - 14).toFixed(1) + ' ' + (lp1.x - 4).toFixed(1) + ',' + (lp1.y - 14).toFixed(1) + '" fill="#ffd93b" stroke="#182042" stroke-width="1.5"/>';
+      // 魚缸（掛牆水族箱，魚的動畫 class 保留）
+      let tank = pr.box3(876, 104, 140, 14, 8, '#8d5a2c');
+      tank += pr.box3(880, 84, 132, 20, 36, '#7ec8e3');
+      tank += faceRect(884, 104.6, 124, 4, 32, 'rgba(191,227,255,0.55)');
+      tank += faceRect(884, 104.6, 124, 4, 10, '#58a05c');
+      const fa = pr.P(898, 96, 20), fb = pr.P(972, 94, 13), bb = pr.P(1000, 92, 7);
+      tank += '<g class="fish-a" transform="translate(' + fa.x.toFixed(1) + ',' + fa.y.toFixed(1) + ')"><rect x="0" y="0" width="10" height="5" fill="#ff8c42"/><rect x="-3" y="1" width="3" height="3" fill="#ff8c42"/><rect x="7" y="1" width="1" height="1" fill="#182042"/></g>';
+      tank += '<g class="fish-b" transform="translate(' + fb.x.toFixed(1) + ',' + fb.y.toFixed(1) + ')"><rect x="0" y="0" width="9" height="4" fill="#ffd166"/><rect x="9" y="1" width="3" height="2" fill="#ffd166"/></g>';
+      tank += '<circle class="fish-bub" cx="' + bb.x.toFixed(1) + '" cy="' + bb.y.toFixed(1) + '" r="2" fill="#ffffff" opacity="0.85"/>';
+      bg += '<g id="school-tank">' + tank + '</g>';
+      // 入口墊
+      bg += pr.box3(515, 264, 120, 28, 2, '#8d5a2c');
+      bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + SCHOOL_PW + ' 300" style="position:absolute; left:0; top:0; width:' + SCHOOL_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      return svgOpen('school-bg25', 0) + bg + '</svg>' + svgOpen('school-front25', 950) + front + '</svg>';
+    }
+
     function ensureSchoolInterior() {
       if (document.getElementById('school-stage')) return;
       const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
@@ -2242,7 +2273,7 @@
       const pf = document.getElementById('podium-fg'); if (pf) pf.remove(); // v9.21 舊講台前景層退役（新場景自帶講台前景）
       const stage = document.createElement('div');
       stage.id = 'school-stage';
-      stage.innerHTML = '<div id="school-rooms">' + SCHOOL_ROOMS_HTML + '</div>';
+      stage.innerHTML = '<div id="school-rooms">' + buildSchoolRoomsHTML() + '</div>';
       host.appendChild(stage);
       let drag = null;
       const activePtrs = new Set();
@@ -2260,7 +2291,7 @@
         if (!drag) return;
         const sc = (stage.clientHeight || 179) / 300;
         const visible = (stage.clientWidth || 278) / sc;
-        const maxPan = Math.max(0, 1150 - visible);
+        const maxPan = Math.max(0, SCHOOL_PW - visible);
         const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
         drag.moved += Math.abs(next - _schoolPanManual);
         _schoolManualUntil = Date.now() + 30000;
@@ -2304,8 +2335,8 @@
       }
       if (typeof focusX !== 'number') focusX = 575;
       let pan;
-      if (visible >= 1150) pan = (1150 - visible) / 2;
-      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      if (visible >= SCHOOL_PW) pan = (SCHOOL_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(SCHOOL_PW - visible, focusX - visible / 2));
       const _nowSchool = performance.now(); const _dtSchool = _schoolPanT ? (_nowSchool - _schoolPanT) : 16; _schoolPanT = _nowSchool;
       applySchoolPan(smoothPanStep(_schoolPanCur, pan, focusX, visible, _dtSchool), sc);
     }
@@ -2331,11 +2362,11 @@
         if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
       }
       if (cw && playerIn) cw.style.zIndex = (currentState === 'studying') ? '500' : '975'; // v9.21 上課坐課桌後（被課桌前景蓋腿）；走動/下課站立在前景之上
-      let focus = 575;
-      if (playerIn) focus = gameState.currentX || 560;
+      let focus = SCHOOL_PROJ.P(575, 200, 0).x;
+      if (playerIn) focus = SCHOOL_PROJ.P(gameState.currentX || 560, gameState.currentY || 212, 0).x;
       else {
         const inner = (gameState.npcs || []).find(n => n.insideLoc === 'school');
-        if (inner) focus = inner.x;
+        if (inner) focus = SCHOOL_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateSchoolPan(focus);
     }
@@ -2559,54 +2590,101 @@
       });
       return out;
     }
-    const LIB_ROOMS_HTML = `
-<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
-  <rect x="0" y="0" width="1150" height="130" fill="#f5ede0"/>
-  <rect x="0" y="130" width="1150" height="170" fill="#b08954"/>
-  <g stroke="#966f3f" stroke-width="1.4" opacity="0.5"><line x1="0" y1="158" x2="1150" y2="158"/><line x1="0" y1="196" x2="1150" y2="196"/><line x1="0" y1="234" x2="1150" y2="234"/><line x1="0" y1="272" x2="1150" y2="272"/></g>
-  <rect x="176" y="158" width="798" height="124" rx="10" fill="#8e3b46" opacity="0.30"/>
-  <g id="lib-shaft-w" opacity="0"><polygon points="36,112 152,112 268,254 128,254" fill="#ffedb5"/><circle class="lib-mote" cx="120" cy="150" r="2.2" fill="#fff7d6"/><circle class="lib-mote" cx="170" cy="190" r="1.7" fill="#fff7d6"/><circle class="lib-mote" cx="95" cy="205" r="1.4" fill="#fff7d6"/></g>
-  <g id="lib-shaft-e" opacity="0"><polygon points="1114,112 998,112 882,254 1022,254" fill="#ffedb5"/><circle class="lib-mote" cx="1030" cy="150" r="2.2" fill="#fff7d6"/><circle class="lib-mote" cx="980" cy="195" r="1.7" fill="#fff7d6"/><circle class="lib-mote" cx="1055" cy="210" r="1.4" fill="#fff7d6"/></g>
-  <rect x="30" y="8" width="128" height="104" fill="#a8d4f0" stroke="#5d4028" stroke-width="4"/>
-  <line x1="94" y1="8" x2="94" y2="112" stroke="#5d4028" stroke-width="3"/><line x1="30" y1="60" x2="158" y2="60" stroke="#5d4028" stroke-width="3"/>
-  <rect x="992" y="8" width="128" height="104" fill="#a8d4f0" stroke="#5d4028" stroke-width="4"/>
-  <line x1="1056" y1="8" x2="1056" y2="112" stroke="#5d4028" stroke-width="3"/><line x1="992" y1="60" x2="1120" y2="60" stroke="#5d4028" stroke-width="3"/>
-  <rect x="176" y="22" width="272" height="100" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
-  ${libSpines(184, 28, 256)}
-  <rect x="702" y="22" width="272" height="100" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
-  ${libSpines(710, 28, 256)}
-  <rect x="486" y="26" width="178" height="76" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
-  ${libSpines(494, 32, 162)}
-  <circle cx="575" cy="13" r="10" fill="#fff8e1" stroke="#182042" stroke-width="2"/><line x1="575" y1="13" x2="575" y2="6" stroke="#182042" stroke-width="1.8"/><line x1="575" y1="13" x2="580" y2="15" stroke="#182042" stroke-width="1.8"/>
-  <text x="575" y="112" font-size="11" fill="#5d4028" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">借 還 書 櫃 台</text>
-  <rect x="474" y="116" width="202" height="9" fill="#8d5a2c" stroke="#182042" stroke-width="1.6"/>
-  <circle cx="88" cy="170" r="17" fill="#7fb2d9" stroke="#182042" stroke-width="2"/><path d="M74 160 Q88 150 102 160 M74 180 Q88 190 102 180" stroke="#27ae60" stroke-width="2.4" fill="none"/><rect x="84" y="187" width="8" height="10" fill="#5d4028"/>
-  <rect x="1064" y="150" width="14" height="16" fill="#b5651d"/><circle cx="1071" cy="140" r="13" fill="#66bb6a"/><circle cx="1062" cy="148" r="8" fill="#81c784"/>
-  <rect x="196" y="176" width="268" height="12" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
-  <rect x="206" y="188" width="8" height="26" fill="#5d4028"/><rect x="446" y="188" width="8" height="26" fill="#5d4028"/>
-  <rect x="686" y="176" width="268" height="12" fill="#8d5a2c" stroke="#182042" stroke-width="1.8"/>
-  <rect x="696" y="188" width="8" height="26" fill="#5d4028"/><rect x="936" y="188" width="8" height="26" fill="#5d4028"/>
-  <g id="lib-lamps" opacity="0"><circle cx="330" cy="160" r="17" fill="#ffd97a" opacity="0.5"/><circle cx="820" cy="160" r="17" fill="#ffd97a" opacity="0.5"/></g>
-  <rect x="326" y="162" width="8" height="12" fill="#2e6b4f"/><path d="M318 162 L342 162 L337 150 L323 150 Z" fill="#27ae60" stroke="#182042" stroke-width="1.4"/>
-  <rect x="816" y="162" width="8" height="12" fill="#2e6b4f"/><path d="M808 162 L832 162 L827 150 L813 150 Z" fill="#27ae60" stroke="#182042" stroke-width="1.4"/>
-  <rect x="110" y="196" width="62" height="28" rx="7" fill="#a33b46" stroke="#182042" stroke-width="2"/>
-  <rect x="110" y="220" width="62" height="15" rx="6" fill="#c04b57" stroke="#182042" stroke-width="2"/>
-  <rect x="102" y="212" width="10" height="22" rx="4" fill="#a33b46" stroke="#182042" stroke-width="1.6"/><rect x="170" y="212" width="10" height="22" rx="4" fill="#a33b46" stroke="#182042" stroke-width="1.6"/>
-  <circle cx="198" cy="230" r="11" fill="#8d5a2c" stroke="#182042" stroke-width="1.6"/>
-  <g id="study-books-library-in" class="study-books"><rect class="book-layer" x="188" y="215" width="20" height="4" fill="#8e44ad"/><rect class="book-layer" x="188" y="211" width="20" height="4" fill="#c0392b"/><rect class="book-layer" x="188" y="207" width="20" height="4" fill="#2980b9"/><rect class="book-layer" x="188" y="203" width="20" height="4" fill="#f39c12"/><rect class="book-layer" x="188" y="199" width="20" height="4" fill="#27ae60"/></g>
-  <rect x="996" y="118" width="88" height="56" fill="#2e6b4f" stroke="#182042" stroke-width="2"/>
-  <text x="1040" y="134" font-size="10" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">新書推薦</text>
-  <rect x="1006" y="142" width="12" height="24" fill="#e74c3c"/><rect x="1021" y="140" width="12" height="26" fill="#f1c40f"/><rect x="1036" y="143" width="12" height="23" fill="#3498db"/><rect x="1051" y="141" width="12" height="25" fill="#9b59b6"/>
-  <rect x="515" y="272" width="120" height="28" fill="#8d5a2c"/>
-  <text x="575" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">入 口</text>
-</svg>
-<svg id="lib-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="474" y="124" width="202" height="26" fill="#795548" stroke="#182042" stroke-width="2"/>
-  <line x1="474" y1="124" x2="676" y2="124" stroke="#a1887f" stroke-width="2"/>
-  <rect x="196" y="184" width="268" height="10" fill="#6d4c41"/>
-  <rect x="686" y="184" width="268" height="10" fill="#6d4c41"/>
-</svg>
-<button class="lib-rec-book" onpointerdown="event.stopPropagation()" onclick="borrowBook()">📖 借推薦書</button>`;
+    // ================= v9.53 圖書館 2.5D 化（報告批次 3b）：場景改投影生成 =================
+    // 分層同範本：#lib-bg25＋#lib-front25（z950）——櫃檯/閱覽桌南面，舊 #lib-front 退役。
+    // 閱覽桌 (196/686,166,268x20,h13)：座位 z208 在南緣之南 22（frontHMax(22,19,4)=23.3）；沙發比照住家床全進 bg（主角坐姿 z500 不被遮）。
+    const LIB_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const LIB_PW = 1340;
+    PROJ.registerRooms('lib-rooms', LIB_PROJ);
+    function buildLibraryRoomsHTML() {
+      const pr = LIB_PROJ, WH = 160;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
+      const PAL = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#d35400', '#16a085', '#2c3e50', '#e74c3c', '#f1c40f'];
+      const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 8); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
+      let bg = '', front = '';
+      // 牆＋地板＋地毯
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f5ede0');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f5ede0', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#b08954');
+      let lines = '';
+      for (let z = 30; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
+      bg += '<g stroke="rgba(150,111,63,0.5)" stroke-width="1.4">' + lines + '</g>';
+      bg += poly([pr.P(176, 158, 0), pr.P(974, 158, 0), pr.P(974, 282, 0), pr.P(176, 282, 0)], 'rgba(142,59,70,0.30)');
+      // 兩扇窗＋窗框十字
+      [[30, 158], [992, 1120]].forEach(([x0, x1]) => {
+        bg += pr.wallDecoN(x0, x1, 60, 164, '#a8d4f0');
+        const mx = (x0 + x1) / 2;
+        const v1 = pr.P(mx, 0, 60), v2 = pr.P(mx, 0, 164), h1 = pr.P(x0, 0, 112), h2 = pr.P(x1, 0, 112);
+        bg += '<line x1="' + v1.x.toFixed(1) + '" y1="' + v1.y.toFixed(1) + '" x2="' + v2.x.toFixed(1) + '" y2="' + v2.y.toFixed(1) + '" stroke="#5d4028" stroke-width="3"/><line x1="' + h1.x.toFixed(1) + '" y1="' + h1.y.toFixed(1) + '" x2="' + h2.x.toFixed(1) + '" y2="' + h2.y.toFixed(1) + '" stroke="#5d4028" stroke-width="3"/>';
+      });
+      // 窗光（id/開關邏輯與舊版相同，形狀改走投影：牆面 h60 起、落到地板 z217）
+      const shaft = (ptsList, motes) => '<polygon points="' + pr.pts(ptsList) + '" fill="#ffedb5"/>' + motes.map(([mx, mz, mh, r]) => { const c = pr.P(mx, mz, mh); return '<circle class="lib-mote" cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + r + '" fill="#fff7d6"/>'; }).join('');
+      bg += '<g id="lib-shaft-w" opacity="0">' + shaft([[36, 0, 58], [152, 0, 58], [268, 217, 0], [128, 217, 0]], [[150, 90, 26, 2.2], [185, 130, 18, 1.7], [140, 150, 12, 1.4]]) + '</g>';
+      bg += '<g id="lib-shaft-e" opacity="0">' + shaft([[1114, 0, 58], [998, 0, 58], [882, 217, 0], [1022, 217, 0]], [[1000, 90, 26, 2.2], [965, 130, 18, 1.7], [1010, 150, 12, 1.4]]) + '</g>';
+      // 後牆書架 x2（高櫃 box3＋南面書脊兩排）＋中央矮架
+      [[176, 3], [702, 23]].forEach(([sx, seed]) => {
+        bg += pr.box3(sx, 6, 272, 20, 150, '#6d4c41');
+        bg += spineRow(sx + 8, sx + 264, 26.6, 104, 142, seed) + spineRow(sx + 8, sx + 264, 26.6, 58, 96, seed + 7);
+        bg += faceRect(sx - 3, 26.6, 278, 99, 102, '#8d5a2c') + faceRect(sx - 3, 26.6, 278, 53, 56, '#8d5a2c');
+      });
+      bg += pr.box3(486, 10, 178, 18, 124, '#6d4c41');
+      bg += spineRow(494, 656, 28.6, 82, 116, 5) + spineRow(494, 656, 28.6, 44, 76, 13);
+      bg += faceRect(483, 28.6, 184, 79, 82, '#8d5a2c');
+      // 時鐘＋櫃檯（南面進 front）＋招牌字
+      const ck = pr.P(575, 0, 158);
+      bg += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="10" fill="#fff8e1" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + ck.x.toFixed(1) + '" y2="' + (ck.y - 7).toFixed(1) + '" stroke="#182042" stroke-width="1.8"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + (ck.x + 5).toFixed(1) + '" y2="' + (ck.y + 2).toFixed(1) + '" stroke="#182042" stroke-width="1.8"/>';
+      const counter = pr.boxFaces(474, 106, 202, 22, 16, '#795548');
+      bg += counter.back; front += counter.front;
+      bg += txt(pr.P(575, 100, 46), '借 還 書 櫃 台', 11, '#5d4028', 'middle');
+      // 地球儀＋東側盆栽
+      const g0 = pr.P(88, 186, 0), g1 = pr.P(88, 186, 12), gc = pr.P(88, 180, 30);
+      bg += '<line x1="' + g0.x.toFixed(1) + '" y1="' + g0.y.toFixed(1) + '" x2="' + g1.x.toFixed(1) + '" y2="' + g1.y.toFixed(1) + '" stroke="#5d4028" stroke-width="4"/>';
+      bg += '<circle cx="' + gc.x.toFixed(1) + '" cy="' + gc.y.toFixed(1) + '" r="17" fill="#7fb2d9" stroke="#182042" stroke-width="2"/>';
+      bg += '<path d="M' + (gc.x - 14).toFixed(1) + ' ' + (gc.y - 6).toFixed(1) + ' Q' + gc.x.toFixed(1) + ' ' + (gc.y - 15).toFixed(1) + ' ' + (gc.x + 14).toFixed(1) + ' ' + (gc.y - 6).toFixed(1) + ' M' + (gc.x - 14).toFixed(1) + ' ' + (gc.y + 8).toFixed(1) + ' Q' + gc.x.toFixed(1) + ' ' + (gc.y + 17).toFixed(1) + ' ' + (gc.x + 14).toFixed(1) + ' ' + (gc.y + 8).toFixed(1) + '" stroke="#27ae60" stroke-width="2.4" fill="none"/>';
+      bg += pr.box3(1064, 150, 14, 12, 12, '#b5651d');
+      const pf1 = pr.P(1071, 156, 25), pf2 = pr.P(1062, 154, 19);
+      bg += '<circle cx="' + pf1.x.toFixed(1) + '" cy="' + pf1.y.toFixed(1) + '" r="13" fill="#66bb6a"/><circle cx="' + pf2.x.toFixed(1) + '" cy="' + pf2.y.toFixed(1) + '" r="8" fill="#81c784"/>';
+      // 閱覽桌 x2（南面進 front）＋桌燈（光暈組合 id 保留）
+      let glows = '';
+      [[196, 330], [686, 820]].forEach(([tx, lx]) => {
+        const tb = pr.boxFaces(tx, 166, 268, 20, 10, '#8d5a2c');
+        bg += tb.back; front += tb.front;
+        bg += pr.planeCircle(lx, 176, 10.4, 6, '#2e6b4f');
+        const s0 = pr.P(lx, 176, 10), s1 = pr.P(lx, 176, 21);
+        bg += '<line x1="' + s0.x.toFixed(1) + '" y1="' + s0.y.toFixed(1) + '" x2="' + s1.x.toFixed(1) + '" y2="' + s1.y.toFixed(1) + '" stroke="#2e6b4f" stroke-width="3"/>';
+        bg += '<polygon points="' + (s1.x - 12).toFixed(1) + ',' + s1.y.toFixed(1) + ' ' + (s1.x + 12).toFixed(1) + ',' + s1.y.toFixed(1) + ' ' + (s1.x + 7).toFixed(1) + ',' + (s1.y - 12).toFixed(1) + ' ' + (s1.x - 7).toFixed(1) + ',' + (s1.y - 12).toFixed(1) + '" fill="#27ae60" stroke="#182042" stroke-width="1.4"/>';
+        glows += pr.planeCircle(lx, 176, 11, 17, '#ffd97a', 0.5);
+      });
+      bg += '<g id="lib-lamps" opacity="0">' + glows + '</g>';
+      // 沙發（全 bg：主角坐姿 z500，平面版沙發本來就在背景層）＋邊桌＋書堆小推車
+      bg += pr.box3(110, 182, 62, 10, 24, '#a33b46');
+      const sofa = pr.boxFaces(110, 192, 62, 32, 13, '#c04b57');
+      bg += sofa.back + sofa.front;
+      bg += pr.box3(102, 192, 10, 32, 18, '#a33b46');
+      bg += pr.box3(170, 192, 10, 32, 18, '#a33b46');
+      const st0 = pr.P(198, 228, 0), st1 = pr.P(198, 228, 9);
+      bg += '<line x1="' + st0.x.toFixed(1) + '" y1="' + st0.y.toFixed(1) + '" x2="' + st1.x.toFixed(1) + '" y2="' + st1.y.toFixed(1) + '" stroke="#5d4028" stroke-width="4"/>';
+      bg += pr.planeCircle(198, 228, 9, 11, '#8d5a2c');
+      bg += pr.rimBand(198, 228, 11, 9, 0.5, '#6d4c41');
+      bg += pr.box3(182, 204, 26, 16, 8, '#5d4028');
+      const bookCols = ['#8e44ad', '#c0392b', '#2980b9', '#f39c12', '#27ae60'];
+      let books = '';
+      bookCols.forEach((c, i) => { books += '<polygon class="book-layer" points="' + pr.pts([pr.P(184, 206, 8.5 + i * 2.2), pr.P(204, 206, 8.5 + i * 2.2), pr.P(204, 218, 8.5 + i * 2.2), pr.P(184, 218, 8.5 + i * 2.2)]) + '" fill="' + c + '"/>'; });
+      bg += '<g id="study-books-library-in" class="study-books">' + books + '</g>';
+      // 新書推薦展示櫃（全 bg）＋標題＋書脊
+      bg += pr.box3(996, 110, 88, 14, 40, '#2e6b4f');
+      bg += txt(pr.P(1040, 117, 46), '新書推薦', 10, '#ffe9b8', 'middle');
+      [[1006, '#e74c3c'], [1021, '#f1c40f'], [1036, '#3498db'], [1051, '#9b59b6']].forEach(([sx, sc2]) => { bg += faceRect(sx, 124.6, 12, 8, 32, sc2); });
+      // 入口墊
+      bg += pr.box3(515, 264, 120, 28, 2, '#8d5a2c');
+      bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + LIB_PW + ' 300" style="position:absolute; left:0; top:0; width:' + LIB_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      return svgOpen('lib-bg25', 0) + bg + '</svg>' + svgOpen('lib-front25', 950) + front + '</svg>'
+        + '<button class="lib-rec-book" onpointerdown="event.stopPropagation()" onclick="borrowBook()">📖 借推薦書</button>';
+    }
+
     let _libPanManual = null;
     let _libManualUntil = 0;
     let _libPanCur = 0; let _libPanT = 0;
@@ -2631,8 +2709,8 @@
       }
       if (typeof focusX !== 'number') focusX = 575;
       let pan;
-      if (visible >= 1150) pan = (1150 - visible) / 2;
-      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      if (visible >= LIB_PW) pan = (LIB_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(LIB_PW - visible, focusX - visible / 2));
       const _nowLib = performance.now(); const _dtLib = _libPanT ? (_nowLib - _libPanT) : 16; _libPanT = _nowLib;
       applyLibraryPan(smoothPanStep(_libPanCur, pan, focusX, visible, _dtLib), sc);
     }
@@ -2642,7 +2720,7 @@
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'lib-stage';
-      stage.innerHTML = '<div id="lib-rooms">' + LIB_ROOMS_HTML + '</div>';
+      stage.innerHTML = '<div id="lib-rooms">' + buildLibraryRoomsHTML() + '</div>';
       host.appendChild(stage);
       let drag = null;
       const activePtrs = new Set();
@@ -2660,7 +2738,7 @@
         if (!drag) return;
         const sc = (stage.clientHeight || 179) / 300;
         const visible = (stage.clientWidth || 278) / sc;
-        const maxPan = Math.max(0, 1150 - visible);
+        const maxPan = Math.max(0, LIB_PW - visible);
         const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
         drag.moved += Math.abs(next - _libPanManual);
         _libManualUntil = Date.now() + 30000;
@@ -2712,11 +2790,11 @@
         if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
       }
       if (cw && playerIn) cw.style.zIndex = (currentState === 'studying') ? '500' : '975';
-      let focus = 575;
-      if (playerIn) focus = gameState.currentX || 560;
+      let focus = LIB_PROJ.P(575, 200, 0).x;
+      if (playerIn) focus = LIB_PROJ.P(gameState.currentX || 560, gameState.currentY || 212, 0).x;
       else {
         const inner = (gameState.npcs || []).find(n => n.insideLoc === 'library');
-        if (inner) focus = inner.x;
+        if (inner) focus = LIB_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateLibraryPan(focus);
       updateLibraryLighting();

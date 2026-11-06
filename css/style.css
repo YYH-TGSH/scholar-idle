@@ -3692,7 +3692,7 @@ input, select, textarea { border-radius: 14px !important; }
 #lib-shaft-w, #lib-shaft-e, #lib-lamps { transition: opacity 1.2s ease; }
 .lib-mote { animation: moteFloat 5s ease-in-out infinite; }
 @keyframes moteFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-.lib-rec-book { position:absolute; left:988px; top:184px; z-index:980; padding:5px 10px; border-radius:999px; border:2px solid var(--ink2); background:#ffd93b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow:0 2px 0 var(--ink2); animation: libGlow 2.2s ease-in-out infinite; }
+.lib-rec-book { position:absolute; left:1002px; top:232px; z-index:980; padding:5px 10px; border-radius:999px; border:2px solid var(--ink2); background:#ffd93b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow:0 2px 0 var(--ink2); animation: libGlow 2.2s ease-in-out infinite; }
 .lib-rec-book:active { transform: translateY(2px); box-shadow:none; }
 @keyframes libGlow { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.18); } }
 #school-stage:active { cursor:grabbing; }
@@ -3939,3 +3939,7 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* v9.52 住家 2.5D：投影後場景寬 1340（鏡頭/拖曳以 HOME_PW 計） */
 #home-rooms { width: 1340px; }
+
+/* v9.53 學校/圖書館 2.5D：投影後場景寬 1340（鏡頭/拖曳以 SCHOOL_PW/LIB_PW 計） */
+#school-rooms { width: 1340px; }
+#lib-rooms { width: 1340px; }
