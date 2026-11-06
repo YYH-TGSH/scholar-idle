@@ -135,7 +135,7 @@ body {
     /* 960x540 緊湊六角等角聚落地圖舞台 */
     .town-map {
       width: 1715px;
-      height: 650px; /* v9.55 投影後世界尺寸 */
+      height: 695px; /* v9.64 投影後世界尺寸（OY 215） */
       position: relative;
       margin: 0 auto;
       overflow: visible;
@@ -313,21 +313,21 @@ body {
     /* 上排 3 棟 */
     .landmark-school {
       left: 475.5px;
-      top: 377.5px; /* v9.63 烘焙：視覺底邊 507（基座南緣）、中心不變 */
+      top: 422.5px; /* v9.64 隨 OY 下移 +45：視覺底邊 552（基座南緣）、中心不變 */
       width: 189px;
       height: 129.5px;
     }
 
     .landmark-library {
       left: 855.5px;
-      top: 377.5px;
+      top: 422.5px;
       width: 189px;
       height: 129.5px;
     }
 
     .landmark-gym {
       left: 1237.6px;
-      top: 377.5px;
+      top: 422.5px;
       width: 198.8px;
       height: 129.5px;
     }
@@ -335,21 +335,21 @@ body {
     /* 下排 3 棟 */
     .landmark-restaurant {
       left: 946.5px;
-      top: 145.5px; /* v9.63 烘焙：視覺底邊 275（基座南緣）、中心不變 */
+      top: 190.5px; /* v9.63 烘焙：視覺底邊 275（基座南緣）、中心不變 */
       width: 189px;
       height: 129.5px;
     }
 
     .landmark-store {
       left: 559.5px;
-      top: 145.5px;
+      top: 190.5px;
       width: 189px;
       height: 129.5px;
     }
 
     .landmark-home {
       left: 177.6px;
-      top: 145.5px;
+      top: 190.5px;
       width: 198.8px;
       height: 129.5px;
     }
@@ -3656,11 +3656,11 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .npc-walking .npc-flip { animation: npc-bob 0.55s ease-in-out infinite alternate; }
 .npc-zzz-tag { position: absolute; top: -4px; right: 0; font-size: 0.78rem; filter: drop-shadow(0 1px 2px rgba(var(--rgb-black),0.4)); }
 #sky-night { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 夜色改均勻單值（舊垂直漸層讓北排無理由地比南排暗——光8）；島嶼由靜態 clip 全挖＋各島 .island-shade 連續決定暗度 */
-#sky-warm { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
-#street-glows { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
+#sky-warm { position: absolute; left: 0; top: 0; width: 1715px; height: 695px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
+#street-glows { position: absolute; left: 0; top: 0; width: 1715px; height: 695px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
 #landmark-store .island-platform-top { transition: filter 0.9s linear; }
 #landmark-store .facade-roof { transition: filter 0.9s linear; }
-#landmark-store.night-lit .facade-roof { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* 招牌燈箱發光（店面本體的亮度改由 #sky-night 挖空達成，不再用 brightness 濾鏡硬拉） */
+#landmark-store.night-lit .bld-sign { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* v9.64 招牌燈箱發光改掛新外觀招牌帶（店面本體的亮度改由 #sky-night 挖空達成） */
 .npc-role { position: absolute; top: -5px; left: 0; font-size: 0.78rem; line-height: 1; text-shadow: 0 1px 2px rgba(var(--rgb-black),0.45); } /* v9.16.1 值班職位小標 */
 /* ===== v9.17 超商大場景（比照住家 stage） ===== */
 #store-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
@@ -3989,3 +3989,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* v9.61 日間 grading：小鎮整場一層暖色柔光（soft-light），把 76 色拉回同一個空氣裡；
    透明度由 updateSkyLighting 依夜間因子驅動（正午最強、入夜歸零，夜色由既有 sky-night 接手）。 */
 #grade-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; background: #ffedb8; mix-blend-mode: soft-light; opacity: 0; }
+
+    /* ---- v9.64 多樓層外觀（proj box 堆疊生成，尺寸本體定版） ---- */
+    .bld-ext { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 6; transition: opacity 0.25s ease; }
+    .iso-island.ext-mode .facade-roof, .iso-island.ext-mode svg.house-room, .iso-island.ext-mode .dollhouse-art { display: none !important; }
+    .iso-island.inside-now .bld-ext { display: none; }

@@ -1886,8 +1886,8 @@
     // 世界邏輯座標 1150x920 不動；城鎮畫面改 TOWN_PROJ 投影（螢幕 1715x650）。
     // 地面/路網/公園/大樹/路燈/道具全走 P() 取樣；六棟建築本體＝投影基座 box3（地台）＋既有娃娃屋立面（與室內「框＝窗」同語彙），
     // 角色/NPC 在世界地圖上的定位由 coords/render 以 parent id 查本投影器自動換算（registerRooms 'town-map'/'npc-layer')。
-    const TOWN_PROJ = PROJ.make(PROJ.K_TOWN, 8, 170);
-    const TOWN_PW = 1715, TOWN_PH = 650;
+    const TOWN_PROJ = PROJ.make(PROJ.K_TOWN, 8, 215); // v9.64 OY 170->215：多樓層外觀最高點（住家 2F+斜頂）入鏡，世界下移 45
+    const TOWN_PW = 1715, TOWN_PH = 695; // v9.64 配合 OY 下移
     PROJ.registerRooms('town-map', TOWN_PROJ);
     PROJ.registerRooms('npc-layer', TOWN_PROJ);
     function buildTownDecor() {
@@ -1989,6 +1989,7 @@
       const map = document.getElementById('town-map');
       if (!map) return;
       buildTownDecor(); // v9.55 小鎮投影裝飾（先於光影層建立）
+      buildExteriors(); // v9.64 多樓層外觀（先於光影層：挖孔按新剪影）
       if (!document.getElementById('street-glows')) {
         const sg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         sg.id = 'street-glows';
@@ -2014,19 +2015,115 @@
     }
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
     const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696, gy: 760 }, { x: 660, y: 696, gy: 760 }, { x: 1050, y: 696, gy: 760 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
-    // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
-    const SKY_HOLES_FALLBACK = { home: [176, 143, 203, 134], store: [558, 143, 193, 134], restaurant: [944, 143, 193, 134], school: [473, 375, 193, 134], library: [853, 375, 193, 134], gym: [1236, 375, 203, 134] }; // 島嶼視覺矩形＋外擴 2（v9.63 烘焙後與 CSS 矩形一致，平時以 CSS 實測為準，此為後備）
+    // ===== v9.64 多樓層外觀（批次 A）：建築規格單一真相——外觀生成、夜間挖孔、北側淡化共用本表 =====
+    const BLD_FLOOR_H = 88; // 層高定版 ≈ 人物高 50 x 1.8
+    const BLD3D = {
+      home: { fx: 123, fz: 76, fw: 150, fd: 95, floors: 2, wall: '#f3e2c7', accent: '#e67e22', roof: 'gable', doorX: 198, pos: [177.6, 190.5] },
+      store: { fx: 491, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#eef4fb', accent: '#2ed573', roof: 'signband', sign: '便利商店', doorX: 571, pos: [559.5, 190.5], winW: 40, winH: 34 },
+      restaurant: { fx: 871, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#f7e8e0', accent: '#c0392b', roof: 'flat', sign: '餐廳', doorX: 951, pos: [946.5, 190.5] },
+      school: { fx: 98, fz: 556, fw: 185, fd: 115, floors: 3, wall: '#ece5d3', accent: '#2c3e50', roof: 'flat', sign: '台東女中', tower: true, bell: true, doorX: 198, pos: [475.5, 422.5] },
+      library: { fx: 488, fz: 561, fw: 165, fd: 105, floors: 2, wall: '#e6efe4', accent: '#1e8449', roof: 'flat', sign: '圖書館', doorX: 571, pos: [855.5, 422.5] },
+      gym: { fx: 898, fz: 516, fw: 120, fd: 40, floors: 1, wall: '#f0e6da', accent: '#ca6f1e', roof: 'flat', doorX: 958, pos: [1237.6, 422.5], overlay: true, holeRect: [1235.6, 420.5, 202.8, 133.5] }
+    };
+    function bldHeight(b) { return b.floors * BLD_FLOOR_H + (b.roof === 'gable' ? 36 : 9); }
+    function segBox(pr, x, z, w, d, h0, h1, color, withTop) {
+      const P = pr.P, pts = pr.pts, sh = PROJ.shade;
+      let out = '<polygon points="' + pts([P(x + w, z, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x + w, z, h1)]) + '" fill="' + sh(color, 0.6) + '"/>';
+      out += '<polygon points="' + pts([P(x, z + d, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + color + '"/>';
+      if (withTop) out += '<polygon points="' + pts([P(x, z, h1), P(x + w, z, h1), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + sh(color, 1.24) + '"/>';
+      return out;
+    }
+    function buildExteriors() {
+      for (const loc in BLD3D) {
+        const isl = document.getElementById('landmark-' + loc);
+        if (!isl || isl.querySelector('.bld-ext')) continue;
+        const b = BLD3D[loc];
+        const pr = PROJ.make(PROJ.K_TOWN, 8 - b.pos[0], 215 - b.pos[1]);
+        const P = pr.P, pts = pr.pts, sh = PROJ.shade, FH = BLD_FLOOR_H, H = b.floors * FH;
+        let g = '';
+        g += '<polygon points="' + pts([P(b.fx + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + b.fd + 4, 0), P(b.fx + 7, b.fz + b.fd + 4, 0)]) + '" fill="rgba(24,32,66,0.16)"/>';
+        for (let f = 0; f < b.floors; f++) {
+          if (f > 0) g += segBox(pr, b.fx - 3, b.fz - 3, b.fw + 6, b.fd + 6, f * FH - 3, f * FH + 3, sh(b.accent, 0.8), false);
+          g += segBox(pr, b.fx, b.fz, b.fw, b.fd, f * FH, (f + 1) * FH, b.wall, false);
+        }
+        const winW = b.winW || 20, winH = b.winH || 26;
+        const sx0 = P(b.fx, b.fz + b.fd, 0).x, sx1 = P(b.fx + b.fw, b.fz + b.fd, 0).x;
+        const doorCx = P(b.doorX, b.fz + b.fd, 0).x, groundY = P(b.fx, b.fz + b.fd, 0).y;
+        const nWin = b.fw >= 170 ? 5 : (b.fw >= 150 ? 4 : 3);
+        for (let f = 0; f < b.floors; f++) {
+          const wy = P(b.fx, b.fz + b.fd, f * FH + 30).y;
+          for (let i = 0; i < nWin; i++) {
+            const wx = sx0 + 16 + (nWin === 1 ? 0 : i * ((sx1 - sx0 - 32 - winW) / (nWin - 1)));
+            if (f === 0 && Math.abs(wx + winW / 2 - doorCx) < 30) continue;
+            g += '<rect x="' + wx.toFixed(1) + '" y="' + (wy - winH).toFixed(1) + '" width="' + winW + '" height="' + winH + '" fill="#aee6fa" stroke="#26324b" stroke-width="1.5"/>';
+          }
+        }
+        g += '<rect x="' + (doorCx - 13).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="26" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#26324b" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#ffcc00"/>';
+        if (loc === 'restaurant') g += segBox(pr, b.fx - 2, b.fz, b.fw + 4, b.fd + 12, 54, 59, b.accent, false);
+        if (b.roof === 'gable') {
+          const midZ = b.fz + b.fd / 2, rc = '#c0392b';
+          g += '<polygon points="' + pts([P(b.fx - 6, b.fz - 6, H), P(b.fx + b.fw + 6, b.fz - 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.78) + '"/>';
+          g += '<polygon points="' + pts([P(b.fx + b.fw + 6, b.fz - 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.6) + '"/>';
+          g += '<polygon points="' + pts([P(b.fx - 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + rc + '"/>';
+        } else if (b.roof === 'signband') {
+          g += '<g class="bld-sign">' + segBox(pr, b.fx - 4, b.fz - 4, b.fw + 8, b.fd + 8, H - 30, H, b.accent, true);
+          const bx0 = P(b.fx - 4, b.fz + b.fd + 4, 0).x, bx1 = P(b.fx + b.fw + 4, b.fz + b.fd + 4, 0).x, byC = P(b.fx, b.fz + b.fd + 4, H - 15).y;
+          g += '<text x="' + ((bx0 + bx1) / 2).toFixed(1) + '" y="' + byC.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="#ffffff">' + b.sign + '</text></g>';
+        } else {
+          g += segBox(pr, b.fx - 4, b.fz - 4, b.fw + 8, b.fd + 8, H, H + 9, b.wall, true);
+          if (b.tower) {
+            g += segBox(pr, b.fx + b.fw - 52, b.fz + 8, 30, 30, H + 9, H + 42, '#5b7fa6', false);
+            g += segBox(pr, b.fx + b.fw - 55, b.fz + 5, 36, 36, H + 42, H + 47, '#2c3e50', true);
+          }
+          if (b.sign) {
+            const sw2 = b.sign.length * 19 + 26, scx = P(b.fx + b.fw / 2, b.fz + b.fd + 4, 0).x, stopY = P(b.fx, b.fz + b.fd + 4, H + 9).y;
+            g += '<rect x="' + (scx + 6).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#26324b"/><rect x="' + (scx + sw2 - 10).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#26324b"/>';
+            g += '<rect x="' + scx.toFixed(1) + '" y="' + (stopY - 32).toFixed(1) + '" width="' + sw2 + '" height="24" fill="' + b.accent + '" stroke="#26324b" stroke-width="1.5"/>';
+            g += '<text x="' + (scx + sw2 / 2).toFixed(1) + '" y="' + (stopY - 20).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#ffffff">' + b.sign + '</text>';
+          }
+        }
+        if (b.bell) {
+          const bx = P(b.fx + b.fw - 37, b.fz + 38, 0).x - 10, by = P(b.fx, b.fz + 38, H + 16).y;
+          g += '<g id="school-bell"><use href="#i-bell" x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="20" height="20"/></g>';
+        }
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'bld-ext'); svg.setAttribute('data-loc', loc); svg.setAttribute('aria-hidden', 'true');
+        svg.innerHTML = g;
+        isl.appendChild(svg);
+        if (!b.overlay) {
+          isl.classList.add('ext-mode');
+          const host = isl.querySelector('.island-platform-top');
+          if (host) host.querySelectorAll(':scope > *').forEach(ch => { if (!(ch.id || '').endsWith('-stage')) ch.classList.add('dollhouse-art'); });
+        }
+      }
+    }
+    function updateBuildingExteriors() {
+      buildExteriors();
+      const cl = (typeof currentLoc !== 'undefined') ? currentLoc : null;
+      const npcs = (typeof gameState !== 'undefined' && gameState.npcs) || [];
+      for (const loc in BLD3D) {
+        const isl = document.getElementById('landmark-' + loc); if (!isl) continue;
+        isl.classList.toggle('inside-now', cl === loc);
+        const svg = isl.querySelector('.bld-ext'); if (!svg) continue;
+        const b = BLD3D[loc];
+        let hit = false;
+        for (let i = 0; i < npcs.length; i++) { const n = npcs[i]; if (n.insideLoc) continue; if (n.x >= b.fx - 6 && n.x <= b.fx + b.fw + 6 && n.y >= b.fz - 64 && n.y <= b.fz - 2) { hit = true; break; } }
+        const want = hit ? '0.4' : '1';
+        if (svg.dataset.fade !== want) { svg.dataset.fade = want; svg.style.opacity = want; }
+      }
+    }
+    // v9.64 夜間挖孔 = 新外觀剪影（BLD3D 規格直算，不再量島框）
     let _skyHolesCache = null;
     function skyHoles() {
       if (_skyHolesCache) return _skyHolesCache;
       const out = {};
-      for (const k in SKY_HOLES_FALLBACK) {
-        const el = document.getElementById('landmark-' + k);
-        if (!el) { out[k] = SKY_HOLES_FALLBACK[k]; continue; }
-        const cs = getComputedStyle(el);
-        const L = parseFloat(cs.left), T = parseFloat(cs.top), W = parseFloat(cs.width);
-        const H = parseFloat(cs.height);
-        out[k] = (isFinite(L) && isFinite(T) && isFinite(W) && isFinite(H)) ? [L - 2, T - 2, W + 4, H + 4] : SKY_HOLES_FALLBACK[k]; // v9.63 島框已烘焙：CSS 矩形即視覺矩形，挖孔只需外擴 2（承 v9.48）——v9.56 的 x0.7 換算隨補丁退役
+      for (const k in BLD3D) {
+        const b = BLD3D[k];
+        if (b.holeRect) { out[k] = b.holeRect; continue; }
+        const H = bldHeight(b);
+        const x0 = TOWN_PROJ.P(b.fx, b.fz, 0).x - 2, x1 = TOWN_PROJ.P(b.fx + b.fw, b.fz + b.fd, 0).x + 2;
+        const y0 = TOWN_PROJ.P(b.fx, b.fz, H).y - 2, y1 = TOWN_PROJ.P(b.fx, b.fz + b.fd, 0).y + 2;
+        out[k] = [Math.round(x0 * 10) / 10, Math.round(y0 * 10) / 10, Math.round((x1 - x0) * 10) / 10, Math.round((y1 - y0) * 10) / 10];
       }
       _skyHolesCache = out;
       return out;
