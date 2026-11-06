@@ -1215,6 +1215,9 @@
     const HOME_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
     const HOME_PW = 1340;
     PROJ.registerRooms('home-rooms', HOME_PROJ);
+    // v9.62 地面密度定版：地板 pattern 產生器（聖經：大面積地面不准純色——交錯帶/棋盤以低對比鋪滿）
+    function floorBands(pr, poly, tone, op, band, x0, x1, z0, z1) { let o = '<g class="floor-pat">'; for (let z = z0, i = 0; z < z1; z += band, i++) { if (i % 2) o += poly([pr.P(x0, z, 0), pr.P(x1, z, 0), pr.P(x1, Math.min(z + band, z1), 0), pr.P(x0, Math.min(z + band, z1), 0)], tone, ' fill-opacity="' + op + '"'); } return o + '</g>'; }
+
     function buildHomeRoomsHTML() {
       const pr = HOME_PROJ, WH = 150;
       const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
@@ -1228,6 +1231,7 @@
       bg += poly([pr.P(792, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(792, 0, WH)], '#eef2f0');
       bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#b8bcc4', 0.8));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      bg += floorBands(pr, poly, '#c98d54', 0.45, 38, 0, 1150, 0, 300); // v9.62 木板交錯帶
       let lines = '';
       for (let z = 38; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       bg += '<g stroke="rgba(150,100,50,0.35)" stroke-width="1.5">' + lines + '</g>';
@@ -1894,7 +1898,7 @@
       const quad = (x, z, w, d, fill, extra) => poly([pr.P(x, z, 0), pr.P(x + w, z, 0), pr.P(x + w, z + d, 0), pr.P(x, z + d, 0)], fill, extra);
       const seg = (a, b, stroke, w, extra) => '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" stroke="' + stroke + '" stroke-width="' + w + '"' + (extra || '') + '/>';
       const circ = (xp, r, fill, extra) => '<circle cx="' + xp.x.toFixed(1) + '" cy="' + xp.y.toFixed(1) + '" r="' + r + '" fill="' + fill + '"' + (extra || '') + '/>';
-      let s = '<defs><pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#8fd07a"/><rect width="24" height="24" fill="#8fd07a"/><rect x="24" y="24" width="24" height="24" fill="#8fd07a"/></pattern><pattern id="parkPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#79bd67"/><rect x="24" y="24" width="24" height="24" fill="#85c173"/><rect width="24" height="24" width="24" height="24" fill="#85c173"/></pattern></defs>';
+      let s = '<defs><pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#8fd07a"/><rect width="24" height="24" fill="#79bd67"/><rect x="24" y="24" width="24" height="24" fill="#79bd67"/></pattern><pattern id="parkPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#6fbb72"/><rect x="24" y="24" width="24" height="24" fill="#5da85f"/><rect width="24" height="24" fill="#5da85f"/></pattern></defs>';
       s += '<g id="town-decor25">';
       // 地面＋公園帶
       s += quad(0, 0, 1150, 920, 'url(#grassPat)');
@@ -1909,7 +1913,7 @@
       for (let x = 10; x < 1150; x += 110) { s += quad(x, 288, 46, 7, '#f7d038') + quad(x, 778, 46, 7, '#f7d038'); }
       // 六棟基座（投影 box3 地台）＋門前小徑
       const PLOTS = [[42, 16, 312, 215, '#c8d2cc'], [422, 16, 298, 215, '#b8bcc4'], [802, 16, 298, 215, '#e8d8a8'], [42, 506, 298, 215, '#cfe8f5'], [422, 506, 298, 215, '#c8d2cc'], [802, 506, 312, 215, '#d9a066']];
-      PLOTS.forEach(([px, pz, pw, pd, col]) => { s += pr.box3(px - 4, pz - 4, pw + 8, pd + 8, 20, col); });
+      PLOTS.forEach(([px, pz, pw, pd, col]) => { s += quad(px - 6, pz + pd + 2, pw + 12, 14, 'rgba(24,32,66,0.10)'); s += pr.box3(px - 4, pz - 4, pw + 8, pd + 8, 20, col); }); // v9.62 牆根接地陰影：建築不再像貼紙浮在草地上
       [[181, 196], [554, 196], [934, 196], [181, 676], [554, 676], [941, 676]].forEach(([dx, dz]) => { s += quad(dx, dz, 34, 48, '#f3e2c7', ' stroke="#b8bcc4" stroke-width="2"'); });
       // 公園：池塘＋小徑（曲線取樣投影）＋長椅＋花圃
       s += pr.planeCircle(250, 428, 0, 118, '#7fd4e8');
@@ -2105,6 +2109,7 @@
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#fff6e8');
       bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#fff6e8', 0.85));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#efe9e0');
+      bg += floorBands(pr, poly, '#ffffff', 0.5, 48, 0, 1150, 0, 300); // v9.62 磁磚列（與既有磚縫同節奏）
       let lines = '';
       for (let z = 48; z < 300; z += 48) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       [150, 430, 710, 990].forEach(x => { const a = pr.P(x, 0, 0), b = pr.P(x, 300, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; });
@@ -2291,6 +2296,7 @@
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#efe9e0');
       bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#efe9e0', 0.8));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      bg += floorBands(pr, poly, '#c98d54', 0.45, 44, 0, 1150, 0, 300); // v9.62 木板交錯帶
       let lines = '';
       for (let z = 42; z < 300; z += 44) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       bg += '<g stroke="#b0743e" stroke-width="2">' + lines + '</g>';
@@ -2517,6 +2523,7 @@
       bg += '<g fill="#ffffff" opacity="0.85"><ellipse cx="240" cy="26" rx="42" ry="9"/><ellipse cx="272" cy="20" rx="26" ry="8"/><ellipse cx="700" cy="40" rx="36" ry="8"/><ellipse cx="726" cy="35" rx="22" ry="7"/></g>';
       // 地面（延伸到 z560 填滿框高）＋地平線樹叢
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 560, 0), pr.P(0, 560, 0)], '#5da85f');
+      bg += floorBands(pr, poly, '#6fbb72', 0.45, 56, 0, 1150, 0, 560); // v9.62 草地修剪條紋
       [[60, 17], [112, 13], [330, 15], [520, 12], [880, 14], [1108, 16]].forEach(([tx, tr]) => { const c = pr.P(tx, 4, 15); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + tr + '" fill="#1e8449"/>'; });
       // 夜間燈組（id 保留）
       let floods = '';
@@ -2538,6 +2545,7 @@
       [[150, 240], [330, 420], [510, 600]].forEach(([x0, x1]) => { bg += seg(pr.P(x0, 207, 0), pr.P(x1, 207, 0), 'rgba(255,255,255,0.8)', 2); });
       // 球場＋中線/中圈/三分線
       bg += poly([pr.P(812, 96, 0), pr.P(1130, 96, 0), pr.P(1130, 264, 0), pr.P(812, 264, 0)], '#d9a066', ' stroke="#182042" stroke-width="2.5"');
+      bg += floorBands(pr, poly, '#c98d54', 0.4, 42, 812, 1130, 96, 264); // v9.62 球場木板帶
       bg += seg(pr.P(971, 96, 0), pr.P(971, 264, 0), '#ffffff', 2);
       bg += '<polygon points="' + pr.planeCirclePts(971, 180, 0, 26) + '" fill="none" stroke="#ffffff" stroke-width="2"/>';
       bg += poly([pr.P(1006, 138, 0), pr.P(1130, 138, 0), pr.P(1130, 222, 0), pr.P(1006, 222, 0)], 'rgba(181,101,29,0.5)');
@@ -2767,6 +2775,7 @@
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f5f0e6');
       bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f5f0e6', 0.8));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#c98d54');
+      bg += floorBands(pr, poly, '#a9743f', 0.4, 38, 0, 1150, 0, 300); // v9.62 木板交錯帶（地毯蓋在其上）
       let lines = '';
       for (let z = 30; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       bg += '<g stroke="rgba(150,111,63,0.5)" stroke-width="1.4">' + lines + '</g>';
@@ -2995,6 +3004,7 @@
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#6d4c41');
       bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#6d4c41', 0.62));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#a9743f');
+      bg += floorBands(pr, poly, '#795548', 0.35, 38, 0, 1150, 0, 300); // v9.62 深木交錯帶
       let lines = '';
       for (let z = 38; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       for (let x = 96; x < 1150; x += 96) { const z0 = (x % 3) * 40; const a = pr.P(x, z0, 0), b = pr.P(x, z0 + 52, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
