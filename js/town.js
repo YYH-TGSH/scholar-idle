@@ -816,6 +816,8 @@
     const SCHOOL_GROUP = { school: 1, library: 2, club: 3 };
     const STAIR_PT = { x: 1085, y: 70 };
     const stairWp = (loc) => ({ x: STAIR_PT.x, y: STAIR_PT.y, door: 'in', loc: loc, ix: STAIR_PT.x, iy: STAIR_PT.y });
+    const HOME_STAIR_PT = { x: 539, y: 70 }; // v9.66 住家樓梯（中央區北側，三方臥室動線共用）
+    const stairWpHome = (f) => ({ x: HOME_STAIR_PT.x, y: HOME_STAIR_PT.y, door: 'in', floor: f, ix: HOME_STAIR_PT.x, iy: HOME_STAIR_PT.y });
     function npcExitPrefix(npc) { // v9.24 在室內的人要先走正門出去；v9.65：2F/3F 的人先下樓梯回 1F 再走大門
       if (npc.insideLoc && SCHOOL_GROUP[npc.insideLoc] && npc.insideLoc !== 'school') return [stairWp('school'), { x: 575, y: 278 }, SCHOOL_DOOR_OUT, { x: INTERIORS.school.worldDoorX, y: npcStreetY('school') }];
       if (npc.insideLoc && INTERIORS[npc.insideLoc]) { const c = INTERIORS[npc.insideLoc]; return [c.inDoor, c.doorOut, { x: c.worldDoorX, y: npcStreetY(npc.insideLoc) }]; }
@@ -973,19 +975,19 @@
       if (def.kind === 'parent') {
         // v9.14.4：爸媽回家時間錯開（爸 17:40、媽 18:12）
         // v9.14：進出室內在門口瞬間切換座標系（door waypoint）
-        const DOOR_IN = { x: NPC_DOOR_X.home, y: NPC_DOOR_Y, door: 'in', ix: 565, iy: 218 };
+        const DOOR_IN = { x: NPC_DOOR_X.home, y: NPC_DOOR_Y, door: 'in', ix: 565, iy: 218, floor: 'home' }; // v9.66 進門=1F
         const DOOR_OUT = { x: 565, y: 218, door: 'out', wx: NPC_DOOR_X.home, wy: NPC_DOOR_Y };
         if (hour >= 22 || hour < 7) {
           npc.dest = 'home';
-          npc.path = npc.inside ? [def.sleepSpot] : [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, DOOR_IN, def.sleepSpot];
+          npc.path = npc.inside ? (npc.floor === 'home2' ? [def.sleepSpot] : [stairWpHome('home2'), def.sleepSpot]) : [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, DOOR_IN, stairWpHome('home2'), def.sleepSpot]; // v9.66 睡覺上 2F 經樓梯
           npc.arrive = 'sleep'; npc.state = 'path'; return 'home';
         } else if (parentBackHome(npc)) { // v9.14.4 爸 17:40 / 媽 18:12
           npc.dest = 'home';
-          npc.path = npc.inside ? [def.homeSpot] : [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, DOOR_IN, def.homeSpot];
+          npc.path = npc.inside ? (npc.floor === 'home2' ? [stairWpHome('home'), def.homeSpot] : [def.homeSpot]) : [{ x: NPC_DOOR_X.home, y: NPC_STREET_Y }, DOOR_IN, def.homeSpot]; // v9.66 在 2F 先下樓
           npc.arrive = 'athome'; npc.state = 'path'; return 'home';
         } else {
           npc.dest = 'away';
-          npc.path = npc.inside ? [DOOR_OUT, { x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: npc.x < WORLD_W / 2 ? -80 : WORLD_W + 80, y: NPC_STREET_Y }] : [{ x: npc.x < WORLD_W / 2 ? -80 : WORLD_W + 80, y: STREET_Y[npcCurStreet(npc)] }];
+          npc.path = npc.inside ? [...(npc.floor === 'home2' ? [stairWpHome('home')] : []), DOOR_OUT, { x: NPC_DOOR_X.home, y: NPC_STREET_Y }, { x: npc.x < WORLD_W / 2 ? -80 : WORLD_W + 80, y: NPC_STREET_Y }] : [{ x: npc.x < WORLD_W / 2 ? -80 : WORLD_W + 80, y: STREET_Y[npcCurStreet(npc)] }]; // v9.66 在 2F 先下樓再出門
           npc.arrive = 'away'; npc.state = 'path'; return 'away';
         }
       }
@@ -1164,7 +1166,7 @@
       if (npc._sayUntil && Date.now() < npc._sayUntil) return;
       npc._sayUntil = Date.now() + 3000;
       const def = npcDef(npc.key);
-      const layer = (npc.insideLoc && INTERIORS[npc.insideLoc] && document.getElementById(INTERIORS[npc.insideLoc].roomsId)) || (npc.inside && document.getElementById('home-rooms')) || document.getElementById('npc-layer'); // v9.17.1 室內泡泡進場景；v9.18 查表
+      const layer = (npc.insideLoc && INTERIORS[npc.insideLoc] && document.getElementById(INTERIORS[npc.insideLoc].roomsId)) || (npc.inside && document.getElementById(npc.floor === 'home2' ? 'home2-rooms' : 'home-rooms')) || document.getElementById('npc-layer'); // v9.17.1 室內泡泡進場景；v9.18 查表；v9.66 爸媽在 2F 時泡泡跟上樓
       if (!layer) return;
       const bubble = document.createElement('div');
       bubble.className = 'npc-speech';
@@ -1267,12 +1269,14 @@
       bg += rectPoly(44, 226, 236, 60, 0, 'rgba(206,147,216,0.45)');
       bg += rectPoly(430, 228, 300, 54, 0, 'rgba(255,204,128,0.5)');
       bg += rectPoly(768, 226, 216, 60, 0, 'rgba(144,202,249,0.5)');
-      // 爸媽床（全 bg：低盒不需南面遮擋）＋衣櫃
-      bg += pr.box3(68, 114, 188, 10, 30, '#8d5a2c');
-      bg += pr.box3(68, 124, 188, 84, 13, '#ffffff');
-      bg += pr.box3(84, 130, 68, 22, 17, '#ffffff');
-      bg += pr.box3(172, 130, 68, 22, 17, '#ffffff');
-      bg += pr.box3(68, 156, 188, 52, 15.5, '#9b59b6');
+      // 起居室（v9.66 臥室搬上 2F）：雙扶手椅＋茶几＋衣櫃（原位）
+      bg += pr.box3(84, 128, 62, 12, 26, '#5da85f');
+      const ac1 = pr.boxFaces(84, 140, 62, 38, 15, '#5da85f');
+      bg += ac1.back; front += ac1.front;
+      bg += pr.box3(196, 128, 62, 12, 26, '#5da85f');
+      const ac2 = pr.boxFaces(196, 140, 62, 38, 15, '#5da85f');
+      bg += ac2.back; front += ac2.front;
+      bg += pr.box3(140, 192, 76, 32, 9, '#a9743f');
       bg += pr.box3(272, 28, 60, 26, 52, '#a9743f');
       // 沙發（靠背北側＋座墊盒，南面進 front）
       bg += pr.box3(442, 116, 152, 12, 26, '#e74c3c');
@@ -1295,11 +1299,13 @@
       bg += dtable.back; front += dtable.front;
       const schair = pr.boxFaces(637, 212, 36, 10, 24, '#a9743f');
       bg += schair.back; front += schair.front;
-      // 我的床
-      bg += pr.box3(792, 114, 162, 10, 30, '#6d4c41');
-      bg += pr.box3(792, 124, 162, 84, 13, '#ffffff');
-      bg += pr.box3(806, 130, 68, 22, 17, '#ffffff');
-      bg += pr.box3(792, 156, 162, 52, 15.5, '#4aa3df');
+      // 書房一角（v9.66 我的床搬上 2F）：閱讀椅＋邊桌＋盆栽
+      bg += pr.box3(812, 128, 66, 12, 26, '#4aa3df');
+      const rch = pr.boxFaces(812, 140, 66, 38, 15, '#4aa3df');
+      bg += rch.back; front += rch.front;
+      bg += pr.box3(896, 150, 30, 30, 20, '#a9743f');
+      bg += pr.box3(922, 106, 26, 26, 12, '#c96f4a');
+      const plv = pr.P(935, 119, 30); bg += '<circle cx="' + plv.x.toFixed(1) + '" cy="' + plv.y.toFixed(1) + '" r="11" fill="#5da85f"/><circle cx="' + (plv.x - 8).toFixed(1) + '" cy="' + (plv.y + 4).toFixed(1) + '" r="7" fill="#27ae60"/>';
       // 書桌（南面進 front）＋桌上書＋椅
       const desk = pr.boxFaces(972, 148, 130, 34, 14, '#a9743f');
       bg += desk.back; front += desk.front;
@@ -1310,24 +1316,16 @@
       // 書櫃＋書脊（畫在南面平面上）
       bg += pr.box3(1108, 28, 38, 24, 54, '#8d5a2c');
       [[1112, '#e74c3c'], [1120, '#4aa3df'], [1128, '#6fbb72']].forEach(([sx, sc2]) => { bg += faceRect(sx, 52.5, 6, 30, 48, sc2); bg += faceRect(sx, 52.5, 6, 6, 22, sc2); });
+      bg += stairSvgAt(pr, 500); // v9.66 樓梯間（中央區北側，通 2F 臥室層）
       // 入口墊＋分區標籤＋貓
       bg += pr.box3(505, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(597, 283, 4), '入 口', 11, '#ffe9b8');
-      bg += txt(pr.P(20, 292, 0), '爸媽房', 14, '#5f5f66', 0.65);
+      bg += txt(pr.P(20, 292, 0), '起居室', 14, '#5f5f66', 0.65); // v9.66
       bg += txt(pr.P(396, 292, 0), '客廳・餐廳', 14, '#a9743f', 0.65);
-      bg += txt(pr.P(800, 292, 0), '我的房間', 14, '#2e5f8a', 0.65);
+      bg += txt(pr.P(800, 292, 0), '書房', 14, '#2e5f8a', 0.65); // v9.66
       const catA = pr.P(300, 248, 0);
       bg += '<g id="home-cat" transform="translate(' + catA.x.toFixed(1) + ',' + catA.y.toFixed(1) + ')"><rect class="cat-tail" x="-4" y="1" width="5" height="2" fill="#e67e22"/><rect x="0" y="4" width="10" height="5" fill="#f39c12"/><rect x="2" y="4" width="1" height="5" fill="#e67e22"/><rect x="5" y="4" width="1" height="5" fill="#e67e22"/><rect x="8" y="0" width="6" height="6" fill="#f39c12"/><rect x="8" y="-1" width="2" height="2" fill="#f39c12"/><rect x="12" y="-1" width="2" height="2" fill="#f39c12"/><rect x="10" y="2" width="1" height="1" fill="#182042"/><rect x="13" y="2" width="1" height="1" fill="#182042"/><rect x="0" y="9" width="3" height="1" fill="#e67e22"/><rect x="7" y="9" width="3" height="1" fill="#e67e22"/></g>';
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + HOME_PW + ' 300" style="position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
-      // 棉被（睡覺時顯示的覆蓋層，形狀＝床面投影多邊形；id/顯示切換與舊版相同）
-      const pb = '<g class="sleep-form-anim">'
-        + rectPoly(66, 168, 192, 44, 15.5, '#9b59b6', ' stroke="#182042" stroke-width="1.6"')
-        + rectPoly(66, 168, 192, 12, 15.6, 'rgba(255,255,255,0.25)')
-        + [[110, 186], [165, 194], [220, 188]].map(([cx, cz]) => { const c = pr.P(cx, cz, 16); return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="rgba(255,255,255,0.3)"/>'; }).join('') + '</g>';
-      const yb = '<g class="sleep-form-anim">'
-        + rectPoly(790, 168, 164, 44, 15.5, '#4aa3df', ' stroke="#182042" stroke-width="1.6"')
-        + rectPoly(790, 182, 164, 5, 15.6, 'rgba(255,255,255,0.35)')
-        + rectPoly(790, 196, 164, 5, 15.6, 'rgba(255,255,255,0.35)') + '</g>';
       // 書桌點擊區（投影後書桌外接矩形，R1：命中以投影後位置為準，邏輯不變）
       const dc = [[972, 148, 0], [1102, 148, 14], [1102, 182, 0], [972, 182, 14], [972, 148, 14], [1102, 182, 14], [972, 182, 0], [1102, 148, 0]].map(([x, z, h]) => pr.P(x, z, h));
       const dx0 = Math.min.apply(null, dc.map(c => c.x)), dx1 = Math.max.apply(null, dc.map(c => c.x));
@@ -1335,9 +1333,7 @@
       const hit = '<div id="desk-hit" onclick="toggleDeskStudy()" title="在書桌自習" style="position:absolute; left:' + (dx0 - 6).toFixed(0) + 'px; top:' + (dy0 - 6).toFixed(0) + 'px; width:' + (dx1 - dx0 + 12).toFixed(0) + 'px; height:' + (dy1 - dy0 + 12).toFixed(0) + 'px; z-index:140; cursor:pointer;"></div>';
       return svgOpen('home-bg25', 0) + bg + '</svg>'
         + svgOpen('home-front25', 196) + front + '</svg>'
-        + '<svg id="parents-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:260; pointer-events:none;">' + pb + '</svg>'
-        + '<svg id="player-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:600; pointer-events:none;">' + yb + '</svg>'
-        + hit;
+        + hit; // v9.66 棉被層（parents-blanket/player-blanket）隨臥室搬到 2F builder
     }
     function toggleDeskStudy() { // v9.14.4：點房間書桌 = 在家自習開關
       if (typeof currentLoc === 'undefined' || currentLoc !== 'home' || gameState.isCommuting) {
@@ -1458,12 +1454,222 @@
     }
     function updateHomeStage() {
       ensureHomeInterior();
+      ensureHome2Interior(); // v9.66 2F 一併備好（棉被/爸媽夜間動線需要）
       updateHomeCat(0.5);
       const stage = document.getElementById('home-stage');
       if (!stage) return;
       const rooms = document.getElementById('home-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && !gameState.isCommuting;
+      const playerHere = playerIn && currentState !== 'sleeping'; // v9.66 睡覺時主角本人在 2F（updateHome2Stage 接手）
       if (playerIn !== _homeWasIn) { _homePanManual = null; _homeWasIn = playerIn; } // 進出家門 → 回到自動跟隨
+      const cw = document.getElementById('char-wrap');
+      if (playerHere) {
+        if (cw && rooms && cw.parentNode !== rooms) {
+          rooms.appendChild(cw);
+          cw.style.zIndex = '500';
+          if (typeof getCharacterCoords === 'function' && typeof updateCharacterPositionAndScale === 'function') {
+            const dc = getCharacterCoords(currentLoc, currentState);
+            updateCharacterPositionAndScale(dc.x, dc.y, false);
+          }
+        }
+      } else {
+        const map = document.getElementById('town-map');
+        if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      if (cw && playerHere) cw.style.zIndex = (((currentState === 'dinner' || currentState === 'studying') && !gameState._playerWalking)) ? '500' : '975'; // v9.30 住家同規（比照其他五棟）：坐定維持夾層，走動/站立在傢俱前景之上
+      { // v9.30 主角自己的晚餐盤（比照餐廳 #player-rest-plate）：坐上晚餐座位才出現，食物置頂 z990
+        let pp = document.getElementById('player-dinner-plate');
+        const showP = playerIn && currentState === 'dinner' && !gameState._playerWalking;
+        if (showP && rooms) {
+          if (!pp) { pp = document.createElement('div'); pp.id = 'player-dinner-plate'; pp.className = 'dish-plate'; pp.innerHTML = icoSvg('curry'); rooms.appendChild(pp); }
+          const _pdp = HOME_PROJ.P(gameState.currentX || 655, 190, 14);
+          pp.style.display = 'block'; pp.style.left = (_pdp.x - 9) + 'px'; pp.style.top = (_pdp.y - 9) + 'px'; pp.style.zIndex = '990';
+        } else if (pp) pp.style.display = 'none';
+      }
+      // 室內鏡頭：主角在家跟主角，否則看在家的爸媽，再否則停客廳
+      let focus = HOME_PROJ.P(565, 200, 0).x;
+      if (playerHere) focus = HOME_PROJ.P(gameState.currentX || 500, gameState.currentY || 212, 0).x;
+      else {
+        const par = (gameState.npcs || []).find(n => n.kind === 'parent' && n.inside);
+        if (par) focus = HOME_PROJ.P(par.x, par.y, 0).x;
+      }
+      updateHomePan(focus);
+      const pBlanket = document.getElementById('player-blanket'); // v9.15：本人躺床上 + 棉被蓋在上層
+      if (pBlanket) pBlanket.style.display = (currentState === 'sleeping' && currentLoc === 'home') ? 'block' : 'none';
+      const parBlanket = document.getElementById('parents-blanket');
+      if (parBlanket) {
+        const anySleep = (gameState.npcs || []).some(n => n.kind === 'parent' && n.inside && n.state === 'sleeping');
+        const want = anySleep ? 'block' : 'none';
+        if (parBlanket.style.display !== want) parBlanket.style.display = want;
+      }
+      applyHomeFloors((playerIn && currentState === 'sleeping') ? 2 : 1); // v9.66 樓層疊層跟著主角睡/醒切換
+    }
+
+    // ================= v9.66 住家 2F 臥室層（多樓層批次 B2：平面圖同 1F，臥室上樓、棉被隨遷） =================
+    PROJ.registerRooms('home2-rooms', HOME_PROJ);
+    function buildHome2RoomsHTML() {
+      const pr = HOME_PROJ, WH = 150;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const rectPoly = (x, z, w, d, h, fill, extra) => poly([pr.P(x, z, h), pr.P(x + w, z, h), pr.P(x + w, z + d, h), pr.P(x, z + d, h)], fill, extra);
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, op) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="700" fill="' + fill + '"' + (op ? ' opacity="' + op + '"' : '') + '>' + str + '</text>';
+      let bg = '', front = '';
+      bg += poly([pr.P(0, 0, 0), pr.P(340, 0, 0), pr.P(340, 0, WH), pr.P(0, 0, WH)], '#f5e6da');
+      bg += poly([pr.P(380, 0, 0), pr.P(752, 0, 0), pr.P(752, 0, WH), pr.P(380, 0, WH)], '#efe9e0');
+      bg += poly([pr.P(792, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(792, 0, WH)], '#e8f0f7');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#b8bcc4', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      bg += floorBands(pr, poly, '#c98d54', 0.45, 38, 0, 1150, 0, 300);
+      [360, 772].forEach(px => {
+        bg += poly([pr.P(px, 0, 0), pr.P(px, 96, 0), pr.P(px, 96, WH), pr.P(px, 0, WH)], '#f3e2c7');
+        bg += poly([pr.P(px, 140, 0), pr.P(px, 300, 0), pr.P(px, 300, WH), pr.P(px, 140, WH)], '#f3e2c7');
+        bg += poly([pr.P(px, 96, 74), pr.P(px, 140, 74), pr.P(px, 140, WH), pr.P(px, 96, WH)], '#f3e2c7');
+      });
+      bg += pr.wallDecoN(150, 196, 88, 118, '#ffffff');
+      [[165, 103], [181, 103], [173, 95]].forEach(([fx, fh]) => { const c = pr.P(fx, 0, fh); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="#fed7aa"/>'; });
+      bg += pr.wallDecoN(566, 646, 88, 148, '#bedcfe');
+      const sun2 = pr.P(588, 0, 128); bg += '<circle cx="' + sun2.x.toFixed(1) + '" cy="' + sun2.y.toFixed(1) + '" r="10" fill="#ffd166"/>';
+      bg += pr.wallDecoN(968, 1036, 96, 142, '#ffffff');
+      bg += txt(pr.P(994, 0, 112), '★', 20, '#ffd166');
+      bg += rectPoly(44, 226, 236, 60, 0, 'rgba(206,147,216,0.45)');
+      bg += rectPoly(430, 228, 300, 54, 0, 'rgba(255,204,128,0.5)');
+      bg += rectPoly(768, 226, 216, 60, 0, 'rgba(144,202,249,0.5)');
+      // 爸媽床（與舊 1F 同幾何：sleepSpot/棉被座標零改動）＋衣櫃
+      bg += pr.box3(68, 114, 188, 10, 30, '#8d5a2c');
+      bg += pr.box3(68, 124, 188, 84, 13, '#ffffff');
+      bg += pr.box3(84, 130, 68, 22, 17, '#ffffff');
+      bg += pr.box3(172, 130, 68, 22, 17, '#ffffff');
+      bg += pr.box3(68, 156, 188, 52, 15.5, '#9b59b6');
+      bg += pr.box3(272, 28, 60, 26, 52, '#a9743f');
+      // 中央：樓梯（下樓口）＋小書房桌
+      bg += stairSvgAt(pr, 500);
+      const ndesk = pr.boxFaces(420, 158, 92, 30, 14, '#a9743f');
+      bg += ndesk.back; front += ndesk.front;
+      bg += pr.box3(448, 192, 36, 10, 22, '#6d4c41');
+      bg += rectPoly(434, 164, 10, 18, 14.5, '#e74c3c');
+      bg += rectPoly(446, 166, 8, 14, 14.5, '#4aa3df');
+      // 我的床（同舊 1F 幾何）＋床頭櫃＋小燈＋書櫃
+      bg += pr.box3(792, 114, 162, 10, 30, '#6d4c41');
+      bg += pr.box3(792, 124, 162, 84, 13, '#ffffff');
+      bg += pr.box3(806, 130, 68, 22, 17, '#ffffff');
+      bg += pr.box3(792, 156, 162, 52, 15.5, '#4aa3df');
+      bg += pr.box3(966, 118, 34, 26, 20, '#a9743f');
+      const nl0 = pr.P(983, 130, 20), nl1 = pr.P(983, 130, 38);
+      bg += '<line x1="' + nl0.x.toFixed(1) + '" y1="' + nl0.y.toFixed(1) + '" x2="' + nl1.x.toFixed(1) + '" y2="' + nl1.y.toFixed(1) + '" stroke="#5f5f66" stroke-width="2.5"/>';
+      bg += pr.planeCircle(983, 130, 0, 20, '#ffd166', 0.22);
+      bg += pr.box3(1108, 28, 38, 24, 54, '#8d5a2c');
+      [[1112, '#e74c3c'], [1120, '#4aa3df'], [1128, '#6fbb72']].forEach(([sx, sc2]) => { bg += faceRect(sx, 52.5, 6, 30, 48, sc2); bg += faceRect(sx, 52.5, 6, 6, 22, sc2); });
+      bg += txt(pr.P(20, 292, 0), '爸媽房', 14, '#5f5f66', 0.65);
+      bg += txt(pr.P(396, 292, 0), '樓梯間・小書房', 14, '#a9743f', 0.65);
+      bg += txt(pr.P(800, 292, 0), '我的房間', 14, '#2e5f8a', 0.65);
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + HOME_PW + ' 300" style="position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      const pb = '<g class="sleep-form-anim">'
+        + rectPoly(66, 168, 192, 44, 15.5, '#9b59b6', ' stroke="#182042" stroke-width="1.6"')
+        + rectPoly(66, 168, 192, 12, 15.6, 'rgba(255,255,255,0.25)')
+        + [[110, 186], [165, 194], [220, 188]].map(([cx, cz]) => { const c = pr.P(cx, cz, 16); return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="rgba(255,255,255,0.3)"/>'; }).join('') + '</g>';
+      const yb = '<g class="sleep-form-anim">'
+        + rectPoly(790, 168, 164, 44, 15.5, '#4aa3df', ' stroke="#182042" stroke-width="1.6"')
+        + rectPoly(790, 182, 164, 5, 15.6, 'rgba(255,255,255,0.35)')
+        + rectPoly(790, 196, 164, 5, 15.6, 'rgba(255,255,255,0.35)') + '</g>';
+      return svgOpen('home2-bg25', 0) + bg + '</svg>'
+        + svgOpen('home2-front25', 196) + front + '</svg>'
+        + '<svg id="parents-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:260; pointer-events:none;">' + pb + '</svg>'
+        + '<svg id="player-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:600; pointer-events:none;">' + yb + '</svg>';
+    }
+    let _home2PanManual = null;
+    let _home2ManualUntil = 0;
+    let _home2PanCur = 0; let _home2PanT = 0;
+    let _home2WasIn = false;
+    function applyHome2Pan(pan, sc) {
+      const rooms = document.getElementById('home2-rooms');
+      if (!rooms) return;
+      _home2PanCur = pan;
+      rooms.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, 0px) scale(' + sc.toFixed(3) + ')';
+    }
+    function updateHome2Pan(focusX) {
+      const stage = document.getElementById('home2-stage');
+      if (!stage) return;
+      const vpW = stage.clientWidth, vpH = stage.clientHeight;
+      if (!vpW || !vpH) return;
+      const sc = vpH / 300;
+      const visible = vpW / sc;
+      if (_home2PanManual !== null) {
+        if (Date.now() > _home2ManualUntil) _home2PanManual = null;
+        else { applyHome2Pan(_home2PanManual, sc); return; }
+      }
+      if (typeof focusX !== 'number') focusX = 565;
+      let pan;
+      if (visible >= HOME_PW) pan = (HOME_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(HOME_PW - visible, focusX - visible / 2));
+      const _nowH2 = performance.now(); const _dtH2 = _home2PanT ? (_nowH2 - _home2PanT) : 16; _home2PanT = _nowH2;
+      applyHome2Pan(smoothPanStep(_home2PanCur, pan, focusX, visible, _dtH2), sc);
+    }
+    function ensureHome2Interior() {
+      if (document.getElementById('home2-stage')) return;
+      const host = document.querySelector('#landmark-home .island-platform-top') || document.querySelector('#landmark-home .island-platform') || document.getElementById('landmark-home');
+      if (!host) return;
+      const stage = document.createElement('div');
+      stage.id = 'home2-stage';
+      stage.innerHTML = '<div id="home2-rooms">' + buildHome2RoomsHTML() + '</div>';
+      host.appendChild(stage);
+      let drag = null;
+      const activePtrs = new Set();
+      stage.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        activePtrs.add(e.pointerId);
+        if (activePtrs.size > 1) { drag = null; const rooms = document.getElementById('home2-rooms'); if (rooms) rooms.style.transition = ''; return; }
+        drag = { x: e.clientX, pan: (_home2PanManual !== null ? _home2PanManual : _home2PanCur), moved: 0 };
+        _home2PanManual = drag.pan;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        const rooms = document.getElementById('home2-rooms');
+        if (rooms) rooms.style.transition = 'none';
+      });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const sc = (stage.clientHeight || 179) / 300;
+        const visible = (stage.clientWidth || 278) / sc;
+        const maxPan = Math.max(0, HOME_PW - visible);
+        const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
+        drag.moved += Math.abs(next - _home2PanManual);
+        _home2ManualUntil = Date.now() + 30000;
+        _home2PanManual = next;
+        applyHome2Pan(_home2PanManual, sc);
+      });
+      const endDrag = e => {
+        activePtrs.delete(e.pointerId);
+        _home2ManualUntil = Date.now() + 30000;
+        if (!drag) return;
+        const wasDrag = drag.moved > 0.5;
+        drag = null;
+        const rooms = document.getElementById('home2-rooms');
+        if (rooms) rooms.style.transition = '';
+        if (wasDrag) stage.addEventListener('click', ev2 => { ev2.stopPropagation(); ev2.preventDefault(); }, { capture: true, once: true });
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('dblclick', () => { _home2PanManual = null; });
+    }
+    function applyHomeFloors(active) { // v9.66 住家樓層疊層（拍板透明制：目前層 1 / 樓下 0.35 / 樓上 0.22）
+      const spec = [['home-stage', 1], ['home2-stage', 2]];
+      for (const [id, f] of spec) {
+        const st = document.getElementById(id);
+        if (!st) continue;
+        const rel = f - active;
+        if (st.dataset.hf === String(rel)) continue;
+        st.dataset.hf = String(rel);
+        st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
+        st.style.zIndex = rel === 0 ? '32' : '29';
+        st.style.transform = rel === 0 ? '' : 'translateY(' + (rel < 0 ? 10 : -10) + 'px) scale(0.97)';
+        st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+      }
+    }
+    function updateHome2Stage() {
+      ensureHome2Interior();
+      const stage = document.getElementById('home2-stage');
+      if (!stage) return;
+      const rooms = document.getElementById('home2-rooms');
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && currentState === 'sleeping' && !gameState.isCommuting;
+      if (playerIn !== _home2WasIn) { _home2PanManual = null; _home2WasIn = playerIn; }
       const cw = document.getElementById('char-wrap');
       if (playerIn) {
         if (cw && rooms && cw.parentNode !== rooms) {
@@ -1478,32 +1684,14 @@
         const map = document.getElementById('town-map');
         if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
       }
-      if (cw && playerIn) cw.style.zIndex = (currentState === 'sleeping' || ((currentState === 'dinner' || currentState === 'studying') && !gameState._playerWalking)) ? '500' : '975'; // v9.30 住家同規（比照其他五棟）：坐定維持夾層，走動/站立在傢俱前景之上
-      { // v9.30 主角自己的晚餐盤（比照餐廳 #player-rest-plate）：坐上晚餐座位才出現，食物置頂 z990
-        let pp = document.getElementById('player-dinner-plate');
-        const showP = playerIn && currentState === 'dinner' && !gameState._playerWalking;
-        if (showP && rooms) {
-          if (!pp) { pp = document.createElement('div'); pp.id = 'player-dinner-plate'; pp.className = 'dish-plate'; pp.innerHTML = icoSvg('curry'); rooms.appendChild(pp); }
-          const _pdp = HOME_PROJ.P(gameState.currentX || 655, 190, 14);
-          pp.style.display = 'block'; pp.style.left = (_pdp.x - 9) + 'px'; pp.style.top = (_pdp.y - 9) + 'px'; pp.style.zIndex = '990';
-        } else if (pp) pp.style.display = 'none';
-      }
-      // 室內鏡頭：主角在家跟主角，否則看在家的爸媽，再否則停客廳
+      if (cw && playerIn) cw.style.zIndex = '500';
       let focus = HOME_PROJ.P(565, 200, 0).x;
-      if (playerIn) focus = HOME_PROJ.P(gameState.currentX || 500, gameState.currentY || 212, 0).x;
+      if (playerIn) focus = HOME_PROJ.P(gameState.currentX || 840, gameState.currentY || 182, 0).x;
       else {
-        const par = (gameState.npcs || []).find(n => n.kind === 'parent' && n.inside);
+        const par = (gameState.npcs || []).find(n => n.kind === 'parent' && n.inside && n.floor === 'home2');
         if (par) focus = HOME_PROJ.P(par.x, par.y, 0).x;
       }
-      updateHomePan(focus);
-      const pBlanket = document.getElementById('player-blanket'); // v9.15：本人躺床上 + 棉被蓋在上層
-      if (pBlanket) pBlanket.style.display = (currentState === 'sleeping' && currentLoc === 'home') ? 'block' : 'none';
-      const parBlanket = document.getElementById('parents-blanket');
-      if (parBlanket) {
-        const anySleep = (gameState.npcs || []).some(n => n.kind === 'parent' && n.inside && n.state === 'sleeping');
-        const want = anySleep ? 'block' : 'none';
-        if (parBlanket.style.display !== want) parBlanket.style.display = want;
-      }
+      updateHome2Pan(focus);
     }
 
     function checkHomeDinner() {
@@ -1512,7 +1700,7 @@
       const parents = (gameState.npcs || []).filter(n => n.kind === 'parent');
       if (!phase) {
         parents.forEach(n => {
-          if (n.atDinner) { n.atDinner = false; n.path = [npcDef(n.key).homeSpot]; n.arrive = 'athome'; n.state = 'path'; }
+          if (n.atDinner) { n.atDinner = false; n.path = n.floor === 'home2' ? [stairWpHome('home'), npcDef(n.key).homeSpot] : [npcDef(n.key).homeSpot]; n.arrive = 'athome'; n.state = 'path'; } // v9.66 晚餐結束在 2F 先下樓
         });
         return;
       }
@@ -1631,6 +1819,7 @@
                 npc.path.shift();
                 if (wp.door === 'in') { if (wp.loc) npc.insideLoc = wp.loc; else npc.inside = true; npc.x = wp.ix; npc.y = wp.iy; }
                 else if (wp.door === 'out') { if (wp.loc) npc.insideLoc = null; else npc.inside = false; npc.x = wp.wx; npc.y = wp.wy; }
+                if (wp.floor) npc.floor = wp.floor; else if (wp.door === 'out' && !wp.loc) npc.floor = null; // v9.66 住家樓層旗標（爸媽上下樓）
                 if (npc.path.length === 0) { arrived = true; break; }
                 continue;
               }
@@ -1793,10 +1982,10 @@
         if (npc.insideLoc === 'gym' && !document.getElementById('gym-rooms')) ensureGymInterior(); // v9.27
         const el = document.getElementById('npc-' + npc.key);
         if (el) { // v9.14：室內外容器切換；v9.17：insideLoc（一般 NPC 的 inside 未初始化，不能當守衛）
-          const _tgt = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? document.getElementById(INTERIORS[npc.insideLoc].roomsId) : (npc.inside ? document.getElementById('home-rooms') : document.getElementById('npc-layer'));
+          const _tgt = (npc.insideLoc && INTERIORS[npc.insideLoc]) ? document.getElementById(INTERIORS[npc.insideLoc].roomsId) : (npc.inside ? document.getElementById(npc.floor === 'home2' ? 'home2-rooms' : 'home-rooms') : document.getElementById('npc-layer'));
           if (_tgt && el.parentNode !== _tgt) _tgt.appendChild(el);
           // v9.17.1：室內人物補償場景縮放，與大地圖同尺寸（腳底為原點）
-          if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms' || _tgt.id === 'school-rooms' || _tgt.id === 'lib-rooms' || _tgt.id === 'gym-rooms')) {
+          if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms' || _tgt.id === 'school-rooms' || _tgt.id === 'lib-rooms' || _tgt.id === 'gym-rooms' || _tgt.id === 'club-rooms' || _tgt.id === 'home2-rooms')) {
             const _st = _tgt.parentNode;
             const _tf = 'scale(' + (300 / ((_st && _st.clientHeight) || 179)).toFixed(3) + ')';
             if (el.style.transform !== _tf) { el.style.transform = _tf; el.style.transformOrigin = '50% 100%'; }
@@ -2433,6 +2622,13 @@
       let o = '';
       for (let i = 0; i < 5; i++) o += pr.box3(1046, 108 - i * 16, 78, 16, 5 + i * 6, i % 2 ? '#a9743f' : '#c98d54');
       const lp = pr.P(1085, 0, 128);
+      o += '<text x="' + lp.x.toFixed(1) + '" y="' + lp.y.toFixed(1) + '" font-size="12" font-weight="900" fill="#8a6248" text-anchor="middle">樓 梯</text>';
+      return o;
+    }
+    function stairSvgAt(pr, x0) { // v9.66 參數化樓梯（住家 x0=500；學校版 stairSvg 為 x0=1046 專用）
+      let o = '';
+      for (let i = 0; i < 5; i++) o += pr.box3(x0, 108 - i * 16, 78, 16, 5 + i * 6, i % 2 ? '#a9743f' : '#c98d54');
+      const lp = pr.P(x0 + 39, 0, 128);
       o += '<text x="' + lp.x.toFixed(1) + '" y="' + lp.y.toFixed(1) + '" font-size="12" font-weight="900" fill="#8a6248" text-anchor="middle">樓 梯</text>';
       return o;
     }

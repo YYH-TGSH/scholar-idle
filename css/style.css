@@ -3676,7 +3676,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
 #lib-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3e2c7; cursor:grab; touch-action:none; }
 #club-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ead9; cursor:grab; touch-action:none; }
-#school-stage, #lib-stage, #club-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
+#school-stage, #lib-stage, #club-stage, #home-stage, #home2-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
 #gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#5da85f; cursor:grab; touch-action:none; }
 #gym-stage:active { cursor:grabbing; }
 #gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
@@ -3803,7 +3803,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 @keyframes steam-drift { 0% { transform: translateY(0); opacity: 0; } 35% { opacity: 0.85; } 100% { transform: translateY(-7px); opacity: 0; } }
 
 /* ===== v9.14 捲動式室內 ===== */
-#home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#3c2415; } /* v9.41 室內底色公式：該場景地板色壓暗一階（木地板→深棕），不再用半夜藍例外 */
+#home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#3c2415; }
+#home2-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f5e6da; cursor:grab; touch-action:none; } /* v9.66 住家 2F */ /* v9.41 室內底色公式：該場景地板色壓暗一階（木地板→深棕），不再用半夜藍例外 */
 #home-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 .sleep-form { position:absolute; z-index:150; pointer-events:none; }
 

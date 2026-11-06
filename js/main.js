@@ -512,6 +512,7 @@
       // 3. 計算開關燈鎖定狀態
       calculateLocks();
       if (typeof updateHomeStage === 'function') updateHomeStage(); // v9.14
+      if (typeof updateHome2Stage === 'function') updateHome2Stage(); // v9.66 住家 2F
       if (typeof updateStoreStage === 'function') updateStoreStage(); // v9.17
       if (typeof updateRestStage === 'function') updateRestStage(); // v9.18
       if (typeof updateSchoolStage === 'function') updateSchoolStage(); // v9.21
@@ -1346,7 +1347,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.65.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.66.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();
