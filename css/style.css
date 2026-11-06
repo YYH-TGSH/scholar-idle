@@ -3685,7 +3685,7 @@ input, select, textarea { border-radius: 14px !important; }
 #gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #gym-sky, #gym-floods { transition: opacity 1.2s ease; }
 .shot-ball { position:absolute; width:20px; height:20px; font-size: 1rem; line-height:20px; text-align:center; z-index:990; pointer-events:none; }
-.gym-shoot-btn { position:absolute; left:866px; top:238px; z-index:980; padding:5px 10px; border-radius:999px; border:2px solid var(--ink2); background:#ffd93b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow:0 2px 0 var(--ink2); animation: libGlow 2.2s ease-in-out infinite; }
+.gym-shoot-btn { position:absolute; left:1006px; top:212px; z-index:980; padding:5px 10px; border-radius:999px; border:2px solid var(--ink2); background:#ffd93b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow:0 2px 0 var(--ink2); animation: libGlow 2.2s ease-in-out infinite; }
 .gym-shoot-btn:active { transform: translateY(2px); box-shadow:none; }
 #lib-stage:active { cursor:grabbing; }
 #lib-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
@@ -3943,3 +3943,7 @@ input, select, textarea { border-radius: 14px !important; }
 /* v9.53 學校/圖書館 2.5D：投影後場景寬 1340（鏡頭/拖曳以 SCHOOL_PW/LIB_PW 計） */
 #school-rooms { width: 1340px; }
 #lib-rooms { width: 1340px; }
+
+/* v9.54 超商/操場 2.5D：投影後場景寬 1340（鏡頭/拖曳以 STORE_PW/GYM_PW 計） */
+#store-rooms { width: 1340px; }
+#gym-rooms { width: 1340px; }

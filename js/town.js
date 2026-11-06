@@ -1967,86 +1967,84 @@
 
 
     // ================= v9.17 超商大場景（比照住家：大室內塞進框框、室內鏡頭、前景圖層） =================
-    const STORE_ROOMS_HTML = `
-<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
-  <rect x="0" y="58" width="1150" height="242" fill="#f3ead9"/>
-  <g stroke="#e2d3b6" stroke-width="2">
-    <line x1="0" y1="106" x2="1150" y2="106"/><line x1="0" y1="154" x2="1150" y2="154"/><line x1="0" y1="202" x2="1150" y2="202"/><line x1="0" y1="250" x2="1150" y2="250"/>
-    <line x1="150" y1="58" x2="150" y2="300"/><line x1="430" y1="58" x2="430" y2="300"/><line x1="710" y1="58" x2="710" y2="300"/><line x1="990" y1="58" x2="990" y2="300"/>
-  </g>
-  <rect x="0" y="0" width="1150" height="58" fill="#fff7ea"/>
-  <rect x="0" y="48" width="1150" height="10" fill="#22b573"/>
-  <text x="26" y="36" font-size="17" fill="#14532d" font-family="'DotGothic16', monospace" font-weight="900">24H MART 歡迎光臨</text>
-  <text x="986" y="36" font-size="12" fill="#8a5a33" font-family="'DotGothic16', monospace" font-weight="900">冰櫃・麵包・關東煮</text>
-  <g>
-    <rect x="330" y="6" width="370" height="50" fill="#9fb6c9" stroke="#182042" stroke-width="2"/>
-    <rect x="336" y="10" width="174" height="42" fill="#dff3ff" opacity="0.9"/>
-    <rect x="518" y="10" width="174" height="42" fill="#dff3ff" opacity="0.9"/>
-    <g>
-      <rect x="342" y="16" width="12" height="16" fill="#e74c3c"/><rect x="358" y="16" width="12" height="16" fill="#2ed573"/><rect x="374" y="16" width="12" height="16" fill="#f1c40f"/><rect x="390" y="16" width="12" height="16" fill="#3498db"/><rect x="406" y="16" width="12" height="16" fill="#9b59b6"/><rect x="422" y="16" width="12" height="16" fill="#ffa502"/>
-      <rect x="342" y="36" width="12" height="14" fill="#1abc9c"/><rect x="358" y="36" width="12" height="14" fill="#e67e22"/><rect x="374" y="36" width="12" height="14" fill="#e84393"/><rect x="390" y="36" width="12" height="14" fill="#2ecc71"/><rect x="406" y="36" width="12" height="14" fill="#f39c12"/><rect x="422" y="36" width="12" height="14" fill="#e74c3c"/>
-      <rect x="524" y="16" width="12" height="16" fill="#3498db"/><rect x="540" y="16" width="12" height="16" fill="#e74c3c"/><rect x="556" y="16" width="12" height="16" fill="#2ed573"/><rect x="572" y="16" width="12" height="16" fill="#f1c40f"/><rect x="588" y="16" width="12" height="16" fill="#ffa502"/><rect x="604" y="16" width="12" height="16" fill="#9b59b6"/>
-      <rect x="524" y="36" width="12" height="14" fill="#e67e22"/><rect x="540" y="36" width="12" height="14" fill="#1abc9c"/><rect x="556" y="36" width="12" height="14" fill="#e84393"/><rect x="572" y="36" width="12" height="14" fill="#2ecc71"/><rect x="588" y="36" width="12" height="14" fill="#f39c12"/><rect x="604" y="36" width="12" height="14" fill="#3498db"/>
-    </g>
-    <rect x="726" y="6" width="150" height="50" fill="#f7c8d8" stroke="#182042" stroke-width="2"/>
-    <text x="748" y="38" font-size="15" fill="#9d2c54" font-family="'DotGothic16', monospace" font-weight="900">🍦 冰品</text>
-    <rect x="892" y="6" width="228" height="50" fill="#ffe9b8" stroke="#182042" stroke-width="2"/>
-    <text x="922" y="38" font-size="15" fill="#8a5a33" font-family="'DotGothic16', monospace" font-weight="900">🥐 現烤麵包</text>
-  </g>
-  <g>
-    <rect x="380" y="116" width="180" height="52" fill="#1f7a4d" stroke="#182042" stroke-width="2.5"/>
-    <rect x="380" y="116" width="180" height="13" fill="#0d5c38"/>
-    <text x="392" y="127" font-size="9" fill="#ffffff" font-family="'DotGothic16', monospace" font-weight="900">零食 SNACKS</text>
-    <line x1="380" y1="143" x2="560" y2="143" stroke="#0d5c38" stroke-width="2"/><line x1="380" y1="156" x2="560" y2="156" stroke="#0d5c38" stroke-width="2"/>
-    <rect x="388" y="132" width="14" height="9" fill="#e74c3c"/><rect x="406" y="132" width="14" height="9" fill="#3498db"/><rect x="424" y="132" width="14" height="9" fill="#f1c40f"/><rect x="442" y="132" width="14" height="9" fill="#9b59b6"/><rect x="460" y="132" width="14" height="9" fill="#e84393"/><rect x="478" y="132" width="14" height="9" fill="#2ecc71"/><rect x="496" y="132" width="14" height="9" fill="#ffa502"/><rect x="514" y="132" width="14" height="9" fill="#00cec9"/>
-    <rect x="388" y="146" width="14" height="9" fill="#f39c12"/><rect x="406" y="146" width="14" height="9" fill="#e74c3c"/><rect x="424" y="146" width="14" height="9" fill="#2ecc71"/><rect x="442" y="146" width="14" height="9" fill="#3498db"/><rect x="460" y="146" width="14" height="9" fill="#ffa502"/><rect x="478" y="146" width="14" height="9" fill="#9b59b6"/><rect x="496" y="146" width="14" height="9" fill="#e84393"/><rect x="514" y="146" width="14" height="9" fill="#f1c40f"/>
-    <rect x="580" y="116" width="180" height="52" fill="#1f7a4d" stroke="#182042" stroke-width="2.5"/>
-    <rect x="580" y="116" width="180" height="13" fill="#0d5c38"/>
-    <text x="592" y="127" font-size="9" fill="#ffffff" font-family="'DotGothic16', monospace" font-weight="900">泡麵・飲料</text>
-    <line x1="580" y1="143" x2="760" y2="143" stroke="#0d5c38" stroke-width="2"/><line x1="580" y1="156" x2="760" y2="156" stroke="#0d5c38" stroke-width="2"/>
-    <rect x="588" y="132" width="14" height="9" fill="#e67e22"/><rect x="606" y="132" width="14" height="9" fill="#e74c3c"/><rect x="624" y="132" width="14" height="9" fill="#f1c40f"/><rect x="642" y="132" width="14" height="9" fill="#3498db"/><rect x="660" y="132" width="14" height="9" fill="#2ed573"/><rect x="678" y="132" width="14" height="9" fill="#9b59b6"/><rect x="696" y="132" width="14" height="9" fill="#ffa502"/><rect x="714" y="132" width="14" height="9" fill="#00cec9"/>
-    <rect x="588" y="146" width="14" height="9" fill="#9b59b6"/><rect x="606" y="146" width="14" height="9" fill="#f39c12"/><rect x="624" y="146" width="14" height="9" fill="#e84393"/><rect x="642" y="146" width="14" height="9" fill="#2ecc71"/><rect x="660" y="146" width="14" height="9" fill="#e74c3c"/><rect x="678" y="146" width="14" height="9" fill="#3498db"/><rect x="696" y="146" width="14" height="9" fill="#f1c40f"/><rect x="714" y="146" width="14" height="9" fill="#e67e22"/>
-  </g>
-  <rect x="400" y="228" width="300" height="16" fill="#b07a45" stroke="#182042" stroke-width="2"/>
-  <text x="412" y="240" font-size="10" fill="#ffffff" font-family="'DotGothic16', monospace" font-weight="900">本週特價</text>
-  <rect x="16" y="214" width="396" height="14" fill="#a5713d" stroke="#182042" stroke-width="2"/>
-  <rect x="24" y="268" width="380" height="28" fill="#bfe3ff" opacity="0.85" stroke="#182042" stroke-width="2"/>
-  <line x1="119" y1="268" x2="119" y2="296" stroke="#182042" stroke-width="2"/><line x1="214" y1="268" x2="214" y2="296" stroke="#182042" stroke-width="2"/><line x1="309" y1="268" x2="309" y2="296" stroke="#182042" stroke-width="2"/>
-  <circle cx="110" cy="262" r="10" fill="#ef5350" stroke="#182042" stroke-width="2"/><circle cx="200" cy="262" r="10" fill="#ef5350" stroke="#182042" stroke-width="2"/><circle cx="290" cy="262" r="10" fill="#ef5350" stroke="#182042" stroke-width="2"/>
-  <rect x="796" y="100" width="328" height="14" fill="#e8edf2" stroke="#182042" stroke-width="2"/>
-  <rect x="505" y="272" width="120" height="28" fill="#22b573" opacity="0.5"/>
-  <text x="540" y="290" font-size="11" fill="#14532d" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
-  <circle cx="36" cy="86" r="12" fill="#2ed573"/><circle cx="1114" cy="86" r="12" fill="#2ed573"/>
-</svg>
-<svg id="store-front-back" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:940; pointer-events:none;">
-  <rect x="16" y="228" width="396" height="18" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
-  <line x1="16" y1="228" x2="412" y2="228" stroke="#caa06a" stroke-width="2"/>
-  <rect x="796" y="114" width="328" height="24" fill="#ffffff" stroke="#182042" stroke-width="2.5"/>
-  <rect x="796" y="124" width="328" height="6" fill="#22b573"/>
-  <rect x="896" y="100" width="24" height="14" fill="#334155" stroke="#182042" stroke-width="1.5"/>
-  <rect x="898" y="102" width="20" height="9" fill="#38bdf8"/>
-  <rect x="950" y="100" width="24" height="14" fill="#334155" stroke="#182042" stroke-width="1.5"/>
-  <rect x="952" y="102" width="20" height="9" fill="#38bdf8"/>
-  <rect x="806" y="96" width="44" height="18" fill="#d97706" stroke="#182042" stroke-width="1.5"/>
-  <text x="810" y="109" font-size="9" fill="#fef08a" font-family="'DotGothic16', monospace" font-weight="900">🍢關東煮</text>
-</svg>
-<svg id="store-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="796" y="138" width="328" height="30" fill="#ffffff"/>
-  <line x1="796" y1="138" x2="796" y2="168" stroke="#182042" stroke-width="2.5"/><line x1="1124" y1="138" x2="1124" y2="168" stroke="#182042" stroke-width="2.5"/><line x1="796" y1="168" x2="1124" y2="168" stroke="#182042" stroke-width="2.5"/>
-  <text x="922" y="160" font-size="11" fill="#14532d" font-family="'DotGothic16', monospace" font-weight="900">歡迎光臨</text>
-</svg>
-<svg id="store-front2" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:960; pointer-events:none;">
-  <rect x="16" y="246" width="396" height="20" fill="#8a5a33"/>
-  <line x1="16" y1="246" x2="16" y2="266" stroke="#182042" stroke-width="2"/><line x1="412" y1="246" x2="412" y2="266" stroke="#182042" stroke-width="2"/><line x1="16" y1="266" x2="412" y2="266" stroke="#182042" stroke-width="2"/>
-</svg>
-<div class="store-chip" style="left:424px; top:192px;" onclick="noodleHitClick(event)">🍜 窗邊泡麵</div>`;
+    // ================= v9.54 超商 2.5D 化（報告批次 4a）：場景改投影生成 =================
+    // 分層：#store-bg25＋#store-front25（z950 櫃檯南面）＋#store-front25b（z960 窗邊吧台南面）——
+    // 店員 945＜櫃檯 950、窗邊客 955＜吧台 960、排隊 975 在最上，舊三帶 (940/950/960) 語意原樣保留，舊層退役。
+    // 櫃檯 (796,100,328x24,h13)：店員崗位 z150 在南緣之南 26（站姿南面淨空公式 h<=25-26*0.378-c）；吧台 (16,224,396x20,h11)：窗邊座 z262 在南緣之南 18。
+    const STORE_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const STORE_PW = 1340;
+    PROJ.registerRooms('store-rooms', STORE_PROJ);
+    function buildStoreRoomsHTML() {
+      const pr = STORE_PROJ, WH = 170;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
+      const PAL = ['#e74c3c', '#2ed573', '#f1c40f', '#3498db', '#9b59b6', '#ffa502', '#1abc9c', '#e67e22', '#e84393', '#2ecc71', '#f39c12', '#00cec9'];
+      const goodsRow = (x0, n, zF, hBot, hTop, seed, wdt) => { let o = ''; for (let i = 0; i < n; i++) { o += faceRect(x0 + i * ((wdt || 14) + 4), zF, wdt || 14, hBot, hTop - ((seed + i * 7) % 4), PAL[(seed + i) % 12]); } return o; };
+      let bg = '', front = '', frontB = '';
+      // 牆＋地板磚
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#fff7ea');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#fff7ea', 0.85));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#f3ead9');
+      let lines = '';
+      for (let z = 48; z < 300; z += 48) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
+      [150, 430, 710, 990].forEach(x => { const a = pr.P(x, 0, 0), b = pr.P(x, 300, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; });
+      bg += '<g stroke="#e2d3b6" stroke-width="2">' + lines + '</g>';
+      // 招牌帶＋牆上櫃：飲料冰櫃/冰品/麵包
+      bg += faceRect(0, 0.6, 1150, 114, 124, '#22b573');
+      bg += txt(pr.P(26, 0, 142), '24H MART 歡迎光臨', 17, '#14532d');
+      bg += txt(pr.P(986, 0, 142), '冰櫃・麵包・關東煮', 12, '#8a5a33');
+      bg += pr.wallDecoN(330, 700, 114, 168, '#9fb6c9');
+      bg += faceRect(336, 0.6, 174, 120, 162, 'rgba(223,243,255,0.9)') + faceRect(518, 0.6, 174, 120, 162, 'rgba(223,243,255,0.9)');
+      bg += goodsRow(342, 6, 0.7, 126, 140, 0, 12) + goodsRow(342, 6, 0.7, 144, 156, 5, 12) + goodsRow(524, 6, 0.7, 126, 140, 3, 12) + goodsRow(524, 6, 0.7, 144, 156, 8, 12);
+      bg += pr.wallDecoN(726, 876, 114, 168, '#f7c8d8');
+      bg += txt(pr.P(748, 0, 140), '🍦 冰品', 15, '#9d2c54');
+      bg += pr.wallDecoN(892, 1120, 114, 168, '#ffe9b8');
+      bg += txt(pr.P(922, 0, 140), '🥐 現烤麵包', 15, '#8a5a33');
+      bg += pr.planeCircle(36, 40, 0, 12, '#2ed573');
+      bg += pr.planeCircle(1114, 40, 0, 12, '#2ed573');
+      // 中央貨架 x2（全 bg：走道在南、無人坐其後）
+      [[380, '零食 SNACKS', 2], [580, '泡麵・飲料', 7]].forEach(([sx, label, seed]) => {
+        bg += pr.box3(sx, 100, 180, 34, 42, '#1f7a4d');
+        bg += faceRect(sx, 134.6, 180, 33, 42, '#0d5c38');
+        bg += txt(pr.P(sx + 12, 135, 37), label, 9, '#ffffff');
+        bg += goodsRow(sx + 8, 8, 134.6, 20, 29, seed) + goodsRow(sx + 8, 8, 134.6, 6, 15, seed + 4);
+      });
+      // 特價桌
+      bg += pr.box3(400, 216, 300, 22, 12, '#b07a45');
+      bg += faceRect(400, 238.6, 120, 2, 10, '#8a5a33');
+      bg += txt(pr.P(412, 239, 7), '本週特價', 10, '#ffffff');
+      // 窗邊吧台（上面進 bg、南面進 frontB z960）＋窗玻璃帶＋吧台椅
+      const bar = pr.boxFaces(16, 224, 396, 20, 11, '#8a5a33');
+      bg += bar.back; frontB += bar.front;
+      bg += poly([pr.P(24, 268, 0), pr.P(404, 268, 0), pr.P(404, 296, 0), pr.P(24, 296, 0)], 'rgba(191,227,255,0.85)');
+      [119, 214, 309].forEach(x => { const a = pr.P(x, 268, 0), b = pr.P(x, 296, 0); bg += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>'; });
+      [110, 200, 290].forEach(x => { bg += pr.planeCircle(x, 262, 0, 10, '#ef5350'); });
+      // 收銀櫃檯（上面進 bg、南面進 front z950）＋收銀機/關東煮
+      const counter = pr.boxFaces(796, 100, 328, 24, 13, '#ffffff');
+      bg += counter.back; front += counter.front;
+      front += txt(pr.P(922, 124.6, 6), '歡迎光臨', 11, '#14532d');
+      bg += pr.box3(896, 102, 24, 10, 22, '#334155');
+      bg += faceRect(898, 112.6, 20, 12, 20, '#38bdf8');
+      bg += pr.box3(950, 102, 24, 10, 22, '#334155');
+      bg += faceRect(952, 112.6, 20, 12, 20, '#38bdf8');
+      bg += pr.box3(806, 102, 44, 16, 18, '#d97706');
+      bg += txt(pr.P(810, 119, 13), '🍢關東煮', 9, '#fef08a');
+      // 入口墊
+      bg += pr.box3(505, 264, 120, 28, 2, '#22b573');
+      bg += txt(pr.P(540, 283, 4), '入 口', 11, '#14532d');
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + STORE_PW + ' 300" style="position:absolute; left:0; top:0; width:' + STORE_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      return svgOpen('store-bg25', 0) + bg + '</svg>' + svgOpen('store-front25', 950) + front + '</svg>' + svgOpen('store-front25b', 960) + frontB + '</svg>'
+        + '<div class="store-chip" style="left:452px; top:214px;" onclick="noodleHitClick(event)">🍜 窗邊泡麵</div>';
+    }
+
     function ensureStoreInterior() {
       if (document.getElementById('store-stage')) return;
       const host = document.querySelector('#landmark-store .island-platform-top') || document.querySelector('#landmark-store .island-platform') || document.getElementById('landmark-store');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'store-stage';
-      stage.innerHTML = '<div id="store-rooms">' + STORE_ROOMS_HTML + '</div>';
+      stage.innerHTML = '<div id="store-rooms">' + buildStoreRoomsHTML() + '</div>';
       host.appendChild(stage);
       let drag = null;
       const activePtrs = new Set();
@@ -2064,7 +2062,7 @@
         if (!drag) return;
         const sc = (stage.clientHeight || 179) / 300;
         const visible = (stage.clientWidth || 278) / sc;
-        const maxPan = Math.max(0, 1150 - visible);
+        const maxPan = Math.max(0, STORE_PW - visible);
         const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
         drag.moved += Math.abs(next - _storePanManual);
         _storeManualUntil = Date.now() + 30000;
@@ -2108,8 +2106,8 @@
       }
       if (typeof focusX !== 'number') focusX = 935;
       let pan;
-      if (visible >= 1150) pan = (1150 - visible) / 2;
-      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      if (visible >= STORE_PW) pan = (STORE_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(STORE_PW - visible, focusX - visible / 2));
       const _nowStore = performance.now(); const _dtStore = _storePanT ? (_nowStore - _storePanT) : 16; _storePanT = _nowStore;
       applyStorePan(smoothPanStep(_storePanCur, pan, focusX, visible, _dtStore), sc);
     }
@@ -2139,15 +2137,16 @@
         const showN = gameState.noodleUntil && gameState.noodleSeat && playerIn;
         if (showN && rooms) {
           if (!np2) { np2 = document.createElement('div'); np2.id = 'player-noodle-plate'; np2.className = 'dish-plate'; np2.textContent = '🍜'; rooms.appendChild(np2); }
-          np2.style.display = 'block'; np2.style.left = (gameState.noodleSeat.x - 9) + 'px'; np2.style.top = (gameState.noodleSeat.y - 40) + 'px'; np2.style.zIndex = '990'; // v9.20 食物置頂
+          const _np = STORE_PROJ.P(gameState.noodleSeat.x, 246, 11);
+          np2.style.display = 'block'; np2.style.left = (_np.x - 9) + 'px'; np2.style.top = (_np.y - 9) + 'px'; np2.style.zIndex = '990'; // v9.20 食物置頂（v9.54 改放投影吧台面）
         } else if (np2) np2.style.display = 'none';
       }
       if (cw && playerIn) cw.style.zIndex = (currentState === 'working') ? String(Z_LAYER.POST_CLIP) : (gameState.noodleUntil ? String(Z_LAYER.SEATED_CLIP) : '975'); // v9.45 主角打工站櫃檯兩帶之間(945)、窗邊吃麵在吧台兩帶之間(955)，臉不再沉到櫃檯後 // v9.20.1 站櫃檯後/窗邊吃麵維持夾層；走動/站立在傢俱前景之上
-      let focus = 935;
-      if (playerIn) focus = gameState.currentX || 565;
+      let focus = STORE_PROJ.P(935, 200, 0).x;
+      if (playerIn) focus = STORE_PROJ.P(gameState.currentX || 565, gameState.currentY || 212, 0).x;
       else {
         const inner = (gameState.npcs || []).find(n => n.insideLoc === 'store');
-        if (inner) focus = inner.x;
+        if (inner) focus = STORE_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateStorePan(focus);
     }
@@ -2375,36 +2374,75 @@
 
     // ================= v9.27 操場大場景（全棟最後一間：露天球場塞框框、夕陽＋投籃） =================
     const GYM_HOOP = { x: 1030, y: 96 }; // 籃框位置（場景座標）
-    const GYM_ROOMS_HTML = `
-<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
-  <rect id="gym-sky" x="0" y="0" width="1150" height="90" fill="#aee3ff"/>
-  <circle id="gym-sun" cx="950" cy="30" r="16" fill="#ffd93b" stroke="#f39c12" stroke-width="2"/>
-  <g fill="#ffffff" opacity="0.85"><ellipse cx="240" cy="26" rx="42" ry="9"/><ellipse cx="272" cy="20" rx="26" ry="8"/><ellipse cx="700" cy="40" rx="36" ry="8"/><ellipse cx="726" cy="35" rx="22" ry="7"/></g>
-  <g fill="#2e7d32"><circle cx="60" cy="84" r="17"/><circle cx="112" cy="88" r="13"/><circle cx="330" cy="86" r="15"/><circle cx="520" cy="84" r="12"/><circle cx="880" cy="86" r="14"/><circle cx="1108" cy="84" r="16"/></g>
-  <rect x="518" y="24" width="114" height="36" fill="#263238" stroke="#182042" stroke-width="2"/>
-  <text x="575" y="48" font-size="13" fill="#ffd93b" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">操 場</text>
-  <rect x="570" y="60" width="4" height="26" fill="#37474f"/><rect x="576" y="60" width="4" height="26" fill="#37474f"/>
-  <rect x="0" y="88" width="1150" height="212" fill="#58a038"/>
-  <g id="gym-floods" opacity="0"><g fill="#fff6bf"><circle cx="120" cy="58" r="24" opacity="0.45"/><circle cx="430" cy="58" r="24" opacity="0.45"/><circle cx="760" cy="58" r="24" opacity="0.45"/><circle cx="1062" cy="58" r="24" opacity="0.45"/></g><g fill="#37474f"><rect x="118" y="58" width="4" height="62"/><rect x="428" y="58" width="4" height="62"/><rect x="758" y="58" width="4" height="62"/><rect x="1060" y="58" width="4" height="62"/></g><g fill="#fff9c4" stroke="#182042" stroke-width="1.4"><rect x="108" y="48" width="24" height="11"/><rect x="418" y="48" width="24" height="11"/><rect x="748" y="48" width="24" height="11"/><rect x="1050" y="48" width="24" height="11"/></g></g>
-  <g fill="#90a4ae" stroke="#182042" stroke-width="1.6"><rect x="36" y="94" width="220" height="9"/><rect x="36" y="105" width="220" height="9"/><rect x="36" y="116" width="220" height="9"/></g>
-  <rect x="36" y="128" width="764" height="158" rx="76" fill="#c0392b" stroke="#182042" stroke-width="2.5"/>
-  <rect x="58" y="146" width="720" height="122" rx="60" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="9 7"/>
-  <rect x="88" y="158" width="664" height="98" rx="48" fill="#67b544"/>
-  <g stroke="#ffffff" stroke-width="2" opacity="0.8"><line x1="150" y1="207" x2="240" y2="207"/><line x1="330" y1="207" x2="420" y2="207"/><line x1="510" y1="207" x2="600" y2="207"/></g>
-  <rect x="812" y="96" width="318" height="168" fill="#d9a066" stroke="#182042" stroke-width="2.5"/>
-  <line x1="971" y1="96" x2="971" y2="264" stroke="#ffffff" stroke-width="2"/>
-  <circle cx="971" cy="180" r="26" fill="none" stroke="#ffffff" stroke-width="2"/>
-  <rect x="1006" y="138" width="124" height="84" fill="#b5651d" opacity="0.5"/>
-  <path d="M1006 138 A 74 74 0 0 0 1006 222" fill="none" stroke="#ffffff" stroke-width="2"/>
-  <rect x="1052" y="60" width="7" height="38" fill="#37474f"/>
-  <rect x="1022" y="52" width="66" height="42" fill="#ffffff" stroke="#e65100" stroke-width="2.5"/>
-  <rect x="1040" y="66" width="30" height="22" fill="none" stroke="#e65100" stroke-width="2"/>
-  <ellipse cx="1030" cy="96" rx="9" ry="3.4" fill="none" stroke="#e65100" stroke-width="2.6"/>
-  <path d="M1022 97 L1026 112 M1030 98 L1030 113 M1038 97 L1034 112" stroke="#eceff1" stroke-width="1.4"/>
-  <rect x="515" y="272" width="120" height="28" fill="#795548"/>
-  <text x="575" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">入 口</text>
-</svg>
-<button class="gym-shoot-btn" onpointerdown="event.stopPropagation()" onclick="playerShoot()">🏀 投籃</button>`;
+    // ================= v9.54 操場 2.5D 化（報告批次 4b）：露天場景，地面全走投影 =================
+    // 無牆無家具前景：單層 #gym-bg25（天空 polygon 保留 gym-sky id、燈組保留 gym-floods id，updateGymLighting 邏輯不變）。
+    // 地面畫到 z560 填滿框高（玩法座標仍在 z<=300）；籃框立於 (1030,96)，框緣中心＝P(1030,96,30)，投籃動畫改投影錨點。
+    const GYM_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 88);
+    const GYM_PW = 1340;
+    PROJ.registerRooms('gym-rooms', GYM_PROJ);
+    function buildGymRoomsHTML() {
+      const pr = GYM_PROJ;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
+      const seg = (a, b, stroke, w) => '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" stroke="' + stroke + '" stroke-width="' + w + '"/>';
+      const rrPts = (x, z, w, d, r) => { // 圓角矩形周界取樣（邏輯座標）→投影點列
+        const out = [];
+        const corner = (cx, cz, a0) => { for (let i = 0; i <= 4; i++) { const a = a0 + i / 4 * Math.PI / 2; out.push(pr.P(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 0)); } };
+        corner(x + w - r, z + r, -Math.PI / 2); corner(x + w - r, z + d - r, 0); corner(x + r, z + d - r, Math.PI / 2); corner(x + r, z + r, Math.PI);
+        return out;
+      };
+      let bg = '';
+      // 天空（id 保留：updateGymLighting 以 setAttribute('fill') 換色）＋太陽/雲（螢幕座標，與舊版相同）
+      bg += '<polygon id="gym-sky" points="0,0 ' + GYM_PW + ',0 ' + pr.pts([pr.P(1150, 0, 0), pr.P(0, 0, 0)]) + '" fill="#aee3ff"/>';
+      bg += '<circle id="gym-sun" cx="950" cy="30" r="16" fill="#ffd93b" stroke="#f39c12" stroke-width="2"/>';
+      bg += '<g fill="#ffffff" opacity="0.85"><ellipse cx="240" cy="26" rx="42" ry="9"/><ellipse cx="272" cy="20" rx="26" ry="8"/><ellipse cx="700" cy="40" rx="36" ry="8"/><ellipse cx="726" cy="35" rx="22" ry="7"/></g>';
+      // 地面（延伸到 z560 填滿框高）＋地平線樹叢
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 560, 0), pr.P(0, 560, 0)], '#58a038');
+      [[60, 17], [112, 13], [330, 15], [520, 12], [880, 14], [1108, 16]].forEach(([tx, tr]) => { const c = pr.P(tx, 4, 15); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + tr + '" fill="#2e7d32"/>'; });
+      // 夜間燈組（id 保留）
+      let floods = '';
+      [120, 430, 760, 1062].forEach(fx => {
+        const g = pr.P(fx, 26, 41);
+        floods += '<circle cx="' + g.x.toFixed(1) + '" cy="' + g.y.toFixed(1) + '" r="24" fill="#fff6bf" opacity="0.45"/>';
+        floods += seg(pr.P(fx, 26, 0), pr.P(fx, 26, 36), '#37474f', 4);
+        floods += poly([pr.P(fx - 12, 26, 36), pr.P(fx + 12, 26, 36), pr.P(fx + 12, 26, 47), pr.P(fx - 12, 26, 47)], '#fff9c4', ' stroke="#182042" stroke-width="1.4"');
+      });
+      bg += '<g id="gym-floods" opacity="0">' + floods + '</g>';
+      // 看台三階
+      bg += pr.box3(36, 86, 220, 10, 26, '#90a4ae');
+      bg += pr.box3(36, 98, 220, 10, 17, '#90a4ae');
+      bg += pr.box3(36, 110, 220, 10, 8, '#90a4ae');
+      // 跑道（圓角矩形投影取樣）＋內場＋起跑線
+      bg += '<polygon points="' + pr.pts(rrPts(36, 128, 764, 158, 76)) + '" fill="#c0392b" stroke="#182042" stroke-width="2.5"/>';
+      bg += '<polyline points="' + pr.pts(rrPts(58, 146, 720, 122, 60)) + '" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="9 7"/>';
+      bg += '<polygon points="' + pr.pts(rrPts(88, 158, 664, 98, 48)) + '" fill="#67b544"/>';
+      [[150, 240], [330, 420], [510, 600]].forEach(([x0, x1]) => { bg += seg(pr.P(x0, 207, 0), pr.P(x1, 207, 0), 'rgba(255,255,255,0.8)', 2); });
+      // 球場＋中線/中圈/三分線
+      bg += poly([pr.P(812, 96, 0), pr.P(1130, 96, 0), pr.P(1130, 264, 0), pr.P(812, 264, 0)], '#d9a066', ' stroke="#182042" stroke-width="2.5"');
+      bg += seg(pr.P(971, 96, 0), pr.P(971, 264, 0), '#ffffff', 2);
+      bg += '<polygon points="' + pr.planeCirclePts(971, 180, 0, 26) + '" fill="none" stroke="#ffffff" stroke-width="2"/>';
+      bg += poly([pr.P(1006, 138, 0), pr.P(1130, 138, 0), pr.P(1130, 222, 0), pr.P(1006, 222, 0)], 'rgba(181,101,29,0.5)');
+      const arcPts = [];
+      for (let i = 0; i <= 10; i++) { const a = Math.PI / 2 + i / 10 * Math.PI; arcPts.push(pr.P(1006 + Math.cos(a) * 74, 180 + Math.sin(a) * 74, 0)); }
+      bg += '<polyline points="' + pr.pts(arcPts) + '" fill="none" stroke="#ffffff" stroke-width="2"/>';
+      // 籃架：柱＋板（z90 平面）＋內框＋框緣（中心 P(1030,96,30)）＋籃網
+      bg += seg(pr.P(1055, 88, 0), pr.P(1055, 88, 34), '#37474f', 5);
+      bg += poly([pr.P(1022, 90, 34), pr.P(1088, 90, 34), pr.P(1088, 90, 76), pr.P(1022, 90, 76)], '#ffffff', ' stroke="#e65100" stroke-width="2.5"');
+      bg += poly([pr.P(1040, 90, 40), pr.P(1070, 90, 40), pr.P(1070, 90, 62), pr.P(1040, 90, 62)], 'none', ' stroke="#e65100" stroke-width="2"');
+      const rim = pr.P(1030, 96, 30);
+      bg += '<ellipse cx="' + rim.x.toFixed(1) + '" cy="' + rim.y.toFixed(1) + '" rx="9" ry="3.4" fill="none" stroke="#e65100" stroke-width="2.6"/>';
+      bg += seg(pr.P(1024, 97, 29), pr.P(1027, 97, 16), '#eceff1', 1.4) + seg(pr.P(1030, 98, 29), pr.P(1030, 98, 15), '#eceff1', 1.4) + seg(pr.P(1036, 97, 29), pr.P(1033, 97, 16), '#eceff1', 1.4);
+      // 司令台看板
+      bg += seg(pr.P(570, 20, 0), pr.P(570, 20, 26), '#37474f', 4) + seg(pr.P(580, 20, 0), pr.P(580, 20, 26), '#37474f', 4);
+      bg += poly([pr.P(518, 20, 26), pr.P(632, 20, 26), pr.P(632, 20, 62), pr.P(518, 20, 62)], '#263238', ' stroke="#182042" stroke-width="2"');
+      bg += txt(pr.P(575, 20, 44), '操 場', 13, '#ffd93b', 'middle');
+      // 入口墊
+      bg += pr.box3(515, 264, 120, 28, 2, '#795548');
+      bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
+      return '<svg id="gym-bg25" viewBox="0 0 ' + GYM_PW + ' 300" style="position:absolute; left:0; top:0; width:' + GYM_PW + 'px; height:300px; pointer-events:none;">' + bg + '</svg>'
+        + '<button class="gym-shoot-btn" onpointerdown="event.stopPropagation()" onclick="playerShoot()">🏀 投籃</button>';
+    }
+
     let _gymPanManual = null;
     let _gymManualUntil = 0;
     let _gymPanCur = 0; let _gymPanT = 0;
@@ -2430,8 +2468,8 @@
       }
       if (typeof focusX !== 'number') focusX = 575;
       let pan;
-      if (visible >= 1150) pan = (1150 - visible) / 2;
-      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      if (visible >= GYM_PW) pan = (GYM_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(GYM_PW - visible, focusX - visible / 2));
       const _nowG = performance.now(); const _dtG = _gymPanT ? (_nowG - _gymPanT) : 16; _gymPanT = _nowG;
       applyGymPan(smoothPanStep(_gymPanCur, pan, focusX, visible, _dtG), sc);
     }
@@ -2441,7 +2479,7 @@
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'gym-stage';
-      stage.innerHTML = '<div id="gym-rooms">' + GYM_ROOMS_HTML + '</div>';
+      stage.innerHTML = '<div id="gym-rooms">' + buildGymRoomsHTML() + '</div>';
       host.appendChild(stage);
       let drag = null;
       const activePtrs = new Set();
@@ -2459,7 +2497,7 @@
         if (!drag) return;
         const sc = (stage.clientHeight || 179) / 300;
         const visible = (stage.clientWidth || 278) / sc;
-        const maxPan = Math.max(0, 1150 - visible);
+        const maxPan = Math.max(0, GYM_PW - visible);
         const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
         drag.moved += Math.abs(next - _gymPanManual);
         _gymManualUntil = Date.now() + 30000;
@@ -2513,11 +2551,11 @@
         if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
       }
       if (cw && playerIn) cw.style.zIndex = '975'; // 露天場地沒有傢俱前景，人物一律在最上層
-      let focus = 575;
-      if (playerIn) focus = gameState.currentX || 560;
+      let focus = GYM_PROJ.P(575, 200, 0).x;
+      if (playerIn) focus = GYM_PROJ.P(gameState.currentX || 560, gameState.currentY || 212, 0).x;
       else {
         const inner = (gameState.npcs || []).find(n => n.insideLoc === 'gym');
-        if (inner) focus = inner.x;
+        if (inner) focus = GYM_PROJ.P(inner.x, inner.y, 0).x;
       }
       if (playerIn && currentState === 'sports' && _gymPanManual === null) { // v9.27.1 跑步跟拍：CSS 迴圈位置由動畫時鐘推算，鏡頭直接跟上（跑道比可視窗寬，置中會有一半看不到人）
         if (_gymRunT0 == null) _gymRunT0 = performance.now();
@@ -2526,7 +2564,8 @@
         let rx = 130;
         for (let i = 1; i < PTS.length; i++) { if (ph <= PTS[i][0]) { const a = PTS[i - 1], b = PTS[i]; rx = a[1] + (b[1] - a[1]) * ((ph - a[0]) / (b[0] - a[0])); break; } }
         const sc2 = stage.clientHeight / 300, vis2 = stage.clientWidth / sc2;
-        const pan2 = vis2 >= 1150 ? (1150 - vis2) / 2 : Math.max(0, Math.min(1150 - vis2, rx - vis2 / 2));
+        const _rfx = GYM_PROJ.P(rx, 208, 0).x;
+        const pan2 = vis2 >= GYM_PW ? (GYM_PW - vis2) / 2 : Math.max(0, Math.min(GYM_PW - vis2, _rfx - vis2 / 2));
         applyGymPan(pan2, sc2);
       } else {
         if (currentState !== 'sports') _gymRunT0 = null;
@@ -2539,9 +2578,10 @@
       const ball = rooms && document.createElement('div');
       if (ball && typeof ball.animate === 'function') {
         ball.className = 'shot-ball'; ball.textContent = '🏀';
-        ball.style.left = (fromX - 10) + 'px'; ball.style.top = (fromY - 54) + 'px';
+        const _sa = GYM_PROJ.P(fromX, fromY, 0), _sr = GYM_PROJ.P(GYM_HOOP.x, GYM_HOOP.y, 30);
+        ball.style.left = (_sa.x - 10) + 'px'; ball.style.top = (_sa.y - 54) + 'px';
         rooms.appendChild(ball);
-        const dx = GYM_HOOP.x - fromX, dy = GYM_HOOP.y - (fromY - 48);
+        const dx = _sr.x - _sa.x, dy = _sr.y - (_sa.y - 48);
         const anim = ball.animate([
           { transform: 'translate(0px, 0px)' },
           { transform: 'translate(' + (dx * 0.5) + 'px, ' + (dy - 95) + 'px)', offset: 0.55 },
