@@ -19,6 +19,14 @@
       --grape: #bf5af2;
       --cocoa: #3c2415;
       --muted: #5f5f66;
+      /* v9.57 世界聖經 UI token（批次 1 落地：圓角 3 值/陰影 2 家族/遮罩單一值；機器版 js/bible.js） */
+      --r-win: 16px;
+      --r-card: 12px;
+      --r-pill: 999px;
+      --sh-win: 0 18px 50px rgba(24, 32, 66, 0.35);
+      --sh-hard: 0 4px 0 var(--cocoa);
+      --sh-hard-sm: 0 2px 0 var(--cocoa);
+      --overlay: rgba(24, 32, 66, 0.55);
       /* 功能色與 alpha 通道（非色票） */
       --ink-soft: rgba(38, 50, 75, 0.55);
       --white: #ffffff;
