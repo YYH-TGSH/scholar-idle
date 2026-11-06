@@ -667,6 +667,7 @@
         fx.innerHTML = '<span class="flame">🔥</span><span class="steam-puff sp1"></span><span class="steam-puff sp2"></span><span class="steam-puff sp3"></span>';
         host.appendChild(fx);
       } else if (fx.parentNode !== host) host.appendChild(fx);
+      if (host.id === 'rest-rooms') { const fp = REST_PROJ.P(300, 160, 15); fx.style.left = (fp.x - 55) + 'px'; fx.style.top = (fp.y - 48) + 'px'; } // v9.51 FX 對位投影後的鐵板
       return fx;
     }
     let _specialSignText = '';
@@ -1150,8 +1151,10 @@
       if (!layer) return;
       const bubble = document.createElement('div');
       bubble.className = 'npc-speech';
-      bubble.style.left = npc.x + 'px';
-      bubble.style.top = (npc.y - 78) + 'px';
+      const _prB = (typeof PROJ !== 'undefined') ? PROJ.forRooms(layer.id) : null;
+      const _anB = _prB ? _prB.P(npc.x, npc.y, 0) : null;
+      bubble.style.left = (_anB ? _anB.x : npc.x) + 'px';
+      bubble.style.top = ((_anB ? _anB.y : npc.y) - 78) + 'px';
       bubble.style.zIndex = '995'; // v9.20 圖層總檢：泡泡永遠在最上層
       bubble.textContent = customText || def.say[Math.floor(Math.random() * def.say.length)];
       layer.appendChild(bubble);
@@ -1798,8 +1801,10 @@
         }
         if (el) {
           const lying = npc.state === 'sleeping' && npc.kind === 'parent';
-          el.style.left = npc.x + 'px';
-          el.style.top = (lying ? (npc.y - 35) : (npc.y - 14 - (NPC_SPR_H[npc.key] || 50))) + 'px'; // v9.40 名牌 14 + 精靈高（規格統一後 50）
+          const _prA = (typeof PROJ !== 'undefined' && el.parentNode) ? PROJ.forRooms(el.parentNode.id) : null;
+          const _anA = _prA ? _prA.P(npc.x, npc.y, 0) : null;
+          el.style.left = (_anA ? _anA.x : npc.x) + 'px';
+          el.style.top = (lying ? ((_anA ? _anA.y : npc.y) - 35) : ((_anA ? _anA.y : npc.y) - 14 - (NPC_SPR_H[npc.key] || 50))) + 'px'; // v9.40 名牌 14 + 精靈高（規格統一後 50）；v9.51 已投影場景改用投影錨點
           const flipEl = el.querySelector('.npc-flip');
           if (flipEl) flipEl.style.transform = `scaleX(${npc.dir < 0 ? -1 : 1})`;
           const svg = el.querySelector('.npc-sprite');
@@ -1841,7 +1846,7 @@
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               const _dt = npc.phase === 'eat' ? todaysSpecial().emoji : (npc.phase === 'wait' ? '🍳' : '📋');
               if (dishEl.textContent !== _dt) dishEl.textContent = _dt;
-              syncDishPlate(npc, npc.phase === 'eat' && npc.insideLoc === 'restaurant', todaysSpecial().emoji, npc.x - 9, npc.y - (npc.y > 200 ? 52 : 32), 'rest-rooms', Z_LAYER.FOOD); // v9.19 菜上桌；v9.20 食物置頂
+              const _rp = restPlateScreen(npc.x, npc.y); syncDishPlate(npc, npc.phase === 'eat' && npc.insideLoc === 'restaurant', todaysSpecial().emoji, _rp.x, _rp.y, 'rest-rooms', Z_LAYER.FOOD); // v9.19 菜上桌；v9.20 食物置頂；v9.51 盤子放投影桌面上
             } else if (npc.state === 'seated' && npc.windowSeat != null) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               if (dishEl.textContent !== '🍜') dishEl.textContent = '🍜';
@@ -2748,77 +2753,85 @@
     }
 
     // ================= v9.18 餐廳大場景（比照住家/超商：大室內塞框框、鐵板台前景層） =================
-    const REST_ROOMS_HTML = `
-<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
-  <rect x="0" y="58" width="1150" height="242" fill="#a5713d"/>
-  <g stroke="#96622f" stroke-width="2">
-    <line x1="0" y1="96" x2="1150" y2="96"/><line x1="0" y1="134" x2="1150" y2="134"/><line x1="0" y1="172" x2="1150" y2="172"/><line x1="0" y1="210" x2="1150" y2="210"/><line x1="0" y1="248" x2="1150" y2="248"/>
-  </g>
-  <rect x="0" y="0" width="1150" height="58" fill="#7a3b2e"/>
-  <rect x="0" y="52" width="1150" height="6" fill="#5d2a20"/>
-  <text x="28" y="37" font-size="17" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">🍳 鐵板食堂</text>
-  <rect x="240" y="8" width="92" height="38" fill="#fff8e1" stroke="#182042" stroke-width="2"/>
-  <text x="254" y="33" font-size="16" fill="#b3543f" font-family="'DotGothic16', monospace" font-weight="900">🍜 拉麵</text>
-  <g>
-    <rect x="640" y="6" width="470" height="46" fill="#2e2a26" stroke="#182042" stroke-width="2"/>
-    <text x="656" y="24" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">招牌炒麵 $60　豚骨拉麵 $75</text>
-    <text x="656" y="42" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">鐵板牛排 $95　香煎雞腿 $80　叉燒炒飯 $60</text>
-  </g>
-  <g>
-    <line x1="160" y1="0" x2="160" y2="18" stroke="#182042" stroke-width="2"/><path d="M146,18 L174,18 L168,30 L152,30 Z" fill="#d9a441" stroke="#182042" stroke-width="1.5"/><circle cx="160" cy="40" r="16" fill="#ffd97a" opacity="0.35"/>
-    <line x1="320" y1="0" x2="320" y2="18" stroke="#182042" stroke-width="2"/><path d="M306,18 L334,18 L328,30 L312,30 Z" fill="#d9a441" stroke="#182042" stroke-width="1.5"/><circle cx="320" cy="40" r="16" fill="#ffd97a" opacity="0.35"/>
-    <line x1="480" y1="0" x2="480" y2="18" stroke="#182042" stroke-width="2"/><path d="M466,18 L494,18 L488,30 L472,30 Z" fill="#d9a441" stroke="#182042" stroke-width="1.5"/><circle cx="480" cy="40" r="16" fill="#ffd97a" opacity="0.35"/>
-  </g>
-  <rect x="60" y="92" width="520" height="16" fill="#3a3f4a" stroke="#182042" stroke-width="2"/>
-  <g stroke="#2b2f38" stroke-width="1.5"><line x1="60" y1="97" x2="580" y2="97"/><line x1="60" y1="102" x2="580" y2="102"/></g>
-  <rect x="120" y="95" width="16" height="8" fill="#e67e22"/><rect x="210" y="96" width="14" height="7" fill="#2ecc71"/><rect x="388" y="95" width="16" height="8" fill="#e74c3c"/><rect x="470" y="96" width="14" height="7" fill="#f1c40f"/>
-  <rect x="60" y="108" width="520" height="70" fill="#795548"/>
-  <circle cx="738" cy="194" r="9" fill="#8d5a2c" stroke="#182042" stroke-width="2"/><circle cx="802" cy="194" r="9" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
-  <circle cx="958" cy="242" r="9" fill="#8d5a2c" stroke="#182042" stroke-width="2"/><circle cx="1022" cy="242" r="9" fill="#8d5a2c" stroke="#182042" stroke-width="2"/>
-  <g>
-    <circle cx="120" cy="184" r="10" fill="#c0392b" stroke="#182042" stroke-width="2"/><circle cx="200" cy="184" r="10" fill="#c0392b" stroke="#182042" stroke-width="2"/><circle cx="280" cy="184" r="10" fill="#c0392b" stroke="#182042" stroke-width="2"/>
-    <circle cx="360" cy="184" r="10" fill="#c0392b" stroke="#182042" stroke-width="2"/><circle cx="440" cy="184" r="10" fill="#c0392b" stroke="#182042" stroke-width="2"/><circle cx="520" cy="184" r="10" fill="#c0392b" stroke="#182042" stroke-width="2"/>
-  </g>
-  <g>
-    <circle cx="770" cy="160" r="36" fill="#ffffff" stroke="#182042" stroke-width="2.5"/><circle cx="770" cy="160" r="26" fill="#fdfdfd" stroke="#e5e0d5" stroke-width="2"/>
-    <rect x="762" y="150" width="16" height="12" fill="#e74c3c"/>
-    <rect x="726" y="118" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/><rect x="796" y="118" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/>
-    <rect x="726" y="190" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/><rect x="796" y="190" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/>
-    <circle cx="990" cy="208" r="36" fill="#ffffff" stroke="#182042" stroke-width="2.5"/><circle cx="990" cy="208" r="26" fill="#fdfdfd" stroke="#e5e0d5" stroke-width="2"/>
-    <rect x="982" y="198" width="16" height="12" fill="#f39c12"/>
-    <rect x="946" y="166" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/><rect x="1016" y="166" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/>
-    <rect x="946" y="238" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/><rect x="1016" y="238" width="18" height="14" fill="#8d5a2c" stroke="#182042" stroke-width="1.5"/>
-  </g>
-  <rect x="900" y="58" width="60" height="62" fill="#35507a" stroke="#182042" stroke-width="2"/>
-  <text x="918" y="96" font-size="15" fill="#ffffff" font-family="'DotGothic16', monospace" font-weight="900">食</text>
-  <circle cx="1096" cy="86" r="14" fill="#2ed573"/><rect x="1090" y="96" width="12" height="18" fill="#8d5a2c"/>
-  <rect x="550" y="272" width="120" height="28" fill="#8d5a2c"/>
-  <text x="588" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">入 口</text>
-</svg>
-<svg id="rest-front-back" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:940; pointer-events:none;">
-  <rect x="60" y="108" width="520" height="16" fill="#6d4c41" stroke="#182042" stroke-width="2.5"/>
-  <line x1="60" y1="108" x2="580" y2="108" stroke="#d9a441" stroke-width="3"/>
-  <g stroke="#5d4037" stroke-width="2">
-    <line x1="125" y1="112" x2="125" y2="136"/><line x1="190" y1="112" x2="190" y2="136"/><line x1="255" y1="112" x2="255" y2="136"/><line x1="320" y1="112" x2="320" y2="136"/><line x1="385" y1="112" x2="385" y2="136"/><line x1="450" y1="112" x2="450" y2="136"/><line x1="515" y1="112" x2="515" y2="136"/>
-  </g>
-</svg>
-<svg id="rest-front" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:950; pointer-events:none;">
-  <rect x="60" y="124" width="520" height="16" fill="#6d4c41"/>
-  <path d="M734,160 A36,36 0 0 0 806,160 Z" fill="#f5f0e6" stroke="#182042" stroke-width="2"/>
-  <path d="M954,208 A36,36 0 0 0 1026,208 Z" fill="#f5f0e6" stroke="#182042" stroke-width="2"/>
-</svg>
-<svg id="rest-front2" viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px; z-index:960; pointer-events:none;">
-  <rect x="60" y="166" width="520" height="14" fill="#5d4037" stroke="#182042" stroke-width="2.5"/>
-  <line x1="60" y1="166" x2="580" y2="166" stroke="#8d6e63" stroke-width="2"/>
-  <text x="282" y="177" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900">鐵 板 燒</text>
-</svg>`;
+    // ================= v9.51 餐廳 2.5D 化（報告批次 1・範本棟）：場景改投影生成，玩法座標零改動 =================
+    // 投影器：室內 K=0.90、OX/OY 逐場景定。地面 1150x300 → 螢幕寬 1340（REST_PW）、高 300 內（牆高 132）。
+    // 分層：#rest-bg25（牆/地板/盒的東面+上面，在人物之下）＋ #rest-front25（盒的南面，z950）——
+    // 廚師（945）在南面之下（吧台只蓋腰腿）、食客（955）在南面之上，與舊夾層契約同構，舊三層已退役。
+    const REST_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const REST_PW = 1340;
+    const REST_TABLES = [{ x: 770, z: 160 }, { x: 990, z: 208 }];
+    PROJ.registerRooms('rest-rooms', REST_PROJ);
+    function restPlateScreen(x, y) { // 座位邏輯座標 → 盤子在桌面上的螢幕位置（dish-plate 左上角）
+      if (y === 184) { const p = REST_PROJ.P(x, 170, 15); return { x: p.x - 9, y: p.y - 9 }; }
+      let c = REST_TABLES[0], bd = Infinity;
+      REST_TABLES.forEach(t => { const d = (t.x - x) * (t.x - x) + (t.z - y) * (t.z - y); if (d < bd) { bd = d; c = t; } });
+      const p = REST_PROJ.P(x + (c.x - x) * 0.45, y + (c.z - y) * 0.45, 14.6);
+      return { x: p.x - 9, y: p.y - 9 };
+    }
+    function buildRestRoomsHTML() {
+      const pr = REST_PROJ, WH = 132;
+      const poly = (list, fill) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"/>';
+      const txt = (xp, yOff, str, size, fill) => '<text x="' + xp.x.toFixed(1) + '" y="' + (xp.y + (yOff || 0)).toFixed(1) + '" font-size="' + size + '" fill="' + fill + '" font-family="\'DotGothic16\', monospace" font-weight="900">' + str + '</text>';
+      let bg = '', front = '';
+      // 北牆＋東牆＋地板（全走投影）
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#7a3b2e');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#7a3b2e', 0.62));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#a5713d');
+      let lines = '';
+      for (let z = 38; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
+      for (let x = 96; x < 1150; x += 96) { const z0 = (x % 3) * 40; const a = pr.P(x, z0, 0), b = pr.P(x, z0 + 52, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
+      bg += '<g stroke="rgba(60,32,8,0.28)" stroke-width="2">' + lines + '</g>';
+      // 北牆裝飾（wallDeco 平面物）＋字（平面貼牆）
+      bg += pr.wallDecoN(240, 332, 84, 122, '#fff8e1');
+      bg += pr.wallDecoN(640, 1110, 78, 124, '#2e2a26');
+      bg += txt(pr.P(28, 0, 104), 0, '🍳 鐵板食堂', 17, '#ffe9b8');
+      bg += txt(pr.P(252, 0, 98), 0, '🍜 拉麵', 16, '#b3543f');
+      bg += txt(pr.P(656, 0, 108), 0, '招牌炒麵 $60　豚骨拉麵 $75', 11, '#ffe9b8');
+      bg += txt(pr.P(656, 0, 90), 0, '鐵板牛排 $95　香煎雞腿 $80　叉燒炒飯 $60', 11, '#ffe9b8');
+      // 吊燈：吊線＋燈罩＋地板光池（planeCircle）
+      [160, 320, 480].forEach(x => {
+        const top = pr.P(x, 0, WH), bot = pr.P(x, 0, 100);
+        bg += '<line x1="' + top.x.toFixed(1) + '" y1="' + top.y.toFixed(1) + '" x2="' + bot.x.toFixed(1) + '" y2="' + bot.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
+        bg += pr.planeCircle(x, 76, 0, 30, '#ffd97a', 0.30);
+        bg += '<polygon points="' + (bot.x - 14).toFixed(1) + ',' + bot.y.toFixed(1) + ' ' + (bot.x + 14).toFixed(1) + ',' + bot.y.toFixed(1) + ' ' + (bot.x + 8).toFixed(1) + ',' + (bot.y + 12).toFixed(1) + ' ' + (bot.x - 8).toFixed(1) + ',' + (bot.y + 12).toFixed(1) + '" fill="#d9a441" stroke="#182042" stroke-width="1.5"/>';
+      });
+      // 鐵板吧台（盒）：廚師崗位 z143 在北緣 146 之北，h15 由 frontHMax(3, 25, 6)=20.1 保證不蓋臉
+      const counter = pr.boxFaces(60, 146, 520, 34, 15, '#795548');
+      bg += counter.back; front += counter.front;
+      bg += poly([pr.P(66, 150, 15.6), pr.P(574, 150, 15.6), pr.P(574, 176, 15.6), pr.P(66, 176, 15.6)], '#3a3f4a');
+      [[120, '#e67e22'], [210, '#2ecc71'], [388, '#e74c3c'], [470, '#f1c40f']].forEach(([fx, fc]) => { bg += pr.planeCircle(fx, 163, 15.8, 6, fc); });
+      [120, 200, 280, 360, 440, 520].forEach(x => { bg += pr.box3(x - 11, 186, 22, 12, 9, '#8d5a2c'); });
+      // 圓桌：桌面 planeCircle＋南緣弧帶（front）＋桌柱
+      REST_TABLES.forEach((t, i) => {
+        bg += pr.planeCircle(t.x, t.z, 0, 13, '#d8d2c4');
+        bg += pr.box3(t.x - 5, t.z - 5, 10, 10, 5, '#8d5a2c');
+        bg += pr.planeCircle(t.x, t.z, 14, 36, '#e5e0d5');
+        bg += pr.planeCircle(t.x, t.z, 14.6, 33, '#ffffff');
+        bg += pr.planeCircle(t.x, t.z, 15.2, 7, i ? '#f39c12' : '#e74c3c');
+        front += pr.rimBand(t.x, t.z, 36, 14, 5, '#f5f0e6');
+      });
+      [[738, 190], [802, 190], [958, 238], [1022, 238]].forEach(([sx, sy]) => { bg += pr.box3(sx - 9, sy - 2, 18, 10, 9, '#8d5a2c'); });
+      // 冰箱（高盒）＋字在南面
+      const fridge = pr.boxFaces(900, 36, 60, 28, 50, '#35507a');
+      bg += fridge.back; front += fridge.front;
+      front += txt(pr.P(922, 64, 30), 5, '食', 15, '#ffffff');
+      // 盆栽
+      bg += pr.box3(1082, 96, 26, 14, 10, '#b3543f');
+      const pc = pr.P(1095, 103, 0);
+      bg += '<circle cx="' + pc.x.toFixed(1) + '" cy="' + (pc.y - 26).toFixed(1) + '" r="12" fill="#2ed573"/><circle cx="' + (pc.x - 9).toFixed(1) + '" cy="' + (pc.y - 18).toFixed(1) + '" r="8" fill="#27ae60"/><circle cx="' + (pc.x + 9).toFixed(1) + '" cy="' + (pc.y - 19).toFixed(1) + '" r="8" fill="#27ae60"/>';
+      // 入口墊
+      bg += pr.box3(550, 264, 120, 28, 2, '#8d5a2c');
+      bg += txt(pr.P(597, 283, 4), 0, '入 口', 11, '#ffe9b8');
+      return '<svg id="rest-bg25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px;">' + bg + '</svg>'
+        + '<svg id="rest-front25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px; z-index:950; pointer-events:none;">' + front + '</svg>';
+    }
     function ensureRestInterior() {
       if (document.getElementById('rest-stage')) return;
       const host = document.querySelector('#landmark-restaurant .island-platform-top') || document.querySelector('#landmark-restaurant .island-platform') || document.getElementById('landmark-restaurant');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'rest-stage';
-      stage.innerHTML = '<div id="rest-rooms">' + REST_ROOMS_HTML + '</div>';
+      stage.innerHTML = '<div id="rest-rooms">' + buildRestRoomsHTML() + '</div>';
       host.appendChild(stage);
       let drag = null;
       const activePtrs = new Set();
@@ -2836,7 +2849,7 @@
         if (!drag) return;
         const sc = (stage.clientHeight || 179) / 300;
         const visible = (stage.clientWidth || 278) / sc;
-        const maxPan = Math.max(0, 1150 - visible);
+        const maxPan = Math.max(0, REST_PW - visible);
         const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
         drag.moved += Math.abs(next - _restPanManual);
         _restManualUntil = Date.now() + 30000;
@@ -2880,8 +2893,8 @@
       }
       if (typeof focusX !== 'number') focusX = 300;
       let pan;
-      if (visible >= 1150) pan = (1150 - visible) / 2;
-      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      if (visible >= REST_PW) pan = (REST_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(REST_PW - visible, focusX - visible / 2));
       const _nowRest = performance.now(); const _dtRest = _restPanT ? (_nowRest - _restPanT) : 16; _restPanT = _nowRest;
       applyRestPan(smoothPanStep(_restPanCur, pan, focusX, visible, _dtRest), sc);
     }
@@ -2912,15 +2925,16 @@
         const showP = playerIn && currentState === 'eating' && gameState.eatPhase === 'eat' && gameState.eatServed;
         if (showP && rooms) {
           if (!pp) { pp = document.createElement('div'); pp.id = 'player-rest-plate'; pp.className = 'dish-plate'; rooms.appendChild(pp); }
-          pp.style.display = 'block'; pp.style.left = ((gameState.currentX || 440) - 9) + 'px'; pp.style.top = ((gameState.currentY || 184) - 32) + 'px'; pp.style.zIndex = '990'; // v9.20 食物置頂
+          const _rps = restPlateScreen(gameState.currentX || 440, gameState.currentY || 184);
+          pp.style.display = 'block'; pp.style.left = _rps.x + 'px'; pp.style.top = _rps.y + 'px'; pp.style.zIndex = '990'; // v9.20 食物置頂；v9.51 盤子改放投影桌面上
           const _pe = todaysSpecial().emoji; if (pp.textContent !== _pe) pp.textContent = _pe;
         } else if (pp) pp.style.display = 'none';
       }
       let focus = 300;
-      if (playerIn) focus = gameState.currentX || 610;
+      if (playerIn) focus = REST_PROJ.P(gameState.currentX || 610, gameState.currentY || 252, 0).x;
       else {
         const inner = (gameState.npcs || []).find(n => n.insideLoc === 'restaurant');
-        if (inner) focus = inner.x;
+        if (inner) focus = REST_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateRestPan(focus);
     }

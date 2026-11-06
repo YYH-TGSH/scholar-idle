@@ -61,8 +61,11 @@
       const posKey = `${x}|${y}|${flipH ? 1 : 0}|${elCharWrap.parentNode ? elCharWrap.parentNode.id : ''}`; // v9.17.1：換容器（進出室內）也要重套縮放
       if (_lastCharPos === posKey && !gameState.isCommuting) return;
       _lastCharPos = posKey;
-      elCharWrap.style.left = `${x - 21}px`; // v9.10.7 置中修正：wrap 寬 42，舊寫法把左緣放在座標上，主角永遠右偏 21（半個椅距），座位/書桌/床位全歪。改為中心對齊座標，與 NPC 一致。
-      elCharWrap.style.top = `${y - 70}px`;
+      const _parP = elCharWrap.parentNode; // v9.51：已投影場景裡，主角錨點改走投影（邏輯座標/走路器/currentX 不變）
+      const _prP = (_parP && typeof PROJ !== 'undefined') ? PROJ.forRooms(_parP.id) : null;
+      const _anP = _prP ? _prP.P(x, y, 0) : null;
+      elCharWrap.style.left = `${(_anP ? _anP.x : x) - 21}px`; // v9.10.7 置中修正：wrap 寬 42，中心對齊座標，與 NPC 一致
+      elCharWrap.style.top = `${(_anP ? _anP.y : y) - 70}px`;
       gameState.currentX = x;
       gameState.currentY = y;
 

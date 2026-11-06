@@ -95,6 +95,21 @@
       cs.forEach(function (c) { if (c.x < minX) minX = c.x; if (c.y < minY) minY = c.y; if (c.x > maxX) maxX = c.x; if (c.y > maxY) maxY = c.y; });
       return { minX: minX, minY: minY, maxX: maxX, maxY: maxY, w: maxX - minX, h: maxY - minY };
     }
+    // 盒三面分層：back＝東面+上面（人物之下）、front＝南面（可蓋住站在北側的人）
+    function boxFaces(x, z, w, d, h, color) {
+      var b = boxPolys(x, z, w, d, h);
+      return {
+        back: '<polygon points="' + pts(b.east) + '" fill="' + shade(color, 0.6) + '"/><polygon points="' + pts(b.top) + '" fill="' + shade(color, 1.24) + '"/>',
+        front: '<polygon points="' + pts(b.south) + '" fill="' + color + '"/>'
+      };
+    }
+    // 圓桌南緣弧帶：桌沿厚度（上緣 hTop、下緣 hBot），只取南半弧
+    function rimBand(cx, cz, r, hTop, hBot, fill) {
+      var top = [], bot = [], i, a;
+      for (i = 0; i <= 10; i++) { a = i / 10 * Math.PI; top.push(P(cx + Math.cos(a) * r, cz + Math.sin(a) * r, hTop)); }
+      for (i = 10; i >= 0; i--) { a = i / 10 * Math.PI; bot.push(P(cx + Math.cos(a) * r, cz + Math.sin(a) * r, hBot)); }
+      return '<polygon points="' + pts(top.concat(bot)) + '" fill="' + fill + '"/>';
+    }
     // 人物臉部帶（billboard 軸對齊矩形）：錨點＝腳底/座位基線的投影點；
     // faceLow/faceHigh＝臉帶下/上緣距錨點的高度（場景單位，見 PROJ.FACE）
     function faceBandPoly(x, z, faceLow, faceHigh, halfW) {
@@ -111,11 +126,15 @@
       K: K, OX: OX, OY: OY, P: P, pts: pts, box3: box3, boxPolys: boxPolys,
       planeCircle: planeCircle, planeCirclePts: planeCirclePts, groundShadow: groundShadow,
       wallDecoN: wallDecoN, wallDecoE: wallDecoE, bounds: bounds,
-      faceBandPoly: faceBandPoly, frontHMax: frontHMax, polysIntersect: polysIntersect
+      faceBandPoly: faceBandPoly, frontHMax: frontHMax, polysIntersect: polysIntersect,
+      boxFaces: boxFaces, rimBand: rimBand
     };
   }
 
+  var _roomsRegistry = {};
   window.PROJ = {
+    registerRooms: function (roomsId, proj) { _roomsRegistry[roomsId] = proj; },
+    forRooms: function (roomsId) { return _roomsRegistry[roomsId] || null; },
     K_INDOOR: 0.90,   // 室內六棟（拍板雙規格）
     K_TOWN: 1.10,     // 小鎮外觀
     // 人物臉部帶定版（場景單位，距座位/腳底錨點的高度區間 [low, high]）：
