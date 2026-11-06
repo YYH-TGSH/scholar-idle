@@ -3936,3 +3936,6 @@ input, select, textarea { border-radius: 14px !important; }
 
 /* v9.51 餐廳 2.5D：投影後場景寬 1340（鏡頭/拖曳以 REST_PW 計） */
 #rest-rooms { width: 1340px; }
+
+/* v9.52 住家 2.5D：投影後場景寬 1340（鏡頭/拖曳以 HOME_PW 計） */
+#home-rooms { width: 1340px; }

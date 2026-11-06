@@ -1174,42 +1174,21 @@
       return null;
     }
     function ensureDinnerFurniture() {
-      ensureHomeInterior(); // v9.14：餐桌在室內場景裡
+      ensureHomeInterior(); // v9.52：餐桌本體已併入投影場景（buildHomeRoomsHTML），這裡只補食物層
       const layer = document.getElementById('home-rooms');
-      if (!layer || document.getElementById('dinner-table-back')) return;
-      const back = document.createElement('div');
-      back.id = 'dinner-table-back';
-      back.style.cssText = 'position:absolute; left:601px; top:118px; width:108px; height:54px; z-index:172; pointer-events:none;';
-      back.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
-        <rect x="12" y="6" width="14" height="16" fill="#a9743f" stroke="#182042" stroke-width="1.8" />
-        <rect x="62" y="6" width="14" height="16" fill="#a9743f" stroke="#182042" stroke-width="1.8" />
-        <rect x="4" y="20" width="80" height="7" fill="#b08968" stroke="#182042" stroke-width="1.8" /></svg>`;
-      layer.appendChild(back);
-      const fg = document.createElement('div');
-      fg.id = 'dinner-table-fg';
-      fg.style.cssText = 'position:absolute; left:601px; top:118px; width:108px; height:54px; z-index:196; pointer-events:none;';
-      fg.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
-        <rect x="4" y="40" width="80" height="5" fill="#8b5a2b" stroke="#182042" stroke-width="1.5" />
-        <rect x="10" y="45" width="5" height="9" fill="#795548" />
-        <rect x="73" y="45" width="5" height="9" fill="#795548" />
-        </svg>`;
-      layer.appendChild(fg);
+      if (!layer || document.getElementById('dinner-food')) return;
+      const pr = HOME_PROJ;
+      const steam = (cx, cz, h, n) => { let out = ''; for (let i = 0; i < n; i++) { const a = pr.P(cx - 6 + i * 6, cz, h); out += '<path class="steam-wisp' + (i ? ' w' + (i + 1) : '') + '" d="M' + a.x.toFixed(1) + ',' + a.y.toFixed(1) + ' q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>'; } return out; };
+      const set = '<g id="home-dinner-set" style="display:none;">'
+        + pr.planeCircle(624, 182, 14.6, 13, '#ffffff') + pr.planeCircle(624, 182, 15.2, 7, '#fff7e0')
+        + pr.planeCircle(685, 182, 14.6, 13, '#ffffff') + pr.planeCircle(685, 182, 15.2, 7, '#fff7e0')
+        + pr.planeCircle(655, 184, 14.6, 17, '#e74c3c') + pr.planeCircle(655, 184, 15.2, 10, '#f39c12')
+        + steam(655, 184, 24, 3) + '</g>';
+      const stm = '<g id="home-dinner-steam" style="display:none;">' + steam(655, 184, 22, 2) + '</g>';
       const food = document.createElement('div');
       food.id = 'dinner-food';
-      food.style.cssText = 'position:absolute; left:601px; top:118px; width:108px; height:54px; z-index:990; pointer-events:none;';
-      food.innerHTML = `<svg viewBox="0 0 88 44" style="width:100%; height:100%; overflow:visible;">
-        <g id="home-dinner-set" style="display:none;">
-          <ellipse cx="20" cy="24" rx="7" ry="3.4" fill="#ffffff" stroke="#182042" stroke-width="1.4" /><ellipse cx="20" cy="23" rx="4" ry="1.8" fill="#fff7e0" />
-          <ellipse cx="68" cy="24" rx="7" ry="3.4" fill="#ffffff" stroke="#182042" stroke-width="1.4" /><ellipse cx="68" cy="23" rx="4" ry="1.8" fill="#fff7e0" />
-          <ellipse cx="44" cy="25" rx="9" ry="4" fill="#e74c3c" stroke="#182042" stroke-width="1.4" /><ellipse cx="44" cy="24" rx="5.5" ry="2.2" fill="#f39c12" />
-          <path class="steam-wisp" d="M38,16 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-          <path class="steam-wisp w2" d="M44,17 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-          <path class="steam-wisp w3" d="M50,16 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-        </g>
-        <g id="home-dinner-steam" style="display:none;">
-          <path class="steam-wisp" d="M40,20 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-          <path class="steam-wisp w2" d="M47,20 q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-        </g></svg>`;
+      food.style.cssText = 'position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:990; pointer-events:none;';
+      food.innerHTML = '<svg viewBox="0 0 ' + HOME_PW + ' 300" style="width:100%; height:100%; display:block;">' + set + stm + '</svg>';
       layer.appendChild(food);
     }
     function updateHomeDinnerVisual(phase) {
@@ -1221,124 +1200,124 @@
     }
 
     // ================= v9.14 捲動式室內 =================
-    const HOME_ROOMS_HTML = `
-<svg viewBox="0 0 1150 300" style="position:absolute; left:0; top:0; width:1150px; height:300px;">
-  <defs>
-    <pattern id="planks" width="46" height="152" patternUnits="userSpaceOnUse">
-      <rect width="46" height="152" fill="#d9a066"/><line x1="0" y1="0" x2="0" y2="152" stroke="#b57e46" stroke-width="1.5"/>
-    </pattern>
-  </defs>
-  <rect x="0" y="18" width="340" height="130" fill="#f0e7f7"/>
-  <rect x="380" y="18" width="372" height="130" fill="#fdf1dc"/>
-  <rect x="792" y="18" width="358" height="130" fill="#e9f2fc"/>
-  <rect x="0" y="148" width="1150" height="152" fill="url(#planks)"/>
-  <rect x="340" y="18" width="40" height="282" fill="#e8dcc8"/>
-  <rect x="752" y="18" width="40" height="282" fill="#e8dcc8"/>
-  <rect x="348" y="100" width="24" height="200" fill="#d9a066"/>
-  <rect x="760" y="100" width="24" height="200" fill="#d9a066"/>
-  <rect x="340" y="88" width="40" height="16" fill="#8a5a33"/>
-  <rect x="752" y="88" width="40" height="16" fill="#8a5a33"/>
-  <rect x="340" y="96" width="8" height="204" fill="#a5713d"/>
-  <rect x="372" y="96" width="8" height="204" fill="#a5713d"/>
-  <rect x="752" y="96" width="8" height="204" fill="#a5713d"/>
-  <rect x="784" y="96" width="8" height="204" fill="#a5713d"/>
-  <rect x="0" y="0" width="1150" height="18" fill="#8a5a33"/>
-  <rect x="0" y="140" width="340" height="8" fill="#ffffff" opacity="0.55"/>
-  <rect x="380" y="140" width="372" height="8" fill="#ffffff" opacity="0.55"/>
-  <rect x="792" y="140" width="358" height="8" fill="#ffffff" opacity="0.55"/>
-  <!-- 爸媽房 -->
-  <rect x="36" y="40" width="80" height="62" fill="#2b3a67" stroke="#182042" stroke-width="2"/>
-  <circle cx="94" cy="58" r="9" fill="#ffe082"/>
-  <circle cx="52" cy="52" r="1.8" fill="#ffffff"/><circle cx="66" cy="82" r="1.8" fill="#ffffff"/><circle cx="46" cy="70" r="1.4" fill="#ffffff"/>
-  <line x1="76" y1="40" x2="76" y2="102" stroke="#182042" stroke-width="2"/>
-  <rect x="30" y="36" width="14" height="72" fill="#b39ddb"/><rect x="108" y="36" width="14" height="72" fill="#b39ddb"/>
-  <rect x="150" y="48" width="46" height="36" fill="#ffffff" stroke="#182042" stroke-width="2"/>
-  <circle cx="165" cy="68" r="6" fill="#ffcc99"/><circle cx="181" cy="68" r="6" fill="#ffcc99"/><circle cx="173" cy="60" r="5" fill="#ffd9b3"/>
-  <rect x="272" y="52" width="60" height="140" fill="#a5713d" stroke="#182042" stroke-width="2"/>
-  <line x1="302" y1="52" x2="302" y2="192" stroke="#182042" stroke-width="2"/>
-  <circle cx="296" cy="124" r="3" fill="#ffd54f"/><circle cx="308" cy="124" r="3" fill="#ffd54f"/>
-  <ellipse cx="162" cy="256" rx="118" ry="20" fill="#ce93d8" opacity="0.45"/>
-  <rect x="72" y="116" width="180" height="18" rx="4" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
-  <rect x="68" y="130" width="188" height="88" rx="6" fill="#ffffff" stroke="#182042" stroke-width="2"/>
-  <rect x="84" y="136" width="68" height="24" rx="6" fill="#ffffff" stroke="#cfd8dc" stroke-width="1.5"/>
-  <rect x="172" y="136" width="68" height="24" rx="6" fill="#ffffff" stroke="#cfd8dc" stroke-width="1.5"/>
-  <rect x="68" y="158" width="188" height="60" rx="6" fill="#9575cd" stroke="#182042" stroke-width="2"/>
-  <rect x="68" y="158" width="188" height="8" fill="#7e57c2"/>
-  <circle cx="100" cy="182" r="5" fill="rgba(255,255,255,0.28)"/><circle cx="160" cy="196" r="5" fill="rgba(255,255,255,0.28)"/><circle cx="216" cy="180" r="5" fill="rgba(255,255,255,0.28)"/>
-  <text x="20" y="290" font-size="14" font-weight="700" fill="#6d4c8c" opacity="0.65">爸媽房</text>
-  <!-- 客廳・餐廳 -->
-  <rect x="392" y="44" width="54" height="104" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
-  <rect x="404" y="56" width="30" height="26" fill="#bfe3ff" stroke="#182042" stroke-width="1.5"/>
-  <rect x="402" y="92" width="34" height="44" fill="none" stroke="#182042" stroke-width="1.5"/>
-  <circle cx="438" cy="112" r="3.5" fill="#ffd54f"/>
-  <rect x="566" y="38" width="80" height="62" fill="#bfe3ff" stroke="#182042" stroke-width="2"/>
-  <circle cx="588" cy="58" r="10" fill="#ffd54f"/>
-  <ellipse cx="622" cy="66" rx="14" ry="6" fill="#ffffff"/><ellipse cx="606" cy="84" rx="11" ry="5" fill="#ffffff"/>
-  <rect x="560" y="34" width="14" height="72" fill="#ffb74d"/><rect x="640" y="34" width="14" height="72" fill="#ffb74d"/>
-  <rect x="452" y="122" width="132" height="38" rx="8" fill="#ef5350" stroke="#182042" stroke-width="2"/>
-  <rect x="442" y="138" width="18" height="50" rx="7" fill="#e53935" stroke="#182042" stroke-width="2"/>
-  <rect x="576" y="138" width="18" height="50" rx="7" fill="#e53935" stroke="#182042" stroke-width="2"/>
-  <rect x="452" y="156" width="132" height="30" rx="6" fill="#e53935" stroke="#182042" stroke-width="2"/>
-  <line x1="518" y1="158" x2="518" y2="184" stroke="#182042" stroke-width="1.5"/>
-  <rect x="648" y="46" width="92" height="60" rx="4" fill="#263238" stroke="#182042" stroke-width="2"/>
-  <rect x="654" y="52" width="80" height="48" fill="#37474f"/>
-  <rect x="654" y="76" width="80" height="24" fill="#4db6ac"/>
-  <circle cx="678" cy="64" r="6" fill="#ffe082"/>
-  <rect x="686" y="106" width="16" height="8" fill="#263238"/>
-  <line x1="616" y1="112" x2="616" y2="196" stroke="#546e7a" stroke-width="3"/>
-  <path d="M600,88 L632,88 L624,112 L608,112 Z" fill="#ffd54f" stroke="#182042" stroke-width="1.8"/>
-  <line x1="655" y1="18" x2="655" y2="40" stroke="#182042" stroke-width="2.5"/>
-  <path d="M632,58 L678,58 L664,40 L646,40 Z" fill="#ff8a65" stroke="#182042" stroke-width="1.8"/>
-  <rect x="430" y="228" width="300" height="54" rx="12" fill="#ffcc80" opacity="0.5"/>
-  <rect x="386" y="236" width="66" height="26" rx="4" fill="#90a4ae"/>
-  <text x="396" y="290" font-size="14" font-weight="700" fill="#a5713d" opacity="0.65">客廳・餐廳</text>
-  <!-- 我的房間 -->
-  <rect x="812" y="40" width="70" height="62" fill="#a8d8ff" stroke="#182042" stroke-width="2"/>
-  <ellipse cx="838" cy="60" rx="13" ry="6" fill="#ffffff"/><ellipse cx="856" cy="80" rx="10" ry="5" fill="#ffffff"/>
-  <rect x="806" y="36" width="13" height="72" fill="#64b5f6"/><rect x="876" y="36" width="13" height="72" fill="#64b5f6"/>
-  <rect x="968" y="40" width="68" height="52" fill="#ffffff" stroke="#182042" stroke-width="2"/>
-  <polygon points="1002,50 1005.5,59 1015,59 1007.5,65 1010.5,74 1002,68.5 993.5,74 996.5,65 989,59 998.5,59" fill="#ffd54f" stroke="#182042" stroke-width="1.2"/>
-  <line x1="980" y1="82" x2="1024" y2="82" stroke="#90a4ae" stroke-width="2.5"/>
-  <ellipse cx="876" cy="256" rx="108" ry="20" fill="#90caf9" opacity="0.5"/>
-  <rect x="796" y="116" width="158" height="18" rx="4" fill="#6d4c41" stroke="#182042" stroke-width="2"/>
-  <rect x="792" y="130" width="162" height="88" rx="6" fill="#ffffff" stroke="#182042" stroke-width="2"/>
-  <rect x="806" y="136" width="68" height="24" rx="6" fill="#ffffff" stroke="#cfd8dc" stroke-width="1.5"/>
-  <rect x="792" y="158" width="162" height="60" rx="6" fill="#42a5f5" stroke="#182042" stroke-width="2"/>
-  <rect x="792" y="176" width="162" height="6" fill="rgba(255,255,255,0.35)"/>
-  <rect x="792" y="194" width="162" height="6" fill="rgba(255,255,255,0.35)"/>
-  <rect x="972" y="146" width="130" height="10" fill="#a5713d" stroke="#182042" stroke-width="2"/>
-  <rect x="978" y="156" width="6" height="40" fill="#795548"/><rect x="1090" y="156" width="6" height="40" fill="#795548"/>
-  <rect x="986" y="128" width="10" height="18" fill="#ef5350"/><rect x="998" y="132" width="8" height="14" fill="#42a5f5"/><rect x="1008" y="130" width="9" height="16" fill="#66bb6a"/>
-  <rect x="1010" y="168" width="44" height="10" rx="4" fill="#5d4037" stroke="#182042" stroke-width="1.5"/>
-  <rect x="1014" y="186" width="36" height="8" fill="#795548"/>
-  <rect x="1108" y="60" width="38" height="130" fill="#8a5a33" stroke="#182042" stroke-width="2"/>
-  <line x1="1108" y1="102" x2="1146" y2="102" stroke="#182042" stroke-width="2"/><line x1="1108" y1="146" x2="1146" y2="146" stroke="#182042" stroke-width="2"/>
-  <rect x="1112" y="84" width="6" height="18" fill="#ef5350"/><rect x="1120" y="80" width="6" height="22" fill="#42a5f5"/><rect x="1128" y="86" width="6" height="16" fill="#66bb6a"/>
-  <rect x="1112" y="128" width="6" height="18" fill="#ffb74d"/><rect x="1120" y="124" width="6" height="22" fill="#ab47bc"/><rect x="1128" y="130" width="6" height="16" fill="#26a69a"/>
-  <text x="800" y="290" font-size="14" font-weight="700" fill="#1565c0" opacity="0.65">我的房間</text>
-  <rect x="505" y="272" width="120" height="28" fill="#8d5a2c"/>
-  <text x="565" y="291" font-size="11" fill="#ffe9b8" font-family="'DotGothic16', monospace" font-weight="900" text-anchor="middle">入 口</text>
-<g id="home-cat" transform="translate(300,248)"><rect class="cat-tail" x="-4" y="1" width="5" height="2" fill="#e67e22"/><rect x="0" y="4" width="10" height="5" fill="#f39c12"/><rect x="2" y="4" width="1" height="5" fill="#e67e22"/><rect x="5" y="4" width="1" height="5" fill="#e67e22"/><rect x="8" y="0" width="6" height="6" fill="#f39c12"/><rect x="8" y="-1" width="2" height="2" fill="#f39c12"/><rect x="12" y="-1" width="2" height="2" fill="#f39c12"/><rect x="10" y="2" width="1" height="1" fill="#182042"/><rect x="13" y="2" width="1" height="1" fill="#182042"/><rect x="0" y="9" width="3" height="1" fill="#e67e22"/><rect x="7" y="9" width="3" height="1" fill="#e67e22"/></g>
-</svg>
-<div id="parents-blanket" style="display:none; position:absolute; left:70px; top:158px; width:184px; height:70px; z-index:260;">
-  <svg viewBox="0 0 100 38" style="width:100%; height:100%; display:block;">
-    <g class="sleep-form-anim">
-      <rect x="1" y="2" width="98" height="34" rx="7" fill="#9575cd" stroke="#182042" stroke-width="1.6"/>
-      <rect x="1" y="2" width="98" height="9" rx="4" fill="rgba(255,255,255,0.25)"/>
-      <circle cx="20" cy="18" r="3.4" fill="rgba(255,255,255,0.3)"/><circle cx="50" cy="25" r="3.4" fill="rgba(255,255,255,0.3)"/><circle cx="82" cy="17" r="3.4" fill="rgba(255,255,255,0.3)"/>
-    </g>
-  </svg>
-</div>
-<div id="desk-hit" onclick="toggleDeskStudy()" title="在書桌自習" style="position:absolute; left:962px; top:112px; width:150px; height:102px; z-index:140; cursor:pointer;"></div>
-<div id="player-blanket" style="display:none; position:absolute; left:788px; top:158px; width:170px; height:70px; z-index:600;">
-  <svg viewBox="0 0 100 38" style="width:100%; height:100%; display:block;">
-    <g class="sleep-form-anim">
-      <rect x="1" y="2" width="98" height="34" rx="7" fill="#42a5f5" stroke="#182042" stroke-width="1.6"/>
-      <rect x="1" y="2" width="98" height="9" rx="4" fill="rgba(255,255,255,0.25)"/>
-      <rect x="8" y="15" width="84" height="5" fill="rgba(255,255,255,0.35)"/><rect x="8" y="25" width="84" height="5" fill="rgba(255,255,255,0.35)"/>
-    </g>
-  </svg>
-</div>`;
+    // ================= v9.52 住家 2.5D 化（報告批次 2）：場景改投影生成，與 K90 模擬圖同構 =================
+    // 分層同餐廳範本：#home-bg25（牆/地板/盒東+上面）＋ #home-front25（南面，z196——晚餐爸媽夾層 185 在其下、棉被 260 在其上，舊契約不變）。
+    // 晚餐桌足跡 (597,168,116x30,h14)：爸媽座 z162 在北緣之北 6（frontHMax(6,25,6)=21.3）、主角座 z208 在南緣之南 10。
+    const HOME_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const HOME_PW = 1340;
+    PROJ.registerRooms('home-rooms', HOME_PROJ);
+    function buildHomeRoomsHTML() {
+      const pr = HOME_PROJ, WH = 150;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const rectPoly = (x, z, w, d, h, fill, extra) => poly([pr.P(x, z, h), pr.P(x + w, z, h), pr.P(x + w, z + d, h), pr.P(x, z + d, h)], fill, extra);
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, op) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="700" fill="' + fill + '"' + (op ? ' opacity="' + op + '"' : '') + '>' + str + '</text>';
+      let bg = '', front = '';
+      // 北牆三區色＋東牆＋地板
+      bg += poly([pr.P(0, 0, 0), pr.P(340, 0, 0), pr.P(340, 0, WH), pr.P(0, 0, WH)], '#f0e7f7');
+      bg += poly([pr.P(380, 0, 0), pr.P(752, 0, 0), pr.P(752, 0, WH), pr.P(380, 0, WH)], '#fdf1dc');
+      bg += poly([pr.P(792, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(792, 0, WH)], '#e9f2fc');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#a8c8ec', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      let lines = '';
+      for (let z = 38; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
+      bg += '<g stroke="rgba(150,100,50,0.35)" stroke-width="1.5">' + lines + '</g>';
+      // 隔間牆（沿 z 的平面，門洞 z96–140＋門楣 h74 起）
+      [360, 772].forEach(px => {
+        bg += poly([pr.P(px, 0, 0), pr.P(px, 96, 0), pr.P(px, 96, WH), pr.P(px, 0, WH)], '#e8dcc8');
+        bg += poly([pr.P(px, 140, 0), pr.P(px, 300, 0), pr.P(px, 300, WH), pr.P(px, 140, WH)], '#e8dcc8');
+        bg += poly([pr.P(px, 96, 74), pr.P(px, 140, 74), pr.P(px, 140, WH), pr.P(px, 96, WH)], '#e8dcc8');
+        const d1 = pr.P(px, 96, 0), d2 = pr.P(px, 96, 74), d3 = pr.P(px, 140, 0), d4 = pr.P(px, 140, 74);
+        bg += '<line x1="' + d1.x.toFixed(1) + '" y1="' + d1.y.toFixed(1) + '" x2="' + d2.x.toFixed(1) + '" y2="' + d2.y.toFixed(1) + '" stroke="#a5713d" stroke-width="3"/><line x1="' + d3.x.toFixed(1) + '" y1="' + d3.y.toFixed(1) + '" x2="' + d4.x.toFixed(1) + '" y2="' + d4.y.toFixed(1) + '" stroke="#a5713d" stroke-width="3"/>';
+      });
+      // 北牆窗/畫/海報（wallDeco 平面物）
+      bg += pr.wallDecoN(36, 116, 96, 144, '#2b3a67');
+      const moon = pr.P(94, 0, 124); bg += '<circle cx="' + moon.x.toFixed(1) + '" cy="' + moon.y.toFixed(1) + '" r="9" fill="#ffe082"/>';
+      bg += pr.wallDecoN(150, 196, 88, 118, '#ffffff');
+      [[165, 103], [181, 103], [173, 95]].forEach(([fx, fh]) => { const c = pr.P(fx, 0, fh); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="#ffcc99"/>'; });
+      bg += pr.wallDecoN(566, 646, 88, 148, '#bfe3ff');
+      const sun = pr.P(588, 0, 128); bg += '<circle cx="' + sun.x.toFixed(1) + '" cy="' + sun.y.toFixed(1) + '" r="10" fill="#ffd54f"/>';
+      const cl = pr.P(622, 0, 116); bg += '<circle cx="' + cl.x.toFixed(1) + '" cy="' + cl.y.toFixed(1) + '" r="8" fill="#ffffff"/><circle cx="' + (cl.x - 10).toFixed(1) + '" cy="' + (cl.y + 2).toFixed(1) + '" r="6" fill="#ffffff"/>';
+      bg += pr.wallDecoN(812, 882, 88, 148, '#a8d8ff');
+      const cl2 = pr.P(838, 0, 122); bg += '<circle cx="' + cl2.x.toFixed(1) + '" cy="' + cl2.y.toFixed(1) + '" r="8" fill="#ffffff"/><circle cx="' + (cl2.x + 12).toFixed(1) + '" cy="' + (cl2.y + 3).toFixed(1) + '" r="6" fill="#ffffff"/>';
+      bg += pr.wallDecoN(968, 1036, 96, 142, '#ffffff');
+      bg += txt(pr.P(994, 0, 112), '★', 20, '#ffd54f');
+      // 地毯（地板上的平面矩形）
+      bg += rectPoly(44, 226, 236, 60, 0, 'rgba(206,147,216,0.45)');
+      bg += rectPoly(430, 228, 300, 54, 0, 'rgba(255,204,128,0.5)');
+      bg += rectPoly(768, 226, 216, 60, 0, 'rgba(144,202,249,0.5)');
+      // 爸媽床（全 bg：低盒不需南面遮擋）＋衣櫃
+      bg += pr.box3(68, 114, 188, 10, 30, '#8a5a33');
+      bg += pr.box3(68, 124, 188, 84, 13, '#ffffff');
+      bg += pr.box3(84, 130, 68, 22, 17, '#ffffff');
+      bg += pr.box3(172, 130, 68, 22, 17, '#ffffff');
+      bg += pr.box3(68, 156, 188, 52, 15.5, '#9575cd');
+      bg += pr.box3(272, 28, 60, 26, 52, '#a5713d');
+      // 沙發（靠背北側＋座墊盒，南面進 front）
+      bg += pr.box3(442, 116, 152, 12, 26, '#ef5350');
+      const sofa = pr.boxFaces(442, 128, 152, 46, 16, '#e53935');
+      bg += sofa.back; front += sofa.front;
+      // 電視（薄盒靠北牆，全 bg）＋螢幕畫在其南面平面上
+      bg += pr.box3(648, 40, 92, 10, 42, '#263238');
+      bg += faceRect(654, 50.5, 80, 8, 36, '#4db6ac');
+      const tsun = pr.P(678, 50.5, 24); bg += '<circle cx="' + tsun.x.toFixed(1) + '" cy="' + tsun.y.toFixed(1) + '" r="6" fill="#ffe082"/>';
+      // 落地燈＋光池
+      const lp0 = pr.P(616, 150, 0), lp1 = pr.P(616, 150, 50);
+      bg += '<line x1="' + lp0.x.toFixed(1) + '" y1="' + lp0.y.toFixed(1) + '" x2="' + lp1.x.toFixed(1) + '" y2="' + lp1.y.toFixed(1) + '" stroke="#546e7a" stroke-width="3"/>';
+      bg += pr.planeCircle(616, 150, 0, 26, '#ffd54f', 0.25);
+      bg += '<polygon points="' + (lp1.x - 16).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 16).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 8).toFixed(1) + ',' + (lp1.y - 20).toFixed(1) + ' ' + (lp1.x - 8).toFixed(1) + ',' + (lp1.y - 20).toFixed(1) + '" fill="#ffd54f" stroke="#182042" stroke-width="1.8"/>';
+      bg += pr.box3(386, 232, 66, 22, 10, '#90a4ae');
+      // 晚餐桌＋北椅（bg）＋南椅（南面進 front）
+      bg += pr.box3(606, 146, 36, 10, 30, '#a9743f');
+      bg += pr.box3(667, 146, 36, 10, 30, '#a9743f');
+      const dtable = pr.boxFaces(597, 168, 116, 30, 14, '#b08968');
+      bg += dtable.back; front += dtable.front;
+      const schair = pr.boxFaces(637, 212, 36, 10, 24, '#a9743f');
+      bg += schair.back; front += schair.front;
+      // 我的床
+      bg += pr.box3(792, 114, 162, 10, 30, '#6d4c41');
+      bg += pr.box3(792, 124, 162, 84, 13, '#ffffff');
+      bg += pr.box3(806, 130, 68, 22, 17, '#ffffff');
+      bg += pr.box3(792, 156, 162, 52, 15.5, '#42a5f5');
+      // 書桌（南面進 front）＋桌上書＋椅
+      const desk = pr.boxFaces(972, 148, 130, 34, 14, '#a5713d');
+      bg += desk.back; front += desk.front;
+      bg += rectPoly(986, 154, 10, 18, 14.5, '#ef5350');
+      bg += rectPoly(998, 156, 8, 14, 14.5, '#42a5f5');
+      bg += rectPoly(1008, 155, 9, 16, 14.5, '#66bb6a');
+      bg += pr.box3(1010, 186, 44, 10, 22, '#5d4037');
+      // 書櫃＋書脊（畫在南面平面上）
+      bg += pr.box3(1108, 28, 38, 24, 54, '#8a5a33');
+      [[1112, '#ef5350'], [1120, '#42a5f5'], [1128, '#66bb6a']].forEach(([sx, sc2]) => { bg += faceRect(sx, 52.5, 6, 30, 48, sc2); bg += faceRect(sx, 52.5, 6, 6, 22, sc2); });
+      // 入口墊＋分區標籤＋貓
+      bg += pr.box3(505, 264, 120, 28, 2, '#8d5a2c');
+      bg += txt(pr.P(597, 283, 4), '入 口', 11, '#ffe9b8');
+      bg += txt(pr.P(20, 292, 0), '爸媽房', 14, '#6d4c8c', 0.65);
+      bg += txt(pr.P(396, 292, 0), '客廳・餐廳', 14, '#a5713d', 0.65);
+      bg += txt(pr.P(800, 292, 0), '我的房間', 14, '#1565c0', 0.65);
+      const catA = pr.P(300, 248, 0);
+      bg += '<g id="home-cat" transform="translate(' + catA.x.toFixed(1) + ',' + catA.y.toFixed(1) + ')"><rect class="cat-tail" x="-4" y="1" width="5" height="2" fill="#e67e22"/><rect x="0" y="4" width="10" height="5" fill="#f39c12"/><rect x="2" y="4" width="1" height="5" fill="#e67e22"/><rect x="5" y="4" width="1" height="5" fill="#e67e22"/><rect x="8" y="0" width="6" height="6" fill="#f39c12"/><rect x="8" y="-1" width="2" height="2" fill="#f39c12"/><rect x="12" y="-1" width="2" height="2" fill="#f39c12"/><rect x="10" y="2" width="1" height="1" fill="#182042"/><rect x="13" y="2" width="1" height="1" fill="#182042"/><rect x="0" y="9" width="3" height="1" fill="#e67e22"/><rect x="7" y="9" width="3" height="1" fill="#e67e22"/></g>';
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + HOME_PW + ' 300" style="position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      // 棉被（睡覺時顯示的覆蓋層，形狀＝床面投影多邊形；id/顯示切換與舊版相同）
+      const pb = '<g class="sleep-form-anim">'
+        + rectPoly(66, 168, 192, 44, 15.5, '#9575cd', ' stroke="#182042" stroke-width="1.6"')
+        + rectPoly(66, 168, 192, 12, 15.6, 'rgba(255,255,255,0.25)')
+        + [[110, 186], [165, 194], [220, 188]].map(([cx, cz]) => { const c = pr.P(cx, cz, 16); return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="rgba(255,255,255,0.3)"/>'; }).join('') + '</g>';
+      const yb = '<g class="sleep-form-anim">'
+        + rectPoly(790, 168, 164, 44, 15.5, '#42a5f5', ' stroke="#182042" stroke-width="1.6"')
+        + rectPoly(790, 182, 164, 5, 15.6, 'rgba(255,255,255,0.35)')
+        + rectPoly(790, 196, 164, 5, 15.6, 'rgba(255,255,255,0.35)') + '</g>';
+      // 書桌點擊區（投影後書桌外接矩形，R1：命中以投影後位置為準，邏輯不變）
+      const dc = [[972, 148, 0], [1102, 148, 14], [1102, 182, 0], [972, 182, 14], [972, 148, 14], [1102, 182, 14], [972, 182, 0], [1102, 148, 0]].map(([x, z, h]) => pr.P(x, z, h));
+      const dx0 = Math.min.apply(null, dc.map(c => c.x)), dx1 = Math.max.apply(null, dc.map(c => c.x));
+      const dy0 = Math.min.apply(null, dc.map(c => c.y)), dy1 = Math.max.apply(null, dc.map(c => c.y));
+      const hit = '<div id="desk-hit" onclick="toggleDeskStudy()" title="在書桌自習" style="position:absolute; left:' + (dx0 - 6).toFixed(0) + 'px; top:' + (dy0 - 6).toFixed(0) + 'px; width:' + (dx1 - dx0 + 12).toFixed(0) + 'px; height:' + (dy1 - dy0 + 12).toFixed(0) + 'px; z-index:140; cursor:pointer;"></div>';
+      return svgOpen('home-bg25', 0) + bg + '</svg>'
+        + svgOpen('home-front25', 196) + front + '</svg>'
+        + '<svg id="parents-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:260; pointer-events:none;">' + pb + '</svg>'
+        + '<svg id="player-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:600; pointer-events:none;">' + yb + '</svg>'
+        + hit;
+    }
     function toggleDeskStudy() { // v9.14.4：點房間書桌 = 在家自習開關
       if (typeof currentLoc === 'undefined' || currentLoc !== 'home' || gameState.isCommuting) {
         if (typeof createFloatingText === 'function') createFloatingText('回家才能用自己的書桌 🏠');
@@ -1359,7 +1338,7 @@
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'home-stage';
-      stage.innerHTML = '<div id="home-rooms">' + HOME_ROOMS_HTML + '</div>';
+      stage.innerHTML = '<div id="home-rooms">' + buildHomeRoomsHTML() + '</div>';
       host.appendChild(stage);
       // v9.14.3：手指/滑鼠在房子裡拖曳 = 捲動室內；在地圖上拖曳 = 移動地圖（地圖引擎在 viewport 上，事件冒泡到不了就輪不到它）
       let drag = null;
@@ -1383,7 +1362,7 @@
         if (!drag) return;
         const sc = (stage.clientHeight || 179) / 300;
         const visible = (stage.clientWidth || 278) / sc;
-        const maxPan = Math.max(0, 1150 - visible);
+        const maxPan = Math.max(0, HOME_PW - visible);
         const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
         drag.moved += Math.abs(next - _homePanManual);
         _homeManualUntil = Date.now() + 30000; // v9.14.4
@@ -1438,8 +1417,8 @@
       }
       if (typeof focusX !== 'number') focusX = 565;
       let pan;
-      if (visible >= 1150) pan = (1150 - visible) / 2;
-      else pan = Math.max(0, Math.min(1150 - visible, focusX - visible / 2));
+      if (visible >= HOME_PW) pan = (HOME_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(HOME_PW - visible, focusX - visible / 2));
       const _nowHome = performance.now(); const _dtHome = _homePanT ? (_nowHome - _homePanT) : 16; _homePanT = _nowHome;
       applyHomePan(smoothPanStep(_homePanCur, pan, focusX, visible, _dtHome), sc);
     }
@@ -1453,7 +1432,8 @@
       _catCd = 18 + Math.random() * 25;
       _catIdx = (_catIdx + 1 + Math.floor(Math.random() * (CAT_SPOTS.length - 1))) % CAT_SPOTS.length;
       const sp = CAT_SPOTS[_catIdx];
-      cat.setAttribute('transform', 'translate(' + sp.x + ',' + sp.y + ')');
+      const _cp = HOME_PROJ.P(sp.x, sp.y, 0);
+      cat.setAttribute('transform', 'translate(' + _cp.x.toFixed(1) + ',' + _cp.y.toFixed(1) + ')');
     }
     function updateHomeStage() {
       ensureHomeInterior();
@@ -1483,15 +1463,16 @@
         const showP = playerIn && currentState === 'dinner' && !gameState._playerWalking;
         if (showP && rooms) {
           if (!pp) { pp = document.createElement('div'); pp.id = 'player-dinner-plate'; pp.className = 'dish-plate'; pp.textContent = '🍛'; rooms.appendChild(pp); }
-          pp.style.display = 'block'; pp.style.left = ((gameState.currentX || 655) - 9) + 'px'; pp.style.top = ((gameState.currentY || 208) - 32) + 'px'; pp.style.zIndex = '990';
+          const _pdp = HOME_PROJ.P(gameState.currentX || 655, 190, 14);
+          pp.style.display = 'block'; pp.style.left = (_pdp.x - 9) + 'px'; pp.style.top = (_pdp.y - 9) + 'px'; pp.style.zIndex = '990';
         } else if (pp) pp.style.display = 'none';
       }
       // 室內鏡頭：主角在家跟主角，否則看在家的爸媽，再否則停客廳
-      let focus = 565;
-      if (playerIn) focus = gameState.currentX || 500;
+      let focus = HOME_PROJ.P(565, 200, 0).x;
+      if (playerIn) focus = HOME_PROJ.P(gameState.currentX || 500, gameState.currentY || 212, 0).x;
       else {
         const par = (gameState.npcs || []).find(n => n.kind === 'parent' && n.inside);
-        if (par) focus = par.x;
+        if (par) focus = HOME_PROJ.P(par.x, par.y, 0).x;
       }
       updateHomePan(focus);
       const pBlanket = document.getElementById('player-blanket'); // v9.15：本人躺床上 + 棉被蓋在上層
@@ -3026,7 +3007,9 @@
       const pop = document.createElement('div');
       pop.className = 'pick-pop';
       pop.textContent = emoji;
-      pop.style.left = (npc.x - 8) + 'px'; pop.style.top = (npc.y - 70) + 'px';
+      const _prC = (typeof PROJ !== 'undefined') ? PROJ.forRooms(layer.id) : null;
+      const _anC = _prC ? _prC.P(npc.x, npc.y, 0) : null;
+      pop.style.left = ((_anC ? _anC.x : npc.x) - 8) + 'px'; pop.style.top = ((_anC ? _anC.y : npc.y) - 70) + 'px';
       layer.appendChild(pop);
       setTimeout(() => { if (pop.parentNode) pop.parentNode.removeChild(pop); }, 2000);
     }
