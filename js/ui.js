@@ -177,11 +177,11 @@
     function parsePixelStr(str) {
       const colorMap = {
         '.': null,
-        'K': '#182042', 'R': '#e74c3c', 'r': '#c0392b', 'W': '#ffffff',
-        'Y': '#f1c40f', 'y': '#ffd60a', 'B': '#2980b9', 'b': '#1f3a93',
-        'N': '#fed7aa', 'H': '#3c2415', 'G': '#30d158', 'g': '#27ae60',
-        'P': '#bf5af2', 'p': '#8e44ad', 'O': '#ff9f0a', 'A': '#86868b',
-        'C': '#aedefc', 'D': '#8b5a2b', 'E': '#4a3728'
+        'K': '#182042', 'R': '#c0392b', 'r': '#c0392b', 'W': '#ffffff',
+        'Y': '#ffcc00', 'y': '#ffcc00', 'B': '#5b7fa6', 'b': '#2c3e50',
+        'N': '#fed7aa', 'H': '#3c2415', 'G': '#2ed573', 'g': '#5da85f',
+        'P': '#bf5af2', 'p': '#8e44ad', 'O': '#ff9f0a', 'A': '#7d868f',
+        'C': '#aee6fa', 'D': '#8d5a2c', 'E': '#3c2415'
       };
       const lines = str.trim().split('\n').map(l => l.trim());
       const pixels = new Array(SKIN_N).fill(null);
@@ -541,7 +541,7 @@
     let editorMirror = false;
     let editorZoom = false;
     let editorRecentColors = [];
-    let editorSelectedColor = '#e74c3c';
+    let editorSelectedColor = '#c0392b';
     let editorCanvasPixels = new Array(SKIN_N).fill(null);
     let editorHistory = [];
     let editorFuture = [];
@@ -613,7 +613,7 @@
           <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--ink2); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</div>
           <div style="display:flex; gap:4px; width:100%;">
             <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.7rem; padding:9px 3px; border:none; border-radius:6px; background:var(--amber); color:white; font-weight:700; cursor:pointer;">裝備</button>
-            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#30d158; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--rose); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
+            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#2ed573; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--rose); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
           </div>
         `;
 
@@ -887,9 +887,9 @@
 
     const PALETTE_GROUPS = [
       { label: '🕘 最近用色', colors: [] }, // 由 editorRecentColors 動態填入
-      { label: '🧑 膚色', colors: ['#ffe0bd', '#fed7aa', '#f1c27d', '#e0ac69', '#c68642', '#8d5524'] },
-      { label: '💇 髮色', colors: ['#2c1810', '#4a3728', '#6d4c41', '#8b5a2b', '#b07d48', '#e8c476', '#dfe3e6', '#e74c3c'] },
-      { label: '🎨 常用色', colors: ['#182042', '#e74c3c', '#c0392b', '#ffffff', '#f1c40f', '#2980b9', '#1f3a93', '#30d158', '#27ae60', '#ff9f0a', '#bf5af2', '#8e44ad', '#aedefc', '#86868b', '#ff8a8a', '#ffd60a', '#0a84ff', '#fca5a5', '#1d1d1f', '#70b848'] },
+      { label: '🧑 膚色', colors: ['#ffe9b8', '#fed7aa', '#f0b98a', '#d9a066', '#c98d54', '#8d5a2c'] },
+      { label: '💇 髮色', colors: ['#1a1a24', '#3c2415', '#6d4c41', '#8d5a2c', '#b0743e', '#f0b98a', '#efe9e0', '#c0392b'] },
+      { label: '🎨 常用色', colors: ['#182042', '#c0392b', '#c0392b', '#ffffff', '#ffcc00', '#5b7fa6', '#2c3e50', '#2ed573', '#5da85f', '#ff9f0a', '#bf5af2', '#8e44ad', '#aee6fa', '#7d868f', '#ff8fab', '#ffcc00', '#0a84ff', '#e89bb0', '#1a1a24', '#79bd67'] },
     ];
     function initEditorPalette() {
       const container = document.getElementById('palette-groups');
@@ -929,25 +929,25 @@
     // ---- 部件範本 (16x25 字串圖，展開成 32x50；'.' = 不動) ----
     const SKIN_TEMPLATES = {
       hat: [
-        { name: '經典紅棒球帽', map: { R: '#e74c3c', D: '#c0392b', W: '#ffffff' }, rows: [
+        { name: '經典紅棒球帽', map: { R: '#c0392b', D: '#c0392b', W: '#ffffff' }, rows: [
           '................','....RRRRRRR.....','..RRRRRRRRRRR...','.RRRRRRRRRRRRR..','.DDDDDDDDDDDDDD.','....WWWW........','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
-        { name: '毛帽', map: { T: '#1abc9c', B: '#148f77', W: '#ffffff' }, rows: [
+        { name: '毛帽', map: { T: '#27ae60', B: '#1e8449', W: '#ffffff' }, rows: [
           '................','...TTTTTTTTTT...','..TTTTTTTTTTTT..','..TTTTTTTTTTTT..','.TTTTTTTTTTTTTT.','.BBBBBBBBBBBBBB.','.BWBWBWBWBWBWB..','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
-        { name: '畢業帽', map: { K: '#23232b', G: '#f1c40f' }, rows: [
+        { name: '畢業帽', map: { K: '#1a1a24', G: '#ffcc00' }, rows: [
           '................','.KKKKKKKKKKKKKK.','..KKKKKKKKKKKK..','....KKKKKKKK....','....KKKKKKKK....','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
       ],
       clothes: [
         { name: '學霸制服', map: { N: '#2c3e50', W: '#ffffff', R: '#c0392b', D: '#182042' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','...NNNNNNNNNN...','..NNNNNNNNNNNN..','..NNWWNNNNWWNN..','..NNWWNNRRNNNN..','..NNNWNRRNNNNN..','..NNNWWNNNNNNN..','..SSNNNNNNNSS...','..SSNNNNNNNSS...','....NNNNNNNN....','....NNNNNNNN....','....DDDDDDDD....','................','................','................','................'] },
-        { name: '連帽T', map: { G: '#27ae60', D: '#1e8449', W: '#eafaf1' }, rows: [
+        { name: '連帽T', map: { G: '#5da85f', D: '#1e8449', W: '#eef2f0' }, rows: [
           '................','................','................','................','................','................','................','................','................','....GGGGGGGG....','..GGGGGGGGGGGG..','.GGGGGGGGGGGGGG.','.GGGGGGGGGGGGGG.','.GGGGGGGGGGGGGG.','.GGGGGDDDDGGGGG.','.GGGGGDDDDGGGGG.','..SSGGGGGGSS....','..SSGGGGGGSS....','....GGGGGGGG....','....GGGGGGGG....','....DDDDDDDD....','................','................','................','................'] },
-        { name: '背心紳士', map: { W: '#ffffff', B: '#8b5a2b', D: '#6d4423', G: '#f1c40f' }, rows: [
+        { name: '背心紳士', map: { W: '#ffffff', B: '#8d5a2c', D: '#6d4c41', G: '#ffcc00' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','...WWBBBBBBWW...','..WWWBBBBBBWWW..','..WWBBBBBBBBWW..','..WWBBBGGBBBB...','..WWBBBBBBBBWW..','..WWBBBBBBBBWW..','..SSBBBBBBBBSS..','..SSBBBBBBBBSS..','....BBBBBBB.....','....BBBBBBB.....','....DDDDDDD.....','................','................','................','................'] },
       ],
       shoes: [
-        { name: '紅白球鞋', map: { W: '#ffffff', R: '#e74c3c', D: '#c0392b' }, rows: [
+        { name: '紅白球鞋', map: { W: '#ffffff', R: '#c0392b', D: '#c0392b' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...WWWW..WWWW...','..WWWWWWWWWWWW..','...RRRR..RRRR...','................'] },
-        { name: '紳士皮鞋', map: { B: '#4a3728', D: '#2c1810', G: '#f1c40f' }, rows: [
+        { name: '紳士皮鞋', map: { B: '#3c2415', D: '#1a1a24', G: '#ffcc00' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...BBBB..BBBB...','..BBBBBBBBBBBB..','...DDDD..DDDD...','................'] },
       ],
     };
@@ -1398,7 +1398,7 @@
         gameState.examCooldownEndHour = 0;
         gameState.examCooldownEndMinute = 0;
 
-        desc.innerHTML = `${distinction ? '🏆 特優合格' : '🎉 恭喜你'}！你的成績：<b>${score} 分</b>（及格線 ${passMark} 分）<br>你現在是：<b style="color:#2a9d8f; font-size:1.4rem;">${nextGradeName}</b>${distinction ? '<br>特優獎學金 <b>+$150</b>！' : ''}<br><br><span style="font-size:0.85rem; color:var(--muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，及格線也會提高，但超商打工時薪同步加薪！</span>`;
+        desc.innerHTML = `${distinction ? '🏆 特優合格' : '🎉 恭喜你'}！你的成績：<b>${score} 分</b>（及格線 ${passMark} 分）<br>你現在是：<b style="color:#27ae60; font-size:1.4rem;">${nextGradeName}</b>${distinction ? '<br>特優獎學金 <b>+$150</b>！' : ''}<br><br><span style="font-size:0.85rem; color:var(--muted);">隨著學歷提升，學習的難度（壓力累積、生理流失）將增加 15%，及格線也會提高，但超商打工時薪同步加薪！</span>`;
         statusLbl.innerText = "繼續衝刺下一個學歷目標吧！";
         // UX4：升學成功撒彩花
         setTimeout(() => celebrateGraduation(), 300);
@@ -1450,7 +1450,7 @@
         ['最親近的好友', bestFriend]
       ];
       const sum = document.getElementById('semester-summary');
-      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #d8cfc0;"><span style="color:var(--muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
+      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #c8d2cc;"><span style="color:var(--muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
       const cv = document.getElementById('semester-canvas');
       const dl = document.getElementById('semester-download');
       if (cv && dl) {
@@ -1458,14 +1458,14 @@
         try {
           const ctx = cv.getContext('2d');
           if (ctx) {
-            const g = ctx.createLinearGradient(0, 0, 0, 400); g.addColorStop(0, '#fdf6e3'); g.addColorStop(1, '#f5e6c4');
+            const g = ctx.createLinearGradient(0, 0, 0, 400); g.addColorStop(0, '#fff6e8'); g.addColorStop(1, '#f3e2c7');
             ctx.fillStyle = g; ctx.fillRect(0, 0, 640, 400);
-            ctx.strokeStyle = '#b08968'; ctx.lineWidth = 6; ctx.strokeRect(8, 8, 624, 384);
+            ctx.strokeStyle = '#c98d54'; ctx.lineWidth = 6; ctx.strokeRect(8, 8, 624, 384);
             ctx.fillStyle = '#3c2415'; ctx.textAlign = 'center';
             ctx.font = '900 34px sans-serif'; ctx.fillText('🎓 學期成績單', 320, 62);
             ctx.font = '700 20px sans-serif'; ctx.fillText('學霸養成記', 320, 94);
             ctx.textAlign = 'left'; ctx.font = '700 22px sans-serif';
-            rows.forEach((r, i) => { const y = 148 + i * 38; ctx.fillStyle = '#8a7360'; ctx.fillText(r[0], 70, y); ctx.fillStyle = '#3c2415'; const w = ctx.measureText(r[1]).width; ctx.fillText(r[1], 570 - w, y); });
+            rows.forEach((r, i) => { const y = 148 + i * 38; ctx.fillStyle = '#9c6b43'; ctx.fillText(r[0], 70, y); ctx.fillStyle = '#3c2415'; const w = ctx.measureText(r[1]).width; ctx.fillText(r[1], 570 - w, y); });
             dl.href = cv.toDataURL('image/png'); dl.style.display = 'inline-block';
           }
         } catch (e) { }
@@ -1735,7 +1735,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.60.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.61.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1862,13 +1862,13 @@
         elBtnExam.disabled = true;
         elBtnExam.style.opacity = '0.55';
         elBtnExam.style.cursor = 'not-allowed';
-        elBtnExam.style.background = 'linear-gradient(135deg, #86868b, #636366)';
+        elBtnExam.style.background = 'linear-gradient(135deg, #7d868f, #5f5f66)';
       } else {
         elBtnExam.innerText = `參加考試（預估 ${expScore} 分）${(gameState.examAttempts || 0) === 0 ? '（首次免費）' : '（$50）'}${gameState.mockBuff ? ' 模擬+' + gameState.mockBuff + '分' : ''}`; // v9.32 分數制：按鈕顯示預估成績
         elBtnExam.disabled = false;
         elBtnExam.style.opacity = '1';
         elBtnExam.style.cursor = 'pointer';
-        elBtnExam.style.background = 'linear-gradient(135deg, #ff2d55, #ff3b30)';
+        elBtnExam.style.background = 'linear-gradient(135deg, #ff2d55, #ff2d55)';
       }
     }
 
@@ -1882,13 +1882,13 @@
     }
 
     // v9.1 知識光點：學到哪一科，就冒哪一科顏色的光點
-    const SUBJECT_COLORS = { cn: '#e74c3c', en: '#2980b9', ma: '#27ae60', sc: '#8e44ad', so: '#f39c12' };
+    const SUBJECT_COLORS = { cn: '#c0392b', en: '#5b7fa6', ma: '#5da85f', sc: '#8e44ad', so: '#f39c12' };
     function spawnKnowledgeOrb(subKey) {
       const wrap = document.getElementById('char-wrap');
       if (!wrap) return;
       const orb = document.createElement('div');
       orb.className = 'knowledge-orb';
-      orb.style.background = SUBJECT_COLORS[subKey] || '#ffd32a';
+      orb.style.background = SUBJECT_COLORS[subKey] || '#f7d038';
       orb.style.left = (14 + Math.random() * 16) + 'px';
       wrap.appendChild(orb);
       setTimeout(() => orb.remove(), 1300);
@@ -2208,8 +2208,8 @@
       floatTxt.style.left = "50%";
       floatTxt.style.transform = "translateX(-50%)";
       floatTxt.style.background = "rgba(74, 55, 40, 0.95)";
-      floatTxt.style.color = "#ffd154";
-      floatTxt.style.border = "2px solid #4a3728";
+      floatTxt.style.color = "#ffd166";
+      floatTxt.style.border = "2px solid #3c2415";
       floatTxt.style.borderRadius = "8px";
       floatTxt.style.padding = "4px 10px";
       floatTxt.style.fontSize = "0.8rem";
@@ -2217,7 +2217,7 @@
       floatTxt.style.whiteSpace = "nowrap"; // v9.0：不加 nowrap 會被 42px 的 char-wrap 擠成直式柱子
       floatTxt.style.zIndex = "30";
       floatTxt.style.pointerEvents = "none";
-      floatTxt.style.boxShadow = "2px 2px 0px #4a3728";
+      floatTxt.style.boxShadow = "2px 2px 0px #3c2415";
       floatTxt.style.animation = "float-up 1.2s forwards ease-out";
       // 移除心了：const style = ... / document.head.appendChild(style)
       floatTxt.innerHTML = icoText(txt);
@@ -2484,7 +2484,7 @@
       area.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
           <div id="cook-score" style="font-weight:900; font-size:0.95rem;">⭐ 0 分 ・ 🔥 連擊 0</div>
-          <div id="cook-order" style="font-weight:800; font-size:0.88rem; background:#fff3e0; border:2px solid #ffb300; border-radius:12px; padding:3px 10px;"></div>
+          <div id="cook-order" style="font-weight:800; font-size:0.88rem; background:#fff6e8; border:2px solid #ff9f0a; border-radius:12px; padding:3px 10px;"></div>
           <div style="font-weight:800; font-size:0.85rem; opacity:0.75;">目標 14 分</div>
         </div>
         <div class="cooking-belt" id="cooking-belt">
@@ -2581,11 +2581,11 @@
       timerFill.style.width = '100%';
 
       const balloonColors = [
-        'linear-gradient(135deg, #ff453a, #ff6b6b)',
-        'linear-gradient(135deg, #0a84ff, #5ac8fa)',
-        'linear-gradient(135deg, #30d158, #8ded9f)',
-        'linear-gradient(135deg, #ff9f0a, #ffd60a)',
-        'linear-gradient(135deg, #bf5af2, #da8aff)'
+        'linear-gradient(135deg, #e74c3c, #ff5b6a)',
+        'linear-gradient(135deg, #0a84ff, #7fd4e8)',
+        'linear-gradient(135deg, #2ed573, #8fd07a)',
+        'linear-gradient(135deg, #ff9f0a, #ffcc00)',
+        'linear-gradient(135deg, #bf5af2, #e89bb0)'
       ];
       const totalBalloons = 3;
       let currentBalloonIdx = 0;
@@ -2921,7 +2921,7 @@
       const el = document.createElement('button');
       el.className = 'combo-bubble';
       el.textContent = COMBO_SUBJECT_CHARS[sub];
-      el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#ffd32a';
+      el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#f7d038';
       // v9.25 使用者指定：泡泡出現在建築「框架內」的隨機位置——大、好點、不被家具擋、也不會疊到老師
       const frameIds = { school: 'school-stage', store: 'store-stage', restaurant: 'rest-stage', home: 'home-stage', library: 'lib-stage' };
       const frame = document.getElementById(frameIds[currentLoc] || '') || document.getElementById('landmark-' + currentLoc) || wrap;
@@ -3046,8 +3046,8 @@
       const item = mockList[mockIdx];
       const ok = i === item.a;
       if (ok) mockScore++;
-      btn.style.background = ok ? '#30d158' : '#ff5a5a';
-      btn.style.color = '#fff';
+      btn.style.background = ok ? '#2ed573' : '#ff5b6a';
+      btn.style.color = '#ffffff';
       playSound(ok ? 'levelUp' : 'examFail');
       setTimeout(() => { mockIdx++; mockLock = false; if (mockIdx >= mockList.length) finishMockExam(); else renderMockQ(); }, 260);
     }
@@ -3059,7 +3059,7 @@
       document.getElementById('mock-quiz').style.display = 'none';
       const res = document.getElementById('mock-result');
       res.style.display = 'block';
-      res.innerHTML = `<div style="font-size:2rem;">${mockScore >= 8 ? '🏆' : (mockScore >= 5 ? '💪' : '😅')}</div><div style="font-weight:900; font-size:1.05rem; margin:6px 0;">答對 ${mockScore} / ${mockList.length} 題</div><div style="color:var(--muted); font-size:0.85rem;">正式考試成功率 <b style="color:#2a9d8f;">+${buff}%</b>（用於下一次升學考）</div>`;
+      res.innerHTML = `<div style="font-size:2rem;">${mockScore >= 8 ? '🏆' : (mockScore >= 5 ? '💪' : '😅')}</div><div style="font-weight:900; font-size:1.05rem; margin:6px 0;">答對 ${mockScore} / ${mockList.length} 題</div><div style="color:var(--muted); font-size:0.85rem;">正式考試成功率 <b style="color:#27ae60;">+${buff}%</b>（用於下一次升學考）</div>`;
       playSound(mockScore >= 5 ? 'examSuccess' : 'click');
       saveGameData();
       updateUI();
@@ -3343,15 +3343,15 @@
     const SHOE_B = ['................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...BBBB..BBBB...','..BBBBBBBBBBBB..','...DDDD..DDDD...','................'];
     const HAT_TOP = ['................','................','................','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','....GGGGGGGG....','..KKKKKKKKKKKK..','..KKKKKKKKKKKK..','................','................','................','................','................','................','................','................','................','................','................','................','................','................'];
     const GACHA_PARTS = [
-      { id: 'star-hat', set: 'star', type: 'hat', name: '星空法帽', map: { T: '#2b2d5c', B: '#4547a8', W: '#f1c40f' }, rows: HAT_B },
-      { id: 'star-clothes', set: 'star', type: 'clothes', name: '星空法袍', map: { N: '#34306e', W: '#f5f3ff', R: '#f1c40f', D: '#1d1b3e' }, rows: TOP_A },
-      { id: 'star-shoes', set: 'star', type: 'shoes', name: '星塵跑鞋', map: { W: '#e8e6ff', R: '#5a54c4', D: '#3c388f' }, rows: SHOE_A },
-      { id: 'sport-hat', set: 'sport', type: 'hat', name: '火焰鴨舌帽', map: { R: '#ff8c1a', D: '#e56f00', W: '#ffffff' }, rows: HAT_A },
-      { id: 'sport-clothes', set: 'sport', type: 'clothes', name: '火焰背心', map: { W: '#ffffff', B: '#ff8c1a', D: '#c75b00', G: '#ffe08a' }, rows: TOP_B },
-      { id: 'sport-shoes', set: 'sport', type: 'shoes', name: '火焰跑鞋', map: { W: '#ffffff', R: '#ff8c1a', D: '#e56f00' }, rows: SHOE_A },
-      { id: 'noble-hat', set: 'noble', type: 'hat', name: '貴族禮帽', map: { K: '#23232b', G: '#f1c40f' }, rows: HAT_TOP },
-      { id: 'noble-clothes', set: 'noble', type: 'clothes', name: '貴族西裝', map: { W: '#f8f6f0', B: '#23232b', D: '#101016', G: '#f1c40f' }, rows: TOP_B },
-      { id: 'noble-shoes', set: 'noble', type: 'shoes', name: '貴族皮鞋', map: { B: '#23232b', D: '#101016', G: '#f1c40f' }, rows: SHOE_B },
+      { id: 'star-hat', set: 'star', type: 'hat', name: '星空法帽', map: { T: '#26324b', B: '#2e5f8a', W: '#ffcc00' }, rows: HAT_B },
+      { id: 'star-clothes', set: 'star', type: 'clothes', name: '星空法袍', map: { N: '#26324b', W: '#eef2f0', R: '#ffcc00', D: '#182042' }, rows: TOP_A },
+      { id: 'star-shoes', set: 'star', type: 'shoes', name: '星塵跑鞋', map: { W: '#eef2f0', R: '#3a6ea5', D: '#2c3e50' }, rows: SHOE_A },
+      { id: 'sport-hat', set: 'sport', type: 'hat', name: '火焰鴨舌帽', map: { R: '#f39c12', D: '#e65c00', W: '#ffffff' }, rows: HAT_A },
+      { id: 'sport-clothes', set: 'sport', type: 'clothes', name: '火焰背心', map: { W: '#ffffff', B: '#f39c12', D: '#e65c00', G: '#ffe9a8' }, rows: TOP_B },
+      { id: 'sport-shoes', set: 'sport', type: 'shoes', name: '火焰跑鞋', map: { W: '#ffffff', R: '#f39c12', D: '#e65c00' }, rows: SHOE_A },
+      { id: 'noble-hat', set: 'noble', type: 'hat', name: '貴族禮帽', map: { K: '#1a1a24', G: '#ffcc00' }, rows: HAT_TOP },
+      { id: 'noble-clothes', set: 'noble', type: 'clothes', name: '貴族西裝', map: { W: '#fff6e8', B: '#1a1a24', D: '#0f1428', G: '#ffcc00' }, rows: TOP_B },
+      { id: 'noble-shoes', set: 'noble', type: 'shoes', name: '貴族皮鞋', map: { B: '#1a1a24', D: '#0f1428', G: '#ffcc00' }, rows: SHOE_B },
     ];
     GACHA_PARTS.forEach(pt => { SKIN_TEMPLATES[pt.type].push({ name: pt.name, map: pt.map, rows: pt.rows, gacha: pt.id }); });
     const SET_DEFS = {

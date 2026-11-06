@@ -756,7 +756,7 @@
               <button class="friend-btn gift" onclick="giftToFriend('${f.id}', '${f.favGift}')" ${(favCount <= 0 || isMax) ? 'disabled' : ''}>
                 🎁 送最愛${f.favGiftName.slice(0, 4)} (+22) [持有:${favCount}]
               </button>
-              <button class="friend-btn" style="background:#ff9f0a; color:#fff;" onclick="inviteCoActivity('${f.id}')" ${(aff < 20 || coToday) ? 'disabled' : ''}>
+              <button class="friend-btn" style="background:#ff9f0a; color:#ffffff;" onclick="inviteCoActivity('${f.id}')" ${(aff < 20 || coToday) ? 'disabled' : ''}>
                 ${coActive ? '💞 同行中…' : (aff < 20 ? '🔒 好感 20 解鎖邀約' : (coToday ? '✅ 今日已邀約' : '💞 邀約同行 (2h 加成)'))}
               </button>
             </div>
@@ -1929,7 +1929,7 @@
 
     // UX4：升學成功彩花動畫
     function celebrateGraduation() {
-      const colors = ['#ff9f0a', '#30d158', '#0a84ff', '#bf5af2', '#ff453a', '#ffd60a'];
+      const colors = ['#ff9f0a', '#2ed573', '#0a84ff', '#bf5af2', '#e74c3c', '#ffcc00'];
       for (let i = 0; i < 50; i++) {
         setTimeout(() => {
           const el = document.createElement('div');

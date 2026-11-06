@@ -9,6 +9,8 @@ window.BIBLE = {
     paper: '#fffdf5', ink: '#26324b', ink2: '#182042', sun: '#ffcc00', amber: '#ff9f0a',
     tang: '#e65c00', skyBlue: '#0a84ff', leaf: '#30d158', rose: '#ff2d55', grape: '#bf5af2',
     cocoa: '#3c2415', muted: '#5f5f66', white: '#ffffff', cream: '#efe9e0',
+    // v9.61 靜音表面色（大面積表面專用；鮮色只留識別與重點）＋鮮豔度量測定義：vivid = HSV 的 s×v > 0.35（感知彩度）
+    woodMut: '#8a6248', leafMut: '#5da85f', steel: '#5b7fa6',
     // 光影
     glowWarm: '#ffc86e', glowCool: '#bedcfe', spray: '#aee6fa', moon: '#ffe9b8',
     starlight: '#ffe9a8', deep: '#0f1428', navy: '#232f47',

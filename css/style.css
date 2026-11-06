@@ -14,7 +14,7 @@
       --amber: #ff9f0a;
       --tang: #e65c00;
       --sky: #0a84ff;
-      --leaf: #30d158;
+      --leaf: #2ed573;
       --rose: #ff2d55;
       --grape: #bf5af2;
       --cocoa: #3c2415;
@@ -31,7 +31,7 @@
       /* 功能色與 alpha 通道（非色票） */
       --ink-soft: rgba(38, 50, 75, 0.55);
       --white: #ffffff;
-      --black: #000000;
+      --black: #0f1428;
       --rgb-ink: 38, 50, 75;
       --rgb-secondary: 255, 69, 58;
       --rgb-accent: 48, 209, 88;
@@ -260,7 +260,7 @@ body {
     }
 
     .island-lv-badge.is-max {
-      background: linear-gradient(135deg, #a55eea, #fc5c65);
+      background: linear-gradient(135deg, #bf5af2, #ff5b6a);
       color: var(--white);
       box-shadow: var(--sh-hard);
     }
@@ -383,7 +383,7 @@ body {
       max-width: calc(100vw - 24px);
       white-space: nowrap;
       z-index: 90;
-      background: linear-gradient(135deg, var(--amber), #ff375f);
+      background: linear-gradient(135deg, var(--amber), #ff2d55);
       color: var(--white);
       border-radius: var(--r-win);
       padding: 8px 16px;
@@ -550,7 +550,7 @@ body {
       left: 45px;
       width: 52px;
       height: 45px;
-      background: #dcd6f7;
+      background: #cfe8f5;
       border: 2.5px solid var(--cocoa);
       border-radius: var(--r-card);
     }
@@ -561,7 +561,7 @@ body {
       top: 45px;
       width: 45px;
       height: 28px;
-      background: #f7a072;
+      background: #d9a066;
       border: 2.5px solid var(--cocoa);
       border-radius: var(--r-card);
     }
@@ -615,7 +615,7 @@ body {
       min-width: 52px;
       padding: 5px 8px;
       border: 2px solid var(--cocoa);
-      background: #fff8eb;
+      background: #fff6e8;
       border-radius: var(--r-card);
       box-shadow: var(--sh-hard);
       cursor: pointer;
@@ -652,7 +652,7 @@ body {
        🏛️ 島嶼建設抽屜 (#drawer-build - 開羅工坊)
        ========================================== */
     .build-summary-card {
-      background: #fcf8ee;
+      background: #fff6e8;
       border: 2px solid var(--cocoa);
       border-radius: var(--r-card);
       padding: 14px;
@@ -670,7 +670,7 @@ body {
     .prosperity-progress-bar {
       width: 100%;
       height: 12px;
-      background: #e6dfcc;
+      background: #f3e2c7;
       border: 2px solid var(--cocoa);
       border-radius: var(--r-card);
       overflow: hidden;
@@ -679,7 +679,7 @@ body {
 
     .prosperity-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--amber), #20bf6b);
+      background: linear-gradient(90deg, var(--amber), #27ae60);
       transition: width 0.4s ease;
     }
 
@@ -724,7 +724,7 @@ body {
 
     .build-card-desc {
       font-size: 0.78rem;
-      color: #7d593b;
+      color: #795548;
       line-height: 1.4;
       margin-bottom: 8px;
     }
@@ -739,7 +739,7 @@ body {
       padding: 6px 14px;
       border-radius: var(--r-card);
       border: 2px solid var(--cocoa);
-      background: linear-gradient(135deg, var(--amber), #eb3b5a);
+      background: linear-gradient(135deg, var(--amber), #ff2d55);
       color: var(--white);
       font-size: 0.78rem;
       font-weight: 900;
@@ -759,7 +759,7 @@ body {
     }
 
     .btn-upgrade-island:disabled {
-      background: #b2bec3;
+      background: #b8bcc4;
       box-shadow: var(--sh-hard-sm);
       cursor: not-allowed;
       opacity: 0.7;
@@ -1174,7 +1174,7 @@ body {
       position: absolute;
       width: 4px;
       height: 4px;
-      background: #aedefc;
+      background: #aee6fa;
       border: 1px solid rgba(var(--rgb-black), 0.15);
       opacity: 0;
       animation: drip-sweat 1s infinite ease-in;
@@ -1840,7 +1840,7 @@ body {
     }
 
     .fill-hunger {
-      background: linear-gradient(90deg, var(--amber), #ff9500);
+      background: linear-gradient(90deg, var(--amber), #ff9f0a);
       /* 蘋果橘 */
       box-shadow: var(--sh-soft);
     }
@@ -2231,7 +2231,7 @@ body {
        博士轉生完結畫面
        ========================================== */
     #clear-overlay {
-      background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: radial-gradient(ellipse at center, #1a1a24 0%, #182042 50%, #232f47 100%);
       z-index: 10000;
       flex-direction: column;
     }
@@ -2894,7 +2894,7 @@ body {
     }
 
     .cooking-item.raw { filter: saturate(0.35) brightness(1.15); }
-    .cooking-item.perfect { border-color: #ffb300; box-shadow: var(--sh-soft); animation: mg-perfect-pulse 0.5s infinite alternate ease-in-out; }
+    .cooking-item.perfect { border-color: #ff9f0a; box-shadow: var(--sh-soft); animation: mg-perfect-pulse 0.5s infinite alternate ease-in-out; }
     .cooking-item.over { filter: sepia(0.7) brightness(0.72); }
     .cooking-item.burnt { filter: grayscale(1) brightness(0.45); }
     .cooking-item .cook-ring { position: absolute; left: 3px; right: 3px; bottom: 3px; height: 5px; border-radius: var(--r-card); background: rgba(var(--rgb-black),0.15); overflow: hidden; }
@@ -3072,7 +3072,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   font-size: 0.78rem !important;
   font-weight: 700 !important;
 }
-#stage-board span { color: #e03131 !important; }
+#stage-board span { color: #c0392b !important; }
 
 /* 速度鈕 */
 .speed-btn {
@@ -3098,8 +3098,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 .status-bar-fill { border-radius: var(--r-pill) !important; box-shadow: none !important; }
 .status-bar-fill.energy { background: #2ed573 !important; }
-.status-bar-fill.hunger { background: #ffa502 !important; }
-.status-bar-fill.stress { background: #ff4757 !important; }
+.status-bar-fill.hunger { background: #ff9f0a !important; }
+.status-bar-fill.stress { background: #e74c3c !important; }
 
 /* 底部 Dock (若有使用) */
 .bottom-dock {
@@ -3118,7 +3118,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   font-weight: 700 !important;
   padding: 6px 12px !important;
 }
-.dock-btn:active { transform: translate(1px, 2px) !important; box-shadow: none !important; background: #ffe98a !important; }
+.dock-btn:active { transform: translate(1px, 2px) !important; box-shadow: none !important; background: #ffe9a8 !important; }
 
 /* 右下功能 FAB：圓鈕 + 粗框硬陰影，與全站統一 */
 .control-fab {
@@ -3139,7 +3139,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* 建築底座：圓角 + 柔和深色框 (像素房間內容不變) */
 .island-platform {
-  border: 3px solid #374151 !important;
+  border: 3px solid #2c3e50 !important;
   border-radius: var(--r-win) !important;
   box-shadow: var(--sh-hard) !important;
   background: var(--paper) !important;
@@ -3457,7 +3457,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .quest-row .quest-icon { font-size: 1rem; }
 .quest-row .quest-desc { flex: 1; }
 .quest-row .quest-prog { color: var(--muted); font-size: 0.78rem; }
-.quest-row .quest-reward { color: #b8860b; font-size: 0.78rem; }
+.quest-row .quest-reward { color: #ca6f1e; font-size: 0.78rem; }
 
 /* ================= v9.1 花錢系統視覺 ================= */
 .home-decor { position: absolute; inset: 0; z-index: 14; pointer-events: none; }
@@ -3535,12 +3535,12 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 @keyframes bubble-in { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes bubble-bob { from { margin-top: 0; } to { margin-top: -4px; } }
 .rival-row { display: flex; align-items: center; gap: 7px; padding: 5px 8px; margin-bottom: 4px; background: rgba(var(--rgb-white),0.55); border: 1.5px solid var(--border-color); border-radius: var(--r-card); font-size: 0.78rem; font-weight: 700; }
-.rival-row.is-you { background: rgba(var(--rgb-yellow), 0.22); border-color: #d9a400; }
+.rival-row.is-you { background: rgba(var(--rgb-yellow), 0.22); border-color: #f39c12; }
 .rival-row .rival-emoji { font-size: 1rem; }
 .rival-row .rival-name { min-width: 74px; }
 .rival-row .rival-bar { flex: 1; height: 9px; background: rgba(var(--rgb-navy),0.12); border-radius: var(--r-card); overflow: hidden; }
-.rival-row .rival-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--amber), #ff7847); border-radius: var(--r-card); transition: width 0.5s ease; }
-.rival-row.is-you .rival-fill { background: linear-gradient(90deg, var(--leaf), #2a9d8f); }
+.rival-row .rival-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--amber), #e67e22); border-radius: var(--r-card); transition: width 0.5s ease; }
+.rival-row.is-you .rival-fill { background: linear-gradient(90deg, var(--leaf), #27ae60); }
 .rival-row .rival-pct { font-size: 0.69rem; color: var(--muted); min-width: 44px; text-align: right; }
 #login-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
 .login-cell { border: 1.5px solid var(--border-color); border-radius: var(--r-card); padding: 8px 6px; text-align: center; background: rgba(var(--rgb-white),0.6); }
@@ -3548,7 +3548,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .login-cell .login-reward { font-size: 0.78rem; font-weight: 900; margin-top: 2px; }
 .login-cell .login-state { font-size: 0.69rem; font-weight: 700; margin-top: 2px; }
 .login-cell.past { opacity: 0.55; }
-.login-cell.today { border-color: #d9a400; background: rgba(var(--rgb-yellow), 0.2); box-shadow: var(--sh-hard-sm); }
+.login-cell.today { border-color: #f39c12; background: rgba(var(--rgb-yellow), 0.2); box-shadow: var(--sh-hard-sm); }
 .mock-opt { text-align: left; padding: 12px 14px; font-size: 1rem; }
 
 
@@ -3559,7 +3559,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .hv-ico { font-size: 0.78rem; }
 .hv-bar { width: 52px; height: 7px; background: rgba(var(--rgb-navy),0.15); border-radius: var(--r-card); overflow: hidden; display: inline-block; }
 .hv-bar span { display: block; height: 100%; border-radius: var(--r-card); transition: width 0.4s ease; }
-.hv-e { background: var(--leaf); } .hv-h { background: var(--amber); } .hv-s { background: #ff5a5a; } .hv-f { background: var(--amber); }
+.hv-e { background: var(--leaf); } .hv-h { background: var(--amber); } .hv-s { background: #ff5b6a; } .hv-f { background: var(--amber); }
 .glance-card {
   position: absolute; top: 46px; z-index: 55; cursor: pointer;
   background: rgba(var(--rgb-white),0.9);  
@@ -3595,7 +3595,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .manual-dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: rgba(var(--rgb-navy),0.2); transition: all 0.3s; }
 .manual-dot.active { background: var(--rose); width: 20px; border-radius: var(--r-card); }
 .dm-side { font-size: 1.25rem; z-index: 1; }
-.dm-road { position: absolute; left: 12%; right: 12%; bottom: 24px; height: 3px; background: repeating-linear-gradient(90deg, #c9a227 0 10px, transparent 10px 18px); border-radius: var(--r-card); }
+.dm-road { position: absolute; left: 12%; right: 12%; bottom: 24px; height: 3px; background: repeating-linear-gradient(90deg, #d98e32 0 10px, transparent 10px 18px); border-radius: var(--r-card); }
 .dm-walker { font-size: 1.25rem; position: absolute; bottom: 28px; animation: dm-walk 3.2s ease-in-out infinite; z-index: 1; }
 @keyframes dm-walk { 0%, 100% { left: 16%; transform: scaleX(1); } 48% { left: 74%; transform: scaleX(1); } 52% { left: 74%; transform: scaleX(-1); } 96% { left: 16%; transform: scaleX(-1); } }
 .dm-bars { width: 62%; display: flex; flex-direction: column; gap: 8px; }
@@ -3603,24 +3603,24 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .dm-bar span { display: block; height: 100%; border-radius: var(--r-card); }
 .dm-bar .f1 { background: var(--leaf); animation: dm-fill1 2.6s ease-in-out infinite; }
 .dm-bar .f2 { background: var(--amber); animation: dm-fill1 2.6s ease-in-out 0.4s infinite; }
-.dm-bar .f3 { background: #ff5a5a; animation: dm-fill2 2.6s ease-in-out 0.2s infinite; }
+.dm-bar .f3 { background: #ff5b6a; animation: dm-fill2 2.6s ease-in-out 0.2s infinite; }
 @keyframes dm-fill1 { 0%, 100% { width: 35%; } 50% { width: 92%; } }
 @keyframes dm-fill2 { 0%, 100% { width: 88%; } 50% { width: 30%; } }
-.dm-bubble { width: 34px; height: 34px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-weight: 900; color: var(--white); background: #e74c3c; border: 2px solid rgba(var(--rgb-white),0.9); box-shadow: none; animation: dm-pop 1.8s ease-in-out infinite; }
-.dm-bubble.b2 { background: #27ae60; animation-delay: 0.35s; }
-.dm-bubble.b3 { background: #2e6fd8; animation-delay: 0.7s; }
+.dm-bubble { width: 34px; height: 34px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-weight: 900; color: var(--white); background: #c0392b; border: 2px solid rgba(var(--rgb-white),0.9); box-shadow: none; animation: dm-pop 1.8s ease-in-out infinite; }
+.dm-bubble.b2 { background: #5da85f; animation-delay: 0.35s; }
+.dm-bubble.b3 { background: #2980b9; animation-delay: 0.7s; }
 @keyframes dm-pop { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.25); } 55% { transform: scale(0.6); opacity: 0.4; } 70% { transform: scale(1); opacity: 1; } }
 .dm-exam { width: 66%; }
 .dm-exam-bar { height: 14px; background: rgba(var(--rgb-navy),0.12); border-radius: var(--r-card); overflow: hidden; }
 .dm-exam-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--amber), var(--leaf)); animation: dm-examfill 2.8s ease-in-out infinite; }
 @keyframes dm-examfill { 0% { width: 22%; } 60%, 100% { width: 92%; } }
-.dm-exam-txt { font-weight: 900; font-size: 0.78rem; margin-top: 8px; color: #2a9d8f; }
+.dm-exam-txt { font-weight: 900; font-size: 0.78rem; margin-top: 8px; color: #27ae60; }
 .dm-race { width: 68%; display: flex; flex-direction: column; gap: 10px; }
 .dm-rrow { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
 .dm-rbar { flex: 1; height: 11px; background: rgba(var(--rgb-navy),0.12); border-radius: var(--r-card); overflow: hidden; }
 .dm-rbar span { display: block; height: 100%; border-radius: var(--r-card); }
 .dm-rbar .r1 { background: var(--leaf); animation: dm-race1 3s ease-in-out infinite; }
-.dm-rbar .r2 { background: #ff7847; animation: dm-race2 3s ease-in-out infinite; }
+.dm-rbar .r2 { background: #e67e22; animation: dm-race2 3s ease-in-out infinite; }
 @keyframes dm-race1 { 0% { width: 18%; } 55%, 100% { width: 95%; } }
 @keyframes dm-race2 { 0% { width: 30%; } 55%, 100% { width: 72%; } }
 .dm-gift { font-size: 1.25rem; animation: dm-shake 1.6s ease-in-out infinite; display: inline-block; }
@@ -3663,31 +3663,31 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #landmark-store.night-lit .facade-roof { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* 招牌燈箱發光（店面本體的亮度改由 #sky-night 挖空達成，不再用 brightness 濾鏡硬拉） */
 .npc-role { position: absolute; top: -5px; left: 0; font-size: 0.78rem; line-height: 1; text-shadow: 0 1px 2px rgba(var(--rgb-black),0.45); } /* v9.16.1 值班職位小標 */
 /* ===== v9.17 超商大場景（比照住家 stage） ===== */
-#store-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3ead9; cursor:grab; touch-action:none; }
+#store-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
 #store-stage:active { cursor:grabbing; }
 #store-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
-.store-chip { position:absolute; z-index:980; background:#fff8e1; border:2px solid var(--ink2); border-radius: var(--r-pill); padding:3px 12px; font-size: 0.78rem; font-weight:900; color:#8d5a2c; box-shadow: var(--sh-hard-sm); cursor:pointer; white-space:nowrap; }
+.store-chip { position:absolute; z-index:980; background:#fff6e8; border:2px solid var(--ink2); border-radius: var(--r-pill); padding:3px 12px; font-size: 0.78rem; font-weight:900; color:#8a6248; box-shadow: var(--sh-hard-sm); cursor:pointer; white-space:nowrap; }
 /* ===== v9.18 餐廳大場景（比照住家/超商 stage） ===== */
-#rest-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#a5713d; cursor:grab; touch-action:none; }
+#rest-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#a9743f; cursor:grab; touch-action:none; }
 #rest-stage:active { cursor:grabbing; }
 #rest-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #rest-rooms #teppan-fx { left:246px; top:50px; width:110px; height:46px; z-index:940; }
 /* ===== v9.21 學校大場景（比照超商/餐廳 stage） ===== */
-#school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ecd2; cursor:grab; touch-action:none; }
-#lib-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe6d0; cursor:grab; touch-action:none; }
-#gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#58a038; cursor:grab; touch-action:none; }
+#school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
+#lib-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3e2c7; cursor:grab; touch-action:none; }
+#gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#5da85f; cursor:grab; touch-action:none; }
 #gym-stage:active { cursor:grabbing; }
 #gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #gym-sky, #gym-floods { transition: opacity 1.2s ease; }
 .shot-ball { position:absolute; width:20px; height:20px; font-size: 1rem; line-height:20px; text-align:center; z-index:990; pointer-events:none; }
-.gym-shoot-btn { position:absolute; left:1006px; top:212px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#ffd93b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
+.gym-shoot-btn { position:absolute; left:1006px; top:212px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#f7d038; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
 .gym-shoot-btn:active { transform: translateY(2px); box-shadow: none; }
 #lib-stage:active { cursor:grabbing; }
 #lib-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #lib-shaft-w, #lib-shaft-e, #lib-lamps { transition: opacity 1.2s ease; }
 .lib-mote { animation: moteFloat 5s ease-in-out infinite; }
 @keyframes moteFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-.lib-rec-book { position:absolute; left:1002px; top:232px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#ffd93b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
+.lib-rec-book { position:absolute; left:1002px; top:232px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#f7d038; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
 .lib-rec-book:active { transform: translateY(2px); box-shadow: none; }
 @keyframes libGlow { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.18); } }
 #school-stage:active { cursor:grabbing; }
@@ -3698,7 +3698,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 @keyframes pick-float { 0% { transform: translateY(6px) scale(0.6); opacity: 0; } 18% { transform: translateY(0) scale(1.15); opacity: 1; } 35% { transform: translateY(-3px) scale(1); opacity: 1; } 100% { transform: translateY(-16px) scale(1); opacity: 0; } }
 .island-shade { position: absolute; inset: 0; z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 每島局部夜色（取代 island-glow 雙重打亮——光6）：opacity 由 updateSkyLighting 依營業權重連續寫入 */
 #town-map.night-on .iso-island.light-off { filter: grayscale(0.5); } /* v9.48 夜裡上鎖只留灰階語意、停用 brightness（光10） */
-.special-sign { position: absolute; left: 10px; top: 190px; z-index: 20; background: #fff8e1; border: 2px solid var(--ink2); border-radius: var(--r-card); padding: 2px 8px; font-size: 0.69rem; font-weight: 700; color: #8d5a2c; box-shadow: var(--sh-hard-sm); pointer-events: none; }
+.special-sign { position: absolute; left: 10px; top: 190px; z-index: 20; background: #fff6e8; border: 2px solid var(--ink2); border-radius: var(--r-card); padding: 2px 8px; font-size: 0.69rem; font-weight: 700; color: #8a6248; box-shadow: var(--sh-hard-sm); pointer-events: none; }
 #teppan-fx { position: absolute; left: 190px; top: 88px; width: 70px; height: 36px; z-index: 22; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
 #teppan-fx .flame { position: absolute; left: 26px; bottom: 2px; font-size: 1rem; animation: flick 0.5s ease-in-out infinite alternate; }
 .steam-puff { position: absolute; bottom: 10px; width: 10px; height: 10px; border-radius: var(--r-pill); background: rgba(var(--rgb-white),0.85); filter: blur(2px); opacity: 0; animation: steam-rise 1.6s ease-out infinite; }
@@ -3716,7 +3716,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .npc.seated .npc-sprite .pixel-feet, .npc.seated .npc-sprite > rect { display: none; }
 .npc.lying .npc-sprite { transform: none; animation: sleep-breath 2.4s ease-in-out infinite; } /* v9.15.3 直著睡：不橫躺旋轉 */
 #noodle-hit { position: absolute; left: 2%; bottom: 5%; width: 46%; height: 23%; z-index: 22; cursor: pointer; }
-#noodle-hit .nh-tag { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); font-size: 0.69rem; font-weight: 700; color: #7c4a12; background: rgba(255,248,225,0.92); border: 1.5px solid var(--ink2); border-radius: var(--r-pill); padding: 1px 7px; white-space: nowrap; box-shadow: var(--sh-hard-sm); }
+#noodle-hit .nh-tag { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); font-size: 0.69rem; font-weight: 700; color: #8d5a2c; background: rgba(255,248,225,0.92); border: 1.5px solid var(--ink2); border-radius: var(--r-pill); padding: 1px 7px; white-space: nowrap; box-shadow: var(--sh-hard-sm); }
 #char-wrap.lying #student-sprite { transform: none; animation: sleep-breath 2.4s ease-in-out infinite; } /* v9.15.3 直著睡 */
 .npc .npc-sprite, #char-wrap #student-sprite { transition: transform 0.6s ease; }
 @keyframes npc-bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
@@ -3730,7 +3730,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .character-wrapper { height: 70px !important; }
 
 /* ===== v9.11 說明改版：diagram-design 骨架 × 學霸黃（紙色/細線/無陰影/單一重點色） ===== */
-.dd-manual { --dd-paper:#f7f4ec; --dd-ink:#2d3142; --dd-muted:#4f5d75; --dd-soft:#5a6580; --dd-accent:var(--sun); --dd-deep:#8a6d00; --dd-tint:rgba(var(--rgb-yellow),.16); --dd-hair:rgba(45,49,66,.28);
+.dd-manual { --dd-paper:#f5f0e6; --dd-ink:#26324b; --dd-muted:#5f5f66; --dd-soft:#5f5f66; --dd-accent:var(--sun); --dd-deep:#8d5a2c; --dd-tint:rgba(var(--rgb-yellow),.16); --dd-hair:rgba(45,49,66,.28);
   background:var(--dd-paper); color:var(--dd-ink); border:1px solid var(--dd-hair); border-radius: var(--r-card); padding:16px 16px 12px;
   font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif; text-align:left; }
 .dd-viewport { height:min(512px, calc(100dvh - 235px)); min-height:360px; }
@@ -3801,7 +3801,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 @keyframes steam-drift { 0% { transform: translateY(0); opacity: 0; } 35% { opacity: 0.85; } 100% { transform: translateY(-7px); opacity: 0; } }
 
 /* ===== v9.14 捲動式室內 ===== */
-#home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#4a3421; } /* v9.41 室內底色公式：該場景地板色壓暗一階（木地板→深棕），不再用半夜藍例外 */
+#home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#3c2415; } /* v9.41 室內底色公式：該場景地板色壓暗一階（木地板→深棕），不再用半夜藍例外 */
 #home-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 .sleep-form { position:absolute; z-index:150; pointer-events:none; }
 
@@ -3842,8 +3842,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .editor-hint { margin-top: 12px; font-size: 0.78rem; color: var(--muted); line-height: 1.6; font-weight: 600; }
 
 /* v9.32 主修科目鈕 */
-.focus-subj-btn { margin-left: auto; font-size: 0.69rem; font-weight: 700; padding: 3px 10px; border-radius: var(--r-card); border: 2px solid #d8cfc0; background: var(--white); cursor: pointer; }
-.focus-subj-btn.active { background: #ffd93d; border-color: #e0a800; }
+.focus-subj-btn { margin-left: auto; font-size: 0.69rem; font-weight: 700; padding: 3px 10px; border-radius: var(--r-card); border: 2px solid #c8d2cc; background: var(--white); cursor: pointer; }
+.focus-subj-btn.active { background: #f7d038; border-color: #f39c12; }
 
 /* v9.33 無障礙地板：焦點可見（鍵盤/切換導覽時不再無跡可尋） */
 :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; box-shadow: var(--sh-hard-sm); }
@@ -3861,7 +3861,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #stage-board { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hv-num { font-size: 0.69rem; font-weight: 700; margin-left: 4px; }
 .floating-controls #btn-lock-mode {   box-shadow: var(--sh-soft); }
-.floating-controls #btn-lock-mode.locked { color: #fff; }
+.floating-controls #btn-lock-mode.locked { color: #ffffff; }
 
 /* ================= v9.40 人物規格：走路 2 幀＋坐姿規格 ================= */
 /* 坐姿規格（主角/NPC 共用一份定義）：下沉 6px、藏腳——NPC 走 .npc.seated（margin-top:6px＋.pixel-feet 隱藏），
@@ -3871,12 +3871,12 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .walking .foot-r, .npc-walking .foot-r { animation: walkStep 0.28s linear infinite; animation-delay: -0.14s; }
 
 /* ================= v9.42 建築識別色＋場景活物 ================= */
-.iso-island.landmark-home .island-tag { background: #e67e22 !important; color: #fff !important; }
+.iso-island.landmark-home .island-tag { background: #e67e22 !important; color: #ffffff !important; }
 .iso-island.landmark-store .island-tag { background: #2ed573 !important; color: var(--ink2) !important; }
-.iso-island.landmark-restaurant .island-tag { background: #c0392b !important; color: #fff !important; }
-.iso-island.landmark-school .island-tag { background: #2c3e50 !important; color: #fff !important; }
-.iso-island.landmark-library .island-tag { background: #1e8449 !important; color: #fff !important; }
-.iso-island.landmark-gym .island-tag { background: #ca6f1e !important; color: #fff !important; }
+.iso-island.landmark-restaurant .island-tag { background: #c0392b !important; color: #ffffff !important; }
+.iso-island.landmark-school .island-tag { background: #2c3e50 !important; color: #ffffff !important; }
+.iso-island.landmark-library .island-tag { background: #1e8449 !important; color: #ffffff !important; }
+.iso-island.landmark-gym .island-tag { background: #ca6f1e !important; color: #ffffff !important; }
 .room-chip[data-loc="home"] { border-left: 8px solid #e67e22; }
 .room-chip[data-loc="store"] { border-left: 8px solid #2ed573; }
 .room-chip[data-loc="restaurant"] { border-left: 8px solid #c0392b; }
@@ -3964,8 +3964,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .bg-leaf { background: var(--leaf); }
 .bg-grape { background: var(--grape); }
 .bg-sky { background: var(--sky); }
-.bg-danger-soft { background: #ff8a8a; }
-.tx-white { color: #fff; }
+.bg-danger-soft { background: #ff8fab; }
+.tx-white { color: #ffffff; }
 .fw700 { font-weight: 700; }
 .d-none { display: none; }
 .mt8 { margin-top: 8px; }
@@ -3985,3 +3985,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* v9.60 坐姿定版（與 NPC 同規格）：主角坐下＝藏腳（既有規則）＋下沉 6px，全由 .seated class 規格負責；
    舊 viewBox 裁切＋scale(0.82) 已退役——同桌比爸媽矮一截就是它造成的。 */
 #char-wrap.seated #student-sprite { transform: translateY(6px); }
+
+/* v9.61 日間 grading：小鎮整場一層暖色柔光（soft-light），把 76 色拉回同一個空氣裡；
+   透明度由 updateSkyLighting 依夜間因子驅動（正午最強、入夜歸零，夜色由既有 sky-night 接手）。 */
+#grade-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; background: #ffedb8; mix-blend-mode: soft-light; opacity: 0; }

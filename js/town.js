@@ -254,7 +254,7 @@
       if (!el) return;
       el.innerHTML = '<div style="font-weight:900; font-size:0.85rem; margin-bottom:6px;">🔗 建築連動 Combo</div>' + TOWN_COMBOS.map(c => {
         const on = townComboActive(c);
-        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:5px 8px; margin-bottom:5px; border-radius:8px; background:${on ? '#e8f7ee' : '#f3efe8'}; border:1.5px solid ${on ? '#7bc47f' : '#ddd3c2'};"><span><b>${c.name}</b> <span style="color:var(--muted); font-size:0.75rem;">${LANDMARK_NAMES[c.a]} Lv.${c.aLv}＋${LANDMARK_NAMES[c.b]} Lv.${c.bLv}</span><br><span style="font-size:0.78rem;">${c.desc}</span></span><span style="font-weight:900; color:${on ? '#2e7d32' : '#a08b6d'};">${on ? '✓ 已啟用' : '未啟用'}</span></div>`;
+        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:5px 8px; margin-bottom:5px; border-radius:8px; background:${on ? '#eef2f0' : '#f5f0e6'}; border:1.5px solid ${on ? '#85c173' : '#e8d8a8'};"><span><b>${c.name}</b> <span style="color:var(--muted); font-size:0.75rem;">${LANDMARK_NAMES[c.a]} Lv.${c.aLv}＋${LANDMARK_NAMES[c.b]} Lv.${c.bLv}</span><br><span style="font-size:0.78rem;">${c.desc}</span></span><span style="font-weight:900; color:${on ? '#1e8449' : '#7d868f'};">${on ? '✓ 已啟用' : '未啟用'}</span></div>`;
       }).join('');
     }
 
@@ -311,7 +311,7 @@
             </div>
             <div class="build-card-footer">
               <div style="font-size:0.76rem; color:var(--muted); font-weight:700;">
-                ${isMax ? '🏆 滿星榮譽' : `升級需求: <strong style="color:${canAfford ? '#ff9f0a' : '#ff3b30'};">$${nextCost}</strong>`}
+                ${isMax ? '🏆 滿星榮譽' : `升級需求: <strong style="color:${canAfford ? '#ff9f0a' : '#ff2d55'};">$${nextCost}</strong>`}
               </div>
               <button class="btn-upgrade-island" ${isMax || !canAfford ? 'disabled' : ''} onclick="upgradeLandmark('${loc}')">
                 ${isMax ? '⭐ 已滿級' : `升級 ($${nextCost})`}
@@ -625,21 +625,21 @@
 
     // ================= v9.8 精緻化：座位池＋門口排隊＋全員步行職員＋爸媽 =================
     const NPC_DEFS = [
-      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 300, speed: 68, palette: { hair: '#f5c542', outfit: '#2e6fd8', shorts: '#1f3a93', skin: '#fed7aa' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
-      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 820, speed: 62, palette: { hair: '#ff8fab', outfit: '#ff6b9d', shorts: '#5b2a86', skin: '#fed7aa', hairStyle: 'long' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
-      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1080, speed: 58, palette: { hair: '#2f6b33', outfit: '#27ae60', shorts: '#0e4d2e', skin: '#c98a4b' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
-      { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#1a1a24', outfit: '#3b6ea5', shorts: '#6c3483', skin: '#fed7aa', hairStyle: 'long' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
-      { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#ff7f27', shorts: '#784212', skin: '#dfa05e', cap: ['#ff7f27', '#d35400', '#a04000'] }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
-      { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#5b3a29', outfit: '#8e44ad', shorts: '#4a235a', skin: '#f5c48b', hairStyle: 'bun' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
-      { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#943126', skin: '#f5c48b', cap: ['#ffd60a', '#d9a400', '#b8860b'] }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 560, speed: 62, palette: { hair: '#6b6f76', outfit: '#2c3e50', shorts: '#2c3e50', skin: '#f5c48b' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
-      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 950, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#1e6f5c', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
-      { key: 'librarian', kind: 'staff', name: '小林', homeX: 430, speed: 60, palette: { hair: '#1a1a24', outfit: '#2980b9', shorts: '#1a5276', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
-      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 700, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#922b21', skin: '#dfa05e', cap: ['#ffffff', '#d5dbdb', '#aab7b8'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
-      { key: 'coach', kind: 'staff', name: '阿力', homeX: 880, speed: 85, palette: { hair: '#3c2415', outfit: '#e74c3c', shorts: '#154360', skin: '#c98a4b', headband: '#e74c3c' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
-      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1010, speed: 60, palette: { hair: '#2c1810', outfit: '#8e44ad', shorts: '#4d342e', skin: '#dfa05e', headband: '#8e44ad' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
-      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2c1810', outfit: '#2c3e50', shorts: '#5d4037', skin: '#f5c48b' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
-      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#7b4b94', outfit: '#c0392b', shorts: '#7d3c98', skin: '#fed7aa', hairStyle: 'bun' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
+      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 300, speed: 68, palette: { hair: '#f7d038', outfit: '#2980b9', shorts: '#2c3e50', skin: '#fed7aa' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
+      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 820, speed: 62, palette: { hair: '#e89bb0', outfit: '#ff5b6a', shorts: '#4a4a55', skin: '#fed7aa', hairStyle: 'long' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
+      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1080, speed: 58, palette: { hair: '#2f5d3a', outfit: '#5da85f', shorts: '#2f5d3a', skin: '#c98d54' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
+      { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#1a1a24', outfit: '#3a6ea5', shorts: '#8e44ad', skin: '#fed7aa', hairStyle: 'long' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
+      { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#6d4c41', skin: '#d9a066', cap: ['#e67e22', '#e65c00', '#a93226'] }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
+      { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#6d4c41', outfit: '#8e44ad', shorts: '#26324b', skin: '#f0b98a', hairStyle: 'bun' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
+      { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#a93226', skin: '#f0b98a', cap: ['#ffcc00', '#f39c12', '#ca6f1e'] }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 560, speed: 62, palette: { hair: '#5f5f66', outfit: '#2c3e50', shorts: '#2c3e50', skin: '#f0b98a' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
+      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 950, speed: 60, palette: { hair: '#3c2415', outfit: '#2ed573', shorts: '#1e8449', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
+      { key: 'librarian', kind: 'staff', name: '小林', homeX: 430, speed: 60, palette: { hair: '#1a1a24', outfit: '#5b7fa6', shorts: '#2e5f8a', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
+      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 700, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#a93226', skin: '#d9a066', cap: ['#ffffff', '#c8d2cc', '#b8bcc4'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
+      { key: 'coach', kind: 'staff', name: '阿力', homeX: 880, speed: 85, palette: { hair: '#3c2415', outfit: '#c0392b', shorts: '#2c3e50', skin: '#c98d54', headband: '#c0392b' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
+      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1010, speed: 60, palette: { hair: '#1a1a24', outfit: '#8e44ad', shorts: '#3c2415', skin: '#d9a066', headband: '#8e44ad' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
+      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#1a1a24', outfit: '#2c3e50', shorts: '#6d4c41', skin: '#f0b98a' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
+      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#8e44ad', outfit: '#c0392b', shorts: '#8e44ad', skin: '#fed7aa', hairStyle: 'bun' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
     ];
     const NPC_STREET_Y = 300; // A 街步行線（spawn/預設用；跨棟路徑一律走 streetYOf/streetLegs）
     const NPC_DOOR_Y = 245;
@@ -1060,13 +1060,13 @@
         const oldCap = svg.querySelector('.pixel-cap-default'); if (oldCap) oldCap.style.display = 'none';
         svg.setAttribute('viewBox', '0 -4 16 29');
         mk(headG, 'rect', { x: 4, y: -4, width: 8, height: 5, fill: '#ffffff', stroke: '#182042', 'stroke-width': 0.8 });
-        mk(headG, 'rect', { x: 4, y: 0, width: 8, height: 1, fill: '#d5dbdb' });
+        mk(headG, 'rect', { x: 4, y: 0, width: 8, height: 1, fill: '#c8d2cc' });
       }
       if (d.key === 'shu') svg.setAttribute('viewBox', '0 -1.5 16 26.5'); // 全員最高
       if (d.key === 'teacher') { // 高馬尾＋紅框眼鏡
         mk(headG, 'rect', { x: 12, y: 5, width: 2, height: 8, fill: d.palette.hair });
-        mk(headG, 'rect', { x: 4.5, y: 6.5, width: 3, height: 3, fill: 'none', stroke: '#e03131', 'stroke-width': 0.7 });
-        mk(headG, 'rect', { x: 8.5, y: 6.5, width: 3, height: 3, fill: 'none', stroke: '#e03131', 'stroke-width': 0.7 });
+        mk(headG, 'rect', { x: 4.5, y: 6.5, width: 3, height: 3, fill: 'none', stroke: '#c0392b', 'stroke-width': 0.7 });
+        mk(headG, 'rect', { x: 8.5, y: 6.5, width: 3, height: 3, fill: 'none', stroke: '#c0392b', 'stroke-width': 0.7 });
       }
       if (d.key === 'kui') { // 雙丸子頭
         mk(headG, 'circle', { cx: 3, cy: 2, r: 1.7, fill: d.palette.hair });
@@ -1075,11 +1075,11 @@
       if (d.key === 'coach' && bodyG) { // 寬肩＋哨子
         const jacket = bodyG.querySelector('rect[x="3"][y="11"]');
         if (jacket) { jacket.setAttribute('x', '2'); jacket.setAttribute('width', '12'); }
-        mk(bodyG, 'rect', { x: 7, y: 11, width: 2, height: 2, fill: '#f5f5f5', stroke: '#182042', 'stroke-width': 0.5 });
+        mk(bodyG, 'rect', { x: 7, y: 11, width: 2, height: 2, fill: '#eef2f0', stroke: '#182042', 'stroke-width': 0.5 });
       }
       if (d.key === 'mom' && bodyG) mk(bodyG, 'rect', { x: 5, y: 13, width: 6, height: 5, fill: '#ffffff', opacity: 0.92 }); // 圍裙色塊
       if (d.key === 'dad') { // 灰髮＋微駝
-        svg.querySelectorAll('.pixel-head-group rect[y="5"]').forEach(r => r.setAttribute('fill', '#9aa0a6'));
+        svg.querySelectorAll('.pixel-head-group rect[y="5"]').forEach(r => r.setAttribute('fill', '#7d868f'));
         if (headG) headG.style.transform = 'translate(0.6px, 0.8px)';
       }
     }
@@ -1116,7 +1116,7 @@
             const capEl = svg.querySelector('.pixel-cap-default');
             if (capEl) {
               capEl.style.display = '';
-              capEl.querySelectorAll('rect').forEach(r => { const f = r.getAttribute('fill'); if (f === '#ffcc00') r.setAttribute('fill', d.palette.cap[0]); else if (f === '#e0a800') r.setAttribute('fill', d.palette.cap[1]); else if (f === '#b8860b') r.setAttribute('fill', d.palette.cap[2]); });
+              capEl.querySelectorAll('rect').forEach(r => { const f = r.getAttribute('fill'); if (f === '#ffcc00') r.setAttribute('fill', d.palette.cap[0]); else if (f === '#f39c12') r.setAttribute('fill', d.palette.cap[1]); else if (f === '#ca6f1e') r.setAttribute('fill', d.palette.cap[2]); });
             }
           }
           if (d.palette.headband) { const hb = svg.querySelector('.pixel-headband'); if (hb) { hb.style.display = ''; hb.setAttribute('fill', d.palette.headband); } }
@@ -1148,7 +1148,7 @@
       fg.id = 'podium-fg';
       fg.style.zIndex = '150'; // v9.12.3 在 NPC 圖層內：蓋住老師(145)、不擋學生(195)與人名
       fg.style.left = '1088px'; fg.style.top = '135px'; fg.style.width = '48px'; fg.style.height = '25px';
-      fg.innerHTML = `<svg viewBox="118 110 48 25" style="width:100%; height:100%; display:block;"><g id="sch-podium"><rect x="118" y="110" width="48" height="6" fill="#b0743e" stroke="#182042" stroke-width="1.5" /><rect x="121" y="116" width="42" height="17" fill="#8d5a2c" stroke="#182042" stroke-width="1.5" /><rect x="118" y="131" width="48" height="4" fill="#6d4c41" /></g></svg>`;
+      fg.innerHTML = `<svg viewBox="118 110 48 25" style="width:100%; height:100%; display:block;"><g id="sch-podium"><rect x="118" y="110" width="48" height="6" fill="#b0743e" stroke="#182042" stroke-width="1.5" /><rect x="121" y="116" width="42" height="17" fill="#8a6248" stroke="#182042" stroke-width="1.5" /><rect x="118" y="131" width="48" height="4" fill="#6d4c41" /></g></svg>`;
       map.appendChild(fg);
     }
     function npcSay(npc, customText) {
@@ -1189,9 +1189,9 @@
       const pr = HOME_PROJ;
       const steam = (cx, cz, h, n) => { let out = ''; for (let i = 0; i < n; i++) { const a = pr.P(cx - 6 + i * 6, cz, h); out += '<path class="steam-wisp' + (i ? ' w' + (i + 1) : '') + '" d="M' + a.x.toFixed(1) + ',' + a.y.toFixed(1) + ' q2,-3 0,-6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>'; } return out; };
       const set = '<g id="home-dinner-set" style="display:none;">'
-        + pr.planeCircle(624, 182, 14.6, 13, '#ffffff') + pr.planeCircle(624, 182, 15.2, 7, '#fff7e0')
-        + pr.planeCircle(685, 182, 14.6, 13, '#ffffff') + pr.planeCircle(685, 182, 15.2, 7, '#fff7e0')
-        + pr.planeCircle(655, 184, 14.6, 17, '#e74c3c') + pr.planeCircle(655, 184, 15.2, 10, '#f39c12')
+        + pr.planeCircle(624, 182, 14.6, 13, '#ffffff') + pr.planeCircle(624, 182, 15.2, 7, '#fff6e8')
+        + pr.planeCircle(685, 182, 14.6, 13, '#ffffff') + pr.planeCircle(685, 182, 15.2, 7, '#fff6e8')
+        + pr.planeCircle(655, 184, 14.6, 17, '#c0392b') + pr.planeCircle(655, 184, 15.2, 10, '#f39c12')
         + steam(655, 184, 24, 3) + '</g>';
       const stm = '<g id="home-dinner-steam" style="display:none;">' + steam(655, 184, 22, 2) + '</g>';
       const food = document.createElement('div');
@@ -1223,63 +1223,63 @@
       const txt = (xp, str, size, fill, op) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="700" fill="' + fill + '"' + (op ? ' opacity="' + op + '"' : '') + '>' + str + '</text>';
       let bg = '', front = '';
       // 北牆三區色＋東牆＋地板
-      bg += poly([pr.P(0, 0, 0), pr.P(340, 0, 0), pr.P(340, 0, WH), pr.P(0, 0, WH)], '#f0e7f7');
-      bg += poly([pr.P(380, 0, 0), pr.P(752, 0, 0), pr.P(752, 0, WH), pr.P(380, 0, WH)], '#fdf1dc');
-      bg += poly([pr.P(792, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(792, 0, WH)], '#e9f2fc');
-      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#a8c8ec', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(340, 0, 0), pr.P(340, 0, WH), pr.P(0, 0, WH)], '#efe9e0');
+      bg += poly([pr.P(380, 0, 0), pr.P(752, 0, 0), pr.P(752, 0, WH), pr.P(380, 0, WH)], '#f5f0e6');
+      bg += poly([pr.P(792, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(792, 0, WH)], '#eef2f0');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#b8bcc4', 0.8));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
       let lines = '';
       for (let z = 38; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       bg += '<g stroke="rgba(150,100,50,0.35)" stroke-width="1.5">' + lines + '</g>';
       // 隔間牆（沿 z 的平面，門洞 z96–140＋門楣 h74 起）
       [360, 772].forEach(px => {
-        bg += poly([pr.P(px, 0, 0), pr.P(px, 96, 0), pr.P(px, 96, WH), pr.P(px, 0, WH)], '#e8dcc8');
-        bg += poly([pr.P(px, 140, 0), pr.P(px, 300, 0), pr.P(px, 300, WH), pr.P(px, 140, WH)], '#e8dcc8');
-        bg += poly([pr.P(px, 96, 74), pr.P(px, 140, 74), pr.P(px, 140, WH), pr.P(px, 96, WH)], '#e8dcc8');
+        bg += poly([pr.P(px, 0, 0), pr.P(px, 96, 0), pr.P(px, 96, WH), pr.P(px, 0, WH)], '#f3e2c7');
+        bg += poly([pr.P(px, 140, 0), pr.P(px, 300, 0), pr.P(px, 300, WH), pr.P(px, 140, WH)], '#f3e2c7');
+        bg += poly([pr.P(px, 96, 74), pr.P(px, 140, 74), pr.P(px, 140, WH), pr.P(px, 96, WH)], '#f3e2c7');
         const d1 = pr.P(px, 96, 0), d2 = pr.P(px, 96, 74), d3 = pr.P(px, 140, 0), d4 = pr.P(px, 140, 74);
-        bg += '<line x1="' + d1.x.toFixed(1) + '" y1="' + d1.y.toFixed(1) + '" x2="' + d2.x.toFixed(1) + '" y2="' + d2.y.toFixed(1) + '" stroke="#a5713d" stroke-width="3"/><line x1="' + d3.x.toFixed(1) + '" y1="' + d3.y.toFixed(1) + '" x2="' + d4.x.toFixed(1) + '" y2="' + d4.y.toFixed(1) + '" stroke="#a5713d" stroke-width="3"/>';
+        bg += '<line x1="' + d1.x.toFixed(1) + '" y1="' + d1.y.toFixed(1) + '" x2="' + d2.x.toFixed(1) + '" y2="' + d2.y.toFixed(1) + '" stroke="#a9743f" stroke-width="3"/><line x1="' + d3.x.toFixed(1) + '" y1="' + d3.y.toFixed(1) + '" x2="' + d4.x.toFixed(1) + '" y2="' + d4.y.toFixed(1) + '" stroke="#a9743f" stroke-width="3"/>';
       });
       // 北牆窗/畫/海報（wallDeco 平面物）
-      bg += pr.wallDecoN(36, 116, 96, 144, '#2b3a67');
-      const moon = pr.P(94, 0, 124); bg += '<circle cx="' + moon.x.toFixed(1) + '" cy="' + moon.y.toFixed(1) + '" r="9" fill="#ffe082"/>';
+      bg += pr.wallDecoN(36, 116, 96, 144, '#2c3e50');
+      const moon = pr.P(94, 0, 124); bg += '<circle cx="' + moon.x.toFixed(1) + '" cy="' + moon.y.toFixed(1) + '" r="9" fill="#ffe9a8"/>';
       bg += pr.wallDecoN(150, 196, 88, 118, '#ffffff');
-      [[165, 103], [181, 103], [173, 95]].forEach(([fx, fh]) => { const c = pr.P(fx, 0, fh); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="#ffcc99"/>'; });
-      bg += pr.wallDecoN(566, 646, 88, 148, '#bfe3ff');
-      const sun = pr.P(588, 0, 128); bg += '<circle cx="' + sun.x.toFixed(1) + '" cy="' + sun.y.toFixed(1) + '" r="10" fill="#ffd54f"/>';
+      [[165, 103], [181, 103], [173, 95]].forEach(([fx, fh]) => { const c = pr.P(fx, 0, fh); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="#fed7aa"/>'; });
+      bg += pr.wallDecoN(566, 646, 88, 148, '#bedcfe');
+      const sun = pr.P(588, 0, 128); bg += '<circle cx="' + sun.x.toFixed(1) + '" cy="' + sun.y.toFixed(1) + '" r="10" fill="#ffd166"/>';
       const cl = pr.P(622, 0, 116); bg += '<circle cx="' + cl.x.toFixed(1) + '" cy="' + cl.y.toFixed(1) + '" r="8" fill="#ffffff"/><circle cx="' + (cl.x - 10).toFixed(1) + '" cy="' + (cl.y + 2).toFixed(1) + '" r="6" fill="#ffffff"/>';
-      bg += pr.wallDecoN(812, 882, 88, 148, '#a8d8ff');
+      bg += pr.wallDecoN(812, 882, 88, 148, '#aee6fa');
       const cl2 = pr.P(838, 0, 122); bg += '<circle cx="' + cl2.x.toFixed(1) + '" cy="' + cl2.y.toFixed(1) + '" r="8" fill="#ffffff"/><circle cx="' + (cl2.x + 12).toFixed(1) + '" cy="' + (cl2.y + 3).toFixed(1) + '" r="6" fill="#ffffff"/>';
       bg += pr.wallDecoN(968, 1036, 96, 142, '#ffffff');
-      bg += txt(pr.P(994, 0, 112), '★', 20, '#ffd54f');
+      bg += txt(pr.P(994, 0, 112), '★', 20, '#ffd166');
       // 地毯（地板上的平面矩形）
       bg += rectPoly(44, 226, 236, 60, 0, 'rgba(206,147,216,0.45)');
       bg += rectPoly(430, 228, 300, 54, 0, 'rgba(255,204,128,0.5)');
       bg += rectPoly(768, 226, 216, 60, 0, 'rgba(144,202,249,0.5)');
       // 爸媽床（全 bg：低盒不需南面遮擋）＋衣櫃
-      bg += pr.box3(68, 114, 188, 10, 30, '#8a5a33');
+      bg += pr.box3(68, 114, 188, 10, 30, '#8d5a2c');
       bg += pr.box3(68, 124, 188, 84, 13, '#ffffff');
       bg += pr.box3(84, 130, 68, 22, 17, '#ffffff');
       bg += pr.box3(172, 130, 68, 22, 17, '#ffffff');
-      bg += pr.box3(68, 156, 188, 52, 15.5, '#9575cd');
-      bg += pr.box3(272, 28, 60, 26, 52, '#a5713d');
+      bg += pr.box3(68, 156, 188, 52, 15.5, '#9b59b6');
+      bg += pr.box3(272, 28, 60, 26, 52, '#a9743f');
       // 沙發（靠背北側＋座墊盒，南面進 front）
-      bg += pr.box3(442, 116, 152, 12, 26, '#ef5350');
-      const sofa = pr.boxFaces(442, 128, 152, 46, 16, '#e53935');
+      bg += pr.box3(442, 116, 152, 12, 26, '#e74c3c');
+      const sofa = pr.boxFaces(442, 128, 152, 46, 16, '#e74c3c');
       bg += sofa.back; front += sofa.front;
       // 電視（薄盒靠北牆，全 bg）＋螢幕畫在其南面平面上
-      bg += pr.box3(648, 40, 92, 10, 42, '#263238');
-      bg += faceRect(654, 50.5, 80, 8, 36, '#4db6ac');
-      const tsun = pr.P(678, 50.5, 24); bg += '<circle cx="' + tsun.x.toFixed(1) + '" cy="' + tsun.y.toFixed(1) + '" r="6" fill="#ffe082"/>';
+      bg += pr.box3(648, 40, 92, 10, 42, '#232f47');
+      bg += faceRect(654, 50.5, 80, 8, 36, '#4aa3df');
+      const tsun = pr.P(678, 50.5, 24); bg += '<circle cx="' + tsun.x.toFixed(1) + '" cy="' + tsun.y.toFixed(1) + '" r="6" fill="#ffe9a8"/>';
       // 落地燈＋光池
       const lp0 = pr.P(616, 150, 0), lp1 = pr.P(616, 150, 50);
-      bg += '<line x1="' + lp0.x.toFixed(1) + '" y1="' + lp0.y.toFixed(1) + '" x2="' + lp1.x.toFixed(1) + '" y2="' + lp1.y.toFixed(1) + '" stroke="#546e7a" stroke-width="3"/>';
-      bg += pr.planeCircle(616, 150, 0, 26, '#ffd54f', 0.25);
-      bg += '<polygon points="' + (lp1.x - 16).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 16).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 8).toFixed(1) + ',' + (lp1.y - 20).toFixed(1) + ' ' + (lp1.x - 8).toFixed(1) + ',' + (lp1.y - 20).toFixed(1) + '" fill="#ffd54f" stroke="#182042" stroke-width="1.8"/>';
-      bg += pr.box3(386, 232, 66, 22, 10, '#90a4ae');
+      bg += '<line x1="' + lp0.x.toFixed(1) + '" y1="' + lp0.y.toFixed(1) + '" x2="' + lp1.x.toFixed(1) + '" y2="' + lp1.y.toFixed(1) + '" stroke="#5f5f66" stroke-width="3"/>';
+      bg += pr.planeCircle(616, 150, 0, 26, '#ffd166', 0.25);
+      bg += '<polygon points="' + (lp1.x - 16).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 16).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 8).toFixed(1) + ',' + (lp1.y - 20).toFixed(1) + ' ' + (lp1.x - 8).toFixed(1) + ',' + (lp1.y - 20).toFixed(1) + '" fill="#ffd166" stroke="#182042" stroke-width="1.8"/>';
+      bg += pr.box3(386, 232, 66, 22, 10, '#7d868f');
       // 晚餐桌＋北椅（bg）＋南椅（南面進 front）
       bg += pr.box3(606, 146, 36, 10, 30, '#a9743f');
       bg += pr.box3(667, 146, 36, 10, 30, '#a9743f');
-      const dtable = pr.boxFaces(597, 168, 116, 30, 14, '#b08968');
+      const dtable = pr.boxFaces(597, 168, 116, 30, 14, '#c98d54');
       bg += dtable.back; front += dtable.front;
       const schair = pr.boxFaces(637, 212, 36, 10, 24, '#a9743f');
       bg += schair.back; front += schair.front;
@@ -1287,33 +1287,33 @@
       bg += pr.box3(792, 114, 162, 10, 30, '#6d4c41');
       bg += pr.box3(792, 124, 162, 84, 13, '#ffffff');
       bg += pr.box3(806, 130, 68, 22, 17, '#ffffff');
-      bg += pr.box3(792, 156, 162, 52, 15.5, '#42a5f5');
+      bg += pr.box3(792, 156, 162, 52, 15.5, '#4aa3df');
       // 書桌（南面進 front）＋桌上書＋椅
-      const desk = pr.boxFaces(972, 148, 130, 34, 14, '#a5713d');
+      const desk = pr.boxFaces(972, 148, 130, 34, 14, '#a9743f');
       bg += desk.back; front += desk.front;
-      bg += rectPoly(986, 154, 10, 18, 14.5, '#ef5350');
-      bg += rectPoly(998, 156, 8, 14, 14.5, '#42a5f5');
-      bg += rectPoly(1008, 155, 9, 16, 14.5, '#66bb6a');
-      bg += pr.box3(1010, 186, 44, 10, 22, '#5d4037');
+      bg += rectPoly(986, 154, 10, 18, 14.5, '#e74c3c');
+      bg += rectPoly(998, 156, 8, 14, 14.5, '#4aa3df');
+      bg += rectPoly(1008, 155, 9, 16, 14.5, '#6fbb72');
+      bg += pr.box3(1010, 186, 44, 10, 22, '#6d4c41');
       // 書櫃＋書脊（畫在南面平面上）
-      bg += pr.box3(1108, 28, 38, 24, 54, '#8a5a33');
-      [[1112, '#ef5350'], [1120, '#42a5f5'], [1128, '#66bb6a']].forEach(([sx, sc2]) => { bg += faceRect(sx, 52.5, 6, 30, 48, sc2); bg += faceRect(sx, 52.5, 6, 6, 22, sc2); });
+      bg += pr.box3(1108, 28, 38, 24, 54, '#8d5a2c');
+      [[1112, '#e74c3c'], [1120, '#4aa3df'], [1128, '#6fbb72']].forEach(([sx, sc2]) => { bg += faceRect(sx, 52.5, 6, 30, 48, sc2); bg += faceRect(sx, 52.5, 6, 6, 22, sc2); });
       // 入口墊＋分區標籤＋貓
-      bg += pr.box3(505, 264, 120, 28, 2, '#8d5a2c');
+      bg += pr.box3(505, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(597, 283, 4), '入 口', 11, '#ffe9b8');
-      bg += txt(pr.P(20, 292, 0), '爸媽房', 14, '#6d4c8c', 0.65);
-      bg += txt(pr.P(396, 292, 0), '客廳・餐廳', 14, '#a5713d', 0.65);
-      bg += txt(pr.P(800, 292, 0), '我的房間', 14, '#1565c0', 0.65);
+      bg += txt(pr.P(20, 292, 0), '爸媽房', 14, '#5f5f66', 0.65);
+      bg += txt(pr.P(396, 292, 0), '客廳・餐廳', 14, '#a9743f', 0.65);
+      bg += txt(pr.P(800, 292, 0), '我的房間', 14, '#2e5f8a', 0.65);
       const catA = pr.P(300, 248, 0);
       bg += '<g id="home-cat" transform="translate(' + catA.x.toFixed(1) + ',' + catA.y.toFixed(1) + ')"><rect class="cat-tail" x="-4" y="1" width="5" height="2" fill="#e67e22"/><rect x="0" y="4" width="10" height="5" fill="#f39c12"/><rect x="2" y="4" width="1" height="5" fill="#e67e22"/><rect x="5" y="4" width="1" height="5" fill="#e67e22"/><rect x="8" y="0" width="6" height="6" fill="#f39c12"/><rect x="8" y="-1" width="2" height="2" fill="#f39c12"/><rect x="12" y="-1" width="2" height="2" fill="#f39c12"/><rect x="10" y="2" width="1" height="1" fill="#182042"/><rect x="13" y="2" width="1" height="1" fill="#182042"/><rect x="0" y="9" width="3" height="1" fill="#e67e22"/><rect x="7" y="9" width="3" height="1" fill="#e67e22"/></g>';
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + HOME_PW + ' 300" style="position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       // 棉被（睡覺時顯示的覆蓋層，形狀＝床面投影多邊形；id/顯示切換與舊版相同）
       const pb = '<g class="sleep-form-anim">'
-        + rectPoly(66, 168, 192, 44, 15.5, '#9575cd', ' stroke="#182042" stroke-width="1.6"')
+        + rectPoly(66, 168, 192, 44, 15.5, '#9b59b6', ' stroke="#182042" stroke-width="1.6"')
         + rectPoly(66, 168, 192, 12, 15.6, 'rgba(255,255,255,0.25)')
         + [[110, 186], [165, 194], [220, 188]].map(([cx, cz]) => { const c = pr.P(cx, cz, 16); return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" fill="rgba(255,255,255,0.3)"/>'; }).join('') + '</g>';
       const yb = '<g class="sleep-form-anim">'
-        + rectPoly(790, 168, 164, 44, 15.5, '#42a5f5', ' stroke="#182042" stroke-width="1.6"')
+        + rectPoly(790, 168, 164, 44, 15.5, '#4aa3df', ' stroke="#182042" stroke-width="1.6"')
         + rectPoly(790, 182, 164, 5, 15.6, 'rgba(255,255,255,0.35)')
         + rectPoly(790, 196, 164, 5, 15.6, 'rgba(255,255,255,0.35)') + '</g>';
       // 書桌點擊區（投影後書桌外接矩形，R1：命中以投影後位置為準，邏輯不變）
@@ -1894,7 +1894,7 @@
       const quad = (x, z, w, d, fill, extra) => poly([pr.P(x, z, 0), pr.P(x + w, z, 0), pr.P(x + w, z + d, 0), pr.P(x, z + d, 0)], fill, extra);
       const seg = (a, b, stroke, w, extra) => '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" stroke="' + stroke + '" stroke-width="' + w + '"' + (extra || '') + '/>';
       const circ = (xp, r, fill, extra) => '<circle cx="' + xp.x.toFixed(1) + '" cy="' + xp.y.toFixed(1) + '" r="' + r + '" fill="' + fill + '"' + (extra || '') + '/>';
-      let s = '<defs><pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#8fd07a"/><rect width="24" height="24" fill="#97d783"/><rect x="24" y="24" width="24" height="24" fill="#97d783"/></pattern><pattern id="parkPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#7cb96a"/><rect x="24" y="24" width="24" height="24" fill="#85c173"/><rect width="24" height="24" width="24" height="24" fill="#85c173"/></pattern></defs>';
+      let s = '<defs><pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#8fd07a"/><rect width="24" height="24" fill="#8fd07a"/><rect x="24" y="24" width="24" height="24" fill="#8fd07a"/></pattern><pattern id="parkPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#79bd67"/><rect x="24" y="24" width="24" height="24" fill="#85c173"/><rect width="24" height="24" width="24" height="24" fill="#85c173"/></pattern></defs>';
       s += '<g id="town-decor25">';
       // 地面＋公園帶
       s += quad(0, 0, 1150, 920, 'url(#grassPat)');
@@ -1902,46 +1902,46 @@
       // 巷道＋人行道＋A/B 街（路網邏輯不動，形狀走投影）
       s += quad(0, 254, 56, 566, '#7d868f') + quad(1094, 254, 56, 566, '#7d868f');
       [360, 450, 540, 630, 720].forEach(z => { s += quad(24, z, 7, 40, '#f7d038') + quad(1118, z, 7, 40, '#f7d038'); });
-      s += quad(0, 224, 1150, 30, '#ccd1d4') + quad(0, 254, 1150, 76, '#7d868f');
-      s += quad(0, 714, 1150, 30, '#ccd1d4') + quad(0, 744, 1150, 76, '#7d868f');
+      s += quad(0, 224, 1150, 30, '#c8d2cc') + quad(0, 254, 1150, 76, '#7d868f');
+      s += quad(0, 714, 1150, 30, '#c8d2cc') + quad(0, 744, 1150, 76, '#7d868f');
       s += seg(pr.P(0, 256, 0), pr.P(1150, 256, 0), 'rgba(245,242,228,0.5)', 3) + seg(pr.P(0, 327, 0), pr.P(1150, 327, 0), 'rgba(245,242,228,0.5)', 3);
       s += seg(pr.P(0, 746, 0), pr.P(1150, 746, 0), 'rgba(245,242,228,0.5)', 3) + seg(pr.P(0, 817, 0), pr.P(1150, 817, 0), 'rgba(245,242,228,0.5)', 3);
       for (let x = 10; x < 1150; x += 110) { s += quad(x, 288, 46, 7, '#f7d038') + quad(x, 778, 46, 7, '#f7d038'); }
       // 六棟基座（投影 box3 地台）＋門前小徑
-      const PLOTS = [[42, 16, 312, 215, '#b7df9a'], [422, 16, 298, 215, '#aeb7be'], [802, 16, 298, 215, '#ecd3ac'], [42, 506, 298, 215, '#d8dfe3'], [422, 506, 298, 215, '#cfe3c0'], [802, 506, 312, 215, '#da8f80']];
+      const PLOTS = [[42, 16, 312, 215, '#c8d2cc'], [422, 16, 298, 215, '#b8bcc4'], [802, 16, 298, 215, '#e8d8a8'], [42, 506, 298, 215, '#cfe8f5'], [422, 506, 298, 215, '#c8d2cc'], [802, 506, 312, 215, '#d9a066']];
       PLOTS.forEach(([px, pz, pw, pd, col]) => { s += pr.box3(px - 4, pz - 4, pw + 8, pd + 8, 20, col); });
-      [[181, 196], [554, 196], [934, 196], [181, 676], [554, 676], [941, 676]].forEach(([dx, dz]) => { s += quad(dx, dz, 34, 48, '#e8e0c8', ' stroke="#cbbfa0" stroke-width="2"'); });
+      [[181, 196], [554, 196], [934, 196], [181, 676], [554, 676], [941, 676]].forEach(([dx, dz]) => { s += quad(dx, dz, 34, 48, '#f3e2c7', ' stroke="#b8bcc4" stroke-width="2"'); });
       // 公園：池塘＋小徑（曲線取樣投影）＋長椅＋花圃
-      s += pr.planeCircle(250, 428, 0, 118, '#79c7e3');
-      s += pr.planeCircle(250, 424, 0, 104, '#93d5ef');
+      s += pr.planeCircle(250, 428, 0, 118, '#7fd4e8');
+      s += pr.planeCircle(250, 424, 0, 104, '#7fd4e8');
       const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]; };
       const pathPts = [];
       for (let i = 0; i <= 12; i++) { const [bx, bz] = bez([0, 478], [300, 442], [600, 502], [900, 464], i / 12); pathPts.push(pr.P(bx, bz, 0)); }
       for (let i = 1; i <= 8; i++) { const [bx, bz] = bez([900, 464], [1200, 426], [1150, 472], [1150, 472], i / 8); pathPts.push(pr.P(bx, bz, 0)); }
-      s += '<polyline points="' + pr.pts(pathPts) + '" fill="none" stroke="#e2d3a8" stroke-width="26" stroke-linecap="round"/>';
+      s += '<polyline points="' + pr.pts(pathPts) + '" fill="none" stroke="#e8d8a8" stroke-width="26" stroke-linecap="round"/>';
       [[430, 352], [700, 352], [430, 486], [700, 486]].forEach(([bx, bz]) => { s += pr.box3(bx, bz, 46, 9, 7, '#a9743f'); });
-      const flower = (fx, fz) => circ(pr.P(fx, fz, 2), 3.5, '#ff8fab') + circ(pr.P(fx + 12, fz + 3, 2), 3, '#ffd166') + circ(pr.P(fx + 24, fz, 2), 3.5, '#c39bff');
+      const flower = (fx, fz) => circ(pr.P(fx, fz, 2), 3.5, '#e89bb0') + circ(pr.P(fx + 12, fz + 3, 2), 3, '#ffd166') + circ(pr.P(fx + 24, fz, 2), 3.5, '#b8bcc4');
       [60, 380, 560, 900, 1060].forEach(fx => { s += flower(fx, 356); });
       [120, 620, 960].forEach(fx => { s += flower(fx, 496); });
       // 樹木（立牌：樹幹＋樹冠 billboard，落點/影走投影）
       const tree = (cx, cz, th, r) => {
         let o = pr.groundShadow(cx, cz, r * 0.55);
-        o += seg(pr.P(cx, cz, 0), pr.P(cx, cz, th), '#8a5a3b', 4);
-        o += circ(pr.P(cx, cz, th + 13), r, '#5da85f') + circ(pr.P(cx - r * 0.62, cz, th + 6), r * 0.62, '#6fbb72') + circ(pr.P(cx + r * 0.62, cz, th + 6), r * 0.62, '#54a258');
+        o += seg(pr.P(cx, cz, 0), pr.P(cx, cz, th), '#8d5a2c', 4);
+        o += circ(pr.P(cx, cz, th + 13), r, '#5da85f') + circ(pr.P(cx - r * 0.62, cz, th + 6), r * 0.62, '#6fbb72') + circ(pr.P(cx + r * 0.62, cz, th + 6), r * 0.62, '#5da85f');
         return o;
       };
       s += tree(430, 483, 21, 24) + tree(880, 410, 18, 21) + tree(1064, 490, 22, 25) + tree(180, 905, 21, 24) + tree(600, 914, 18, 21) + tree(990, 907, 23, 26);
-      const pine = (cx, cz) => seg(pr.P(cx, cz, 0), pr.P(cx, cz, 16), '#8a5a3b', 4)
-        + poly([pr.P(cx - 11, cz, 14), pr.P(cx + 11, cz, 14), pr.P(cx, cz, 32)], '#3e8e5a')
-        + poly([pr.P(cx - 9, cz, 26), pr.P(cx + 9, cz, 26), pr.P(cx, cz, 44)], '#46a065');
+      const pine = (cx, cz) => seg(pr.P(cx, cz, 0), pr.P(cx, cz, 16), '#8d5a2c', 4)
+        + poly([pr.P(cx - 11, cz, 14), pr.P(cx + 11, cz, 14), pr.P(cx, cz, 32)], '#3f9142')
+        + poly([pr.P(cx - 9, cz, 26), pr.P(cx + 9, cz, 26), pr.P(cx, cz, 44)], '#5da85f');
       s += pine(60, 420) + pine(814, 910);
       // 地標大樹（id 保留：花季切換）
       let bt = pr.groundShadow(575, 448, 30);
-      bt += poly([pr.P(569, 448, 0), pr.P(581, 448, 0), pr.P(581, 448, 48), pr.P(569, 448, 48)], '#8a5a3b');
-      bt += seg(pr.P(575, 448, 34), pr.P(575, 448, 48), '#8a5a3b', 4);
-      bt += circ(pr.P(575, 448, 82), 46, '#5da85f') + circ(pr.P(536, 448, 66), 30, '#6fbb72') + circ(pr.P(614, 448, 66), 30, '#54a258') + circ(pr.P(575, 448, 114), 27, '#6fbb72');
+      bt += poly([pr.P(569, 448, 0), pr.P(581, 448, 0), pr.P(581, 448, 48), pr.P(569, 448, 48)], '#8d5a2c');
+      bt += seg(pr.P(575, 448, 34), pr.P(575, 448, 48), '#8d5a2c', 4);
+      bt += circ(pr.P(575, 448, 82), 46, '#5da85f') + circ(pr.P(536, 448, 66), 30, '#6fbb72') + circ(pr.P(614, 448, 66), 30, '#5da85f') + circ(pr.P(575, 448, 114), 27, '#6fbb72');
       bt += '<g id="big-tree-blossom" style="display:none;">' + circ(pr.P(548, 448, 98), 12, 'rgba(255,183,213,0.85)') + circ(pr.P(602, 448, 106), 10, 'rgba(255,183,213,0.85)') + circ(pr.P(575, 448, 82), 11, 'rgba(255,183,213,0.8)') + circ(pr.P(622, 448, 84), 8, 'rgba(255,183,213,0.8)') + circ(pr.P(528, 448, 84), 8, 'rgba(255,183,213,0.8)') + '</g>';
-      bt += seg(pr.P(608, 448, 64), pr.P(608, 448, 44), '#8a5a3b', 2);
+      bt += seg(pr.P(608, 448, 64), pr.P(608, 448, 44), '#8d5a2c', 2);
       bt += quad(598, 446, 20, 4, '#a9743f');
       s += '<g id="big-tree">' + bt + '</g>';
       // 路燈（柱＋頭，光池在 street-glows 層）
@@ -1949,33 +1949,33 @@
       [180, 480, 780, 1080].forEach(lx => { s += lamp(lx, 344); });
       [270, 660, 1050].forEach(lx => { s += lamp(lx, 722); });
       // 道具：郵筒/告示牌/腳踏車/販賣機
-      s += pr.box3(86, 352, 16, 12, 20, '#d43a2f');
+      s += pr.box3(86, 352, 16, 12, 20, '#c0392b');
       const mslot = pr.P(89, 364.6, 14); s += '<rect x="' + mslot.x.toFixed(1) + '" y="' + mslot.y.toFixed(1) + '" width="10" height="4" fill="#fffdf5"/>';
       s += pr.box3(1006, 350, 30, 6, 22, '#f5f0e6');
-      s += poly([pr.P(1010, 356.5, 11), pr.P(1032, 356.5, 11), pr.P(1032, 356.5, 14), pr.P(1010, 356.5, 14)], '#e74c3c');
+      s += poly([pr.P(1010, 356.5, 11), pr.P(1032, 356.5, 11), pr.P(1032, 356.5, 14), pr.P(1010, 356.5, 14)], '#c0392b');
       s += poly([pr.P(1010, 356.5, 17), pr.P(1032, 356.5, 17), pr.P(1032, 356.5, 20), pr.P(1010, 356.5, 20)], '#7d868f');
       const w1 = pr.P(634, 253, 5), w2 = pr.P(646, 253, 5);
       s += '<circle cx="' + w1.x.toFixed(1) + '" cy="' + w1.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/><circle cx="' + w2.x.toFixed(1) + '" cy="' + w2.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/>';
-      s += seg(pr.P(634, 253, 5), pr.P(640, 253, 14), '#e74c3c', 2) + seg(pr.P(640, 253, 14), pr.P(646, 253, 5), '#e74c3c', 2);
-      s += pr.box3(1082, 676, 20, 14, 40, '#dfe9f5');
-      s += poly([pr.P(1085, 690.5, 20), pr.P(1099, 690.5, 20), pr.P(1099, 690.5, 36), pr.P(1085, 690.5, 36)], '#93d5ef');
+      s += seg(pr.P(634, 253, 5), pr.P(640, 253, 14), '#c0392b', 2) + seg(pr.P(640, 253, 14), pr.P(646, 253, 5), '#c0392b', 2);
+      s += pr.box3(1082, 676, 20, 14, 40, '#cfe8f5');
+      s += poly([pr.P(1085, 690.5, 20), pr.P(1099, 690.5, 20), pr.P(1099, 690.5, 36), pr.P(1085, 690.5, 36)], '#7fd4e8');
       // 美化道具組（id/display 與舊版相同，worldMutations 切換）
-      let arch = poly([pr.P(1014, 458, 0), pr.P(1023, 458, 0), pr.P(1023, 458, 34), pr.P(1014, 458, 34)], '#8d5a2c') + poly([pr.P(1077, 458, 0), pr.P(1086, 458, 0), pr.P(1086, 458, 34), pr.P(1077, 458, 34)], '#8d5a2c');
+      let arch = poly([pr.P(1014, 458, 0), pr.P(1023, 458, 0), pr.P(1023, 458, 34), pr.P(1014, 458, 34)], '#8a6248') + poly([pr.P(1077, 458, 0), pr.P(1086, 458, 0), pr.P(1086, 458, 34), pr.P(1077, 458, 34)], '#8a6248');
       const arcPts = [];
       for (let i = 0; i <= 10; i++) { const a = Math.PI - i / 10 * Math.PI; arcPts.push(pr.P(1050 + Math.cos(a) * 42, 458, 34 + Math.sin(a) * 20)); }
-      arch += '<polyline points="' + pr.pts(arcPts) + '" fill="none" stroke="#4e9b47" stroke-width="6"/>';
-      arch += circ(pr.P(1024, 458, 46), 5, '#ff8fab') + circ(pr.P(1050, 458, 54), 5.6, '#ffd32a') + circ(pr.P(1076, 458, 46), 5, '#ff8fab');
+      arch += '<polyline points="' + pr.pts(arcPts) + '" fill="none" stroke="#3f9142" stroke-width="6"/>';
+      arch += circ(pr.P(1024, 458, 46), 5, '#e89bb0') + circ(pr.P(1050, 458, 54), 5.6, '#f7d038') + circ(pr.P(1076, 458, 46), 5, '#e89bb0');
       s += '<g id="beauty-arch" style="display:none;">' + arch + '</g>';
-      let ftn = pr.planeCircle(300, 452, 0, 52, '#aee6fa') + pr.planeCircle(300, 452, 1, 44, '#74c7e8');
-      ftn += poly([pr.P(294, 452, 0), pr.P(306, 452, 0), pr.P(306, 452, 36), pr.P(294, 452, 36)], '#b8c4cc');
-      ftn += circ(pr.P(300, 452, 38), 6, '#e8eef2');
+      let ftn = pr.planeCircle(300, 452, 0, 52, '#aee6fa') + pr.planeCircle(300, 452, 1, 44, '#7fd4e8');
+      ftn += poly([pr.P(294, 452, 0), pr.P(306, 452, 0), pr.P(306, 452, 36), pr.P(294, 452, 36)], '#b8bcc4');
+      ftn += circ(pr.P(300, 452, 38), 6, '#eef2f0');
       const spray = (x2, z2, h2, cls) => '<polyline class="beauty-spray ' + cls + '" points="' + pr.pts([pr.P(300, 452, 40), pr.P(x2, z2, h2), pr.P(x2 + (x2 < 300 ? -8 : 8), z2, h2 - 14)]) + '" fill="none" stroke="#aee6fa" stroke-width="3"/>';
       ftn += spray(282, 440, 56, '') + spray(300, 436, 62, 's2') + spray(318, 440, 56, 's3');
       s += '<g id="beauty-fountain" style="display:none;">' + ftn + '</g>';
-      let stat = pr.box3(682, 402, 36, 14, 20, '#b8c4cc') + pr.box3(678, 400, 44, 16, 6, '#98a5ae');
-      stat += poly([pr.P(692, 404, 20), pr.P(708, 404, 20), pr.P(708, 404, 50), pr.P(692, 404, 50)], '#b8860b');
-      stat += circ(pr.P(700, 404, 56), 8, '#d4a017');
-      stat += poly([pr.P(688, 404, 62), pr.P(712, 404, 62), pr.P(712, 404, 66), pr.P(688, 404, 66)], '#23232b');
+      let stat = pr.box3(682, 402, 36, 14, 20, '#b8bcc4') + pr.box3(678, 400, 44, 16, 6, '#b8bcc4');
+      stat += poly([pr.P(692, 404, 20), pr.P(708, 404, 20), pr.P(708, 404, 50), pr.P(692, 404, 50)], '#ca6f1e');
+      stat += circ(pr.P(700, 404, 56), 8, '#d98e32');
+      stat += poly([pr.P(688, 404, 62), pr.P(712, 404, 62), pr.P(712, 404, 66), pr.P(688, 404, 66)], '#1a1a24');
       s += '<g id="beauty-statue" style="display:none;">' + stat + '</g>';
       s += '</g>';
       svg.setAttribute('viewBox', '0 0 ' + TOWN_PW + ' ' + TOWN_PH);
@@ -2059,6 +2059,7 @@
           sg: document.getElementById('street-glows'),
           shades: [...document.querySelectorAll('.island-shade')],
           map: document.getElementById('town-map'),
+          gr: document.getElementById('grade-layer'),
         };
         if (!_skyEls.sn) _skyEls = null;
       }
@@ -2080,6 +2081,7 @@
       if (_skyEls.map) _skyEls.map.classList.toggle('night-on', nf > 0.5); // 光10：夜裡上鎖建築停用 brightness，避免暗上加暗
       const storeIsl = document.getElementById('landmark-store'); if (storeIsl) storeIsl.classList.toggle('night-lit', nf > 0.45); // v9.16.1 整間店自己亮，不補光暈
       _skyEls.sg.style.opacity = r3(nf * 0.85); // v9.22.1 超商的亮來自 #sky-night 的挖空（見 style.css），不再疊補光片
+      if (_skyEls.gr) _skyEls.gr.style.opacity = r3(0.16 * (1 - nf) * (1 - wf * 0.6)); // v9.61 日間 grading：正午最強、黃昏讓位給暖色層、入夜歸零
     }
 
 
@@ -2096,60 +2098,60 @@
       const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
       const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
       const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
-      const PAL = ['#e74c3c', '#2ed573', '#f1c40f', '#3498db', '#9b59b6', '#ffa502', '#1abc9c', '#e67e22', '#e84393', '#2ecc71', '#f39c12', '#00cec9'];
+      const PAL = ['#c0392b', '#2ed573', '#ffcc00', '#3a6ea5', '#9b59b6', '#ff9f0a', '#27ae60', '#e67e22', '#ff5b6a', '#2ed573', '#f39c12', '#2ed573'];
       const goodsRow = (x0, n, zF, hBot, hTop, seed, wdt) => { let o = ''; for (let i = 0; i < n; i++) { o += faceRect(x0 + i * ((wdt || 14) + 4), zF, wdt || 14, hBot, hTop - ((seed + i * 7) % 4), PAL[(seed + i) % 12]); } return o; };
       let bg = '', front = '', frontB = '';
       // 牆＋地板磚
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#fff7ea');
-      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#fff7ea', 0.85));
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#f3ead9');
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#fff6e8');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#fff6e8', 0.85));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#efe9e0');
       let lines = '';
       for (let z = 48; z < 300; z += 48) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       [150, 430, 710, 990].forEach(x => { const a = pr.P(x, 0, 0), b = pr.P(x, 300, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; });
-      bg += '<g stroke="#e2d3b6" stroke-width="2">' + lines + '</g>';
+      bg += '<g stroke="#e8d8a8" stroke-width="2">' + lines + '</g>';
       // 招牌帶＋牆上櫃：飲料冰櫃/冰品/麵包
-      bg += faceRect(0, 0.6, 1150, 114, 124, '#22b573');
-      bg += txt(pr.P(26, 0, 142), '24H MART 歡迎光臨', 17, '#14532d');
-      bg += txt(pr.P(986, 0, 142), '冰櫃・麵包・關東煮', 12, '#8a5a33');
-      bg += pr.wallDecoN(330, 700, 114, 168, '#9fb6c9');
+      bg += faceRect(0, 0.6, 1150, 114, 124, '#2ed573');
+      bg += txt(pr.P(26, 0, 142), '24H MART 歡迎光臨', 17, '#2f5d3a');
+      bg += txt(pr.P(986, 0, 142), '冰櫃・麵包・關東煮', 12, '#8d5a2c');
+      bg += pr.wallDecoN(330, 700, 114, 168, '#b8bcc4');
       bg += faceRect(336, 0.6, 174, 120, 162, 'rgba(223,243,255,0.9)') + faceRect(518, 0.6, 174, 120, 162, 'rgba(223,243,255,0.9)');
       bg += goodsRow(342, 6, 0.7, 126, 140, 0, 12) + goodsRow(342, 6, 0.7, 144, 156, 5, 12) + goodsRow(524, 6, 0.7, 126, 140, 3, 12) + goodsRow(524, 6, 0.7, 144, 156, 8, 12);
-      bg += pr.wallDecoN(726, 876, 114, 168, '#f7c8d8');
-      bg += txt(pr.P(748, 0, 140), '🍦 冰品', 15, '#9d2c54');
+      bg += pr.wallDecoN(726, 876, 114, 168, '#fed7aa');
+      bg += txt(pr.P(748, 0, 140), '🍦 冰品', 15, '#a93226');
       bg += pr.wallDecoN(892, 1120, 114, 168, '#ffe9b8');
-      bg += txt(pr.P(922, 0, 140), '🥐 現烤麵包', 15, '#8a5a33');
+      bg += txt(pr.P(922, 0, 140), '🥐 現烤麵包', 15, '#8d5a2c');
       bg += pr.planeCircle(36, 40, 0, 12, '#2ed573');
       bg += pr.planeCircle(1114, 40, 0, 12, '#2ed573');
       // 中央貨架 x2（全 bg：走道在南、無人坐其後）
       [[380, '零食 SNACKS', 2], [580, '泡麵・飲料', 7]].forEach(([sx, label, seed]) => {
-        bg += pr.box3(sx, 100, 180, 34, 42, '#1f7a4d');
-        bg += faceRect(sx, 134.6, 180, 33, 42, '#0d5c38');
+        bg += pr.box3(sx, 100, 180, 34, 42, '#1e8449');
+        bg += faceRect(sx, 134.6, 180, 33, 42, '#2f5d3a');
         bg += txt(pr.P(sx + 12, 135, 37), label, 9, '#ffffff');
         bg += goodsRow(sx + 8, 8, 134.6, 20, 29, seed) + goodsRow(sx + 8, 8, 134.6, 6, 15, seed + 4);
       });
       // 特價桌
-      bg += pr.box3(400, 216, 300, 22, 12, '#b07a45');
-      bg += faceRect(400, 238.6, 120, 2, 10, '#8a5a33');
+      bg += pr.box3(400, 216, 300, 22, 12, '#b0743e');
+      bg += faceRect(400, 238.6, 120, 2, 10, '#8d5a2c');
       bg += txt(pr.P(412, 239, 7), '本週特價', 10, '#ffffff');
       // 窗邊吧台（上面進 bg、南面進 frontB z960）＋窗玻璃帶＋吧台椅
-      const bar = pr.boxFaces(16, 224, 396, 20, 11, '#8a5a33');
+      const bar = pr.boxFaces(16, 224, 396, 20, 11, '#8d5a2c');
       bg += bar.back; frontB += bar.front;
       bg += poly([pr.P(24, 268, 0), pr.P(404, 268, 0), pr.P(404, 296, 0), pr.P(24, 296, 0)], 'rgba(191,227,255,0.85)');
       [119, 214, 309].forEach(x => { const a = pr.P(x, 268, 0), b = pr.P(x, 296, 0); bg += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>'; });
-      [110, 200, 290].forEach(x => { bg += pr.planeCircle(x, 262, 0, 10, '#ef5350'); });
+      [110, 200, 290].forEach(x => { bg += pr.planeCircle(x, 262, 0, 10, '#e74c3c'); });
       // 收銀櫃檯（上面進 bg、南面進 front z950）＋收銀機/關東煮
       const counter = pr.boxFaces(796, 100, 328, 24, 13, '#ffffff');
       bg += counter.back; front += counter.front;
-      front += txt(pr.P(922, 124.6, 6), '歡迎光臨', 11, '#14532d');
-      bg += pr.box3(896, 102, 24, 10, 22, '#334155');
-      bg += faceRect(898, 112.6, 20, 12, 20, '#38bdf8');
-      bg += pr.box3(950, 102, 24, 10, 22, '#334155');
-      bg += faceRect(952, 112.6, 20, 12, 20, '#38bdf8');
-      bg += pr.box3(806, 102, 44, 16, 18, '#d97706');
-      bg += txt(pr.P(810, 119, 13), '🍢關東煮', 9, '#fef08a');
+      front += txt(pr.P(922, 124.6, 6), '歡迎光臨', 11, '#2f5d3a');
+      bg += pr.box3(896, 102, 24, 10, 22, '#2c3e50');
+      bg += faceRect(898, 112.6, 20, 12, 20, '#4aa3df');
+      bg += pr.box3(950, 102, 24, 10, 22, '#2c3e50');
+      bg += faceRect(952, 112.6, 20, 12, 20, '#4aa3df');
+      bg += pr.box3(806, 102, 44, 16, 18, '#e67e22');
+      bg += txt(pr.P(810, 119, 13), '🍢關東煮', 9, '#ffe9a8');
       // 入口墊
-      bg += pr.box3(505, 264, 120, 28, 2, '#22b573');
-      bg += txt(pr.P(540, 283, 4), '入 口', 11, '#14532d');
+      bg += pr.box3(505, 264, 120, 28, 2, '#2ed573');
+      bg += txt(pr.P(540, 283, 4), '入 口', 11, '#2f5d3a');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + STORE_PW + ' 300" style="position:absolute; left:0; top:0; width:' + STORE_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       return svgOpen('store-bg25', 0) + bg + '</svg>' + svgOpen('store-front25', 950) + front + '</svg>' + svgOpen('store-front25b', 960) + frontB + '</svg>'
         + '<div class="store-chip" style="left:452px; top:214px;" onclick="noodleHitClick(event)">' + icoSvg('noodle') + ' 窗邊泡麵</div>';
@@ -2282,58 +2284,58 @@
       const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
       const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
       const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
-      const PAL = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#d35400', '#16a085', '#e74c3c', '#f1c40f', '#f5f0e6'];
+      const PAL = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#c0392b', '#ffcc00', '#f5f0e6'];
       const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 7); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
       let bg = '', front = '';
       // 牆＋地板
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f7ecd2');
-      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f7ecd2', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#efe9e0');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#efe9e0', 0.8));
       bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
       let lines = '';
       for (let z = 42; z < 300; z += 44) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
-      bg += '<g stroke="#b57e46" stroke-width="2">' + lines + '</g>';
+      bg += '<g stroke="#b0743e" stroke-width="2">' + lines + '</g>';
       // 辦公室窗＋書架牆板＋標籤
-      bg += pr.wallDecoN(36, 140, 76, 146, '#bfe6f5');
+      bg += pr.wallDecoN(36, 140, 76, 146, '#bedcfe');
       const wx1 = pr.P(88, 0, 76), wx2 = pr.P(88, 0, 146), wy1 = pr.P(36, 0, 111), wy2 = pr.P(140, 0, 111);
       bg += '<line x1="' + wx1.x.toFixed(1) + '" y1="' + wx1.y.toFixed(1) + '" x2="' + wx2.x.toFixed(1) + '" y2="' + wx2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/><line x1="' + wy1.x.toFixed(1) + '" y1="' + wy1.y.toFixed(1) + '" x2="' + wy2.x.toFixed(1) + '" y2="' + wy2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
-      const osun = pr.P(60, 0, 128); bg += '<circle cx="' + osun.x.toFixed(1) + '" cy="' + osun.y.toFixed(1) + '" r="9" fill="#ffd93b"/>';
-      bg += pr.wallDecoN(160, 282, 74, 148, '#8d5a2c');
+      const osun = pr.P(60, 0, 128); bg += '<circle cx="' + osun.x.toFixed(1) + '" cy="' + osun.y.toFixed(1) + '" r="9" fill="#f7d038"/>';
+      bg += pr.wallDecoN(160, 282, 74, 148, '#8a6248');
       bg += spineRow(168, 274, 0.6, 116, 140, 3) + spineRow(168, 274, 0.6, 80, 102, 11);
-      bg += faceRect(157, 0.6, 128, 110, 113, '#5d4028');
-      bg += pr.wallDecoN(48, 166, 54, 72, '#fff8e1');
-      bg += txt(pr.P(58, 0, 63), '教師辦公室', 11, '#8d5a2c');
+      bg += faceRect(157, 0.6, 128, 110, 113, '#6d4c41');
+      bg += pr.wallDecoN(48, 166, 54, 72, '#fff6e8');
+      bg += txt(pr.P(58, 0, 63), '教師辦公室', 11, '#8a6248');
       // 老師桌（南面進 front）＋桌上物＋電腦小桌＋辦公椅背
-      const tdesk = pr.boxFaces(104, 128, 108, 20, 13, '#8d5a2c');
+      const tdesk = pr.boxFaces(104, 128, 108, 20, 13, '#8a6248');
       bg += tdesk.back; front += tdesk.front;
       bg += pr.planeCircle(126, 136, 13.4, 5, '#ffffff');
       bg += poly([pr.P(146, 132, 13.4), pr.P(166, 132, 13.4), pr.P(166, 142, 13.4), pr.P(146, 142, 13.4)], '#f5f0e6');
-      bg += pr.box3(186, 130, 10, 8, 17, '#27ae60');
-      const plf = pr.P(191, 134, 23); bg += '<circle cx="' + plf.x.toFixed(1) + '" cy="' + plf.y.toFixed(1) + '" r="7" fill="#66bb6a"/>';
+      bg += pr.box3(186, 130, 10, 8, 17, '#5da85f');
+      const plf = pr.P(191, 134, 23); bg += '<circle cx="' + plf.x.toFixed(1) + '" cy="' + plf.y.toFixed(1) + '" r="7" fill="#6fbb72"/>';
       bg += pr.box3(222, 100, 66, 16, 12, '#6d4c41');
-      bg += pr.box3(232, 102, 38, 4, 38, '#cfd8dc');
-      bg += faceRect(234, 106.6, 34, 16, 34, '#e8f5e9');
-      const mdot = pr.P(266, 106.6, 20); bg += '<circle cx="' + mdot.x.toFixed(1) + '" cy="' + mdot.y.toFixed(1) + '" r="3" fill="#27ae60"/>';
-      bg += pr.box3(134, 138, 42, 8, 20, '#5d4037');
+      bg += pr.box3(232, 102, 38, 4, 38, '#c8d2cc');
+      bg += faceRect(234, 106.6, 34, 16, 34, '#eef2f0');
+      const mdot = pr.P(266, 106.6, 20); bg += '<circle cx="' + mdot.x.toFixed(1) + '" cy="' + mdot.y.toFixed(1) + '" r="3" fill="#5da85f"/>';
+      bg += pr.box3(134, 138, 42, 8, 20, '#6d4c41');
       // 隔間柱面（半透明）＋班牌
-      bg += poly([pr.P(302, 6, 0), pr.P(302, 206, 0), pr.P(302, 206, 132), pr.P(302, 6, 132)], '#a1887f', ' opacity="0.45"');
-      bg += poly([pr.P(302, 96, 80), pr.P(302, 142, 80), pr.P(302, 142, 100), pr.P(302, 96, 100)], '#fff8e1');
-      bg += txt(pr.P(308, 119, 90), '三年二班', 10, '#8d5a2c');
+      bg += poly([pr.P(302, 6, 0), pr.P(302, 206, 0), pr.P(302, 206, 132), pr.P(302, 6, 132)], '#7d868f', ' opacity="0.45"');
+      bg += poly([pr.P(302, 96, 80), pr.P(302, 142, 80), pr.P(302, 142, 100), pr.P(302, 96, 100)], '#fff6e8');
+      bg += txt(pr.P(308, 119, 90), '三年二班', 10, '#8a6248');
       // 黑板＋粉筆
       bg += pr.wallDecoN(340, 820, 54, 158, '#6d4c41');
       bg += pr.wallDecoN(346, 814, 60, 152, '#2f5d3a');
-      bg += txt(pr.P(374, 0, 130), '今日課程：數學・國文・自然', 14, '#e8f5e9');
-      bg += txt(pr.P(374, 0, 104), '3/4 ＋ 1/2 ＝ ？　（這題考試會考！）', 13, '#c8e6c9');
-      bg += faceRect(752, 0.6, 34, 72, 76, '#f5f0e6') + faceRect(722, 0.6, 16, 72, 76, '#ffb3c1');
+      bg += txt(pr.P(374, 0, 130), '今日課程：數學・國文・自然', 14, '#eef2f0');
+      bg += txt(pr.P(374, 0, 104), '3/4 ＋ 1/2 ＝ ？　（這題考試會考！）', 13, '#cfe8f5');
+      bg += faceRect(752, 0.6, 34, 72, 76, '#f5f0e6') + faceRect(722, 0.6, 16, 72, 76, '#f0b98a');
       // 時鐘
       const ck = pr.P(838, 0, 130);
       bg += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="15" fill="#ffffff" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + ck.x.toFixed(1) + '" y2="' + (ck.y - 10).toFixed(1) + '" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + (ck.x + 7).toFixed(1) + '" y2="' + (ck.y + 4).toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
       // 榮譽榜（四個名次文字 id 保留，其他系統會寫入）
-      bg += pr.wallDecoN(860, 1128, 86, 156, '#c9a06b');
-      bg += txt(pr.P(878, 0, 140), '🏆 榮譽榜', 12, '#5d4037');
-      bg += '<text id="board-r1i" x="' + pr.P(878, 0, 120).x.toFixed(1) + '" y="' + pr.P(878, 0, 120).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">🥇</text>';
-      bg += '<text id="board-r2i" x="' + pr.P(972, 0, 120).x.toFixed(1) + '" y="' + pr.P(972, 0, 120).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">🥈</text>';
-      bg += '<text id="board-r3i" x="' + pr.P(878, 0, 104).x.toFixed(1) + '" y="' + pr.P(878, 0, 104).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">🥉</text>';
-      bg += '<text id="board-4i" x="' + pr.P(972, 0, 104).x.toFixed(1) + '" y="' + pr.P(972, 0, 104).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#5d4037">⭐</text>';
+      bg += pr.wallDecoN(860, 1128, 86, 156, '#c9a06a');
+      bg += txt(pr.P(878, 0, 140), '🏆 榮譽榜', 12, '#6d4c41');
+      bg += '<text id="board-r1i" x="' + pr.P(878, 0, 120).x.toFixed(1) + '" y="' + pr.P(878, 0, 120).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#6d4c41">🥇</text>';
+      bg += '<text id="board-r2i" x="' + pr.P(972, 0, 120).x.toFixed(1) + '" y="' + pr.P(972, 0, 120).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#6d4c41">🥈</text>';
+      bg += '<text id="board-r3i" x="' + pr.P(878, 0, 104).x.toFixed(1) + '" y="' + pr.P(878, 0, 104).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#6d4c41">🥉</text>';
+      bg += '<text id="board-4i" x="' + pr.P(972, 0, 104).x.toFixed(1) + '" y="' + pr.P(972, 0, 104).y.toFixed(1) + '" font-size="11" font-weight="900" fill="#6d4c41">⭐</text>';
       // 講台（南面進 front）＋課桌 x6（南面進 front、桌上書）
       const podium = pr.boxFaces(524, 104, 102, 18, 16, '#795548');
       bg += podium.back; front += podium.front;
@@ -2341,42 +2343,42 @@
       [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]].forEach(([sx, sy]) => {
         const dk = pr.boxFaces(sx - 28, sy - 40, 56, 26, 11, '#a9743f');
         bg += dk.back; front += dk.front;
-        bg += poly([pr.P(sx - 16, sy - 36, 11.4), pr.P(sx - 3, sy - 36, 11.4), pr.P(sx - 3, sy - 27, 11.4), pr.P(sx - 16, sy - 27, 11.4)], '#e74c3c');
+        bg += poly([pr.P(sx - 16, sy - 36, 11.4), pr.P(sx - 3, sy - 36, 11.4), pr.P(sx - 3, sy - 27, 11.4), pr.P(sx - 16, sy - 27, 11.4)], '#c0392b');
         bg += poly([pr.P(sx + 4, sy - 35, 11.4), pr.P(sx + 16, sy - 35, 11.4), pr.P(sx + 16, sy - 27, 11.4), pr.P(sx + 4, sy - 27, 11.4)], '#f5f0e6');
       });
       // 主角桌上的自習書堆（class/數量與舊版相同，updateStudyBooks 以 index 控制顯示）
-      const bookCols = ['#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#f39c12'];
+      const bookCols = ['#c0392b', '#5b7fa6', '#5da85f', '#8e44ad', '#f39c12'];
       let books = '';
       bookCols.forEach((c, i) => { books += '<polygon class="book-layer" points="' + pr.pts([pr.P(564, 216, 11.5 + i * 2.2), pr.P(584, 216, 11.5 + i * 2.2), pr.P(584, 228, 11.5 + i * 2.2), pr.P(564, 228, 11.5 + i * 2.2)]) + '" fill="' + c + '"/>'; });
       bg += '<g id="study-books-school-in" class="study-books">' + books + '</g>';
       // 閱讀角：地毯＋書架＋坐墊＋盆栽＋立燈
-      bg += pr.planeCircle(1000, 228, 0, 110, '#b2dfdb', 0.55);
-      bg += '<polygon points="' + pr.planeCirclePts(1000, 228, 0.5, 88) + '" fill="none" stroke="#80cbc4" stroke-width="2"/>';
-      bg += pr.box3(888, 120, 224, 24, 26, '#8d5a2c');
+      bg += pr.planeCircle(1000, 228, 0, 110, '#aee6fa', 0.55);
+      bg += '<polygon points="' + pr.planeCirclePts(1000, 228, 0.5, 88) + '" fill="none" stroke="#7fd4e8" stroke-width="2"/>';
+      bg += pr.box3(888, 120, 224, 24, 26, '#8a6248');
       bg += spineRow(896, 958, 144.6, 6, 24, 5) + spineRow(1040, 1104, 144.6, 6, 24, 9);
-      bg += poly([pr.P(952, 124, 26.5), pr.P(1048, 124, 26.5), pr.P(1048, 140, 26.5), pr.P(952, 140, 26.5)], '#fff8e1');
-      bg += txt(pr.P(964, 132, 32), '📚 閱讀角', 10, '#8d5a2c');
-      bg += pr.planeCircle(935, 246, 0, 30, '#ffab91');
-      bg += pr.planeCircle(1065, 250, 0, 30, '#90caf9');
-      bg += pr.box3(1108, 196, 16, 12, 10, '#8d5a2c');
+      bg += poly([pr.P(952, 124, 26.5), pr.P(1048, 124, 26.5), pr.P(1048, 140, 26.5), pr.P(952, 140, 26.5)], '#fff6e8');
+      bg += txt(pr.P(964, 132, 32), '📚 閱讀角', 10, '#8a6248');
+      bg += pr.planeCircle(935, 246, 0, 30, '#f0b98a');
+      bg += pr.planeCircle(1065, 250, 0, 30, '#7fd4e8');
+      bg += pr.box3(1108, 196, 16, 12, 10, '#8a6248');
       const pf1 = pr.P(1116, 202, 17), pf2 = pr.P(1108, 200, 13);
-      bg += '<circle cx="' + pf1.x.toFixed(1) + '" cy="' + pf1.y.toFixed(1) + '" r="10" fill="#66bb6a"/><circle cx="' + pf2.x.toFixed(1) + '" cy="' + pf2.y.toFixed(1) + '" r="7" fill="#81c784"/>';
+      bg += '<circle cx="' + pf1.x.toFixed(1) + '" cy="' + pf1.y.toFixed(1) + '" r="10" fill="#6fbb72"/><circle cx="' + pf2.x.toFixed(1) + '" cy="' + pf2.y.toFixed(1) + '" r="7" fill="#85c173"/>';
       const lp0 = pr.P(884, 196, 0), lp1 = pr.P(884, 196, 34);
-      bg += pr.planeCircle(884, 212, 0, 30, '#ffd93b', 0.18);
+      bg += pr.planeCircle(884, 212, 0, 30, '#f7d038', 0.18);
       bg += '<line x1="' + lp0.x.toFixed(1) + '" y1="' + lp0.y.toFixed(1) + '" x2="' + lp1.x.toFixed(1) + '" y2="' + lp1.y.toFixed(1) + '" stroke="#182042" stroke-width="2.5"/>';
-      bg += '<polygon points="' + (lp1.x - 8).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 8).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 4).toFixed(1) + ',' + (lp1.y - 14).toFixed(1) + ' ' + (lp1.x - 4).toFixed(1) + ',' + (lp1.y - 14).toFixed(1) + '" fill="#ffd93b" stroke="#182042" stroke-width="1.5"/>';
+      bg += '<polygon points="' + (lp1.x - 8).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 8).toFixed(1) + ',' + lp1.y.toFixed(1) + ' ' + (lp1.x + 4).toFixed(1) + ',' + (lp1.y - 14).toFixed(1) + ' ' + (lp1.x - 4).toFixed(1) + ',' + (lp1.y - 14).toFixed(1) + '" fill="#f7d038" stroke="#182042" stroke-width="1.5"/>';
       // 魚缸（掛牆水族箱，魚的動畫 class 保留）
-      let tank = pr.box3(876, 104, 140, 14, 8, '#8d5a2c');
-      tank += pr.box3(880, 84, 132, 20, 36, '#7ec8e3');
+      let tank = pr.box3(876, 104, 140, 14, 8, '#8a6248');
+      tank += pr.box3(880, 84, 132, 20, 36, '#7fd4e8');
       tank += faceRect(884, 104.6, 124, 4, 32, 'rgba(191,227,255,0.55)');
-      tank += faceRect(884, 104.6, 124, 4, 10, '#58a05c');
+      tank += faceRect(884, 104.6, 124, 4, 10, '#5da85f');
       const fa = pr.P(898, 96, 20), fb = pr.P(972, 94, 13), bb = pr.P(1000, 92, 7);
-      tank += '<g class="fish-a" transform="translate(' + fa.x.toFixed(1) + ',' + fa.y.toFixed(1) + ')"><rect x="0" y="0" width="10" height="5" fill="#ff8c42"/><rect x="-3" y="1" width="3" height="3" fill="#ff8c42"/><rect x="7" y="1" width="1" height="1" fill="#182042"/></g>';
+      tank += '<g class="fish-a" transform="translate(' + fa.x.toFixed(1) + ',' + fa.y.toFixed(1) + ')"><rect x="0" y="0" width="10" height="5" fill="#e67e22"/><rect x="-3" y="1" width="3" height="3" fill="#e67e22"/><rect x="7" y="1" width="1" height="1" fill="#182042"/></g>';
       tank += '<g class="fish-b" transform="translate(' + fb.x.toFixed(1) + ',' + fb.y.toFixed(1) + ')"><rect x="0" y="0" width="9" height="4" fill="#ffd166"/><rect x="9" y="1" width="3" height="2" fill="#ffd166"/></g>';
       tank += '<circle class="fish-bub" cx="' + bb.x.toFixed(1) + '" cy="' + bb.y.toFixed(1) + '" r="2" fill="#ffffff" opacity="0.85"/>';
       bg += '<g id="school-tank">' + tank + '</g>';
       // 入口墊
-      bg += pr.box3(515, 264, 120, 28, 2, '#8d5a2c');
+      bg += pr.box3(515, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + SCHOOL_PW + ' 300" style="position:absolute; left:0; top:0; width:' + SCHOOL_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       return svgOpen('school-bg25', 0) + bg + '</svg>' + svgOpen('school-front25', 950) + front + '</svg>';
@@ -2510,29 +2512,29 @@
       };
       let bg = '';
       // 天空（id 保留：updateGymLighting 以 setAttribute('fill') 換色）＋太陽/雲（螢幕座標，與舊版相同）
-      bg += '<polygon id="gym-sky" points="0,0 ' + GYM_PW + ',0 ' + pr.pts([pr.P(1150, 0, 0), pr.P(0, 0, 0)]) + '" fill="#aee3ff"/>';
-      bg += '<circle id="gym-sun" cx="950" cy="30" r="16" fill="#ffd93b" stroke="#f39c12" stroke-width="2"/>';
+      bg += '<polygon id="gym-sky" points="0,0 ' + GYM_PW + ',0 ' + pr.pts([pr.P(1150, 0, 0), pr.P(0, 0, 0)]) + '" fill="#aee6fa"/>';
+      bg += '<circle id="gym-sun" cx="950" cy="30" r="16" fill="#f7d038" stroke="#f39c12" stroke-width="2"/>';
       bg += '<g fill="#ffffff" opacity="0.85"><ellipse cx="240" cy="26" rx="42" ry="9"/><ellipse cx="272" cy="20" rx="26" ry="8"/><ellipse cx="700" cy="40" rx="36" ry="8"/><ellipse cx="726" cy="35" rx="22" ry="7"/></g>';
       // 地面（延伸到 z560 填滿框高）＋地平線樹叢
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 560, 0), pr.P(0, 560, 0)], '#58a038');
-      [[60, 17], [112, 13], [330, 15], [520, 12], [880, 14], [1108, 16]].forEach(([tx, tr]) => { const c = pr.P(tx, 4, 15); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + tr + '" fill="#2e7d32"/>'; });
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 560, 0), pr.P(0, 560, 0)], '#5da85f');
+      [[60, 17], [112, 13], [330, 15], [520, 12], [880, 14], [1108, 16]].forEach(([tx, tr]) => { const c = pr.P(tx, 4, 15); bg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + tr + '" fill="#1e8449"/>'; });
       // 夜間燈組（id 保留）
       let floods = '';
       [120, 430, 760, 1062].forEach(fx => {
         const g = pr.P(fx, 26, 41);
-        floods += '<circle cx="' + g.x.toFixed(1) + '" cy="' + g.y.toFixed(1) + '" r="24" fill="#fff6bf" opacity="0.45"/>';
-        floods += seg(pr.P(fx, 26, 0), pr.P(fx, 26, 36), '#37474f', 4);
-        floods += poly([pr.P(fx - 12, 26, 36), pr.P(fx + 12, 26, 36), pr.P(fx + 12, 26, 47), pr.P(fx - 12, 26, 47)], '#fff9c4', ' stroke="#182042" stroke-width="1.4"');
+        floods += '<circle cx="' + g.x.toFixed(1) + '" cy="' + g.y.toFixed(1) + '" r="24" fill="#ffe9b8" opacity="0.45"/>';
+        floods += seg(pr.P(fx, 26, 0), pr.P(fx, 26, 36), '#2c3e50', 4);
+        floods += poly([pr.P(fx - 12, 26, 36), pr.P(fx + 12, 26, 36), pr.P(fx + 12, 26, 47), pr.P(fx - 12, 26, 47)], '#fff6e8', ' stroke="#182042" stroke-width="1.4"');
       });
       bg += '<g id="gym-floods" opacity="0">' + floods + '</g>';
       // 看台三階
-      bg += pr.box3(36, 86, 220, 10, 26, '#90a4ae');
-      bg += pr.box3(36, 98, 220, 10, 17, '#90a4ae');
-      bg += pr.box3(36, 110, 220, 10, 8, '#90a4ae');
+      bg += pr.box3(36, 86, 220, 10, 26, '#7d868f');
+      bg += pr.box3(36, 98, 220, 10, 17, '#7d868f');
+      bg += pr.box3(36, 110, 220, 10, 8, '#7d868f');
       // 跑道（圓角矩形投影取樣）＋內場＋起跑線
       bg += '<polygon points="' + pr.pts(rrPts(36, 128, 764, 158, 76)) + '" fill="#c0392b" stroke="#182042" stroke-width="2.5"/>';
       bg += '<polyline points="' + pr.pts(rrPts(58, 146, 720, 122, 60)) + '" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="9 7"/>';
-      bg += '<polygon points="' + pr.pts(rrPts(88, 158, 664, 98, 48)) + '" fill="#67b544"/>';
+      bg += '<polygon points="' + pr.pts(rrPts(88, 158, 664, 98, 48)) + '" fill="#5da85f"/>';
       [[150, 240], [330, 420], [510, 600]].forEach(([x0, x1]) => { bg += seg(pr.P(x0, 207, 0), pr.P(x1, 207, 0), 'rgba(255,255,255,0.8)', 2); });
       // 球場＋中線/中圈/三分線
       bg += poly([pr.P(812, 96, 0), pr.P(1130, 96, 0), pr.P(1130, 264, 0), pr.P(812, 264, 0)], '#d9a066', ' stroke="#182042" stroke-width="2.5"');
@@ -2543,16 +2545,16 @@
       for (let i = 0; i <= 10; i++) { const a = Math.PI / 2 + i / 10 * Math.PI; arcPts.push(pr.P(1006 + Math.cos(a) * 74, 180 + Math.sin(a) * 74, 0)); }
       bg += '<polyline points="' + pr.pts(arcPts) + '" fill="none" stroke="#ffffff" stroke-width="2"/>';
       // 籃架：柱＋板（z90 平面）＋內框＋框緣（中心 P(1030,96,30)）＋籃網
-      bg += seg(pr.P(1055, 88, 0), pr.P(1055, 88, 34), '#37474f', 5);
-      bg += poly([pr.P(1022, 90, 34), pr.P(1088, 90, 34), pr.P(1088, 90, 76), pr.P(1022, 90, 76)], '#ffffff', ' stroke="#e65100" stroke-width="2.5"');
-      bg += poly([pr.P(1040, 90, 40), pr.P(1070, 90, 40), pr.P(1070, 90, 62), pr.P(1040, 90, 62)], 'none', ' stroke="#e65100" stroke-width="2"');
+      bg += seg(pr.P(1055, 88, 0), pr.P(1055, 88, 34), '#2c3e50', 5);
+      bg += poly([pr.P(1022, 90, 34), pr.P(1088, 90, 34), pr.P(1088, 90, 76), pr.P(1022, 90, 76)], '#ffffff', ' stroke="#e65c00" stroke-width="2.5"');
+      bg += poly([pr.P(1040, 90, 40), pr.P(1070, 90, 40), pr.P(1070, 90, 62), pr.P(1040, 90, 62)], 'none', ' stroke="#e65c00" stroke-width="2"');
       const rim = pr.P(1030, 96, 30);
-      bg += '<ellipse cx="' + rim.x.toFixed(1) + '" cy="' + rim.y.toFixed(1) + '" rx="9" ry="3.4" fill="none" stroke="#e65100" stroke-width="2.6"/>';
-      bg += seg(pr.P(1024, 97, 29), pr.P(1027, 97, 16), '#eceff1', 1.4) + seg(pr.P(1030, 98, 29), pr.P(1030, 98, 15), '#eceff1', 1.4) + seg(pr.P(1036, 97, 29), pr.P(1033, 97, 16), '#eceff1', 1.4);
+      bg += '<ellipse cx="' + rim.x.toFixed(1) + '" cy="' + rim.y.toFixed(1) + '" rx="9" ry="3.4" fill="none" stroke="#e65c00" stroke-width="2.6"/>';
+      bg += seg(pr.P(1024, 97, 29), pr.P(1027, 97, 16), '#eef2f0', 1.4) + seg(pr.P(1030, 98, 29), pr.P(1030, 98, 15), '#eef2f0', 1.4) + seg(pr.P(1036, 97, 29), pr.P(1033, 97, 16), '#eef2f0', 1.4);
       // 司令台看板
-      bg += seg(pr.P(570, 20, 0), pr.P(570, 20, 26), '#37474f', 4) + seg(pr.P(580, 20, 0), pr.P(580, 20, 26), '#37474f', 4);
-      bg += poly([pr.P(518, 20, 26), pr.P(632, 20, 26), pr.P(632, 20, 62), pr.P(518, 20, 62)], '#263238', ' stroke="#182042" stroke-width="2"');
-      bg += txt(pr.P(575, 20, 44), '操 場', 13, '#ffd93b', 'middle');
+      bg += seg(pr.P(570, 20, 0), pr.P(570, 20, 26), '#2c3e50', 4) + seg(pr.P(580, 20, 0), pr.P(580, 20, 26), '#2c3e50', 4);
+      bg += poly([pr.P(518, 20, 26), pr.P(632, 20, 26), pr.P(632, 20, 62), pr.P(518, 20, 62)], '#232f47', ' stroke="#182042" stroke-width="2"');
+      bg += txt(pr.P(575, 20, 44), '操 場', 13, '#f7d038', 'middle');
       // 入口墊
       bg += pr.box3(515, 264, 120, 28, 2, '#795548');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
@@ -2641,7 +2643,7 @@
       const h = (gameState.hour || 0) + (gameState.minute || 0) / 60;
       const key = (h < 6 || h >= 19.5) ? 'night' : h < 11 ? 'am' : h < 16 ? 'noon' : h < 18 ? 'golden' : 'sunset';
       if (key === _gymLightKey) return; _gymLightKey = key;
-      const cfg = { night: ['#1d2a52', -30, -30, '0.85'], am: ['#aee3ff', 950, 30, '0'], noon: ['#7ecbf2', 575, 15, '0'], golden: ['#ffb066', 265, 42, '0'], sunset: ['#ff7e47', 150, 62, '0.35'] }[key];
+      const cfg = { night: ['#232f47', -30, -30, '0.85'], am: ['#aee6fa', 950, 30, '0'], noon: ['#7fd4e8', 575, 15, '0'], golden: ['#f0b98a', 265, 42, '0'], sunset: ['#e67e22', 150, 62, '0.35'] }[key];
       sky.setAttribute('fill', cfg[0]);
       sun.setAttribute('cx', String(cfg[1])); sun.setAttribute('cy', String(cfg[2]));
       fl.style.opacity = cfg[3];
@@ -2732,7 +2734,7 @@
     // ================= v9.26 圖書館大場景（比照住家/超商/餐廳/學校：大室內塞框框、窗光＋抽書） =================
     const LIB_SHELF_POINTS = [ { x: 240, y: 128 }, { x: 380, y: 128 }, { x: 760, y: 128 }, { x: 905, y: 128 } ]; // 書架前走道（抽書/上架站位）
     function libSpines(x, y, w) {
-      const pal = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#d35400', '#16a085', '#2c3e50', '#e74c3c', '#f1c40f'];
+      const pal = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#2c3e50', '#c0392b', '#ffcc00'];
       let out = '';
       [0, 1].forEach(row => {
         const baseY = y + row * 36 + 30;
@@ -2743,7 +2745,7 @@
           out += `<rect x="${cx}" y="${baseY - bh}" width="${bw}" height="${bh}" fill="${pal[i % pal.length]}" stroke="rgba(24,32,66,0.35)" stroke-width="0.7"/>`;
           cx += bw + 2; i++;
         }
-        out += `<rect x="${x - 3}" y="${baseY}" width="${w + 6}" height="4" fill="#8d5a2c"/>`;
+        out += `<rect x="${x - 3}" y="${baseY}" width="${w + 6}" height="4" fill="#8a6248"/>`;
       });
       return out;
     }
@@ -2758,84 +2760,84 @@
       const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
       const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
       const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + str + '</text>';
-      const PAL = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#d35400', '#16a085', '#2c3e50', '#e74c3c', '#f1c40f'];
+      const PAL = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#2c3e50', '#c0392b', '#ffcc00'];
       const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 8); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
       let bg = '', front = '';
       // 牆＋地板＋地毯
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f5ede0');
-      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f5ede0', 0.8));
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#b08954');
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f5f0e6');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f5f0e6', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#c98d54');
       let lines = '';
       for (let z = 30; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       bg += '<g stroke="rgba(150,111,63,0.5)" stroke-width="1.4">' + lines + '</g>';
       bg += poly([pr.P(176, 158, 0), pr.P(974, 158, 0), pr.P(974, 282, 0), pr.P(176, 282, 0)], 'rgba(142,59,70,0.30)');
       // 兩扇窗＋窗框十字
       [[30, 158], [992, 1120]].forEach(([x0, x1]) => {
-        bg += pr.wallDecoN(x0, x1, 60, 164, '#a8d4f0');
+        bg += pr.wallDecoN(x0, x1, 60, 164, '#bedcfe');
         const mx = (x0 + x1) / 2;
         const v1 = pr.P(mx, 0, 60), v2 = pr.P(mx, 0, 164), h1 = pr.P(x0, 0, 112), h2 = pr.P(x1, 0, 112);
-        bg += '<line x1="' + v1.x.toFixed(1) + '" y1="' + v1.y.toFixed(1) + '" x2="' + v2.x.toFixed(1) + '" y2="' + v2.y.toFixed(1) + '" stroke="#5d4028" stroke-width="3"/><line x1="' + h1.x.toFixed(1) + '" y1="' + h1.y.toFixed(1) + '" x2="' + h2.x.toFixed(1) + '" y2="' + h2.y.toFixed(1) + '" stroke="#5d4028" stroke-width="3"/>';
+        bg += '<line x1="' + v1.x.toFixed(1) + '" y1="' + v1.y.toFixed(1) + '" x2="' + v2.x.toFixed(1) + '" y2="' + v2.y.toFixed(1) + '" stroke="#6d4c41" stroke-width="3"/><line x1="' + h1.x.toFixed(1) + '" y1="' + h1.y.toFixed(1) + '" x2="' + h2.x.toFixed(1) + '" y2="' + h2.y.toFixed(1) + '" stroke="#6d4c41" stroke-width="3"/>';
       });
       // 窗光（id/開關邏輯與舊版相同，形狀改走投影：牆面 h60 起、落到地板 z217）
-      const shaft = (ptsList, motes) => '<polygon points="' + pr.pts(ptsList) + '" fill="#ffedb5"/>' + motes.map(([mx, mz, mh, r]) => { const c = pr.P(mx, mz, mh); return '<circle class="lib-mote" cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + r + '" fill="#fff7d6"/>'; }).join('');
+      const shaft = (ptsList, motes) => '<polygon points="' + pr.pts(ptsList) + '" fill="#ffe9b8"/>' + motes.map(([mx, mz, mh, r]) => { const c = pr.P(mx, mz, mh); return '<circle class="lib-mote" cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="' + r + '" fill="#fff6e8"/>'; }).join('');
       bg += '<g id="lib-shaft-w" opacity="0">' + shaft([[36, 0, 58], [152, 0, 58], [268, 217, 0], [128, 217, 0]], [[150, 90, 26, 2.2], [185, 130, 18, 1.7], [140, 150, 12, 1.4]]) + '</g>';
       bg += '<g id="lib-shaft-e" opacity="0">' + shaft([[1114, 0, 58], [998, 0, 58], [882, 217, 0], [1022, 217, 0]], [[1000, 90, 26, 2.2], [965, 130, 18, 1.7], [1010, 150, 12, 1.4]]) + '</g>';
       // 後牆書架 x2（高櫃 box3＋南面書脊兩排）＋中央矮架
       [[176, 3], [702, 23]].forEach(([sx, seed]) => {
         bg += pr.box3(sx, 6, 272, 20, 150, '#6d4c41');
         bg += spineRow(sx + 8, sx + 264, 26.6, 104, 142, seed) + spineRow(sx + 8, sx + 264, 26.6, 58, 96, seed + 7);
-        bg += faceRect(sx - 3, 26.6, 278, 99, 102, '#8d5a2c') + faceRect(sx - 3, 26.6, 278, 53, 56, '#8d5a2c');
+        bg += faceRect(sx - 3, 26.6, 278, 99, 102, '#8a6248') + faceRect(sx - 3, 26.6, 278, 53, 56, '#8a6248');
       });
       bg += pr.box3(486, 10, 178, 18, 124, '#6d4c41');
       bg += spineRow(494, 656, 28.6, 82, 116, 5) + spineRow(494, 656, 28.6, 44, 76, 13);
-      bg += faceRect(483, 28.6, 184, 79, 82, '#8d5a2c');
+      bg += faceRect(483, 28.6, 184, 79, 82, '#8a6248');
       // 時鐘＋櫃檯（南面進 front）＋招牌字
       const ck = pr.P(575, 0, 158);
-      bg += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="10" fill="#fff8e1" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + ck.x.toFixed(1) + '" y2="' + (ck.y - 7).toFixed(1) + '" stroke="#182042" stroke-width="1.8"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + (ck.x + 5).toFixed(1) + '" y2="' + (ck.y + 2).toFixed(1) + '" stroke="#182042" stroke-width="1.8"/>';
+      bg += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="10" fill="#fff6e8" stroke="#182042" stroke-width="2"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + ck.x.toFixed(1) + '" y2="' + (ck.y - 7).toFixed(1) + '" stroke="#182042" stroke-width="1.8"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + (ck.x + 5).toFixed(1) + '" y2="' + (ck.y + 2).toFixed(1) + '" stroke="#182042" stroke-width="1.8"/>';
       const counter = pr.boxFaces(474, 106, 202, 22, 16, '#795548');
       bg += counter.back; front += counter.front;
-      bg += txt(pr.P(575, 100, 46), '借 還 書 櫃 台', 11, '#5d4028', 'middle');
+      bg += txt(pr.P(575, 100, 46), '借 還 書 櫃 台', 11, '#6d4c41', 'middle');
       // 地球儀＋東側盆栽
       const g0 = pr.P(88, 186, 0), g1 = pr.P(88, 186, 12), gc = pr.P(88, 180, 30);
-      bg += '<line x1="' + g0.x.toFixed(1) + '" y1="' + g0.y.toFixed(1) + '" x2="' + g1.x.toFixed(1) + '" y2="' + g1.y.toFixed(1) + '" stroke="#5d4028" stroke-width="4"/>';
-      bg += '<circle cx="' + gc.x.toFixed(1) + '" cy="' + gc.y.toFixed(1) + '" r="17" fill="#7fb2d9" stroke="#182042" stroke-width="2"/>';
-      bg += '<path d="M' + (gc.x - 14).toFixed(1) + ' ' + (gc.y - 6).toFixed(1) + ' Q' + gc.x.toFixed(1) + ' ' + (gc.y - 15).toFixed(1) + ' ' + (gc.x + 14).toFixed(1) + ' ' + (gc.y - 6).toFixed(1) + ' M' + (gc.x - 14).toFixed(1) + ' ' + (gc.y + 8).toFixed(1) + ' Q' + gc.x.toFixed(1) + ' ' + (gc.y + 17).toFixed(1) + ' ' + (gc.x + 14).toFixed(1) + ' ' + (gc.y + 8).toFixed(1) + '" stroke="#27ae60" stroke-width="2.4" fill="none"/>';
-      bg += pr.box3(1064, 150, 14, 12, 12, '#b5651d');
+      bg += '<line x1="' + g0.x.toFixed(1) + '" y1="' + g0.y.toFixed(1) + '" x2="' + g1.x.toFixed(1) + '" y2="' + g1.y.toFixed(1) + '" stroke="#6d4c41" stroke-width="4"/>';
+      bg += '<circle cx="' + gc.x.toFixed(1) + '" cy="' + gc.y.toFixed(1) + '" r="17" fill="#7fd4e8" stroke="#182042" stroke-width="2"/>';
+      bg += '<path d="M' + (gc.x - 14).toFixed(1) + ' ' + (gc.y - 6).toFixed(1) + ' Q' + gc.x.toFixed(1) + ' ' + (gc.y - 15).toFixed(1) + ' ' + (gc.x + 14).toFixed(1) + ' ' + (gc.y - 6).toFixed(1) + ' M' + (gc.x - 14).toFixed(1) + ' ' + (gc.y + 8).toFixed(1) + ' Q' + gc.x.toFixed(1) + ' ' + (gc.y + 17).toFixed(1) + ' ' + (gc.x + 14).toFixed(1) + ' ' + (gc.y + 8).toFixed(1) + '" stroke="#5da85f" stroke-width="2.4" fill="none"/>';
+      bg += pr.box3(1064, 150, 14, 12, 12, '#ca6f1e');
       const pf1 = pr.P(1071, 156, 25), pf2 = pr.P(1062, 154, 19);
-      bg += '<circle cx="' + pf1.x.toFixed(1) + '" cy="' + pf1.y.toFixed(1) + '" r="13" fill="#66bb6a"/><circle cx="' + pf2.x.toFixed(1) + '" cy="' + pf2.y.toFixed(1) + '" r="8" fill="#81c784"/>';
+      bg += '<circle cx="' + pf1.x.toFixed(1) + '" cy="' + pf1.y.toFixed(1) + '" r="13" fill="#6fbb72"/><circle cx="' + pf2.x.toFixed(1) + '" cy="' + pf2.y.toFixed(1) + '" r="8" fill="#85c173"/>';
       // 閱覽桌 x2（南面進 front）＋桌燈（光暈組合 id 保留）
       let glows = '';
       [[196, 330], [686, 820]].forEach(([tx, lx]) => {
-        const tb = pr.boxFaces(tx, 166, 268, 20, 10, '#8d5a2c');
+        const tb = pr.boxFaces(tx, 166, 268, 20, 10, '#8a6248');
         bg += tb.back; front += tb.front;
-        bg += pr.planeCircle(lx, 176, 10.4, 6, '#2e6b4f');
+        bg += pr.planeCircle(lx, 176, 10.4, 6, '#2f5d3a');
         const s0 = pr.P(lx, 176, 10), s1 = pr.P(lx, 176, 21);
-        bg += '<line x1="' + s0.x.toFixed(1) + '" y1="' + s0.y.toFixed(1) + '" x2="' + s1.x.toFixed(1) + '" y2="' + s1.y.toFixed(1) + '" stroke="#2e6b4f" stroke-width="3"/>';
-        bg += '<polygon points="' + (s1.x - 12).toFixed(1) + ',' + s1.y.toFixed(1) + ' ' + (s1.x + 12).toFixed(1) + ',' + s1.y.toFixed(1) + ' ' + (s1.x + 7).toFixed(1) + ',' + (s1.y - 12).toFixed(1) + ' ' + (s1.x - 7).toFixed(1) + ',' + (s1.y - 12).toFixed(1) + '" fill="#27ae60" stroke="#182042" stroke-width="1.4"/>';
-        glows += pr.planeCircle(lx, 176, 11, 17, '#ffd97a', 0.5);
+        bg += '<line x1="' + s0.x.toFixed(1) + '" y1="' + s0.y.toFixed(1) + '" x2="' + s1.x.toFixed(1) + '" y2="' + s1.y.toFixed(1) + '" stroke="#2f5d3a" stroke-width="3"/>';
+        bg += '<polygon points="' + (s1.x - 12).toFixed(1) + ',' + s1.y.toFixed(1) + ' ' + (s1.x + 12).toFixed(1) + ',' + s1.y.toFixed(1) + ' ' + (s1.x + 7).toFixed(1) + ',' + (s1.y - 12).toFixed(1) + ' ' + (s1.x - 7).toFixed(1) + ',' + (s1.y - 12).toFixed(1) + '" fill="#5da85f" stroke="#182042" stroke-width="1.4"/>';
+        glows += pr.planeCircle(lx, 176, 11, 17, '#ffd166', 0.5);
       });
       bg += '<g id="lib-lamps" opacity="0">' + glows + '</g>';
       // 沙發（全 bg：主角坐姿 z500，平面版沙發本來就在背景層）＋邊桌＋書堆小推車
-      bg += pr.box3(110, 182, 62, 10, 24, '#a33b46');
-      const sofa = pr.boxFaces(110, 192, 62, 32, 13, '#c04b57');
+      bg += pr.box3(110, 182, 62, 10, 24, '#a93226');
+      const sofa = pr.boxFaces(110, 192, 62, 32, 13, '#b04a3a');
       bg += sofa.back + sofa.front;
-      bg += pr.box3(102, 192, 10, 32, 18, '#a33b46');
-      bg += pr.box3(170, 192, 10, 32, 18, '#a33b46');
+      bg += pr.box3(102, 192, 10, 32, 18, '#a93226');
+      bg += pr.box3(170, 192, 10, 32, 18, '#a93226');
       const st0 = pr.P(198, 228, 0), st1 = pr.P(198, 228, 9);
-      bg += '<line x1="' + st0.x.toFixed(1) + '" y1="' + st0.y.toFixed(1) + '" x2="' + st1.x.toFixed(1) + '" y2="' + st1.y.toFixed(1) + '" stroke="#5d4028" stroke-width="4"/>';
-      bg += pr.planeCircle(198, 228, 9, 11, '#8d5a2c');
+      bg += '<line x1="' + st0.x.toFixed(1) + '" y1="' + st0.y.toFixed(1) + '" x2="' + st1.x.toFixed(1) + '" y2="' + st1.y.toFixed(1) + '" stroke="#6d4c41" stroke-width="4"/>';
+      bg += pr.planeCircle(198, 228, 9, 11, '#8a6248');
       bg += pr.rimBand(198, 228, 11, 9, 0.5, '#6d4c41');
-      bg += pr.box3(182, 204, 26, 16, 8, '#5d4028');
-      const bookCols = ['#8e44ad', '#c0392b', '#2980b9', '#f39c12', '#27ae60'];
+      bg += pr.box3(182, 204, 26, 16, 8, '#6d4c41');
+      const bookCols = ['#8e44ad', '#c0392b', '#5b7fa6', '#f39c12', '#5da85f'];
       let books = '';
       bookCols.forEach((c, i) => { books += '<polygon class="book-layer" points="' + pr.pts([pr.P(184, 206, 8.5 + i * 2.2), pr.P(204, 206, 8.5 + i * 2.2), pr.P(204, 218, 8.5 + i * 2.2), pr.P(184, 218, 8.5 + i * 2.2)]) + '" fill="' + c + '"/>'; });
       bg += '<g id="study-books-library-in" class="study-books">' + books + '</g>';
       // 新書推薦展示櫃（全 bg）＋標題＋書脊
-      bg += pr.box3(996, 110, 88, 14, 40, '#2e6b4f');
+      bg += pr.box3(996, 110, 88, 14, 40, '#2f5d3a');
       bg += txt(pr.P(1040, 117, 46), '新書推薦', 10, '#ffe9b8', 'middle');
-      [[1006, '#e74c3c'], [1021, '#f1c40f'], [1036, '#3498db'], [1051, '#9b59b6']].forEach(([sx, sc2]) => { bg += faceRect(sx, 124.6, 12, 8, 32, sc2); });
+      [[1006, '#c0392b'], [1021, '#ffcc00'], [1036, '#3a6ea5'], [1051, '#9b59b6']].forEach(([sx, sc2]) => { bg += faceRect(sx, 124.6, 12, 8, 32, sc2); });
       // 入口墊
-      bg += pr.box3(515, 264, 120, 28, 2, '#8d5a2c');
+      bg += pr.box3(515, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + LIB_PW + ' 300" style="position:absolute; left:0; top:0; width:' + LIB_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       return svgOpen('lib-bg25', 0) + bg + '</svg>' + svgOpen('lib-front25', 950) + front + '</svg>'
@@ -2990,53 +2992,53 @@
       const txt = (xp, yOff, str, size, fill) => '<text x="' + xp.x.toFixed(1) + '" y="' + (xp.y + (yOff || 0)).toFixed(1) + '" font-size="' + size + '" fill="' + fill + '" font-family="\'DotGothic16\', monospace" font-weight="900">' + str + '</text>';
       let bg = '', front = '';
       // 北牆＋東牆＋地板（全走投影）
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#7a3b2e');
-      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#7a3b2e', 0.62));
-      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#a5713d');
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#6d4c41');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#6d4c41', 0.62));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#a9743f');
       let lines = '';
       for (let z = 38; z < 300; z += 38) { const a = pr.P(0, z, 0), b = pr.P(1150, z, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       for (let x = 96; x < 1150; x += 96) { const z0 = (x % 3) * 40; const a = pr.P(x, z0, 0), b = pr.P(x, z0 + 52, 0); lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }
       bg += '<g stroke="rgba(60,32,8,0.28)" stroke-width="2">' + lines + '</g>';
       // 北牆裝飾（wallDeco 平面物）＋字（平面貼牆）
-      bg += pr.wallDecoN(240, 332, 84, 122, '#fff8e1');
-      bg += pr.wallDecoN(640, 1110, 78, 124, '#2e2a26');
+      bg += pr.wallDecoN(240, 332, 84, 122, '#fff6e8');
+      bg += pr.wallDecoN(640, 1110, 78, 124, '#3c2415');
       bg += txt(pr.P(28, 0, 104), 0, '🍳 鐵板食堂', 17, '#ffe9b8');
-      bg += txt(pr.P(252, 0, 98), 0, '🍜 拉麵', 16, '#b3543f');
+      bg += txt(pr.P(252, 0, 98), 0, '🍜 拉麵', 16, '#b04a3a');
       bg += txt(pr.P(656, 0, 108), 0, '招牌炒麵 $60　豚骨拉麵 $75', 11, '#ffe9b8');
       bg += txt(pr.P(656, 0, 90), 0, '鐵板牛排 $95　香煎雞腿 $80　叉燒炒飯 $60', 11, '#ffe9b8');
       // 吊燈：吊線＋燈罩＋地板光池（planeCircle）
       [160, 320, 480].forEach(x => {
         const top = pr.P(x, 0, WH), bot = pr.P(x, 0, 100);
         bg += '<line x1="' + top.x.toFixed(1) + '" y1="' + top.y.toFixed(1) + '" x2="' + bot.x.toFixed(1) + '" y2="' + bot.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
-        bg += pr.planeCircle(x, 76, 0, 30, '#ffd97a', 0.30);
-        bg += '<polygon points="' + (bot.x - 14).toFixed(1) + ',' + bot.y.toFixed(1) + ' ' + (bot.x + 14).toFixed(1) + ',' + bot.y.toFixed(1) + ' ' + (bot.x + 8).toFixed(1) + ',' + (bot.y + 12).toFixed(1) + ' ' + (bot.x - 8).toFixed(1) + ',' + (bot.y + 12).toFixed(1) + '" fill="#d9a441" stroke="#182042" stroke-width="1.5"/>';
+        bg += pr.planeCircle(x, 76, 0, 30, '#ffd166', 0.30);
+        bg += '<polygon points="' + (bot.x - 14).toFixed(1) + ',' + bot.y.toFixed(1) + ' ' + (bot.x + 14).toFixed(1) + ',' + bot.y.toFixed(1) + ' ' + (bot.x + 8).toFixed(1) + ',' + (bot.y + 12).toFixed(1) + ' ' + (bot.x - 8).toFixed(1) + ',' + (bot.y + 12).toFixed(1) + '" fill="#d9a066" stroke="#182042" stroke-width="1.5"/>';
       });
       // 鐵板吧台（盒）：廚師崗位 z143 在北緣 146 之北，h15 由 frontHMax(3, 25, 6)=20.1 保證不蓋臉
       const counter = pr.boxFaces(60, 146, 520, 34, 15, '#795548');
       bg += counter.back; front += counter.front;
-      bg += poly([pr.P(66, 150, 15.6), pr.P(574, 150, 15.6), pr.P(574, 176, 15.6), pr.P(66, 176, 15.6)], '#3a3f4a');
-      [[120, '#e67e22'], [210, '#2ecc71'], [388, '#e74c3c'], [470, '#f1c40f']].forEach(([fx, fc]) => { bg += pr.planeCircle(fx, 163, 15.8, 6, fc); });
-      [120, 200, 280, 360, 440, 520].forEach(x => { bg += pr.box3(x - 11, 186, 22, 12, 9, '#8d5a2c'); });
+      bg += poly([pr.P(66, 150, 15.6), pr.P(574, 150, 15.6), pr.P(574, 176, 15.6), pr.P(66, 176, 15.6)], '#2c3e50');
+      [[120, '#e67e22'], [210, '#2ed573'], [388, '#c0392b'], [470, '#ffcc00']].forEach(([fx, fc]) => { bg += pr.planeCircle(fx, 163, 15.8, 6, fc); });
+      [120, 200, 280, 360, 440, 520].forEach(x => { bg += pr.box3(x - 11, 186, 22, 12, 9, '#8a6248'); });
       // 圓桌：桌面 planeCircle＋南緣弧帶（front）＋桌柱
       REST_TABLES.forEach((t, i) => {
-        bg += pr.planeCircle(t.x, t.z, 0, 13, '#d8d2c4');
-        bg += pr.box3(t.x - 5, t.z - 5, 10, 10, 5, '#8d5a2c');
-        bg += pr.planeCircle(t.x, t.z, 14, 36, '#e5e0d5');
+        bg += pr.planeCircle(t.x, t.z, 0, 13, '#c8d2cc');
+        bg += pr.box3(t.x - 5, t.z - 5, 10, 10, 5, '#8a6248');
+        bg += pr.planeCircle(t.x, t.z, 14, 36, '#f3e2c7');
         bg += pr.planeCircle(t.x, t.z, 14.6, 33, '#ffffff');
-        bg += pr.planeCircle(t.x, t.z, 15.2, 7, i ? '#f39c12' : '#e74c3c');
+        bg += pr.planeCircle(t.x, t.z, 15.2, 7, i ? '#f39c12' : '#c0392b');
         front += pr.rimBand(t.x, t.z, 36, 14, 5, '#f5f0e6');
       });
-      [[738, 190], [802, 190], [958, 238], [1022, 238]].forEach(([sx, sy]) => { bg += pr.box3(sx - 9, sy - 2, 18, 10, 9, '#8d5a2c'); });
+      [[738, 190], [802, 190], [958, 238], [1022, 238]].forEach(([sx, sy]) => { bg += pr.box3(sx - 9, sy - 2, 18, 10, 9, '#8a6248'); });
       // 冰箱（高盒）＋字在南面
-      const fridge = pr.boxFaces(900, 36, 60, 28, 50, '#35507a');
+      const fridge = pr.boxFaces(900, 36, 60, 28, 50, '#2e5f8a');
       bg += fridge.back; front += fridge.front;
       front += txt(pr.P(922, 64, 30), 5, '食', 15, '#ffffff');
       // 盆栽
-      bg += pr.box3(1082, 96, 26, 14, 10, '#b3543f');
+      bg += pr.box3(1082, 96, 26, 14, 10, '#b04a3a');
       const pc = pr.P(1095, 103, 0);
-      bg += '<circle cx="' + pc.x.toFixed(1) + '" cy="' + (pc.y - 26).toFixed(1) + '" r="12" fill="#2ed573"/><circle cx="' + (pc.x - 9).toFixed(1) + '" cy="' + (pc.y - 18).toFixed(1) + '" r="8" fill="#27ae60"/><circle cx="' + (pc.x + 9).toFixed(1) + '" cy="' + (pc.y - 19).toFixed(1) + '" r="8" fill="#27ae60"/>';
+      bg += '<circle cx="' + pc.x.toFixed(1) + '" cy="' + (pc.y - 26).toFixed(1) + '" r="12" fill="#2ed573"/><circle cx="' + (pc.x - 9).toFixed(1) + '" cy="' + (pc.y - 18).toFixed(1) + '" r="8" fill="#5da85f"/><circle cx="' + (pc.x + 9).toFixed(1) + '" cy="' + (pc.y - 19).toFixed(1) + '" r="8" fill="#5da85f"/>';
       // 入口墊
-      bg += pr.box3(550, 264, 120, 28, 2, '#8d5a2c');
+      bg += pr.box3(550, 264, 120, 28, 2, '#8a6248');
       bg += txt(pr.P(597, 283, 4), 0, '入 口', 11, '#ffe9b8');
       return '<svg id="rest-bg25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px;">' + bg + '</svg>'
         + '<svg id="rest-front25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px; z-index:950; pointer-events:none;">' + front + '</svg>';
