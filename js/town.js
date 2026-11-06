@@ -1869,14 +1869,119 @@
       const tri = (c, w) => Math.max(0, 1 - Math.abs(hf - c) / w);
       return Math.min(0.9, Math.max(tri(6.4, 1.8), tri(18.1, 1.9)) * 0.9);
     }
+    // ================= v9.55 小鎮外觀 2.5D 化（報告批次 5）：K=1.1 全鎮投影 =================
+    // 世界邏輯座標 1150x920 不動；城鎮畫面改 TOWN_PROJ 投影（螢幕 1715x650）。
+    // 地面/路網/公園/大樹/路燈/道具全走 P() 取樣；六棟建築本體＝投影基座 box3（地台）＋既有娃娃屋立面（與室內「框＝窗」同語彙），
+    // 角色/NPC 在世界地圖上的定位由 coords/render 以 parent id 查本投影器自動換算（registerRooms 'town-map'/'npc-layer')。
+    const TOWN_PROJ = PROJ.make(PROJ.K_TOWN, 8, 170);
+    const TOWN_PW = 1715, TOWN_PH = 650;
+    PROJ.registerRooms('town-map', TOWN_PROJ);
+    PROJ.registerRooms('npc-layer', TOWN_PROJ);
+    function buildTownDecor() {
+      const svg = document.querySelector('.map-decorations');
+      if (!svg || document.getElementById('town-decor25')) return;
+      const pr = TOWN_PROJ;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const quad = (x, z, w, d, fill, extra) => poly([pr.P(x, z, 0), pr.P(x + w, z, 0), pr.P(x + w, z + d, 0), pr.P(x, z + d, 0)], fill, extra);
+      const seg = (a, b, stroke, w, extra) => '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" stroke="' + stroke + '" stroke-width="' + w + '"' + (extra || '') + '/>';
+      const circ = (xp, r, fill, extra) => '<circle cx="' + xp.x.toFixed(1) + '" cy="' + xp.y.toFixed(1) + '" r="' + r + '" fill="' + fill + '"' + (extra || '') + '/>';
+      let s = '<defs><pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#8fd07a"/><rect width="24" height="24" fill="#97d783"/><rect x="24" y="24" width="24" height="24" fill="#97d783"/></pattern><pattern id="parkPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#7cb96a"/><rect x="24" y="24" width="24" height="24" fill="#85c173"/><rect width="24" height="24" width="24" height="24" fill="#85c173"/></pattern></defs>';
+      s += '<g id="town-decor25">';
+      // 地面＋公園帶
+      s += quad(0, 0, 1150, 920, 'url(#grassPat)');
+      s += quad(0, 336, 1150, 184, 'url(#parkPat)');
+      // 巷道＋人行道＋A/B 街（路網邏輯不動，形狀走投影）
+      s += quad(0, 254, 56, 566, '#7d868f') + quad(1094, 254, 56, 566, '#7d868f');
+      [360, 450, 540, 630, 720].forEach(z => { s += quad(24, z, 7, 40, '#f7d038') + quad(1118, z, 7, 40, '#f7d038'); });
+      s += quad(0, 224, 1150, 30, '#ccd1d4') + quad(0, 254, 1150, 76, '#7d868f');
+      s += quad(0, 714, 1150, 30, '#ccd1d4') + quad(0, 744, 1150, 76, '#7d868f');
+      s += seg(pr.P(0, 256, 0), pr.P(1150, 256, 0), 'rgba(245,242,228,0.5)', 3) + seg(pr.P(0, 327, 0), pr.P(1150, 327, 0), 'rgba(245,242,228,0.5)', 3);
+      s += seg(pr.P(0, 746, 0), pr.P(1150, 746, 0), 'rgba(245,242,228,0.5)', 3) + seg(pr.P(0, 817, 0), pr.P(1150, 817, 0), 'rgba(245,242,228,0.5)', 3);
+      for (let x = 10; x < 1150; x += 110) { s += quad(x, 288, 46, 7, '#f7d038') + quad(x, 778, 46, 7, '#f7d038'); }
+      // 六棟基座（投影 box3 地台）＋門前小徑
+      const PLOTS = [[42, 16, 312, 215, '#b7df9a'], [422, 16, 298, 215, '#aeb7be'], [802, 16, 298, 215, '#ecd3ac'], [42, 506, 298, 215, '#d8dfe3'], [422, 506, 298, 215, '#cfe3c0'], [802, 506, 312, 215, '#da8f80']];
+      PLOTS.forEach(([px, pz, pw, pd, col]) => { s += pr.box3(px - 4, pz - 4, pw + 8, pd + 8, 20, col); });
+      [[181, 196], [554, 196], [934, 196], [181, 676], [554, 676], [941, 676]].forEach(([dx, dz]) => { s += quad(dx, dz, 34, 48, '#e8e0c8', ' stroke="#cbbfa0" stroke-width="2"'); });
+      // 公園：池塘＋小徑（曲線取樣投影）＋長椅＋花圃
+      s += pr.planeCircle(250, 428, 0, 118, '#79c7e3');
+      s += pr.planeCircle(250, 424, 0, 104, '#93d5ef');
+      const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]; };
+      const pathPts = [];
+      for (let i = 0; i <= 12; i++) { const [bx, bz] = bez([0, 478], [300, 442], [600, 502], [900, 464], i / 12); pathPts.push(pr.P(bx, bz, 0)); }
+      for (let i = 1; i <= 8; i++) { const [bx, bz] = bez([900, 464], [1200, 426], [1150, 472], [1150, 472], i / 8); pathPts.push(pr.P(bx, bz, 0)); }
+      s += '<polyline points="' + pr.pts(pathPts) + '" fill="none" stroke="#e2d3a8" stroke-width="26" stroke-linecap="round"/>';
+      [[430, 352], [700, 352], [430, 486], [700, 486]].forEach(([bx, bz]) => { s += pr.box3(bx, bz, 46, 9, 7, '#a9743f'); });
+      const flower = (fx, fz) => circ(pr.P(fx, fz, 2), 3.5, '#ff8fab') + circ(pr.P(fx + 12, fz + 3, 2), 3, '#ffd166') + circ(pr.P(fx + 24, fz, 2), 3.5, '#c39bff');
+      [60, 380, 560, 900, 1060].forEach(fx => { s += flower(fx, 356); });
+      [120, 620, 960].forEach(fx => { s += flower(fx, 496); });
+      // 樹木（立牌：樹幹＋樹冠 billboard，落點/影走投影）
+      const tree = (cx, cz, th, r) => {
+        let o = pr.groundShadow(cx, cz, r * 0.55);
+        o += seg(pr.P(cx, cz, 0), pr.P(cx, cz, th), '#8a5a3b', 4);
+        o += circ(pr.P(cx, cz, th + 13), r, '#5da85f') + circ(pr.P(cx - r * 0.62, cz, th + 6), r * 0.62, '#6fbb72') + circ(pr.P(cx + r * 0.62, cz, th + 6), r * 0.62, '#54a258');
+        return o;
+      };
+      s += tree(430, 483, 21, 24) + tree(880, 410, 18, 21) + tree(1064, 490, 22, 25) + tree(180, 905, 21, 24) + tree(600, 914, 18, 21) + tree(990, 907, 23, 26);
+      const pine = (cx, cz) => seg(pr.P(cx, cz, 0), pr.P(cx, cz, 16), '#8a5a3b', 4)
+        + poly([pr.P(cx - 11, cz, 14), pr.P(cx + 11, cz, 14), pr.P(cx, cz, 32)], '#3e8e5a')
+        + poly([pr.P(cx - 9, cz, 26), pr.P(cx + 9, cz, 26), pr.P(cx, cz, 44)], '#46a065');
+      s += pine(60, 420) + pine(814, 910);
+      // 地標大樹（id 保留：花季切換）
+      let bt = pr.groundShadow(575, 448, 30);
+      bt += poly([pr.P(569, 448, 0), pr.P(581, 448, 0), pr.P(581, 448, 48), pr.P(569, 448, 48)], '#8a5a3b');
+      bt += seg(pr.P(575, 448, 34), pr.P(575, 448, 48), '#8a5a3b', 4);
+      bt += circ(pr.P(575, 448, 82), 46, '#5da85f') + circ(pr.P(536, 448, 66), 30, '#6fbb72') + circ(pr.P(614, 448, 66), 30, '#54a258') + circ(pr.P(575, 448, 114), 27, '#6fbb72');
+      bt += '<g id="big-tree-blossom" style="display:none;">' + circ(pr.P(548, 448, 98), 12, 'rgba(255,183,213,0.85)') + circ(pr.P(602, 448, 106), 10, 'rgba(255,183,213,0.85)') + circ(pr.P(575, 448, 82), 11, 'rgba(255,183,213,0.8)') + circ(pr.P(622, 448, 84), 8, 'rgba(255,183,213,0.8)') + circ(pr.P(528, 448, 84), 8, 'rgba(255,183,213,0.8)') + '</g>';
+      bt += seg(pr.P(608, 448, 64), pr.P(608, 448, 44), '#8a5a3b', 2);
+      bt += quad(598, 446, 20, 4, '#a9743f');
+      s += '<g id="big-tree">' + bt + '</g>';
+      // 路燈（柱＋頭，光池在 street-glows 層）
+      const lamp = (lx, lz) => seg(pr.P(lx, lz, 0), pr.P(lx, lz, 24), '#4a4a55', 4) + circ(pr.P(lx, lz, 27), 6, '#ffe9a8', ' stroke="#4a4a55" stroke-width="2"');
+      [180, 480, 780, 1080].forEach(lx => { s += lamp(lx, 344); });
+      [270, 660, 1050].forEach(lx => { s += lamp(lx, 722); });
+      // 道具：郵筒/告示牌/腳踏車/販賣機
+      s += pr.box3(86, 352, 16, 12, 20, '#d43a2f');
+      const mslot = pr.P(89, 364.6, 14); s += '<rect x="' + mslot.x.toFixed(1) + '" y="' + mslot.y.toFixed(1) + '" width="10" height="4" fill="#fffdf5"/>';
+      s += pr.box3(1006, 350, 30, 6, 22, '#f5f0e6');
+      s += poly([pr.P(1010, 356.5, 11), pr.P(1032, 356.5, 11), pr.P(1032, 356.5, 14), pr.P(1010, 356.5, 14)], '#e74c3c');
+      s += poly([pr.P(1010, 356.5, 17), pr.P(1032, 356.5, 17), pr.P(1032, 356.5, 20), pr.P(1010, 356.5, 20)], '#7d868f');
+      const w1 = pr.P(634, 253, 5), w2 = pr.P(646, 253, 5);
+      s += '<circle cx="' + w1.x.toFixed(1) + '" cy="' + w1.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/><circle cx="' + w2.x.toFixed(1) + '" cy="' + w2.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/>';
+      s += seg(pr.P(634, 253, 5), pr.P(640, 253, 14), '#e74c3c', 2) + seg(pr.P(640, 253, 14), pr.P(646, 253, 5), '#e74c3c', 2);
+      s += pr.box3(1082, 676, 20, 14, 40, '#dfe9f5');
+      s += poly([pr.P(1085, 690.5, 20), pr.P(1099, 690.5, 20), pr.P(1099, 690.5, 36), pr.P(1085, 690.5, 36)], '#93d5ef');
+      // 美化道具組（id/display 與舊版相同，worldMutations 切換）
+      let arch = poly([pr.P(1014, 458, 0), pr.P(1023, 458, 0), pr.P(1023, 458, 34), pr.P(1014, 458, 34)], '#8d5a2c') + poly([pr.P(1077, 458, 0), pr.P(1086, 458, 0), pr.P(1086, 458, 34), pr.P(1077, 458, 34)], '#8d5a2c');
+      const arcPts = [];
+      for (let i = 0; i <= 10; i++) { const a = Math.PI - i / 10 * Math.PI; arcPts.push(pr.P(1050 + Math.cos(a) * 42, 458, 34 + Math.sin(a) * 20)); }
+      arch += '<polyline points="' + pr.pts(arcPts) + '" fill="none" stroke="#4e9b47" stroke-width="6"/>';
+      arch += circ(pr.P(1024, 458, 46), 5, '#ff8fab') + circ(pr.P(1050, 458, 54), 5.6, '#ffd32a') + circ(pr.P(1076, 458, 46), 5, '#ff8fab');
+      s += '<g id="beauty-arch" style="display:none;">' + arch + '</g>';
+      let ftn = pr.planeCircle(300, 452, 0, 52, '#aee6fa') + pr.planeCircle(300, 452, 1, 44, '#74c7e8');
+      ftn += poly([pr.P(294, 452, 0), pr.P(306, 452, 0), pr.P(306, 452, 36), pr.P(294, 452, 36)], '#b8c4cc');
+      ftn += circ(pr.P(300, 452, 38), 6, '#e8eef2');
+      const spray = (x2, z2, h2, cls) => '<polyline class="beauty-spray ' + cls + '" points="' + pr.pts([pr.P(300, 452, 40), pr.P(x2, z2, h2), pr.P(x2 + (x2 < 300 ? -8 : 8), z2, h2 - 14)]) + '" fill="none" stroke="#aee6fa" stroke-width="3"/>';
+      ftn += spray(282, 440, 56, '') + spray(300, 436, 62, 's2') + spray(318, 440, 56, 's3');
+      s += '<g id="beauty-fountain" style="display:none;">' + ftn + '</g>';
+      let stat = pr.box3(682, 402, 36, 14, 20, '#b8c4cc') + pr.box3(678, 400, 44, 16, 6, '#98a5ae');
+      stat += poly([pr.P(692, 404, 20), pr.P(708, 404, 20), pr.P(708, 404, 50), pr.P(692, 404, 50)], '#b8860b');
+      stat += circ(pr.P(700, 404, 56), 8, '#d4a017');
+      stat += poly([pr.P(688, 404, 62), pr.P(712, 404, 62), pr.P(712, 404, 66), pr.P(688, 404, 66)], '#23232b');
+      s += '<g id="beauty-statue" style="display:none;">' + stat + '</g>';
+      s += '</g>';
+      svg.setAttribute('viewBox', '0 0 ' + TOWN_PW + ' ' + TOWN_PH);
+      svg.innerHTML = s;
+    }
     function buildSkyLayer() {
       const map = document.getElementById('town-map');
       if (!map) return;
+      buildTownDecor(); // v9.55 小鎮投影裝飾（先於光影層建立）
       if (!document.getElementById('street-glows')) {
-        const sg = document.createElement('div');
+        const sg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         sg.id = 'street-glows';
+        sg.setAttribute('viewBox', '0 0 ' + TOWN_PW + ' ' + TOWN_PH);
         map.appendChild(sg);
-        sg.style.background = TOWN_LAMPS.map(l => 'radial-gradient(circle ' + (l.r || 175) + 'px at ' + l.x + 'px ' + (l.gy || l.y) + 'px, rgba(' + (l.c || '255, 200, 110') + ', 0.5), rgba(' + (l.c || '255, 200, 110') + ', 0) 70%)').join(', '); // v9.48 光暈移到夜色層之上、半徑放大讓相鄰光池相交成帶、B 街光池心南移到步行線（gy）——實機報告光1/光2
+        sg.innerHTML = TOWN_LAMPS.map(l => TOWN_PROJ.planeCircle(l.x, l.gy || l.y, 0, l.r ? 55 : 120, l.c ? 'rgb(' + l.c + ')' : '#ffc86e', 0.5)).join(''); // v9.55 光池改投影 planeCircle（§2.4：禁止正圓光暈浮在平面上）；v9.48 光池心南移步行線（gy）保留
         const sw = document.createElement('div'); // v9.22.1 store-beacon/store-lit 補光片退役：改由 #sky-night 在超商處挖空
         sw.id = 'sky-warm';
         map.appendChild(sw);
@@ -1896,7 +2001,7 @@
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
     const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696, gy: 760 }, { x: 660, y: 696, gy: 760 }, { x: 1050, y: 696, gy: 760 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
     // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
-    const SKY_HOLES_FALLBACK = { home: [56, 30, 284, 179], store: [436, 30, 264, 179], restaurant: [816, 30, 264, 179], school: [56, 520, 264, 179], library: [436, 520, 264, 179], gym: [816, 520, 284, 179] };
+    const SKY_HOLES_FALLBACK = { home: [139, 71, 284, 185], store: [519, 71, 270, 185], restaurant: [899, 71, 270, 185], school: [435, 297, 270, 185], library: [815, 297, 270, 185], gym: [1195, 297, 284, 185] }; // v9.55 投影後島嶼位置（平時以 CSS 實測為準，此為後備）
     let _skyHolesCache = null;
     function skyHoles() {
       if (_skyHolesCache) return _skyHolesCache;
@@ -1925,7 +2030,8 @@
     }
     function skyNightClip() {
       // v9.48 靜態全挖六島：全域夜色只蓋街道/公園，島的暗度改由各自的 .island-shade 連續決定（不再隨開關改 clip）
-      let pts = '0px 0px, ' + WORLD_W + 'px 0px, ' + WORLD_W + 'px ' + WORLD_H + 'px, 0px ' + WORLD_H + 'px, 0px 0px';
+      const _o = [TOWN_PROJ.P(0, 0, 0), TOWN_PROJ.P(1150, 0, 0), TOWN_PROJ.P(1150, 920, 0), TOWN_PROJ.P(0, 920, 0)]; // v9.55 外輪廓改投影平行四邊形（§2.4）
+      let pts = _o.map(p => p.x.toFixed(0) + 'px ' + p.y.toFixed(0) + 'px').join(', ') + ', ' + _o[0].x.toFixed(0) + 'px ' + _o[0].y.toFixed(0) + 'px';
       const holes = skyHoles();
       for (const k in holes) {
         const r = holes[k];

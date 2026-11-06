@@ -198,17 +198,19 @@
       return [cur, vel];
     }
     function playerWorldPos() { // v9.28.2 主角的世界座標：在室內時 currentX/Y 是場景座標（跟世界座標不同套），世界鏡頭要對準該建築門口，否則會追到別棟附近（追錯人）
-      if (gameState.isCommuting && _visPos) return _visPos;
+      // v9.55：回傳投影後螢幕座標（世界鏡頭活在 TOWN_PROJ 投影空間）；邏輯座標只在函式內部換算
+      const _proj = lp => (typeof TOWN_PROJ !== 'undefined') ? TOWN_PROJ.P(lp.x, lp.y, 0) : lp;
+      if (gameState.isCommuting && _visPos) return _proj(_visPos);
       const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1 };
-      if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return { x: DOOR_X[currentLoc], y: DOOR_FRONT_Y[currentLoc] };
-      return { x: gameState.currentX || WORLD_W / 2, y: gameState.currentY || WORLD_H / 2 };
+      if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return _proj({ x: DOOR_X[currentLoc], y: DOOR_FRONT_Y[currentLoc] });
+      return _proj({ x: gameState.currentX || WORLD_W / 2, y: gameState.currentY || WORLD_H / 2 });
     }
     function snapCameraToChar() {
       const s = (window.__baseMapScale || 1) * mapZoom;
       _camAnchor = null; _camVX = 0; _camVY = 0;
       const wp = playerWorldPos();
-      mapPanX = -(wp.x - WORLD_W / 2) * s;
-      mapPanY = -(wp.y - WORLD_H / 2) * s;
+      mapPanX = -(wp.x - WORLD_PW / 2) * s;
+      mapPanY = -(wp.y - WORLD_PH / 2) * s;
       clampMapPan(); applyMapZoom();
     }
     let _renderPrevT = 0;
@@ -236,7 +238,7 @@
       const s = (window.__baseMapScale || 1) * mapZoom;
       let tx, ty, hasTarget = false;
       if (_camAnchor) {
-        tx = -(_camAnchor.x - WORLD_W / 2) * s; ty = -(_camAnchor.y - WORLD_H / 2) * s; hasTarget = true;
+        tx = -(_camAnchor.x - WORLD_PW / 2) * s; ty = -(_camAnchor.y - WORLD_PH / 2) * s; hasTarget = true;
       } else {
         // v9.15.2：鏡頭改跟內插後的視覺位置（原本跟 100ms 才跳一次的邏輯位置，前饋又用每 tick 的瞬時位移估速度，
         // 路徑一轉彎目標就跳一下，彈簧追著跳躍目標 = 通勤時鏡頭一頓一頓）
@@ -321,9 +323,9 @@
       // v9.0 橫向捲軸：基準縮放讓畫面約涵蓋 720px 寬的世界 (約 2.3 棟建築)，其餘靠跟隨相機/拖曳探索
       // v9.46 寬版改 fit-to-world（實機報告 A2）：舊公式分母停在舊世界 720x560，新世界 1150x920 在寬螢幕被系統性放大裁切（1600x900 開局裁掉約 27% 高度）
       const _wideFit = window.innerWidth > 820 && !(window.innerWidth > window.innerHeight && window.innerHeight <= 520);
-      const _ww = (typeof WORLD_W !== 'undefined') ? WORLD_W : 1150;
-      const _wh = (typeof WORLD_H !== 'undefined') ? WORLD_H : 920;
-      const fit = _wideFit ? Math.min(availW / _ww, availH / _wh, 1.25) : Math.min(availW / 720, availH / 560, 1.25);
+      const _ww = (typeof WORLD_PW !== 'undefined') ? WORLD_PW : 1715; // v9.55 fit 以投影後尺寸重算（R2）
+      const _wh = (typeof WORLD_PH !== 'undefined') ? WORLD_PH : 650;
+      const fit = _wideFit ? Math.min(availW / _ww, availH / _wh, 1.25) : Math.min(availW / 980, availH / 520, 1.25); // v9.55 非寬版基準改投影尺度（約涵蓋 2 棟建築寬）
       let scale = Math.max(Math.min(fit, 1.25), 0.15);
       window.__baseMapScale = scale;
       try { if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; } } catch (e) { }
@@ -348,20 +350,20 @@
       const vp = document.getElementById('map-viewport');
       if (!vp) return;
       const s = (window.__baseMapScale || 1) * mapZoom;
-      const mx = Math.max(0, (WORLD_W * s - vp.clientWidth) / 2) + 30;
-      const my = Math.max(0, (WORLD_H * s - vp.clientHeight) / 2) + 30;
+      const mx = Math.max(0, (WORLD_PW * s - vp.clientWidth) / 2) + 30;
+      const my = Math.max(0, (WORLD_PH * s - vp.clientHeight) / 2) + 30;
       mapPanX = Math.max(-mx, Math.min(mx, mapPanX));
       mapPanY = Math.max(-my, Math.min(my, mapPanY));
     }
     function centerMapOn(mapX, mapY) {
       const s = (window.__baseMapScale || 1) * mapZoom;
-      _camAnchor = { x: mapX, y: mapY }; // v9.0.1：不瞬移，交給彈簧鏡頭滑過去
+      _camAnchor = (typeof TOWN_PROJ !== 'undefined') ? TOWN_PROJ.P(mapX, mapY, 0) : { x: mapX, y: mapY }; // v9.0.1：不瞬移，交給彈簧鏡頭滑過去（v9.55 錨點存投影座標）
       _camVX = 0; _camVY = 0;
       clampMapPan(); applyMapZoom();
     }
     // 房間快捷導覽 (手機底部膠囊列)：把該房間滑到畫面中央並脈衝提示，玩家再點大房間派遣
     function focusLandmark(loc) {
-      const centers = { home: [175, 118], store: [485, 118], restaurant: [795, 118], school: [1105, 118], library: [1415, 118], gym: [1732, 118] };
+      const centers = { home: [198, 122], store: [571, 122], restaurant: [951, 122], school: [191, 612], library: [571, 612], gym: [958, 612] }; // v9.55 改為六島邏輯中心（舊值是單排時代遺留，學校/圖書館/操場 x 全錯位）
       const c = centers[loc];
       if (!c) return;
       if (mapZoom < 1.7) _camZoomTarget = 1.7; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間
@@ -1340,7 +1342,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.54.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.55.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

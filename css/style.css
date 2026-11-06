@@ -125,8 +125,8 @@ body {
 
     /* 960x540 緊湊六角等角聚落地圖舞台 */
     .town-map {
-      width: 1150px;
-      height: 920px;
+      width: 1715px;
+      height: 650px; /* v9.55 投影後世界尺寸 */
       position: relative;
       margin: 0 auto;
       overflow: visible;
@@ -302,44 +302,44 @@ body {
     /* 6 大建築固定座標 (960x540 Viewport - 開羅 2.5D 正向街區佈局) */
     /* 上排 3 棟 */
     .landmark-school {
-      left: 56px;
-      top: 520px;
+      left: 435px;
+      top: 297px; /* v9.55 投影基座位置 */
       width: 270px;
       height: 185px;
     }
 
     .landmark-library {
-      left: 436px;
-      top: 520px;
+      left: 815px;
+      top: 297px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-gym {
-      left: 816px;
-      top: 520px;
+      left: 1195px;
+      top: 297px;
       width: 284px;
       height: 185px;
     }
 
     /* 下排 3 棟 */
     .landmark-restaurant {
-      left: 816px;
-      top: 30px;
+      left: 899px;
+      top: 71px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-store {
-      left: 436px;
-      top: 30px;
+      left: 519px;
+      top: 71px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-home {
-      left: 56px;
-      top: 30px;
+      left: 139px;
+      top: 71px;
       width: 284px;
       height: 185px;
     }
@@ -3660,9 +3660,9 @@ input, select, textarea { border-radius: 14px !important; }
 .npc-sprite { display: block; margin: 0 auto; }
 .npc-walking .npc-flip { animation: npc-bob 0.55s ease-in-out infinite alternate; }
 .npc-zzz-tag { position: absolute; top: -4px; right: 0; font-size: 0.78rem; filter: drop-shadow(0 1px 2px rgba(var(--rgb-black),0.4)); }
-#sky-night { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 夜色改均勻單值（舊垂直漸層讓北排無理由地比南排暗——光8）；島嶼由靜態 clip 全挖＋各島 .island-shade 連續決定暗度 */
-#sky-warm { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
-#street-glows { position: absolute; left: 0; top: 0; width: 1150px; height: 920px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
+#sky-night { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 夜色改均勻單值（舊垂直漸層讓北排無理由地比南排暗——光8）；島嶼由靜態 clip 全挖＋各島 .island-shade 連續決定暗度 */
+#sky-warm { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,60,0.42), rgba(255,90,80,0.20) 55%, rgba(60,30,110,0.22)); }
+#street-glows { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
 #landmark-store .island-platform-top { transition: filter 0.9s linear; }
 #landmark-store .facade-roof { transition: filter 0.9s linear; }
 #landmark-store.night-lit .facade-roof { filter: brightness(1.3) drop-shadow(0 0 7px rgba(140, 255, 180, 0.9)); } /* 招牌燈箱發光（店面本體的亮度改由 #sky-night 挖空達成，不再用 brightness 濾鏡硬拉） */

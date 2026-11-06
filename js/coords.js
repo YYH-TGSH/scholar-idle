@@ -7,6 +7,7 @@
     // v9.38 A 案雙排小鎮：世界 1150x920，北排（住家/超商/餐廳）面 A 街、南排（學校/圖書館/操場）面 B 街，
     // 中間是公園帶，東西兩條連通巷接兩條街。所有世界座標以本註冊表為單一來源。
     const WORLD_W = 1150, WORLD_H = 920;
+    const WORLD_PW = 1715, WORLD_PH = 650; // v9.55 投影後世界螢幕尺寸（TOWN_PROJ K=1.1、OX8/OY170：寬 1150+920*0.605≈1715、高 170+920*0.462≈595＋南緣餘裕）
     const LOC_STREET = { home: 'A', store: 'A', restaurant: 'A', school: 'B', library: 'B', gym: 'B' };
     const STREET_Y = { A: 300, B: 790 }; // 兩條街的步行線
     const CONNECTOR_X = [28, 1122]; // 東西連通巷的步行線 x
