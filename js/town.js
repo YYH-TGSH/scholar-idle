@@ -2015,7 +2015,7 @@
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
     const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696, gy: 760 }, { x: 660, y: 696, gy: 760 }, { x: 1050, y: 696, gy: 760 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
     // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
-    const SKY_HOLES_FALLBACK = { home: [176, 143, 203, 134], store: [558, 143, 193, 134], restaurant: [944, 143, 193, 134], school: [473, 375, 193, 134], library: [853, 375, 193, 134], gym: [1236, 375, 203, 134] }; // v9.56 島嶼視覺矩形（縮放 0.7 後，平時以 CSS 實測換算為準，此為後備）
+    const SKY_HOLES_FALLBACK = { home: [176, 143, 203, 134], store: [558, 143, 193, 134], restaurant: [944, 143, 193, 134], school: [473, 375, 193, 134], library: [853, 375, 193, 134], gym: [1236, 375, 203, 134] }; // 島嶼視覺矩形＋外擴 2（v9.63 烘焙後與 CSS 矩形一致，平時以 CSS 實測為準，此為後備）
     let _skyHolesCache = null;
     function skyHoles() {
       if (_skyHolesCache) return _skyHolesCache;
@@ -2026,7 +2026,7 @@
         const cs = getComputedStyle(el);
         const L = parseFloat(cs.left), T = parseFloat(cs.top), W = parseFloat(cs.width);
         const H = parseFloat(cs.height);
-        out[k] = (isFinite(L) && isFinite(T) && isFinite(W) && isFinite(H)) ? [L + W / 2 - W * 0.35 - 2, T + H - H * 0.7 - 2, W * 0.7 + 4, H * 0.7 + 4] : SKY_HOLES_FALLBACK[k]; // v9.56 島嶼視覺縮放 0.7（.iso-island scale、origin bottom center）→ 挖孔按視覺矩形換算：中心 x 與底邊不變、寬高 x0.7、外擴 2（承 v9.48）
+        out[k] = (isFinite(L) && isFinite(T) && isFinite(W) && isFinite(H)) ? [L - 2, T - 2, W + 4, H + 4] : SKY_HOLES_FALLBACK[k]; // v9.63 島框已烘焙：CSS 矩形即視覺矩形，挖孔只需外擴 2（承 v9.48）——v9.56 的 x0.7 換算隨補丁退役
       }
       _skyHolesCache = out;
       return out;
