@@ -524,6 +524,7 @@
 
       gameState.overrideAction = action;
       gameState.overrideHoursLeft = 2;
+      gameState._focusOnArrive = { sleep: 'home', 'study-school': 'school', sports: 'gym', eat: 'restaurant', 'study-library': 'library', work: 'store' }[action] || null; // v9.60：使用者親自派遣＝進場即聚焦（與點膠囊同等待遇，相機補償全路徑覆蓋）
 
       decideLocationAndState();
       updateUI();

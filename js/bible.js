@@ -47,7 +47,7 @@ window.BIBLE = {
     PERSON_W: 32,          // sprite 框寬
     SEATED_INK: 44,        // 坐姿墨高（主角/NPC 共用）
     SEAT_SINK: 6,          // 坐姿下沉量
-    INDOOR_SCALE: 1.676,   // 室內補償定版常數 = 300/179，禁止 clientHeight 浮動反推
+    INDOOR_SCALE: 1.676, CAM_INDOOR_ZOOM: 2.4 /* 進場聚焦倍率（v9.56 定版值）：室內 0.7 島框 ×2.4 ≈ 戶外基準 */,   // 室內補償定版常數 = 300/179，禁止 clientHeight 浮動反推
     STAGE_H: 179,          // 舞台框高定版
     DOOR_RATIO: 1.3,       // 門洞高 ÷ 人高
     INK: '#3c2415'         // 描邊墨色（= PALETTE.cocoa）

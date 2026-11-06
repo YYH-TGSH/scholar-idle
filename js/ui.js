@@ -1735,7 +1735,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.59.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.60.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1938,17 +1938,10 @@
       elCharWrap.classList.remove("in-bed");
       elCharWrap.classList.remove("lying");
       elCharWrap.classList.toggle("seated", (currentState === 'eating' || currentState === 'dinner' || (currentLoc === 'home' && currentState === 'studying' && gameState.deskStudy)) && !gameState._playerWalking); // v9.24 走路中不坐
-      if (elStudentSprite) { // v9.10.4 坐姿：裁掉 viewBox 下段 (鞋子區) + 高度等比 + 整隻下沉讓腰進吧台後
-        const _sp2 = (currentState === 'eating' || currentState === 'dinner') && !gameState._playerWalking; // v9.24 走路中維持站姿
-        const _vb2 = _sp2 ? '0 0 16 21' : '0 0 16 25';
-        if (elStudentSprite.getAttribute('viewBox') !== _vb2) elStudentSprite.setAttribute('viewBox', _vb2);
-        const _sh2 = _sp2 ? '42px' : '50px';
-        if (elStudentSprite.style.height !== _sh2) elStudentSprite.style.height = _sh2;
-        // v9.10.6 坐姿改用 transform 縮放（margin 對主角 sprite 完全無效,實測確認）:
-        // 縮到 NPC 坐姿的寬高 (32→26), 屁股釘在錨點、頭降到跟 NPC 同高
-        const _st2 = _sp2 ? 'translateY(-3px) scale(0.82)' : '';
-        if (elStudentSprite.style.transform !== _st2) elStudentSprite.style.transform = _st2;
-        if (_sp2 && elStudentSprite.style.transformOrigin !== '50% 100%') elStudentSprite.style.transformOrigin = '50% 100%';
+      if (elStudentSprite) { // v9.60 坐姿定版：與 NPC 共用同一規格——不裁 viewBox、不縮放；藏腳＋下沉 6px 全由 #char-wrap.seated 的 CSS 規格負責（舊 0.82 縮放讓主角坐著比同桌 NPC 矮 22%，退役）
+        if (elStudentSprite.getAttribute('viewBox') !== '0 0 16 25') elStudentSprite.setAttribute('viewBox', '0 0 16 25');
+        if (elStudentSprite.style.height !== '50px') elStudentSprite.style.height = '50px';
+        if (elStudentSprite.style.transform) elStudentSprite.style.transform = '';
         if (elStudentSprite.style.marginBottom) elStudentSprite.style.marginBottom = '';
       }
 

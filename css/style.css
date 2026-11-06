@@ -3981,3 +3981,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #parents-modal-icon .pix-ico, #re-modal-icon .pix-ico { width: 48px; height: 48px; }
 .store-chip .pix-ico { width: 13px; height: 13px; vertical-align: -2px; }
 .help-tab-btn .pix-ico, .ach-cat-btn .pix-ico { width: 15px; height: 15px; vertical-align: -2px; }
+
+/* v9.60 坐姿定版（與 NPC 同規格）：主角坐下＝藏腳（既有規則）＋下沉 6px，全由 .seated class 規格負責；
+   舊 viewBox 裁切＋scale(0.82) 已退役——同桌比爸媽矮一截就是它造成的。 */
+#char-wrap.seated #student-sprite { transform: translateY(6px); }
