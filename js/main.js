@@ -366,7 +366,7 @@
       const centers = { home: [198, 122], store: [571, 122], restaurant: [951, 122], school: [191, 612], library: [571, 612], gym: [958, 612] }; // v9.55 改為六島邏輯中心（舊值是單排時代遺留，學校/圖書館/操場 x 全錯位）
       const c = centers[loc];
       if (!c) return;
-      if (mapZoom < 1.7) _camZoomTarget = 1.7; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間
+      if (mapZoom < 2.4) _camZoomTarget = 2.4; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間（v9.56 島嶼視覺縮放 0.7 → 目標 1.7/0.7≈2.4 補償，進場大小不變）
       _camHoldUntil = Date.now() + 30000; // v9.14.4 手動操控後 30 秒不自動回追主角
       centerMapOn(c[0], c[1]);
       const el = document.getElementById('landmark-' + loc);
@@ -1342,7 +1342,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.55.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.56.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

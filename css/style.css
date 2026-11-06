@@ -146,10 +146,11 @@ body {
       z-index: 10;
       transition: transform 0.22s var(--ease-std), filter 0.22s ease;
       transform-origin: bottom center;
+      transform: scale(0.7); /* v9.56 島嶼視覺縮放：185 高的娃娃屋框在 K=1.1 投影下會溢出自己的地塊帶、壓到北邊馬路與公園站立線——縮到 0.7 後六島全數退回帶內（底邊錨定基座南緣、中心對基座） */
     }
 
     .iso-island:hover {
-      transform: translateY(-4px) scale(1.02);
+      transform: translateY(-4px) scale(0.714); /* v9.56 承 0.7 基底 x1.02 */
       filter: drop-shadow(0 14px 20px rgba(var(--rgb-black), 0.16));
     }
 
@@ -164,7 +165,7 @@ body {
     }
 
     .iso-island.light-off:hover {
-      transform: none;
+      transform: scale(0.7); /* v9.56 保持縮放基底 */
     }
 
     /* 開羅經典 2.5D 正向點陣建築框架 (Kairosoft 2.5D Dollhouse) */
@@ -303,43 +304,43 @@ body {
     /* 上排 3 棟 */
     .landmark-school {
       left: 435px;
-      top: 297px; /* v9.55 投影基座位置 */
+      top: 322px; /* v9.56 版面底邊 507（基座南緣） */ /* v9.55 投影基座位置 */
       width: 270px;
       height: 185px;
     }
 
     .landmark-library {
       left: 815px;
-      top: 297px;
+      top: 322px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-gym {
       left: 1195px;
-      top: 297px;
+      top: 322px;
       width: 284px;
       height: 185px;
     }
 
     /* 下排 3 棟 */
     .landmark-restaurant {
-      left: 899px;
-      top: 71px;
+      left: 906px;
+      top: 90px; /* v9.56 版面底邊 275（基座南緣）、中心對基座 */
       width: 270px;
       height: 185px;
     }
 
     .landmark-store {
       left: 519px;
-      top: 71px;
+      top: 90px;
       width: 270px;
       height: 185px;
     }
 
     .landmark-home {
-      left: 139px;
-      top: 71px;
+      left: 135px;
+      top: 90px;
       width: 284px;
       height: 185px;
     }
@@ -3173,7 +3174,7 @@ input, select, textarea { border-radius: 14px !important; }
 }
 /* 觸控裝置關閉 hover 抬升 (iOS 會把第一下點按吃去做 hover，造成「點不到」) */
 @media (hover: none) {
-  .iso-island:hover { transform: none !important; filter: none !important; }
+  .iso-island:hover { transform: scale(0.7) !important; filter: none !important; } /* v9.56 觸控 hover 不得解除縮放基底 */
 }
 
 /* 彈窗 / 抽屜 */

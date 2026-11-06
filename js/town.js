@@ -1981,7 +1981,8 @@
         sg.id = 'street-glows';
         sg.setAttribute('viewBox', '0 0 ' + TOWN_PW + ' ' + TOWN_PH);
         map.appendChild(sg);
-        sg.innerHTML = TOWN_LAMPS.map(l => TOWN_PROJ.planeCircle(l.x, l.gy || l.y, 0, l.r ? 55 : 120, l.c ? 'rgb(' + l.c + ')' : '#ffc86e', 0.5)).join(''); // v9.55 光池改投影 planeCircle（§2.4：禁止正圓光暈浮在平面上）；v9.48 光池心南移步行線（gy）保留
+        const glowDefs = '<defs><radialGradient id="lampGlowWarm"><stop offset="0%" stop-color="#ffc86e" stop-opacity="0.9"/><stop offset="55%" stop-color="#ffc86e" stop-opacity="0.38"/><stop offset="100%" stop-color="#ffc86e" stop-opacity="0"/></radialGradient><radialGradient id="lampGlowCool"><stop offset="0%" stop-color="#bedcfe" stop-opacity="0.9"/><stop offset="55%" stop-color="#bedcfe" stop-opacity="0.38"/><stop offset="100%" stop-color="#bedcfe" stop-opacity="0"/></radialGradient></defs>';
+        sg.innerHTML = glowDefs + TOWN_LAMPS.map(l => TOWN_PROJ.planeCircle(l.x, l.gy || l.y, 0, l.r ? 42 : 95, l.c ? 'url(#lampGlowCool)' : 'url(#lampGlowWarm)', 0.85)).join(''); // v9.56 光池改徑向漸層柔邊＋半徑 120→95（v9.55 均勻實心橢圓邊界生硬、像大色塊糊在房子上——實機「光線怪怪的」） // v9.55 光池改投影 planeCircle（§2.4：禁止正圓光暈浮在平面上）；v9.48 光池心南移步行線（gy）保留
         const sw = document.createElement('div'); // v9.22.1 store-beacon/store-lit 補光片退役：改由 #sky-night 在超商處挖空
         sw.id = 'sky-warm';
         map.appendChild(sw);
@@ -2001,7 +2002,7 @@
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
     const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696, gy: 760 }, { x: 660, y: 696, gy: 760 }, { x: 1050, y: 696, gy: 760 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
     // v9.23 夜間挖空矩形改為執行期自 CSS 註冊量測（.landmark-* 的 left/top/width 就是版面真相），常數只留後備
-    const SKY_HOLES_FALLBACK = { home: [139, 71, 284, 185], store: [519, 71, 270, 185], restaurant: [899, 71, 270, 185], school: [435, 297, 270, 185], library: [815, 297, 270, 185], gym: [1195, 297, 284, 185] }; // v9.55 投影後島嶼位置（平時以 CSS 實測為準，此為後備）
+    const SKY_HOLES_FALLBACK = { home: [176, 143, 203, 134], store: [558, 143, 193, 134], restaurant: [944, 143, 193, 134], school: [473, 375, 193, 134], library: [853, 375, 193, 134], gym: [1236, 375, 203, 134] }; // v9.56 島嶼視覺矩形（縮放 0.7 後，平時以 CSS 實測換算為準，此為後備）
     let _skyHolesCache = null;
     function skyHoles() {
       if (_skyHolesCache) return _skyHolesCache;
@@ -2011,7 +2012,8 @@
         if (!el) { out[k] = SKY_HOLES_FALLBACK[k]; continue; }
         const cs = getComputedStyle(el);
         const L = parseFloat(cs.left), T = parseFloat(cs.top), W = parseFloat(cs.width);
-        out[k] = (isFinite(L) && isFinite(T) && isFinite(W)) ? [L - 2, T - 2, W + 4, 183] : SKY_HOLES_FALLBACK[k]; // v9.48 外擴蓋滿島嶼（舊 W-6 在右/底邊各留 6px 暗框——光4）
+        const H = parseFloat(cs.height);
+        out[k] = (isFinite(L) && isFinite(T) && isFinite(W) && isFinite(H)) ? [L + W / 2 - W * 0.35 - 2, T + H - H * 0.7 - 2, W * 0.7 + 4, H * 0.7 + 4] : SKY_HOLES_FALLBACK[k]; // v9.56 島嶼視覺縮放 0.7（.iso-island scale、origin bottom center）→ 挖孔按視覺矩形換算：中心 x 與底邊不變、寬高 x0.7、外擴 2（承 v9.48）
       }
       _skyHolesCache = out;
       return out;
