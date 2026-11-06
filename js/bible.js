@@ -56,6 +56,7 @@ window.BIBLE = {
   UI: {
     R_WIN: '16px', R_CARD: '12px', R_PILL: '999px',
     SH_WIN: '0 18px 50px rgba(24, 32, 66, 0.35)',
+    SH_SOFT: '0 4px 14px rgba(24, 32, 66, 0.16)',
     SH_HARD: '0 4px 0 #3c2415', SH_HARD_SM: '0 2px 0 #3c2415',
     OVERLAY: 'rgba(24, 32, 66, 0.55)'
   }
