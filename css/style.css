@@ -4004,3 +4004,4 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     .roof-ghost, .explode-guides { transition: opacity 0.35s ease, transform 0.35s ease; }
     .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
     .floor-label.active { background: var(--yellow); color: var(--ink); }
+    .floor-label.peeking { background: rgba(38, 50, 75, 0.45); border: 1.5px dashed #eef2f0; box-shadow: none; } /* R2-2 peek 態：虛線描邊，與實際樓層的實心高亮區分 */

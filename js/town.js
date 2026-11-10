@@ -1654,6 +1654,7 @@
     let _homeExplodeMode = 'out';
     function applyHomeFloors(derived) { // v9.67 爆炸圖版（原 v9.66 疊層）：位移量放大為整層步進、加屋頂/導引線/標籤
       const inB = (typeof currentLoc !== 'undefined') && currentLoc === 'home';
+      if (!inB) _homeViewFloor = null; // R2-2：離開住家即清 peek，不得殘留到下次進屋
       if (derived !== _homeDerivedPrev) { _homeViewFloor = null; _homeDerivedPrev = derived; }
       const active = _homeViewFloor || derived;
       const mode = inB ? 'in' : 'out';
@@ -1676,9 +1677,10 @@
           st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
         }
         let lb = st.querySelector('.floor-label');
-        if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.textContent = name; lb.addEventListener('click', () => { _homeViewFloor = f; applyHomeFloors(_homeDerivedPrev); }); st.appendChild(lb); }
+        if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.textContent = name; lb.addEventListener('click', (e) => { e.stopPropagation(); _homeViewFloor = f; applyHomeFloors(_homeDerivedPrev); }); lb.addEventListener('pointerdown', (e) => { e.stopPropagation(); }); st.appendChild(lb); }
         lb.style.display = inB ? 'block' : 'none';
-        lb.classList.toggle('active', rel === 0);
+        lb.classList.toggle('active', f === derived); // R2-2：實心高亮＝實際所在樓層
+        lb.classList.toggle('peeking', _homeViewFloor !== null && f === active && f !== derived); // R2-2：虛線描邊＝只是 peek 的樓層
       }
       const plat = document.querySelector('#landmark-home .island-platform');
       if (plat) plat.classList.toggle('explode-open', inB);
@@ -2420,7 +2422,7 @@
           st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
         }
         let lb = st.querySelector('.floor-label');
-        if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.dataset.loc = loc; lb.textContent = FLOOR_NAME[loc]; lb.addEventListener('click', () => switchFloor(loc)); st.appendChild(lb); }
+        if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.dataset.loc = loc; lb.textContent = FLOOR_NAME[loc]; lb.addEventListener('click', (e) => { e.stopPropagation(); switchFloor(loc); }); lb.addEventListener('pointerdown', (e) => { e.stopPropagation(); }); st.appendChild(lb); }
         lb.style.display = inB ? 'block' : 'none';
         lb.classList.toggle('active', rel === 0);
       }
