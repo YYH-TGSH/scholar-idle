@@ -3998,8 +3998,9 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     .iso-island.ext-mode .facade-roof, .iso-island.ext-mode svg.house-room, .iso-island.ext-mode .dollhouse-art { display: none !important; }
     .iso-island.inside-now .bld-ext { display: none; }
 
-    /* ---- v9.65 樓層切換膠囊（比照模擬圖右上） ---- */
-    #floor-switcher { position: absolute; top: 10px; right: 12px; z-index: 220; display: none; align-items: center; gap: 6px; background: rgba(38, 50, 75, 0.88); border-radius: var(--r-pill); padding: 5px 8px; box-shadow: var(--sh-hard-sm); }
-    #floor-switcher .fs-label { color: #cfe8f5; font-size: 0.69rem; font-weight: 700; padding: 0 2px 0 4px; }
-    #floor-switcher button { border: none; cursor: pointer; background: rgba(255, 255, 255, 0.14); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 12px; }
-    #floor-switcher button.active { background: var(--yellow); color: var(--ink); }
+
+    /* ---- v9.67 爆炸圖 chrome（R1）：導引線/屋頂幽靈/樓層標籤/島框溢出解放 ---- */
+    .island-platform.explode-open { overflow: visible; }
+    .roof-ghost, .explode-guides { transition: opacity 0.35s ease, transform 0.35s ease; }
+    .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
+    .floor-label.active { background: var(--yellow); color: var(--ink); }

@@ -1222,7 +1222,7 @@
     // ================= v9.52 住家 2.5D 化（報告批次 2）：場景改投影生成，與 K90 模擬圖同構 =================
     // 分層同餐廳範本：#home-bg25（牆/地板/盒東+上面）＋ #home-front25（南面，z196——晚餐爸媽夾層 185 在其下、棉被 260 在其上，舊契約不變）。
     // 晚餐桌足跡 (597,168,116x30,h14)：爸媽座 z162 在北緣之北 6（frontHMax(6,25,6)=21.3）、主角座 z208 在南緣之南 10。
-    const HOME_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const HOME_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172); // v9.67 室內 45°
     const HOME_PW = 1340;
     PROJ.registerRooms('home-rooms', HOME_PROJ);
     // v9.62 地面密度定版：地板 pattern 產生器（聖經：大面積地面不准純色——交錯帶/棋盤以低對比鋪滿）
@@ -1649,19 +1649,63 @@
       stage.addEventListener('pointercancel', endDrag);
       stage.addEventListener('dblclick', () => { _home2PanManual = null; });
     }
-    function applyHomeFloors(active) { // v9.66 住家樓層疊層（拍板透明制：目前層 1 / 樓下 0.35 / 樓上 0.22）
-      const spec = [['home-stage', 1], ['home2-stage', 2]];
-      for (const [id, f] of spec) {
+    let _homeViewFloor = null; // v9.67 標籤 peek 的暫時檢視層（睡/醒狀態一變就清除）
+    let _homeDerivedPrev = 1;
+    let _homeExplodeMode = 'out';
+    function applyHomeFloors(derived) { // v9.67 爆炸圖版（原 v9.66 疊層）：位移量放大為整層步進、加屋頂/導引線/標籤
+      const inB = (typeof currentLoc !== 'undefined') && currentLoc === 'home';
+      if (derived !== _homeDerivedPrev) { _homeViewFloor = null; _homeDerivedPrev = derived; }
+      const active = _homeViewFloor || derived;
+      const mode = inB ? 'in' : 'out';
+      const modeFlip = _homeExplodeMode !== mode; _homeExplodeMode = mode;
+      const dur = modeFlip ? (inB ? 350 : 200) : 250;
+      const sc = explodeSc(document.getElementById('home-stage'));
+      const step = (300 + EXPLODE_GAP) * sc;
+      const spec = [['home-stage', 1, '1F 客餐廳'], ['home2-stage', 2, '2F 臥室']];
+      for (const [id, f, name] of spec) {
         const st = document.getElementById(id);
         if (!st) continue;
         const rel = f - active;
-        if (st.dataset.hf === String(rel)) continue;
-        st.dataset.hf = String(rel);
-        st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
-        st.style.zIndex = rel === 0 ? '32' : '29';
-        st.style.transform = rel === 0 ? '' : 'translateY(' + (rel < 0 ? 10 : -10) + 'px) scale(0.97)';
-        st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+        const key = rel + mode;
+        if (st.dataset.hf !== key) {
+          st.dataset.hf = key;
+          st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
+          st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
+          st.style.zIndex = rel === 0 ? '32' : '29';
+          st.style.transform = inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '';
+          st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+        }
+        let lb = st.querySelector('.floor-label');
+        if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.textContent = name; lb.addEventListener('click', () => { _homeViewFloor = f; applyHomeFloors(_homeDerivedPrev); }); st.appendChild(lb); }
+        lb.style.display = inB ? 'block' : 'none';
+        lb.classList.toggle('active', rel === 0);
       }
+      const plat = document.querySelector('#landmark-home .island-platform');
+      if (plat) plat.classList.toggle('explode-open', inB);
+      const host = document.querySelector('#landmark-home .island-platform-top');
+      if (host) {
+        ensureExplodeChrome('home', host, 'home', HOME_PROJ, 3, EXPLODE_GAP);
+        const pan = active === 2 ? _home2PanCur : _homePanCur;
+        const topOff = -(2 - (active - 1)) * step;
+        const roof = document.getElementById('home-roof');
+        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        const gd = document.getElementById('home-guides');
+        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+      }
+    }
+    function syncMiniExplode(key, loc, pr, panCur) { // v9.67 單層建物迷你爆炸（餐廳/超商：地板層＋屋頂層、GAP_SINGLE）
+      const inside = (typeof currentLoc !== 'undefined') && currentLoc === loc && !gameState.isCommuting;
+      const host = document.querySelector('#landmark-' + loc + ' .island-platform-top');
+      if (!host) return;
+      ensureExplodeChrome(key, host, loc, pr, 2, EXPLODE_GAP_SINGLE);
+      const plat = document.querySelector('#landmark-' + loc + ' .island-platform');
+      if (plat) plat.classList.toggle('explode-open', inside);
+      const sc = explodeSc(document.getElementById(key + '-stage'));
+      const step = (300 + EXPLODE_GAP_SINGLE) * sc;
+      const roof = document.getElementById(key + '-roof');
+      if (roof) { const ry = inside ? -step : 0; const rk = ry.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.opacity = inside ? '0.55' : '0'; roof.style.transform = 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + ry.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+      const gd = document.getElementById(key + '-guides');
+      if (gd) { const gy = inside ? -step : 0; const gk = gy.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.opacity = inside ? '1' : '0'; gd.style.transform = 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + gy.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
     }
     function updateHome2Stage() {
       ensureHome2Interior();
@@ -2311,30 +2355,86 @@
       }
       syncFloorStack(); // v9.65 樓層疊層/膠囊跟著每 tick 同步
     }
-    // ===== v9.65 樓層疊層呈現＋切換（拍板透明制：目前層 1 / 樓下 0.35 / 樓上 0.22、250ms 淡換、錯位暗示堆疊） =====
+    // ===== v9.67 爆炸圖呈現層（R1 定版：GAP 120/單層 80、屋頂幽靈 0.55、四角導引線、左側樓層標籤；透明制 100/35/22 疊加） =====
+    const EXPLODE_GAP = 120;
+    const EXPLODE_GAP_SINGLE = 80;
     const FLOOR_STAGE = { school: 'school-stage', library: 'lib-stage', club: 'club-stage' };
     const FLOOR_NAME = { school: '1F 教室', library: '2F 圖書館', club: '3F 社團活動室' };
+    function explodeSc(stageEl) { return ((stageEl && stageEl.clientHeight) || 179) / 300; }
+    function roofPlateSvg(kind, pr) {
+      let inner;
+      if (kind === 'home') {
+        inner = '<polygon points="' + pr.pts([pr.P(0, 0, 0), pr.P(0, 150, 46), pr.P(0, 300, 0)]) + '" fill="' + PROJ.shade('#c0392b', 0.6) + '"/>'
+          + '<polygon points="' + pr.pts([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 150, 46), pr.P(0, 150, 46)]) + '" fill="' + PROJ.shade('#c0392b', 0.82) + '"/>'
+          + '<polygon points="' + pr.pts([pr.P(0, 150, 46), pr.P(1150, 150, 46), pr.P(1150, 300, 0), pr.P(0, 300, 0)]) + '" fill="#c0392b"/>';
+      } else {
+        const col = kind === 'school' ? '#2c3e50' : kind === 'restaurant' ? '#c0392b' : '#2ed573';
+        inner = pr.box3(-6, -6, 1162, 312, 10, col);
+      }
+      return '<svg viewBox="0 0 1340 300" style="width:1340px; height:300px; display:block;">' + inner + '</svg>';
+    }
+    function guidesSvg(pr, plates, gap) {
+      const total = plates * 300 + (plates - 1) * gap;
+      const xs = [pr.P(0, 0, 0).x, pr.P(1150, 0, 0).x, pr.P(0, 300, 0).x, pr.P(1150, 300, 0).x];
+      const lines = xs.map(x => '<line x1="' + x.toFixed(1) + '" y1="0" x2="' + x.toFixed(1) + '" y2="' + total + '" stroke="#8fa8c8" stroke-width="2" stroke-dasharray="7 7"/>').join('');
+      return '<svg width="1340" height="' + total + '" viewBox="0 0 1340 ' + total + '" style="display:block; opacity:0.5;">' + lines + '</svg>';
+    }
+    function ensureExplodeChrome(key, host, kind, pr, plates, gap) {
+      if (!host || document.getElementById(key + '-roof')) return;
+      const total = plates * 300 + (plates - 1) * gap;
+      const gd = document.createElement('div');
+      gd.id = key + '-guides'; gd.className = 'explode-guides';
+      gd.style.cssText = 'position:absolute; left:0; top:0; width:1340px; height:' + total + 'px; pointer-events:none; opacity:0; z-index:4;';
+      gd.innerHTML = guidesSvg(pr, plates, gap);
+      host.appendChild(gd);
+      const rf = document.createElement('div');
+      rf.id = key + '-roof'; rf.className = 'roof-ghost';
+      rf.style.cssText = 'position:absolute; left:0; top:0; width:1340px; height:300px; pointer-events:none; opacity:0; z-index:40;';
+      rf.innerHTML = roofPlateSvg(kind, pr);
+      host.appendChild(rf);
+    }
+    let _schExplodeMode = 'out';
     function syncFloorStack() {
       const cur = (typeof currentLoc !== 'undefined') ? currentLoc : null;
       if (SCHOOL_GROUP[cur]) { ensureSchoolInterior(); ensureLibraryInterior(); ensureClubInterior(); }
-      const active = SCHOOL_GROUP[cur] || 1;
+      const inB = !!SCHOOL_GROUP[cur];
+      const active = inB ? SCHOOL_GROUP[cur] : 1;
+      const mode = inB ? 'in' : 'out';
+      const modeFlip = _schExplodeMode !== mode; _schExplodeMode = mode;
+      const dur = modeFlip ? (inB ? 350 : 200) : 250; // E2：進場展開 350ms、離場收合 200ms、切層 250ms
+      const anchorStage = document.getElementById(FLOOR_STAGE[inB ? cur : 'school']);
+      const sc = explodeSc(anchorStage);
+      const step = (300 + EXPLODE_GAP) * sc;
       for (const loc in SCHOOL_GROUP) {
         const st = document.getElementById(FLOOR_STAGE[loc]);
         if (!st) continue;
-        const rel = SCHOOL_GROUP[loc] - active;
-        if (st.dataset.frel === String(rel)) continue;
-        st.dataset.frel = String(rel);
-        st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
-        st.style.zIndex = rel === 0 ? '32' : String(30 - Math.abs(rel));
-        st.style.transform = rel === 0 ? '' : 'translateY(' + (rel < 0 ? 10 : -10) + 'px) scale(0.97)';
-        st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+        const f = SCHOOL_GROUP[loc];
+        const rel = f - active;
+        const key = rel + mode;
+        if (st.dataset.frel !== key) {
+          st.dataset.frel = key;
+          st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
+          st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
+          st.style.zIndex = rel === 0 ? '32' : String(30 - Math.abs(rel));
+          st.style.transform = inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '';
+          st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+        }
+        let lb = st.querySelector('.floor-label');
+        if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.dataset.loc = loc; lb.textContent = FLOOR_NAME[loc]; lb.addEventListener('click', () => switchFloor(loc)); st.appendChild(lb); }
+        lb.style.display = inB ? 'block' : 'none';
+        lb.classList.toggle('active', rel === 0);
       }
-      const sw = document.getElementById('floor-switcher');
-      if (sw) {
-        if (!sw.dataset.wired) { sw.dataset.wired = '1'; sw.querySelectorAll('button').forEach(b2 => b2.addEventListener('click', () => switchFloor(b2.dataset.loc))); }
-        const show = !!SCHOOL_GROUP[cur];
-        if (sw.dataset.show !== String(show)) { sw.dataset.show = String(show); sw.style.display = show ? 'flex' : 'none'; }
-        if (show) sw.querySelectorAll('button').forEach(b2 => b2.classList.toggle('active', b2.dataset.loc === cur));
+      const plat = document.querySelector('#landmark-school .island-platform');
+      if (plat) plat.classList.toggle('explode-open', inB);
+      const host = document.querySelector('#landmark-school .island-platform-top');
+      if (host) {
+        ensureExplodeChrome('school', host, 'school', SCHOOL_PROJ, 4, EXPLODE_GAP);
+        const pan = inB ? (({ school: _schoolPanCur, library: _libPanCur, club: _clubPanCur })[cur] || 0) : 0;
+        const topOff = -(3 - (active - 1)) * step;
+        const roof = document.getElementById('school-roof');
+        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        const gd = document.getElementById('school-guides');
+        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
     }
     function switchFloor(loc) {
@@ -2428,7 +2528,7 @@
     // 分層：#store-bg25＋#store-front25（z950 櫃檯南面）＋#store-front25b（z960 窗邊吧台南面）——
     // 店員 945＜櫃檯 950、窗邊客 955＜吧台 960、排隊 975 在最上，舊三帶 (940/950/960) 語意原樣保留，舊層退役。
     // 櫃檯 (796,100,328x24,h13)：店員崗位 z150 在南緣之南 26（站姿南面淨空公式 h<=25-26*0.378-c）；吧台 (16,224,396x20,h11)：窗邊座 z262 在南緣之南 18。
-    const STORE_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const STORE_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172); // v9.67 室內 45°
     const STORE_PW = 1340;
     PROJ.registerRooms('store-rooms', STORE_PROJ);
     function buildStoreRoomsHTML() {
@@ -2607,6 +2707,7 @@
         if (inner) focus = STORE_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateStorePan(focus);
+      syncMiniExplode('store', 'store', STORE_PROJ, _storePanCur); // v9.67
     }
 
 
@@ -2615,7 +2716,7 @@
     // ================= v9.53 學校 2.5D 化（報告批次 3a）：場景改投影生成 =================
     // 分層同範本：#school-bg25＋#school-front25（z950）——講台/課桌南面在坐姿 945 之上、與舊 940/950 雙層同構，舊層退役。
     // 講台足跡 (524,104,102x18,h16)：老師崗位 (575,134) 在南緣之南 12（frontHMax(12,25,6)=23.5）；課桌 (sx-28,sy-40,56x26,h11)，座位在南緣之南 14。
-    const SCHOOL_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const SCHOOL_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172); // v9.67 室內 45°
     const SCHOOL_PW = 1340;
     PROJ.registerRooms('school-rooms', SCHOOL_PROJ);
     function stairSvg(pr) { // v9.65 三層共用樓梯間（東北角，STAIR_PT 對位）：階梯向北爬升＋牆上標示
@@ -3109,7 +3210,7 @@
     // ================= v9.53 圖書館 2.5D 化（報告批次 3b）：場景改投影生成 =================
     // 分層同範本：#lib-bg25＋#lib-front25（z950）——櫃檯/閱覽桌南面，舊 #lib-front 退役。
     // 閱覽桌 (196/686,166,268x20,h13)：座位 z208 在南緣之南 22（frontHMax(22,19,4)=23.3）；沙發比照住家床全進 bg（主角坐姿 z500 不被遮）。
-    const LIB_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const LIB_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172); // v9.67 室內 45°
     const LIB_PW = 1340;
     PROJ.registerRooms('lib-rooms', LIB_PROJ);
     function buildLibraryRoomsHTML() {
@@ -3166,7 +3267,7 @@
       // 閱覽桌 x2（南面進 front）＋桌燈（光暈組合 id 保留）
       let glows = '';
       [[196, 330], [686, 820]].forEach(([tx, lx]) => {
-        const tb = pr.boxFaces(tx, 166, 268, 20, 10, '#8a6248');
+        const tb = pr.boxFaces(tx, 166, 268, 20, 8, '#8a6248'); // v9.67 45° 後南面頂緣會蹭到坐姿臉帶下緣 0.7 單位：桌高 10->8 讓開（幾何驗證 v9.53）
         bg += tb.back; front += tb.front;
         bg += pr.planeCircle(lx, 176, 10.4, 6, '#2f5d3a');
         const s0 = pr.P(lx, 176, 10), s1 = pr.P(lx, 176, 21);
@@ -3330,7 +3431,7 @@
     }
 
     // ================= v9.65 學校 3F 社團活動室（多樓層批次 B1：與 1F 教室/2F 圖書館同棟疊層） =================
-    const CLUB_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const CLUB_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172); // v9.67 室內 45°
     const CLUB_PW = 1340;
     PROJ.registerRooms('club-rooms', CLUB_PROJ);
     function buildClubRoomsHTML() {
@@ -3495,7 +3596,7 @@
     // 投影器：室內 K=0.90、OX/OY 逐場景定。地面 1150x300 → 螢幕寬 1340（REST_PW）、高 300 內（牆高 132）。
     // 分層：#rest-bg25（牆/地板/盒的東面+上面，在人物之下）＋ #rest-front25（盒的南面，z950）——
     // 廚師（945）在南面之下（吧台只蓋腰腿）、食客（955）在南面之上，與舊夾層契約同構，舊三層已退役。
-    const REST_PROJ = PROJ.make(PROJ.K_INDOOR, 24, 172);
+    const REST_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172); // v9.67 室內 45°
     const REST_PW = 1340;
     const REST_TABLES = [{ x: 770, z: 160 }, { x: 990, z: 208 }];
     PROJ.registerRooms('rest-rooms', REST_PROJ);
@@ -3676,6 +3777,7 @@
         if (inner) focus = REST_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateRestPan(focus);
+      syncMiniExplode('rest', 'restaurant', REST_PROJ, _restPanCur); // v9.67
     }
 
     // ================= v9.12 學校鐘聲 / 下課 / 週五榜單結算 =================

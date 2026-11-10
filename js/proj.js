@@ -36,9 +36,12 @@
     return true;
   }
 
-  function makeProj(K, OX, OY) {
+  var AXIS_TOWN = { dx: 0.55, dy: 0.42 }; // 小鎮 37°
+  var AXIS_INDOOR = { dx: 0.489, dy: 0.489 }; // v9.67 室內 45° 定版：軸長同舊軸 |(0.55,0.42)|≈0.692、DX＝DY（R1 報告 A1）
+  function makeProj(K, OX, OY, AX) {
+    var ax = AX || AXIS_TOWN;
     function P(x, z, h) {
-      return { x: OX + x + z * 0.55 * K, y: OY + z * 0.42 * K - (h || 0) };
+      return { x: OX + x + z * ax.dx * K, y: OY + z * ax.dy * K - (h || 0) };
     }
     function pts(list) {
       return list.map(function (p) { return (Array.isArray(p) ? p[0] : p.x).toFixed(1) + ',' + (Array.isArray(p) ? p[1] : p.y).toFixed(1); }).join(' ');
@@ -120,7 +123,7 @@
     // hMax = gapZ*0.42*K + faceLow - clearance（回傳值以下皆安全）
     // 注意：2.5D 下家具的螢幕佔高 = d*0.42K + h，深度自己貢獻高度，h 定版遠小於平面時代的前板帶高
     function frontHMax(gapZ, faceLow, clearance) {
-      return gapZ * 0.42 * K + faceLow - clearance;
+      return gapZ * ax.dy * K + faceLow - clearance; // v9.67 跟投影軸走（室內 45° 後上限同步放寬）
     }
     return {
       K: K, OX: OX, OY: OY, P: P, pts: pts, box3: box3, boxPolys: boxPolys,
@@ -137,6 +140,9 @@
     forRooms: function (roomsId) { return _roomsRegistry[roomsId] || null; },
     K_INDOOR: 0.90,   // 室內六棟（拍板雙規格）
     K_TOWN: 1.10,     // 小鎮外觀
+    AXIS_TOWN: AXIS_TOWN,
+    AXIS_INDOOR: AXIS_INDOOR,
+    makeIndoor: function (K, OX, OY) { return makeProj(K, OX, OY, AXIS_INDOOR); }, // v9.67 室內 45° 專用入口（單一定義）
     // 人物臉部帶定版（場景單位，距座位/腳底錨點的高度區間 [low, high]）：
     // 站姿精靈高 50、臉 [錨點+25, 錨點+35]；坐姿下沉 6 → [19, 29]
     FACE: { STAND_LOW: 25, STAND_HIGH: 35, SEAT_LOW: 19, SEAT_HIGH: 29, HALF_W: 16 },
