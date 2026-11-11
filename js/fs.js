@@ -198,7 +198,7 @@
       _fsSig = '';
       if (typeof Screens !== 'undefined' && Screens.open('fs-view')) { /* R3：FS 開關改走 Screen Manager */ } else { view.classList.add('on'); document.body.classList.add('fs-on'); }
       fsLayout();
-      const stepPx = (300 + def.gap) * (_fs.s || 0.3);
+      const stepPx = (300 + def.gap) * ((_fs && _fs.s) || 0.3);
       let ai = plates.findIndex(pl => pl.loc && pl.loc === (typeof currentLoc !== 'undefined' ? currentLoc : null));
       if (ai < 0) ai = plates.length - 1;
       plates.forEach((pl, i) => { if (i !== ai) { pl.wrap.style.transition = 'transform 350ms ease'; pl.wrap.style.transform = 'translateY(' + ((ai - i) * stepPx).toFixed(1) + 'px)'; } });
@@ -312,6 +312,7 @@
       const modeFlip = _homeExplodeMode !== mode; _homeExplodeMode = mode;
       const dur = modeFlip ? (inB ? 350 : 200) : 250;
       const sc = explodeSc(document.getElementById('home-stage'));
+      fsWant('home', fsInside(['home'])); // v9.99 前置：先結算進/出 FS，樣式寫入才反映本幀狀態
       const fsOn = _fs && _fs.key === 'home';
       const step = (300 + EXPLODE_GAP) * sc;
       const spec = [['home-stage', 1, '1F 客餐廳'], ['home2-stage', 2, '2F 臥室']];
@@ -319,14 +320,14 @@
         const st = document.getElementById(id);
         if (!st) continue;
         const rel = f - active;
-        const key = rel + mode;
+        const key = rel + mode + (fsOn ? 'F' : 'T');
         if (st.dataset.hf !== key) {
           st.dataset.hf = key;
           st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
-          st.style.opacity = inB ? (rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22')) : '0'; // v9.96 電視批：非主角所在棟，室內不再攤在小鎮上（改由門前電視呈現）
+          st.style.opacity = fsOn ? (rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22')) : '0'; // v9.99 使用者指示：房間顯示只在電視與 FS 內，小鎮表面一律不攤室內（所在棟亦然）
           st.style.zIndex = rel === 0 ? '32' : '29';
           st.style.transform = fsOn ? '' : (inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '');
-          st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+          st.style.pointerEvents = (fsOn && rel === 0) ? 'auto' : 'none';
         }
         let lb = st.querySelector('.floor-label');
         if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.textContent = name; lb.addEventListener('click', (e) => { e.stopPropagation(); _homeViewFloor = f; applyHomeFloors(_homeDerivedPrev); }); lb.addEventListener('pointerdown', (e) => { e.stopPropagation(); }); st.appendChild(lb); }
@@ -342,11 +343,10 @@
         const pan = active === 2 ? _home2PanCur : _homePanCur;
         const topOff = -(2 - (active - 1)) * step;
         const roof = document.getElementById('home-roof');
-        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + (_fs.s || 0).toFixed(3) : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = fsOn ? 'translate(' + (-pan * (_fs.s || 0.3)).toFixed(1) + 'px, 0px) scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = fsOn ? '0.55' : '0'; roof.style.transform = fsOn ? 'translate(' + (-pan * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
         const gd = document.getElementById('home-guides');
-        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + (_fs.s || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-pan * (_fs.s || 0.3)).toFixed(1) + 'px, 0px) scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = fsOn ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-pan * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
-      fsWant('home', fsInside(['home']));
       if (_fs && _fs.key === 'home') fsMarkActive(active === 2 ? 'home2' : 'home');
     }
     function syncMiniExplode(key, loc, pr, panCur) { // v9.67 單層建物迷你爆炸（餐廳/超商：地板層＋屋頂層、GAP_SINGLE）
@@ -357,13 +357,13 @@
       const plat = document.querySelector('#landmark-' + loc + ' .island-mount');
       if (plat) plat.classList.toggle('explode-open', inside);
       const sc = explodeSc(document.getElementById(key + '-stage'));
+      fsWant(key, inside); // v9.99 前置：先結算進/出 FS
       const fsOn = _fs && _fs.key === key;
       const step = (300 + EXPLODE_GAP_SINGLE) * sc;
       const roof = document.getElementById(key + '-roof');
-      if (roof) { const ry = inside ? -step : 0; const rk = ry.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' + (_fs.s || 0).toFixed(3) : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.opacity = inside ? '0.55' : '0'; roof.style.transform = fsOn ? 'translate(' + (-panCur * (_fs.s || 0.3)).toFixed(1) + 'px, 0px) scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + ry.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+      if (roof) { const ry = inside ? -step : 0; const rk = ry.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.opacity = fsOn ? '0.55' : '0'; roof.style.transform = fsOn ? 'translate(' + (-panCur * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + ry.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       const gd = document.getElementById(key + '-guides');
-      if (gd) { const gy = inside ? -step : 0; const gk = gy.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' + (_fs.s || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.opacity = inside ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-panCur * (_fs.s || 0.3)).toFixed(1) + 'px, 0px) scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + gy.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
-      fsWant(key, inside);
+      if (gd) { const gy = inside ? -step : 0; const gk = gy.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.opacity = fsOn ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-panCur * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + gy.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       if (_fs && _fs.key === key) fsMarkActive(loc);
     }
     function updateHome2Stage() {
@@ -475,6 +475,7 @@
       const mode = inB ? 'in' : 'out';
       const modeFlip = _schExplodeMode !== mode; _schExplodeMode = mode;
       const dur = modeFlip ? (inB ? 350 : 200) : 250; // E2：進場展開 350ms、離場收合 200ms、切層 250ms
+      fsWant('school', fsInside(['school', 'study', 'club'])); // v9.99 前置：先結算進/出 FS
       const anchorStage = document.getElementById(FLOOR_STAGE[inB ? cur : 'school']);
       const sc = explodeSc(anchorStage);
       const fsOn = _fs && _fs.key === 'school';
@@ -484,14 +485,14 @@
         if (!st) continue;
         const f = SCHOOL_GROUP[loc];
         const rel = f - active;
-        const key = rel + mode;
+        const key = rel + mode + (fsOn ? 'F' : 'T');
         if (st.dataset.frel !== key) {
           st.dataset.frel = key;
           st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
-          st.style.opacity = inB ? (rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22')) : '0'; // v9.96 電視批：非主角所在棟，室內不再攤在小鎮上（改由門前電視呈現）
+          st.style.opacity = fsOn ? (rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22')) : '0'; // v9.99 使用者指示：房間顯示只在電視與 FS 內，小鎮表面一律不攤室內（所在棟亦然）
           st.style.zIndex = rel === 0 ? '32' : String(30 - Math.abs(rel));
           st.style.transform = fsOn ? '' : (inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '');
-          st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
+          st.style.pointerEvents = (fsOn && rel === 0) ? 'auto' : 'none';
         }
         let lb = st.querySelector('.floor-label');
         if (!lb) { lb = document.createElement('button'); lb.className = 'floor-label'; lb.type = 'button'; lb.dataset.loc = loc; lb.textContent = FLOOR_NAME[loc]; lb.addEventListener('click', (e) => { e.stopPropagation(); switchFloor(loc); }); lb.addEventListener('pointerdown', (e) => { e.stopPropagation(); }); st.appendChild(lb); }
@@ -506,11 +507,10 @@
         const pan = inB ? (({ school: _schoolPanCur, study: _studyPanCur, club: _clubPanCur })[cur] || 0) : 0;
         const topOff = -(3 - (active - 1)) * step;
         const roof = document.getElementById('school-roof');
-        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + (_fs.s || 0).toFixed(3) : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = fsOn ? 'translate(' + (-pan * (_fs.s || 0.3)).toFixed(1) + 'px, 0px) scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = fsOn ? '0.55' : '0'; roof.style.transform = fsOn ? 'translate(' + (-pan * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
         const gd = document.getElementById('school-guides');
-        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + (_fs.s || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-pan * (_fs.s || 0.3)).toFixed(1) + 'px, 0px) scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = fsOn ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-pan * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
-      fsWant('school', fsInside(['school', 'study', 'club']));
       if (_fs && _fs.key === 'school') fsMarkActive(inB ? cur : null);
     }
     function switchFloor(loc) {

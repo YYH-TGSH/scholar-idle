@@ -612,6 +612,7 @@
       ensureStoreInterior();
       const stage = document.getElementById('store-stage');
       if (!stage) return;
+      { const fsHere = !!(window.__FS_FIT && window.__FS_FIT.active === 'store'); const wo = fsHere ? '' : '0'; if (stage.style.opacity !== wo) stage.style.opacity = wo; stage.style.pointerEvents = fsHere ? '' : 'none'; } // v9.99 小鎮表面不攤室內（只在電視/FS 顯示）
       const rooms = document.getElementById('store-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'store' && !gameState.isCommuting;
       if (playerIn !== _storeWasIn) { _storePanManual = null; _storeWasIn = playerIn; }
@@ -1315,6 +1316,7 @@
       ensureLibraryInterior();
       const stage = document.getElementById('lib-stage');
       if (!stage) return;
+      { const fsHere = !!(window.__FS_FIT && window.__FS_FIT.active === 'library'); const wo = fsHere ? '' : '0'; if (stage.style.opacity !== wo) stage.style.opacity = wo; stage.style.pointerEvents = fsHere ? '' : 'none'; } // v9.99 小鎮表面不攤室內（只在電視/FS 顯示）
       const rooms = document.getElementById('lib-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'library' && !gameState.isCommuting;
       if (playerIn !== _libWasIn) { _libPanManual = null; _libWasIn = playerIn; }
@@ -1793,6 +1795,7 @@
       ensureRestInterior();
       const stage = document.getElementById('rest-stage');
       if (!stage) return;
+      { const fsHere = !!(window.__FS_FIT && window.__FS_FIT.active === 'rest'); const wo = fsHere ? '' : '0'; if (stage.style.opacity !== wo) stage.style.opacity = wo; stage.style.pointerEvents = fsHere ? '' : 'none'; } // v9.99 小鎮表面不攤室內（只在電視/FS 顯示）
       const rooms = document.getElementById('rest-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'restaurant' && !gameState.isCommuting;
       if (playerIn !== _restWasIn) { _restPanManual = null; _restWasIn = playerIn; }
