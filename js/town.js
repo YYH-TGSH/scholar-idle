@@ -2431,7 +2431,54 @@
         }
       }
     }
+    // v9.70 R4：圖書館 annex 靜態閱覽室（純背景、零 NPC/座位/互動；視覺語言比照學校 2F 圖書館）
+    function ensureLibAnnexView() {
+      if (document.getElementById('lib-annex-view')) return;
+      const host = document.querySelector('#landmark-library .island-platform-top');
+      if (!host) return;
+      const pr = LIB_PROJ, WH = 160;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const PAL = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#2c3e50', '#c0392b', '#ffcc00'];
+      const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 7); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
+      let g = '';
+      g += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f5f0e6');
+      g += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f5f0e6', 0.8));
+      g += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#c98d54');
+      g += floorBands(pr, poly, '#a9743f', 0.4, 38, 0, 1150, 0, 300);
+      g += poly([pr.P(176, 158, 0), pr.P(974, 158, 0), pr.P(974, 282, 0), pr.P(176, 282, 0)], 'rgba(142,59,70,0.30)');
+      [[176, 3], [702, 23]].forEach(([sx, seed]) => {
+        g += pr.box3(sx, 6, 272, 20, 150, '#6d4c41');
+        g += spineRow(sx + 8, sx + 264, 26.6, 104, 142, seed) + spineRow(sx + 8, sx + 264, 26.6, 58, 96, seed + 7);
+        g += faceRect(sx - 3, 26.6, 278, 99, 102, '#8a6248') + faceRect(sx - 3, 26.6, 278, 53, 56, '#8a6248');
+      });
+      g += pr.box3(486, 10, 178, 18, 124, '#6d4c41');
+      g += spineRow(494, 656, 28.6, 82, 116, 5) + spineRow(494, 656, 28.6, 44, 76, 13);
+      g += faceRect(483, 28.6, 184, 79, 82, '#8a6248');
+      const counter = pr.boxFaces(474, 106, 202, 22, 16, '#795548');
+      g += counter.back + counter.front;
+      const sp = pr.P(575, 100, 46);
+      g += '<text x="' + sp.x.toFixed(1) + '" y="' + sp.y.toFixed(1) + '" font-size="11" font-weight="900" fill="#6d4c41" text-anchor="middle">借 還 書 櫃 台</text>';
+      const ck = pr.P(575, 0, 158);
+      g += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="10" fill="#fff6e8" stroke="#182042" stroke-width="2"/>';
+      [176, 686].forEach(tx => {
+        const t = pr.boxFaces(tx, 166, 268, 20, 8, '#8a6248');
+        g += t.back + t.front;
+        g += pr.box3(tx + 40, 200, 26, 14, 22, '#6d4c41') + pr.box3(tx + 190, 200, 26, 14, 22, '#6d4c41');
+      });
+      const corners = [pr.P(0, 0, WH), pr.P(1150, 0, WH), pr.P(1150, 300, 0), pr.P(0, 300, 0)];
+      const xs = corners.map(c => c.x), ys = corners.map(c => c.y);
+      const vb = (Math.min(...xs) - 6).toFixed(0) + ' ' + (Math.min(...ys) - 6).toFixed(0) + ' ' + (Math.max(...xs) - Math.min(...xs) + 12).toFixed(0) + ' ' + (Math.max(...ys) - Math.min(...ys) + 12).toFixed(0);
+      const fit = ((host.clientWidth || 1150) / 1340).toFixed(3);
+      const view = document.createElement('div');
+      view.id = 'lib-annex-view';
+      view.style.cssText = 'position:absolute; inset:0; z-index:30; overflow:hidden; background:#f3e2c7; pointer-events:none;';
+      view.innerHTML = '<div class="lib-annex-rooms" style="width:1340px; height:300px; transform-origin:0 0; transform:scale(' + fit + ');"><svg width="1340" height="300" viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet">' + g + '</svg></div>';
+      host.appendChild(view);
+    }
+    window.addEventListener('resize', () => { const v = document.getElementById('lib-annex-view'); if (v) { const host = document.querySelector('#landmark-library .island-platform-top'); const r = v.querySelector('.lib-annex-rooms'); if (host && r) r.style.transform = 'scale(' + ((host.clientWidth || 1150) / 1340).toFixed(3) + ')'; } });
     function updateBuildingExteriors() {
+      ensureLibAnnexView(); // v9.70 R4：annex 靜態閱覽室（一次生成、之後守衛直接返回）
       buildExteriors();
       const cl = (typeof currentLoc !== 'undefined') ? currentLoc : null;
       const npcs = (typeof gameState !== 'undefined' && gameState.npcs) || [];
