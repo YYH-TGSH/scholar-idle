@@ -1646,9 +1646,11 @@
       try {
         if (!raw.startsWith('XUEBA1.')) throw new Error('prefix');
         const payload = JSON.parse(decodeURIComponent(escape(atob(raw.slice(7)))));
-        const parsedSave = JSON.parse(payload.save);
-        if (!parsedSave || !parsedSave.subjects) throw new Error('shape');
+        // R4：驗形改走 unwrapSave——新碼（信封 v1）與舊碼（v0 裸檔）皆可還原
+        const unwrapped = (typeof unwrapSave === 'function') ? unwrapSave(payload.save) : null;
+        if (!unwrapped) throw new Error('shape');
         SafeStore.set('scholar_idle_savegame_v136', payload.save);
+        SafeStore.remove('scholar_idle_savegame_v136_bak'); // 還原點即新基準：清舊備援避免日後誤復原到還原前狀態
         if (payload.reb) SafeStore.set('scholar_rebirth_v1', payload.reb);
         if (payload.ach) SafeStore.set('scholar_achievements_v1', payload.ach);
         queueFloatingText('✅ 存檔碼還原成功，重新載入中…');
@@ -1860,7 +1862,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.89.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.90.0) | 上次存檔：${ts}`);
       }
     }
 

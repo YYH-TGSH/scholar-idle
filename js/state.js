@@ -1408,6 +1408,7 @@
       saveRebirthData();
 
       SafeStore.remove(SAVE_KEY);
+      SafeStore.remove(SAVE_BAK_KEY); // R4：重置連備援一併清
       gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
       gameState.rebirthCount = rebirthCount;
       gameState.worldMutations = mutations;
@@ -1478,12 +1479,49 @@
     // 本地存檔與重置
     // ------------------------------------------
     const SAVE_KEY = "scholar_idle_savegame_v136";
+    const SAVE_BAK_KEY = SAVE_KEY + "_bak";
+    // R4 存檔版本制：信封 {version, savedAt, data}＋遷移鏈＋雙 key 備援（目標架構 Phase 2）
+    const SAVE_FORMAT_VERSION = 1;
+    const SAVE_MIGRATIONS = { 0: (d) => d }; // v0（舊裸存檔）→ v1：僅信封化；欄位預設由 loadGameData 既有修補鏈處理
+    function validateSaveData(d) {
+      return !!d && typeof d === 'object' && typeof d.money === 'number' && !!d.bag && typeof d.bag === 'object' && !!d.subjects && typeof d.subjects === 'object';
+    }
+    function unwrapSave(raw) {
+      if (!raw) return null;
+      let obj;
+      try { obj = JSON.parse(raw); } catch (e) { return null; }
+      if (!obj || typeof obj !== 'object') return null;
+      let v, data;
+      if (typeof obj.version === 'number' && obj.data && typeof obj.data === 'object') { v = obj.version; data = obj.data; }
+      else if (typeof obj.version === 'undefined') { v = 0; data = obj; } // v9.89 以前：裸 gameState 物件
+      else return null;
+      if (v > SAVE_FORMAT_VERSION) return null;
+      const from = v;
+      while (v < SAVE_FORMAT_VERSION) { const m = SAVE_MIGRATIONS[v]; if (!m) return null; data = m(data); v++; }
+      if (!validateSaveData(data)) return null;
+      return { data, fromVersion: from };
+    }
+    function readSaveWithFallback() {
+      const main = unwrapSave(SafeStore.get(SAVE_KEY));
+      if (main) return main;
+      const bak = unwrapSave(SafeStore.get(SAVE_BAK_KEY));
+      if (bak) {
+        window.__SAVE_RECOVERED__ = true;
+        try { document.dispatchEvent(new CustomEvent('scholar:save-corrupted', { detail: { recoveredFrom: 'bak' } })); } catch (e) { }
+        return bak;
+      }
+      return null;
+    }
+    window.__SAVE_FORMAT_VERSION__ = SAVE_FORMAT_VERSION;
 
     function saveGameData() {
       gameState.lastSaved = Date.now();
       gameState.currentLoc = currentLoc;
       gameState.currentState = currentState;
-      SafeStore.set(SAVE_KEY, JSON.stringify(gameState));
+      const payload = JSON.stringify({ version: SAVE_FORMAT_VERSION, savedAt: gameState.lastSaved, data: gameState });
+      // 雙 key 備援：先寫 bak 並驗證可解析，通過才寫主 key；主檔損毀時 load 自動走 bak
+      SafeStore.set(SAVE_BAK_KEY, payload);
+      if (unwrapSave(SafeStore.get(SAVE_BAK_KEY))) SafeStore.set(SAVE_KEY, payload);
     }
 
     // 將舊版自定義服飾 pixels（支援 16x16 與 18x24）自動升級為 18x30 (540像素)
@@ -1530,10 +1568,11 @@
     }
 
     function loadGameData() {
-      const saved = SafeStore.get(SAVE_KEY);
-      if (saved) {
+      const loadedSave = readSaveWithFallback();
+      if (loadedSave) {
         try {
-          const parsed = JSON.parse(saved);
+          const parsed = loadedSave.data;
+          if (loadedSave.fromVersion < SAVE_FORMAT_VERSION) window.__SAVE_MIGRATED_FROM__ = loadedSave.fromVersion;
           calculateOfflineIncome(parsed);
 
           gameState = { ...gameState, ...parsed };
@@ -1588,7 +1627,7 @@
           if (gameState.isCommuting && gameState.commuteTarget === 'library') { gameState.isCommuting = false; gameState.commutePath = null; } // v9.72 解綁：舊存檔往學校圖書館的通勤作廢，安全落地
           gameState.lastSaved = Date.now();
           // v8.2 離線收益冪等：載入後立刻把 lastSaved 回寫存檔，任何重複載入都不會再算第二次
-          SafeStore.set(SAVE_KEY, JSON.stringify(gameState));
+          saveGameData(); // R4：回寫走信封＋雙 key 路徑（原為裸 JSON 直寫）
           lastSavedMinute = Math.floor(gameState.minute);
         } catch (e) {
           console.error("載入舊存檔出錯，開始新遊戲", e);
@@ -1901,6 +1940,7 @@
       playSound('levelUp');
       const rebirthCount = (gameState.rebirthCount || 0) + 1;
       SafeStore.remove(SAVE_KEY);
+      SafeStore.remove(SAVE_BAK_KEY); // R4：重置連備援一併清
       gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
       gameState.rebirthCount = rebirthCount;
       currentLoc = 'home';
@@ -1914,6 +1954,7 @@
       if (confirm("確定要重置所有遊戲進度嗎？重置後所有累積數據將清空！")) {
         playSound('click');
         SafeStore.remove(SAVE_KEY);
+        SafeStore.remove(SAVE_BAK_KEY); // R4：重置連備援一併清
         SafeStore.remove(REBIRTH_KEY);
         SafeStore.remove(ACH_KEY);
         location.reload();
