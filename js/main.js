@@ -306,8 +306,7 @@
       let bottom = 0;
       if (controls) bottom = Math.max(bottom, Math.round(window.innerHeight - controls.getBoundingClientRect().top) + 10);
       if (nav && getComputedStyle(nav).display !== 'none') bottom = Math.max(bottom, Math.round(window.innerHeight - nav.getBoundingClientRect().top) + 10);
-      rootEl.style.setProperty('--chrome-top', top + 'px');
-      rootEl.style.setProperty('--chrome-bottom', bottom + 'px');
+      if (layoutMapInsets._last !== top + '/' + bottom) { layoutMapInsets._last = top + '/' + bottom; rootEl.style.setProperty('--chrome-top', top + 'px'); rootEl.style.setProperty('--chrome-bottom', bottom + 'px'); } // v9.77 A批：值沒變不寫（resize 連續觸發時避免重複 style 寫入）
     }
 
     function resizeMapScale() {
@@ -1429,7 +1428,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.76.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.77.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

@@ -564,6 +564,21 @@
       saveGameData();
     }
 
+    // v9.77 A批（game-ui-ux 堆疊修正）：Escape 關最上層「可自由關閉」的 modal
+    // ——只有內含 .modal-close（使用者可自行關閉）的 overlay 才處理；事件/登入/引導類
+    // overlay 沒有該鈕、必須做完選擇，Escape 不介入。走該 modal 自己的關閉鈕，
+    // 讓存檔等副作用照原路徑執行。輸入框聚焦時不攔截。
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const open = [...document.querySelectorAll('.overlay.active')];
+      for (let i = open.length - 1; i >= 0; i--) {
+        const btn = open[i].querySelector('.modal-close');
+        if (btn) { btn.click(); return; }
+      }
+    });
+
     function switchWardrobeTab(type) {
       playSound('click');
       currentWardrobeTab = type;
@@ -1614,7 +1629,11 @@
 
     // ------------------------------------------
     // UI 刷新與小人及 NPC 視覺控制
+    let _locksSig = '';
     function updateLocksUI() {
+      const sig = [homeLocked, schoolLocked, restaurantLocked, libraryLocked, storeLocked].join('|');
+      if (sig === _locksSig) return; // v9.77 A批：鎖定狀態沒變就不碰 DOM（原每 100ms 對五地標做 10 次 classList 操作）
+      _locksSig = sig;
       const landmarkHome = elLandmarks.home;
       const landmarkSchool = elLandmarks.school;
       const landmarkRestaurant = elLandmarks.restaurant;
@@ -1735,7 +1754,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.76.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.77.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1848,8 +1867,12 @@
     }
 
     // UX2：考試按鈕冷卻計時顯示
+    let _examSig = '';
     function updateExamProgress() {
       const expScore = getExamExpectedScore();
+      const sigE = expScore + '|' + getExamCooldownRemaining() + '|' + (gameState.examAttempts || 0) + '|' + examPassMark();
+      if (sigE === _examSig) return; // v9.77 A批：顯示值沒變不重寫（原每 tick 無條件寫三處 DOM）
+      _examSig = sigE;
       elExamRate.innerText = `預估成績: ${expScore} 分 (及格 ${examPassMark()})`;
 
       const remaining = getExamCooldownRemaining();

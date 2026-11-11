@@ -591,7 +591,7 @@ body {
        ========================================== */
     .bottom-dock {
       position: fixed;
-      bottom: 10px;
+      bottom: max(10px, env(safe-area-inset-bottom));
       left: 50%;
       transform: translateX(-50%);
       z-index: 80;
@@ -1383,9 +1383,9 @@ body {
        ========================================== */
     .floating-header {
       position: fixed;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      top: max(20px, env(safe-area-inset-top));
+      left: max(20px, env(safe-area-inset-left));
+      right: max(20px, env(safe-area-inset-right));
       z-index: 50;
       pointer-events: none;
       display: flex;
@@ -1533,8 +1533,8 @@ body {
     /* 懸浮控制 FAB 氣泡 */
     .floating-controls {
       position: fixed;
-      right: 20px;
-      bottom: 20px;
+      right: max(20px, env(safe-area-inset-right));
+      bottom: max(20px, env(safe-area-inset-bottom));
       z-index: 60;
       display: flex;
       flex-direction: column;
@@ -1790,8 +1790,8 @@ body {
     /* 磨砂極簡版號頁尾 */
     .floating-footer {
       position: fixed;
-      bottom: 12px;
-      left: 18px;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      left: max(18px, env(safe-area-inset-left));
       z-index: 70;
       font-size: 0.69rem;
       color: var(--muted);
