@@ -576,11 +576,39 @@
           if (el) this.entries.push({ id, el, kind: 'drawer', esc: 'ignore' });
         });
         const fsEl = document.getElementById('fs-view');
-        if (fsEl) this.entries.push({ id: 'fs-view', el: fsEl, kind: 'layer', esc: 'ignore' });
+        this.entries.push({ id: 'fs-view', el: fsEl, kind: 'layer', esc: 'ignore' }); // FS 元素為延遲建立：描述恆登記，元素活查
         return this.entries;
       },
       list() { if (!this.entries.length) this.build(); return this.entries; },
-      isOpen(en) { return en.kind === 'drawer' ? en.el.classList.contains('open') : en.el.classList.contains('active'); },
+      isOpen(en) {
+        const el = document.getElementById(en.id) || en.el;
+        if (!el) return false;
+        if (en.kind === 'drawer') return el.classList.contains('open');
+        if (en.kind === 'layer') return el.classList.contains('on');
+        return el.classList.contains('active');
+      },
+      open(id) {
+        const en = this.list().find(e => e.id === id);
+        if (!en) return false;
+        const el = document.getElementById(id) || en.el;
+        if (!el) return false;
+        en.el = el;
+        if (en.kind === 'layer') { el.classList.add('on'); document.body.classList.add('fs-on'); }
+        else if (en.kind === 'drawer') el.classList.add('open');
+        else el.classList.add('active');
+        return true;
+      },
+      close(id) {
+        const en = this.list().find(e => e.id === id);
+        if (!en) return false;
+        const el = document.getElementById(id) || en.el;
+        if (!el) return false;
+        en.el = el;
+        if (en.kind === 'layer') { el.classList.remove('on'); document.body.classList.remove('fs-on'); }
+        else if (en.kind === 'drawer') el.classList.remove('open');
+        else el.classList.remove('active');
+        return true;
+      },
       closeTop() {
         // 可關條件：overlay 開著、且其 .modal-close 此刻可見（minigame 的完成鈕未完賽前是
         // d-none——A 批的「存在即算」會誤點隱藏鈕，此處以可見性為準）。
@@ -1832,7 +1860,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.88.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.89.0) | 上次存檔：${ts}`);
       }
     }
 

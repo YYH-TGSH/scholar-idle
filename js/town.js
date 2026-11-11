@@ -1228,6 +1228,46 @@
     // v9.62 地面密度定版：地板 pattern 產生器（聖經：大面積地面不准純色——交錯帶/棋盤以低對比鋪滿）
     function floorBands(pr, poly, tone, op, band, x0, x1, z0, z1) { let o = '<g class="floor-pat">'; for (let z = z0, i = 0; z < z1; z += band, i++) { if (i % 2) o += poly([pr.P(x0, z, 0), pr.P(x1, z, 0), pr.P(x1, Math.min(z + band, z1), 0), pr.P(x0, Math.min(z + band, z1), 0)], tone, ' fill-opacity="' + op + '"'); } return o + '</g>'; }
 
+    // R3 模型盒殼：牆頂蓋（牆厚切面）＋踢腳板＋地板 slab 緣——九場景共用，讓室內讀作開口模型盒
+    function roomShell(pr, WH, D) {
+      const P = pr.P, pts = pr.pts;
+      const poly = (l, f, e) => '<polygon points="' + pts(l) + '" fill="' + f + '"' + (e || '') + '/>';
+      let o = '<g class="room-shell">';
+      o += poly([P(0, D - 9, 0), P(1150, D - 9, 0), P(1150, D, 0), P(0, D, 0)], '#c98d64');
+      o += poly([P(1141, 0, 0), P(1150, 0, 0), P(1150, D, 0), P(1141, D, 0)], '#a9714b');
+      if (WH > 0) {
+        o += poly([P(0, 1.5, 0), P(1150, 1.5, 0), P(1150, 1.5, 11), P(0, 1.5, 11)], 'rgba(124,74,99,0.55)');
+        o += poly([P(0, 0, WH), P(1150, 0, WH), P(1150, 7, WH), P(0, 7, WH)], '#ffffff');
+        o += poly([P(0, 7, WH), P(1150, 7, WH), P(1150, 7, WH - 7), P(0, 7, WH - 7)], 'rgba(124,74,99,0.35)');
+        o += poly([P(1143, 0, WH), P(1150, 0, WH), P(1150, D, WH), P(1143, D, WH)], 'rgba(255,255,255,0.7)');
+      }
+      return o + '</g>';
+    }
+    // R3 場景裝飾包：每室牆面×2＋軟裝×2＋生活小物×1（data-decor 標記，§92 守衛密度）
+    const DECOR_ACCENT = { home: '#ff8fab', home2: '#ffb3c9', store: '#2fd48c', school: '#6ec3ff', library: '#b79ced', rest: '#ffb08a', gym: '#ffd43b', club: '#c39bf0', study: '#8fc9f2' };
+    function sceneDecor(pr, key) {
+      const P = pr.P, pts = pr.pts, acc = DECOR_ACCENT[key] || '#ff8fab';
+      const poly = (l, f, e) => '<polygon points="' + pts(l) + '" fill="' + f + '"' + (e || '') + '/>';
+      const face = (x, z, w, h0, h1, f, e) => poly([P(x, z, h0), P(x + w, z, h0), P(x + w, z, h1), P(x, z, h1)], f, e);
+      let o = '<g class="scene-decor">';
+      o += face(96, 1, 100, 72, 124, '#ffffff', ' data-decor="wall" stroke="#7c4a63" stroke-width="3"');
+      o += face(112, 1, 68, 86, 110, acc, ' data-decor="wall"');
+      const ck = P(1052, 1, 100);
+      o += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="15" fill="#ffffff" stroke="#7c4a63" stroke-width="3" data-decor="wall"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + ck.x.toFixed(1) + '" y2="' + (ck.y - 9).toFixed(1) + '" stroke="#5c2e3e" stroke-width="2.5" data-decor="wall"/><line x1="' + ck.x.toFixed(1) + '" y1="' + ck.y.toFixed(1) + '" x2="' + (ck.x + 7).toFixed(1) + '" y2="' + ck.y.toFixed(1) + '" stroke="#5c2e3e" stroke-width="2.5" data-decor="wall"/>';
+      const rug = [], rug2 = [];
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; rug.push(P(575 + Math.cos(a) * 130, 208 + Math.sin(a) * 36, 0)); rug2.push(P(575 + Math.cos(a) * 84, 208 + Math.sin(a) * 22, 0)); }
+      o += poly(rug, acc, ' data-decor="soft" opacity="0.35"');
+      o += poly(rug2, '#ffffff', ' data-decor="soft" opacity="0.35"');
+      o += poly([P(40, 246, 0), P(76, 246, 0), P(76, 282, 0), P(40, 282, 0)], '#e8906f', ' data-decor="soft"');
+      const lf = P(58, 264, 30), lf2 = P(58, 264, 44);
+      o += '<circle cx="' + lf.x.toFixed(1) + '" cy="' + lf.y.toFixed(1) + '" r="12" fill="#4fce7e" data-decor="soft"/><circle cx="' + lf2.x.toFixed(1) + '" cy="' + lf2.y.toFixed(1) + '" r="9" fill="#2fd48c" data-decor="soft"/>';
+      [0, 1, 2].forEach(i => {
+        const cols = [acc, '#ffffff', '#7d8fc9'];
+        o += poly([P(268, 40, i * 5), P(312, 40, i * 5), P(312, 70, i * 5), P(268, 70, i * 5)], cols[i], ' data-decor="prop"');
+        o += poly([P(268, 70, i * 5), P(312, 70, i * 5), P(312, 70, i * 5 + 5), P(268, 70, i * 5 + 5)], cols[i], ' data-decor="prop" opacity="0.75"');
+      });
+      return o + '</g>';
+    }
     function buildHomeRoomsHTML() {
       const pr = HOME_PROJ, WH = 150;
       const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
@@ -1331,7 +1371,7 @@
       const dx0 = Math.min.apply(null, dc.map(c => c.x)), dx1 = Math.max.apply(null, dc.map(c => c.x));
       const dy0 = Math.min.apply(null, dc.map(c => c.y)), dy1 = Math.max.apply(null, dc.map(c => c.y));
       const hit = '<div id="desk-hit" onclick="toggleDeskStudy()" title="在書桌自習" style="position:absolute; left:' + (dx0 - 6).toFixed(0) + 'px; top:' + (dy0 - 6).toFixed(0) + 'px; width:' + (dx1 - dx0 + 12).toFixed(0) + 'px; height:' + (dy1 - dy0 + 12).toFixed(0) + 'px; z-index:140; cursor:pointer;"></div>';
-      return svgOpen('home-bg25', 0) + bg + '</svg>'
+      return svgOpen('home-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'home') + '</svg>'
         + svgOpen('home-front25', 196) + front + '</svg>'
         + hit; // v9.66 棉被層（parents-blanket/player-blanket）隨臥室搬到 2F builder
     }
@@ -1571,7 +1611,7 @@
         + rectPoly(790, 168, 164, 44, 15.5, '#8fc9f2', ' stroke="#5c2e3e" stroke-width="1.6"')
         + rectPoly(790, 182, 164, 5, 15.6, 'rgba(255,255,255,0.35)')
         + rectPoly(790, 196, 164, 5, 15.6, 'rgba(255,255,255,0.35)') + '</g>';
-      return svgOpen('home2-bg25', 0) + bg + '</svg>'
+      return svgOpen('home2-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'home2') + '</svg>'
         + svgOpen('home2-front25', 196) + front + '</svg>'
         + '<svg id="parents-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:260; pointer-events:none;">' + pb + '</svg>'
         + '<svg id="player-blanket" viewBox="0 0 ' + HOME_PW + ' 300" style="display:none; position:absolute; left:0; top:0; width:' + HOME_PW + 'px; height:300px; z-index:600; pointer-events:none;">' + yb + '</svg>';
@@ -1713,13 +1753,14 @@
         const wrap = document.createElement('div'); wrap.className = 'fs-plate'; wrap.dataset.loc = pd.loc || ''; stack.appendChild(wrap);
         const el = document.getElementById(pd.id);
         if (el) { moved.push({ el: el, parent: el.parentNode, next: el.nextSibling }); if (pd.kind === 'stage') el.style.transform = ''; el.style.transformOrigin = '0 0'; wrap.appendChild(el); }
+        const tray = document.createElement('div'); tray.className = 'fs-tray'; tray.setAttribute('aria-hidden', 'true'); wrap.appendChild(tray); // R3 模型托盤木唇
         plates.push({ wrap: wrap, kind: pd.kind, loc: pd.loc, id: pd.id });
       });
       const gd = document.getElementById(def.guides);
       if (gd) { moved.push({ el: gd, parent: gd.parentNode, next: gd.nextSibling }); gd.style.transformOrigin = '0 0'; stack.appendChild(gd); }
       _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0 };
       _fsSig = '';
-      view.classList.add('on'); document.body.classList.add('fs-on');
+      if (typeof Screens !== 'undefined' && Screens.open('fs-view')) { /* R3：FS 開關改走 Screen Manager */ } else { view.classList.add('on'); document.body.classList.add('fs-on'); }
       fsLayout();
       const stepPx = (300 + def.gap) * (_fs.s || 0.3);
       let ai = plates.findIndex(pl => pl.loc && pl.loc === (typeof currentLoc !== 'undefined' ? currentLoc : null));
@@ -1731,7 +1772,7 @@
       if (!_fs) return;
       _fs.moved.forEach(m => { delete m.el.dataset.hf; delete m.el.dataset.frel; delete m.el.dataset.k; }); // P3(b)：清守衛鍵，次一 tick sync 全量重寫樣式
       for (let i = _fs.moved.length - 1; i >= 0; i--) { const m = _fs.moved[i]; if (!m.parent) continue; m.el.style.transformOrigin = ''; if (m.next && m.next.parentNode === m.parent) m.parent.insertBefore(m.el, m.next); else m.parent.appendChild(m.el); }
-      fsViewEl().classList.remove('on'); document.body.classList.remove('fs-on');
+      if (typeof Screens !== 'undefined' && Screens.close('fs-view')) { /* R3：FS 開關改走 Screen Manager */ } else { fsViewEl().classList.remove('on'); document.body.classList.remove('fs-on'); }
       _fs = null; _fsSig = ''; window.__FS_FIT = null;
       _camAnchor = null; _camHoldUntil = 0; // P2：FS 關閉後鏡頭回主角（清 anchor/hold 殘留）
       if (typeof snapCameraToChar === 'function') snapCameraToChar();
@@ -2788,7 +2829,7 @@
       bg += pr.box3(505, 264, 120, 28, 2, '#4fce7e');
       bg += txt(pr.P(540, 283, 4), '入 口', 11, '#8a6bc9');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + STORE_PW + ' 300" style="position:absolute; left:0; top:0; width:' + STORE_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
-      return svgOpen('store-bg25', 0) + bg + '</svg>' + svgOpen('store-front25', 950) + front + '</svg>' + svgOpen('store-front25b', 960) + frontB + '</svg>'
+      return svgOpen('store-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'store') + '</svg>' + svgOpen('store-front25', 950) + front + '</svg>' + svgOpen('store-front25b', 960) + frontB + '</svg>'
         + '<div class="store-chip" style="left:452px; top:214px;" onclick="noodleHitClick(event)">' + icoSvg('noodle') + ' 窗邊泡麵</div>';
     }
 
@@ -3033,7 +3074,7 @@
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + SCHOOL_PW + ' 300" style="position:absolute; left:0; top:0; width:' + SCHOOL_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       bg += stairSvg(pr); // v9.65 樓梯間（1F 看是上樓梯）
-      return svgOpen('school-bg25', 0) + bg + '</svg>' + svgOpen('school-front25', 950) + front + '</svg>';
+      return svgOpen('school-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'school') + '</svg>' + svgOpen('school-front25', 950) + front + '</svg>';
     }
 
     function ensureSchoolInterior() {
@@ -3212,7 +3253,7 @@
       // 入口墊
       bg += pr.box3(515, 264, 120, 28, 2, '#795548');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
-      return '<svg id="gym-bg25" viewBox="0 0 ' + GYM_PW + ' 300" style="position:absolute; left:0; top:0; width:' + GYM_PW + 'px; height:300px; pointer-events:none;">' + bg + '</svg>'
+      return '<svg id="gym-bg25" viewBox="0 0 ' + GYM_PW + ' 300" style="position:absolute; left:0; top:0; width:' + GYM_PW + 'px; height:300px; pointer-events:none;">' + bg + roomShell(pr, 0, 560) + sceneDecor(pr, 'gym') + '</svg>'
         + '<button class="gym-shoot-btn" onpointerdown="event.stopPropagation()" onclick="playerShoot()">🏀 投籃</button>';
     }
 
@@ -3496,7 +3537,7 @@
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + LIB_PW + ' 300" style="position:absolute; left:0; top:0; width:' + LIB_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
       bg += stairSvg(pr); // v9.65 樓梯間（2F 上下樓）
-      return svgOpen('lib-bg25', 0) + bg + '</svg>' + svgOpen('lib-front25', 950) + front + '</svg>'
+      return svgOpen('lib-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'library') + '</svg>' + svgOpen('lib-front25', 950) + front + '</svg>'
         + '<button class="lib-rec-book" onpointerdown="event.stopPropagation()" onclick="borrowBook()">📖 借推薦書</button>';
     }
 
@@ -3682,7 +3723,7 @@
       bg += pr.box3(515, 264, 120, 28, 2, '#a15c72');
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + CLUB_PW + ' 300" style="position:absolute; left:0; top:0; width:' + CLUB_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
-      return svgOpen('club-bg25', 0) + bg + '</svg>' + svgOpen('club-front25', 950) + front + '</svg>';
+      return svgOpen('club-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'club') + '</svg>' + svgOpen('club-front25', 950) + front + '</svg>';
     }
     let _clubPanManual = null;
     let _clubManualUntil = 0;
@@ -3823,7 +3864,7 @@
       });
       bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
       const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + STUDY_PW + ' 300" style="position:absolute; left:0; top:0; width:' + STUDY_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
-      return svgOpen('study-bg25', 0) + bg + '</svg>' + svgOpen('study-front25', 950) + front + '</svg>';
+      return svgOpen('study-bg25', 0) + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'study') + '</svg>' + svgOpen('study-front25', 950) + front + '</svg>';
     }
     let _studyPanManual = null;
     let _studyManualUntil = 0;
@@ -4000,7 +4041,7 @@
       // 入口墊
       bg += pr.box3(550, 264, 120, 28, 2, '#a15c72');
       bg += txt(pr.P(597, 283, 4), 0, '入 口', 11, '#ffe9b8');
-      return '<svg id="rest-bg25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px;">' + bg + '</svg>'
+      return '<svg id="rest-bg25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px;">' + bg + roomShell(pr, WH, 300) + sceneDecor(pr, 'rest') + '</svg>'
         + '<svg id="rest-front25" viewBox="0 0 ' + REST_PW + ' 300" style="position:absolute; left:0; top:0; width:' + REST_PW + 'px; height:300px; z-index:950; pointer-events:none;">' + front + '</svg>';
     }
     function ensureRestInterior() {
