@@ -36,6 +36,7 @@
       SafeStore.set('scholar_fx_enabled', now ? 'off' : 'on');
       const btn = document.getElementById('btn-fx-toggle');
       if (btn) btn.innerText = !now ? '✨ 特效：開' : '✨ 特效：關';
+      if (window.Bus) Bus.emit('fx-toggle', { enabled: !now }); // R5
       if (typeof createFloatingText === 'function') createFloatingText(!now ? '✨ 特效已開啟' : '✨ 特效已關閉');
     }
 
@@ -1146,7 +1147,7 @@
         const reward = (ach.category === 'academic' ? 120 : (ach.category === 'economy' ? 150 : 80)) + (ach.hidden ? 70 : 0);
         if (typeof gameState !== 'undefined' && gameState) { gameState.money = (gameState.money || 0) + reward; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + reward; }
         showAchievementToast(ach, reward);
-        if (typeof FB !== 'undefined' && FB.achievement) FB.achievement();
+        if (window.Bus) Bus.emit('achievement-unlocked', { id: id, reward: reward }); // R5：FB 改訂閱事件（原直呼 FB.achievement）
       }
     }
 
@@ -1513,6 +1514,8 @@
       return null;
     }
     window.__SAVE_FORMAT_VERSION__ = SAVE_FORMAT_VERSION;
+    // R5：R4 的 DOM 橋接事件正式收編進事件層
+    document.addEventListener('scholar:save-corrupted', (e) => { if (window.Bus) Bus.emit('save-corrupted', (e && e.detail) || {}); });
 
     function saveGameData() {
       gameState.lastSaved = Date.now();

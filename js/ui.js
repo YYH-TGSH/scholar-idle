@@ -1468,9 +1468,10 @@
       }
       function freeze(ms) { if (!on()) return false; window.__FB_FREEZE_UNTIL = Date.now() + Math.min(ms || 100, 130); return true; }
       function moneyTick(v) {
+        // R5：偵測留在邊界、反應改走事件層——變化時發 money-changed，下方訂閱負責 pop/浮字
         if (lastMoney === null) { lastMoney = v; return; }
-        const d = v - lastMoney; lastMoney = v;
-        if (d > 0 && on()) { const b = elMoneyVal ? elMoneyVal.closest('.status-badge') : null; pop(b, 'S'); floatAt(b, '+$' + d); }
+        const d = v - lastMoney; const from = lastMoney; lastMoney = v;
+        if (d !== 0 && window.Bus) Bus.emit('money-changed', { from: from, to: v, delta: d });
       }
       function exam(passed, distinction) {
         const card = document.getElementById('modal-desc') ? document.getElementById('modal-desc').closest('.game-modal') : null;
@@ -1482,8 +1483,17 @@
         const t = document.querySelectorAll('.achievement-toast');
         if (t.length) pop(t[t.length - 1], 'M');
       }
+      // R5 事件訂閱：FB 自 B 批「直呼」改為事件層訂閱者（行為不變）
+      if (window.Bus) {
+        Bus.on('money-changed', (pl) => { if (pl && pl.delta > 0 && on()) { const b = elMoneyVal ? elMoneyVal.closest('.status-badge') : null; pop(b, 'S'); floatAt(b, '+$' + pl.delta); } });
+        Bus.on('exam-finished', (pl) => { if (pl) exam(!!pl.passed, !!pl.distinction); });
+        Bus.on('achievement-unlocked', () => { achievement(); });
+      }
       return { on, pop, shake, floatAt, freeze, moneyTick, exam, achievement };
     })();
+
+    // R5 HUD 事件驅動：金錢變化即時刷新徽章數字（不等下一個狀態輪詢）
+    if (window.Bus) Bus.on('money-changed', (pl) => { if (pl && elMoneyVal) elMoneyVal.innerText = '$' + pl.to; });
 
     function finishExam(passRate, nextGradeName) {
       gameState.mockBuff = 0; // v9.3 模擬考加成：用於本次考試後失效
@@ -1546,7 +1556,8 @@
         gameState.examCooldownEndMinute = gameState.minute;
       }
 
-      if (typeof FB !== 'undefined') FB.exam(score >= passMark, score >= passMark + 25);
+      if (window.Bus) Bus.emit('exam-finished', { passed: score >= passMark, distinction: score >= passMark + 25, score: score, passMark: passMark }); // R5（FB 訂閱反應）
+      else if (typeof FB !== 'undefined') FB.exam(score >= passMark, score >= passMark + 25);
       if (btnClose) btnClose.style.display = "inline-block";
       updateUI();
       saveGameData();
@@ -1862,7 +1873,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.90.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.91.0) | 上次存檔：${ts}`);
       }
     }
 

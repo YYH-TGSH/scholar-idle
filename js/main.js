@@ -440,9 +440,22 @@
 
 
     // 遊戲時間推進 (推進 speed / 10 分鐘，1x 速度下 1 秒(10次tick) = 1 遊戲分鐘)
+    // R5 時間事件守望：day-changed／time-segment 由 tick 邊界統一發射（不散寫各時間推進點）
+    let _busDay = null, _busSeg = null;
+    function busTimeWatch() {
+      if (!window.Bus || typeof gameState === 'undefined' || !gameState) return;
+      const d = gameState.totalGameDays || 0;
+      if (_busDay === null) { _busDay = d; }
+      else if (d !== _busDay) { _busDay = d; Bus.emit('day-changed', { day: d, dayOfWeek: gameState.dayOfWeek }); }
+      const h = gameState.hour || 0;
+      const seg = h < 5 ? 'night' : h < 8 ? 'dawn' : h < 17 ? 'day' : h < 19 ? 'dusk' : 'night';
+      if (_busSeg === null) { _busSeg = seg; }
+      else if (seg !== _busSeg) { _busSeg = seg; Bus.emit('time-segment', { segment: seg, hour: h }); }
+    }
     function tick() {
       if (window.__FB_FREEZE_UNTIL && Date.now() < window.__FB_FREEZE_UNTIL) return; // v9.82 FB 大事件停頓（<=130ms）
       if (window._minigameOpen) return; // v9.15.2 玩小遊戲時遊戲時間凍結
+      busTimeWatch(); // R5
       const progressMinutes = gameState.speed / 10;
       // v9.16 窗邊泡麵進行中：飽足/減壓連續入帳，完成時結算
       if (gameState.noodleUntil) {
@@ -619,6 +632,7 @@
       if (def.loc !== currentLoc) playerIndoorGo(def.loc, p);
       if (typeof playSound === 'function') playSound('click');
       if (typeof syncSpotBar === 'function') syncSpotBar();
+      if (window.Bus) Bus.emit('spot-changed', { key: key, loc: def.loc, group: def.group }); // R5
     }
     window.setSpot = setSpot;
     function playerIndoorGo(targetLoc, destPt) {
@@ -1446,7 +1460,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.90.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.91.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

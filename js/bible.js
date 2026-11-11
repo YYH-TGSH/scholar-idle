@@ -338,3 +338,13 @@ function dlgPick(key, arr) {
   rec.push(s); if (rec.length > 6) rec.shift();
   return s;
 }
+
+/* ===== R5 事件層 Bus：全域 pub/sub（主題見 state/ui/main 各發射點）。單一 listener 拋錯不擴散。 ===== */
+const Bus = {
+  _m: {},
+  on(topic, fn) { (this._m[topic] || (this._m[topic] = [])).push(fn); return () => this.off(topic, fn); },
+  off(topic, fn) { const a = this._m[topic]; if (!a) return; const i = a.indexOf(fn); if (i >= 0) a.splice(i, 1); },
+  emit(topic, payload) { const a = this._m[topic]; if (!a || !a.length) return; a.slice().forEach(fn => { try { fn(payload); } catch (e) { try { console.warn('Bus listener error [' + topic + ']', e); } catch (e2) { } } }); },
+  topics() { return Object.keys(this._m); }
+};
+window.Bus = Bus;
