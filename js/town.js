@@ -2384,7 +2384,7 @@
       s += poly([pr.P(1010, 356.5, 11), pr.P(1032, 356.5, 11), pr.P(1032, 356.5, 14), pr.P(1010, 356.5, 14)], '#c0392b');
       s += poly([pr.P(1010, 356.5, 17), pr.P(1032, 356.5, 17), pr.P(1032, 356.5, 20), pr.P(1010, 356.5, 20)], '#7d868f');
       const w1 = pr.P(634, 253, 5), w2 = pr.P(646, 253, 5);
-      s += '<circle cx="' + w1.x.toFixed(1) + '" cy="' + w1.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/><circle cx="' + w2.x.toFixed(1) + '" cy="' + w2.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/>';
+      s += '<circle cx="' + w1.x.toFixed(1) + '" cy="' + w1.y.toFixed(1) + '" r="5" fill="none" stroke="#5d4028" stroke-width="2"/><circle cx="' + w2.x.toFixed(1) + '" cy="' + w2.y.toFixed(1) + '" r="5" fill="none" stroke="#26324b" stroke-width="2"/>';
       s += seg(pr.P(634, 253, 5), pr.P(640, 253, 14), '#c0392b', 2) + seg(pr.P(640, 253, 14), pr.P(646, 253, 5), '#c0392b', 2);
       s += pr.box3(1082, 676, 20, 14, 40, '#cfe8f5');
       s += poly([pr.P(1085, 690.5, 20), pr.P(1099, 690.5, 20), pr.P(1099, 690.5, 36), pr.P(1085, 690.5, 36)], '#7fd4e8');
@@ -2454,8 +2454,8 @@
     function bldHeight(b) { return b.floors * BLD_FLOOR_H + (b.roof === 'gable' ? 36 : 9); }
     function segBox(pr, x, z, w, d, h0, h1, color, withTop) {
       const P = pr.P, pts = pr.pts, sh = PROJ.shade;
-      let out = '<polygon points="' + pts([P(x + w, z, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x + w, z, h1)]) + '" fill="' + sh(color, 0.6) + '"/>';
-      out += '<polygon points="' + pts([P(x, z + d, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + color + '"/>';
+      let out = '<polygon points="' + pts([P(x + w, z, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x + w, z, h1)]) + '" fill="' + sh(color, 0.6) + '" stroke="#5d4028" stroke-width="2" stroke-linejoin="round"/>';
+      out += '<polygon points="' + pts([P(x, z + d, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + color + '" stroke="#5d4028" stroke-width="2" stroke-linejoin="round"/>';
       if (withTop) out += '<polygon points="' + pts([P(x, z, h1), P(x + w, z, h1), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + sh(color, 1.24) + '"/>';
       return out;
     }
@@ -2467,7 +2467,7 @@
         const pr = PROJ.make(PROJ.K_TOWN, 8 - b.pos[0], 215 - b.pos[1]);
         const P = pr.P, pts = pr.pts, sh = PROJ.shade, FH = BLD_FLOOR_H, H = b.floors * FH;
         let g = '';
-        g += '<polygon points="' + pts([P(b.fx + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + b.fd + 4, 0), P(b.fx + 7, b.fz + b.fd + 4, 0)]) + '" fill="rgba(24,32,66,0.16)"/>';
+        g += '<polygon points="' + pts([P(b.fx + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + b.fd + 4, 0), P(b.fx + 7, b.fz + b.fd + 4, 0)]) + '" fill="rgba(74,50,32,0.16)"/>';
         for (let f = 0; f < b.floors; f++) {
           if (f > 0) g += segBox(pr, b.fx - 3, b.fz - 3, b.fw + 6, b.fd + 6, f * FH - 3, f * FH + 3, sh(b.accent, 0.8), false);
           g += segBox(pr, b.fx, b.fz, b.fw, b.fd, f * FH, (f + 1) * FH, b.wall, false);
@@ -2481,20 +2481,20 @@
           for (let i = 0; i < nWin; i++) {
             const wx = sx0 + 16 + (nWin === 1 ? 0 : i * ((sx1 - sx0 - 32 - winW) / (nWin - 1)));
             if (f === 0 && Math.abs(wx + winW / 2 - doorCx) < 30) continue;
-            g += '<rect x="' + wx.toFixed(1) + '" y="' + (wy - winH).toFixed(1) + '" width="' + winW + '" height="' + winH + '" fill="#aee6fa" stroke="#26324b" stroke-width="1.5"/>';
+            g += '<rect x="' + wx.toFixed(1) + '" y="' + (wy - winH).toFixed(1) + '" width="' + winW + '" height="' + winH + '" fill="#f7e8c9" stroke="#5d4028" stroke-width="1.5"/>';
           }
         }
-        g += '<rect x="' + (doorCx - 13).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="26" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#26324b" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#ffcc00"/>';
+        g += '<rect x="' + (doorCx - 13).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="26" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#5d4028" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#f2b544"/>';
         if (loc === 'restaurant') g += segBox(pr, b.fx - 2, b.fz, b.fw + 4, b.fd + 12, 54, 59, b.accent, false);
         if (b.roof === 'gable') {
-          const midZ = b.fz + b.fd / 2, rc = '#c0392b';
+          const midZ = b.fz + b.fd / 2, rc = '#c2452d';
           g += '<polygon points="' + pts([P(b.fx - 6, b.fz - 6, H), P(b.fx + b.fw + 6, b.fz - 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.78) + '"/>';
           g += '<polygon points="' + pts([P(b.fx + b.fw + 6, b.fz - 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.6) + '"/>';
           g += '<polygon points="' + pts([P(b.fx - 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + rc + '"/>';
         } else if (b.roof === 'signband') {
           g += '<g class="bld-sign">' + segBox(pr, b.fx - 4, b.fz - 4, b.fw + 8, b.fd + 8, H - 30, H, b.accent, true);
           const bx0 = P(b.fx - 4, b.fz + b.fd + 4, 0).x, bx1 = P(b.fx + b.fw + 4, b.fz + b.fd + 4, 0).x, byC = P(b.fx, b.fz + b.fd + 4, H - 15).y;
-          g += '<text x="' + ((bx0 + bx1) / 2).toFixed(1) + '" y="' + byC.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="#ffffff">' + b.sign + '</text></g>';
+          g += '<text x="' + ((bx0 + bx1) / 2).toFixed(1) + '" y="' + byC.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="#ffffff" stroke="#5d4028" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">' + b.sign + '</text></g>';
         } else {
           g += segBox(pr, b.fx - 4, b.fz - 4, b.fw + 8, b.fd + 8, H, H + 9, b.wall, true);
           if (b.tower) {
@@ -2503,9 +2503,9 @@
           }
           if (b.sign) {
             const sw2 = b.sign.length * 19 + 26, scx = P(b.fx + b.fw / 2, b.fz + b.fd + 4, 0).x, stopY = P(b.fx, b.fz + b.fd + 4, H + 9).y;
-            g += '<rect x="' + (scx + 6).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#26324b"/><rect x="' + (scx + sw2 - 10).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#26324b"/>';
-            g += '<rect x="' + scx.toFixed(1) + '" y="' + (stopY - 32).toFixed(1) + '" width="' + sw2 + '" height="24" fill="' + b.accent + '" stroke="#26324b" stroke-width="1.5"/>';
-            g += '<text x="' + (scx + sw2 / 2).toFixed(1) + '" y="' + (stopY - 20).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#ffffff">' + b.sign + '</text>';
+            g += '<rect x="' + (scx + 6).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#5d4028"/><rect x="' + (scx + sw2 - 10).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#5d4028"/>';
+            g += '<rect x="' + scx.toFixed(1) + '" y="' + (stopY - 32).toFixed(1) + '" width="' + sw2 + '" height="24" fill="' + b.accent + '" stroke="#5d4028" stroke-width="1.5"/>';
+            g += '<text x="' + (scx + sw2 / 2).toFixed(1) + '" y="' + (stopY - 20).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#ffffff" stroke="#5d4028" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">' + b.sign + '</text>';
           }
         }
         if (b.bell) {

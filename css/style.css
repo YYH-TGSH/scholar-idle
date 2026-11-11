@@ -7,15 +7,23 @@
 
 :root {
       /* v9.37 美術憲法：全站唯一 :root。色票 12 色封頂（語意名，新色禁止進場） */
-      --paper: #fffdf5;
-      --ink: #26324b;
-      --ink2: #182042;
-      --sun: #ffcc00;
+      --paper: #fdf6e3;
+      --ink: #4a3220;
+      --ink2: #3a2718;
+      --sun: #f2b544;
+      --stroke: #5d4028;
+      --card: #fffaf0;
+      --terra: #c96f4a;
+      --brick: #c2452d;
+      --sage: #7fa663;
+      --sage2: #a8bf8a;
+      --moss: #5f7d5a;
+      --font-display: "Songti TC", "Noto Serif TC", serif;
       --amber: #ff9f0a;
       --tang: #e65c00;
       --sky: #0a84ff;
       --leaf: #2ed573;
-      --rose: #ff2d55;
+      --rose: #c2452d;
       --grape: #bf5af2;
       --cocoa: #3c2415;
       --muted: #5f5f66;
@@ -27,18 +35,18 @@
       --sh-soft: 0 4px 14px rgba(24, 32, 66, 0.16);
       --sh-hard: 0 4px 0 var(--cocoa);
       --sh-hard-sm: 0 2px 0 var(--cocoa);
-      --overlay: rgba(24, 32, 66, 0.55);
+      --overlay: rgba(58, 39, 24, 0.55);
       /* 功能色與 alpha 通道（非色票） */
-      --ink-soft: rgba(38, 50, 75, 0.55);
+      --ink-soft: rgba(74, 50, 32, 0.55);
       --white: #ffffff;
       --black: #0f1428;
-      --rgb-ink: 38, 50, 75;
+      --rgb-ink: 74, 50, 32;
       --rgb-secondary: 255, 69, 58;
       --rgb-accent: 48, 209, 88;
       --rgb-primary: 255, 159, 10;
       --rgb-sky: 10, 132, 255;
       --rgb-purple: 191, 90, 242;
-      --rgb-yellow: 255, 204, 0;
+      --rgb-yellow: 242, 181, 68;
       --rgb-navy: 20, 28, 54;
       --rgb-peach: 255, 200, 110;
       --rgb-gold: 255, 215, 0;
@@ -4027,3 +4035,19 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #spot-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--chrome-bottom, 16px) + 10px); z-index:47; display:none; gap:6px; padding:5px 7px; background:rgba(20,28,48,0.85); border-radius:var(--r-pill); }
 #spot-bar .spot-chip { border:1.5px solid rgba(255,255,255,0.35); background:transparent; color:#e8eefc; font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); cursor:pointer; font-family:inherit; }
 #spot-bar .spot-chip.on { background:var(--sun); color:#182042; border-color:var(--sun); }
+
+/* ===== v9.78 V1 紙感繪本：紙紋 + UI 殼紙卡化（規格 scholar-idle-visual-redesign-spec） ===== */
+#paper-grain { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0.05; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='240' height='240' filter='url(%23n)' opacity='0.6'/></svg>"); }
+.calendar-badge, .status-badge { background: var(--card); border: 2px solid var(--stroke); color: var(--ink); box-shadow: var(--sh-hard-sm); }
+.game-modal { background: var(--card); border: 2.5px solid var(--stroke); color: var(--ink); }
+.game-modal h2, .game-modal h3, .modal-title { font-family: var(--font-display); }
+.drawer-panel { background: var(--card); border: 2px solid var(--stroke); color: var(--ink); }
+.bottom-dock { background: var(--card) !important; border: 3px solid var(--stroke) !important; }
+.modal-close { color: var(--ink); border-color: var(--stroke); }
+.island-platform-top { background: var(--card); }
+#spot-bar { background: rgba(58, 39, 24, 0.92); }
+#spot-bar .spot-chip.on { color: var(--ink); }
+.floor-label { background: rgba(58, 39, 24, 0.78); }
+.floor-label.active { color: var(--ink); }
+#fs-exit-btn { color: var(--ink); }
+.fs-reenter-btn { background: rgba(58, 39, 24, 0.88); }

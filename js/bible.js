@@ -6,7 +6,7 @@ window.BIBLE = {
   // ---- 色票總表（全遊戲相異 hex 上限 120；新色先進表） ----
   PALETTE: {
     // UI 核心（承 v9.37 :root 美術憲法）
-    paper: '#fffdf5', ink: '#26324b', ink2: '#182042', sun: '#ffcc00', amber: '#ff9f0a',
+    paper: '#fdf6e3', ink: '#4a3220', ink2: '#3a2718', sun: '#f2b544', stroke: '#5d4028', card: '#fffaf0', terra: '#c96f4a', brick: '#c2452d', sage: '#7fa663', sage2: '#a8bf8a', moss: '#5f7d5a', amber: '#ff9f0a',
     tang: '#e65c00', skyBlue: '#0a84ff', leaf: '#30d158', rose: '#ff2d55', grape: '#bf5af2',
     cocoa: '#3c2415', muted: '#5f5f66', white: '#ffffff', cream: '#efe9e0',
     // v9.61 靜音表面色（大面積表面專用；鮮色只留識別與重點）＋鮮豔度量測定義：vivid = HSV 的 s×v > 0.35（感知彩度）

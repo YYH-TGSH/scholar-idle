@@ -1754,7 +1754,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.77.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.78.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1891,7 +1891,7 @@
         elBtnExam.disabled = false;
         elBtnExam.style.opacity = '1';
         elBtnExam.style.cursor = 'pointer';
-        elBtnExam.style.background = 'linear-gradient(135deg, #ff2d55, #ff2d55)';
+        elBtnExam.style.background = 'linear-gradient(135deg, #c2452d, #c2452d)';
       }
     }
 
