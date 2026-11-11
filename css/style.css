@@ -4105,3 +4105,12 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* ===== R3 FS 托盤木唇：每層托盤下緣的木唇 ===== */
 .fs-tray { position: absolute; left: 6px; right: 6px; bottom: -13px; height: 13px; background: linear-gradient(#c98d64, #a9714b); border-radius: 0 0 var(--r-card) var(--r-card); pointer-events: none; }
+
+/* ===== v9.96 小鎮電視直播：門前立架電視（螢幕即時迷你室內＋LIVE/待機＋識別色名牌） ===== */
+#town-tvs { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
+.town-tv { position: absolute; width: 88px; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer; }
+.town-tv .tv-name { margin-top: 2px; padding: 1px 4px; border: 2px solid #7c4a63; border-radius: var(--r-pill); box-shadow: var(--sh-hard-sm); color: #5c2e3e; font-size: 0.69rem; font-weight: 700; text-align: center; }
+.town-tv .tv-standby { opacity: 0; transition: opacity 0.3s ease; }
+.town-tv[data-state="idle"] .tv-standby { opacity: 0.5; }
+.town-tv[data-state="idle"] .tv-live { display: none; }
+#town-map.night-on .town-tv .tv-screen { filter: drop-shadow(0 0 7px rgba(165, 216, 255, 0.65)); }

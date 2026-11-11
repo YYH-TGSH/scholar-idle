@@ -144,6 +144,92 @@
         if (svg.dataset.fade !== want) { svg.dataset.fade = want; svg.style.opacity = want; }
       }
       syncFloorStack(); // v9.65 樓層疊層/膠囊跟著每 tick 同步
+      syncTownTVs(false); // v9.96 電視直播（內部 250ms 節流）
+    }
+    // ===== v9.96 小鎮電視直播（規格 scholar-idle-town-tv-spec）：非主角所在棟的室內改由門前電視呈現 =====
+    const TV_DEFS = [
+      { loc: 'home', name: '住家', color: '#ff8fab', anchor: [268, 212], rooms: ['home', 'home2'] },
+      { loc: 'store', name: '超商', color: '#2fd48c', anchor: [648, 212], rooms: ['store'] },
+      { loc: 'restaurant', name: '餐廳', color: '#ffb08a', anchor: [1028, 212], rooms: ['restaurant'] },
+      { loc: 'school', name: '學霸高中', color: '#6ec3ff', anchor: [268, 700], rooms: ['school', 'study', 'club'] },
+      { loc: 'library', name: '圖書館', color: '#b79ced', anchor: [648, 700], rooms: ['library'] },
+      { loc: 'gym', name: '操場', color: '#ffd43b', anchor: [1028, 700], rooms: ['gym'] }
+    ];
+    const TV_SCREEN = { x: 6, y: 8, w: 72, h: 40 };
+    function tvMapPoint(ix, iy) { // 室內座標（1150x300）→ 螢幕內框：全遊戲單一出處
+      return [TV_SCREEN.x + (ix / 1150) * TV_SCREEN.w, TV_SCREEN.y + (iy / 300) * TV_SCREEN.h];
+    }
+    const TV_FURN = {
+      home: '<rect x="10" y="28" width="18" height="10" rx="2" fill="#ff8fab" opacity="0.65"/><rect x="50" y="30" width="16" height="8" rx="1" fill="#b09a72" opacity="0.8"/>',
+      store: '<rect x="12" y="16" width="13" height="22" fill="#2fd48c" opacity="0.45"/><rect x="33" y="16" width="13" height="22" fill="#2fd48c" opacity="0.45"/><rect x="54" y="16" width="13" height="22" fill="#2fd48c" opacity="0.45"/>',
+      restaurant: '<rect x="8" y="13" width="68" height="5" fill="#d98a68" opacity="0.8"/><ellipse cx="24" cy="36" rx="7" ry="3.5" fill="#ffb08a"/><ellipse cx="56" cy="36" rx="7" ry="3.5" fill="#ffb08a"/>',
+      school: '<rect x="28" y="11" width="28" height="13" fill="#6ec3ff" opacity="0.5"/><rect x="14" y="33" width="13" height="6" fill="#b09a72"/><rect x="36" y="33" width="13" height="6" fill="#b09a72"/><rect x="58" y="33" width="13" height="6" fill="#b09a72"/>',
+      library: '<rect x="12" y="16" width="6" height="22" fill="#b79ced"/><rect x="21" y="16" width="6" height="18" fill="#6ec3ff"/><rect x="30" y="16" width="6" height="24" fill="#ff8fab"/><rect x="57" y="16" width="6" height="20" fill="#ffd43b"/><rect x="66" y="16" width="6" height="22" fill="#2fd48c"/>',
+      gym: '<ellipse cx="42" cy="30" rx="19" ry="9" fill="none" stroke="#2fd48c" stroke-width="1.6"/><line x1="42" y1="21" x2="42" y2="39" stroke="#2fd48c" stroke-width="1.2"/><circle cx="42" cy="30" r="3" fill="none" stroke="#2fd48c" stroke-width="1.2"/>'
+    };
+    function buildTownTVs() {
+      const map = document.getElementById('town-map'); if (!map) return null;
+      let wrap = document.getElementById('town-tvs');
+      if (wrap) return wrap;
+      wrap = document.createElement('div'); wrap.id = 'town-tvs';
+      for (const d of TV_DEFS) {
+        const p = TOWN_PROJ.P(d.anchor[0], d.anchor[1], 0);
+        const el = document.createElement('div');
+        el.className = 'town-tv'; el.dataset.loc = d.loc; el.dataset.state = 'idle';
+        el.style.left = p.x.toFixed(1) + 'px'; el.style.top = p.y.toFixed(1) + 'px';
+        el.innerHTML = '<svg viewBox="0 0 84 74" style="display:block; width:84px; height:74px;">'
+          + '<rect x="2" y="2" width="80" height="52" rx="6" fill="#3a2430"/>'
+          + '<rect class="tv-screen" x="6" y="6" width="72" height="44" rx="3" fill="#fff5f9"/>'
+          + '<rect x="6" y="40" width="72" height="10" fill="#f3c48d" opacity="0.55"/>'
+          + (TV_FURN[d.loc] || '')
+          + '<g class="tv-dolls"></g>'
+          + '<rect class="tv-standby" x="6" y="6" width="72" height="44" rx="3" fill="#2a1836"/>'
+          + '<g class="tv-live"><circle cx="72" cy="12" r="2.6" fill="#d6336c"/></g>'
+          + '<rect x="40" y="54" width="4" height="10" fill="#3a2430"/><rect x="30" y="64" width="24" height="4" rx="2" fill="#3a2430"/>'
+          + '</svg>'
+          + '<div class="tv-name" style="background:' + d.color + ';">' + d.name + '</div>';
+        el.addEventListener('click', (e) => { e.stopPropagation(); landmarkClick(d.loc); });
+        el.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+        wrap.appendChild(el);
+      }
+      map.appendChild(wrap);
+      return wrap;
+    }
+    function tvOccupants(def) {
+      const out = [];
+      const npcs = (typeof gameState !== 'undefined' && gameState.npcs) || [];
+      for (const n of npcs) {
+        if (!n.inside || def.rooms.indexOf(n.insideLoc) < 0) continue;
+        const pal = (typeof npcDef === 'function' && npcDef(n.key) && npcDef(n.key).palette) || {};
+        out.push({ key: n.key, x: n.x, y: n.y, skin: pal.skin || '#fed7aa', outfit: pal.outfit || '#6ec3ff', hero: false });
+      }
+      if (typeof currentLoc !== 'undefined' && def.rooms.indexOf(currentLoc) >= 0 && !gameState.isCommuting) {
+        out.push({ key: 'hero', x: gameState.currentX || 0, y: gameState.currentY || 0, skin: '#fed7aa', outfit: '#6ec3ff', hero: true });
+      }
+      return out;
+    }
+    let _tvLast = 0;
+    function syncTownTVs(force) {
+      const now = Date.now();
+      if (!force && now - _tvLast < 250) return; // 節流 <=4Hz
+      _tvLast = now;
+      const wrap = buildTownTVs(); if (!wrap) return;
+      for (const d of TV_DEFS) {
+        const el = wrap.querySelector('.town-tv[data-loc="' + d.loc + '"]'); if (!el) continue;
+        const occ = tvOccupants(d);
+        const sig = occ.map(o => o.key + ':' + Math.round(o.x / 4) + ',' + Math.round(o.y / 4)).join('|');
+        if (el.dataset.sig !== sig) {
+          el.dataset.sig = sig;
+          const g = el.querySelector('.tv-dolls');
+          g.innerHTML = occ.map(o => {
+            const pt = tvMapPoint(o.x, o.y);
+            const gold = o.hero ? ' stroke="#ffd43b" stroke-width="1.4"' : '';
+            return '<g><circle cx="' + pt[0].toFixed(1) + '" cy="' + (pt[1] - 2.2).toFixed(1) + '" r="2.7" fill="' + o.skin + '"' + gold + '/><rect x="' + (pt[0] - 2.7).toFixed(1) + '" y="' + (pt[1] - 0.4).toFixed(1) + '" width="5.4" height="6.4" rx="1.6" fill="' + o.outfit + '"' + gold + '/></g>';
+          }).join('');
+        }
+        const st = occ.length ? 'live' : 'idle';
+        if (el.dataset.state !== st) el.dataset.state = st;
+      }
     }
     // v9.64 夜間挖孔 = 新外觀剪影（BLD3D 規格直算，不再量島框）
     let _skyHolesCache = null;

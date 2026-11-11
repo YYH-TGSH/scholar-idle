@@ -201,7 +201,7 @@
         if (st.dataset.hf !== key) {
           st.dataset.hf = key;
           st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
-          st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
+          st.style.opacity = inB ? (rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22')) : '0'; // v9.96 電視批：非主角所在棟，室內不再攤在小鎮上（改由門前電視呈現）
           st.style.zIndex = rel === 0 ? '32' : '29';
           st.style.transform = fsOn ? '' : (inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '');
           st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
@@ -366,7 +366,7 @@
         if (st.dataset.frel !== key) {
           st.dataset.frel = key;
           st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
-          st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
+          st.style.opacity = inB ? (rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22')) : '0'; // v9.96 電視批：非主角所在棟，室內不再攤在小鎮上（改由門前電視呈現）
           st.style.zIndex = rel === 0 ? '32' : String(30 - Math.abs(rel));
           st.style.transform = fsOn ? '' : (inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '');
           st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
