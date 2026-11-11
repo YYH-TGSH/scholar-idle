@@ -1004,7 +1004,7 @@
         </button>
       `).join('');
 
-      overlay.classList.add('active');
+      scrOpen(overlay.id);
     }
 
     function resolveRandomEvent(choiceIdx, isAuto) {
@@ -1019,7 +1019,7 @@
       const capsule = document.getElementById('random-event-capsule');
       const overlay = document.getElementById('random-event-overlay');
       if (capsule) capsule.classList.remove('active');
-      if (overlay) overlay.classList.remove('active');
+      if (overlay) scrClose(overlay.id);
 
       const resultMsg = choice.exec ? choice.exec() : '事件處理完成！';
       gameState.randomEventsResolved = (gameState.randomEventsResolved || 0) + 1;
@@ -1232,14 +1232,14 @@
 
     function openAchievementPanel() {
       playSound('click');
-      document.getElementById('achievement-overlay').classList.add('active');
+      scrOpen('achievement-overlay');
       renderAchievementList('all');
       updateWorldMutationsDisplay();
     }
 
     function closeAchievementPanel() {
       playSound('click');
-      document.getElementById('achievement-overlay').classList.remove('active');
+      scrClose('achievement-overlay');
     }
 
     let currentAchFilter = 'all';
@@ -1357,9 +1357,9 @@
       saveRebirthData();
 
       // 隱藏完結畫面，顯示加點面板
-      document.getElementById('clear-overlay').classList.remove('active');
+      scrClose('clear-overlay');
       renderRebirthAllocation();
-      document.getElementById('rebirth-overlay').classList.add('active');
+      scrOpen('rebirth-overlay');
     }
 
     function renderRebirthAllocation() {
@@ -1425,7 +1425,7 @@
       isManualLocked = false;
 
       saveGameData();
-      document.getElementById('rebirth-overlay').classList.remove('active');
+      scrClose('rebirth-overlay');
       location.reload();
     }
 
@@ -1929,7 +1929,7 @@
         🍌 難度係數達 <strong>${gameState.difficulty.toFixed(2)}</strong> ${rebirthStr}
       `;
 
-      overlay.classList.add('active');
+      scrOpen(overlay.id);
 
       // 3 秒後才顯示投胎按鈕（讓玩家先感受一下）
       btn.style.display = 'none';
@@ -1949,7 +1949,7 @@
       currentLoc = 'home';
       currentState = 'idle';
       isManualLocked = false;
-      document.getElementById('clear-overlay').classList.remove('active');
+      scrClose('clear-overlay');
       location.reload();
     }
 

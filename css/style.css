@@ -124,34 +124,12 @@ body {
     /* ==========================================
        一屏盡覽六角聚落 (Single-Screen Viewport)
        ========================================== */
-    .map-viewport {
-      background: linear-gradient(180deg, #8fd8ff, #ffeef7);
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: auto;
-    }
+    
 
     /* v8.8 移除 viewport 暈影：它讓地圖舞台邊界變成一圈可見長方形 */
 
     /* 960x540 緊湊六角等角聚落地圖舞台 */
-    .town-map {
-      width: 1715px;
-      height: 695px; /* v9.64 投影後世界尺寸（OY 215） */
-      position: relative;
-      margin: 0 auto;
-      overflow: visible;
-      transform-origin: center center;
-      transition: transform 0.25s var(--ease-std);
-      user-select: none;
-    }
+    
 
     /* ==========================================
        斜 45 度等角立體島嶼 (Isometric Diorama Blocks)
@@ -207,24 +185,7 @@ body {
     }
 
     /* 建築標籤 (開羅經典木牌標籤) */
-    .island-tag {
-      position: absolute;
-      bottom: -19px; /* v9.14.3 全島統一：名牌吊在框框下方，不擋室內（v9.63 烘焙後由 -27 改 -19，視覺位置不變） */
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--paper);
-      color: var(--cocoa);
-      font-size: 0.69rem;
-      font-weight: 700;
-      border-radius: var(--r-card);
-      padding: 2px 10px;
-      border: 2px solid var(--cocoa);
-      box-shadow: var(--sh-hard-sm);
-      white-space: nowrap;
-      z-index: 28;
-      transition: all 0.2s ease;
-      pointer-events: none;
-    }
+    
 
     .iso-island:hover .island-tag {
       background: var(--paper);
@@ -233,25 +194,7 @@ body {
     }
 
     /* 島嶼等級像素寶石徽章 */
-    .island-lv-badge {
-      position: absolute;
-      top: -27px; /* v9.14.3 全島統一：徽章在框框上方 */
-      right: -6px;
-      z-index: 30;
-      background: linear-gradient(135deg, var(--sun), var(--amber));
-      color: var(--cocoa);
-      font-size: 0.69rem;
-      font-weight: 900;
-      padding: 2px 8px;
-      border-radius: var(--r-card);
-      border: 2px solid var(--cocoa);
-      box-shadow: var(--sh-hard);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      transition: all 0.15s var(--ease-std);
-    }
+    
 
     .island-lv-badge:hover {
       transform: scale(1.1) translateY(-2px);
@@ -270,13 +213,7 @@ body {
     }
 
     /* 建築物 Lv.2 / Lv.3 視覺擴充浮動裝飾 */
-    .island-up-deco {
-      position: absolute;
-      pointer-events: none;
-      z-index: 18;
-      display: none;
-      animation: float-deco 2.5s ease-in-out infinite;
-    }
+    
 
     .island-up-deco.active {
       display: block;
@@ -571,63 +508,16 @@ body {
     }
 
     /* 頂部中央狀態膠囊 */
-    #stage-board {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--ink2);
-      margin-top: 6px;
-      padding: 3px 12px;
-      background: rgba(var(--rgb-white), 0.35);
-      border-radius: var(--r-card);
-      border: 1px solid rgba(var(--rgb-white), 0.25);
-      box-shadow: none;
-      display: inline-block;
-      pointer-events: auto;
-    }
+    
 
-    #stage-board span {
-      color: var(--tang);
-      font-weight: 700;
-    }
+    
 
     /* ==========================================
        底部 RPG 控制 Dock 欄 (Kairosoft Parchment Dock)
        ========================================== */
-    .bottom-dock {
-      position: fixed;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 80;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--paper);
-      border: 3px solid var(--cocoa);
-      border-radius: var(--r-card);
-      box-shadow: none;
-      max-width: 96vw;
-      user-select: none;
-    }
+    
 
-    .dock-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 52px;
-      padding: 5px 8px;
-      border: 2px solid var(--cocoa);
-      background: #fff6e8;
-      border-radius: var(--r-card);
-      box-shadow: var(--sh-hard);
-      cursor: pointer;
-      transition: all 0.1s ease;
-      font-family: inherit;
-      color: var(--cocoa);
-      outline: none;
-    }
+    
 
     .dock-btn:hover {
       background: var(--paper);
@@ -635,10 +525,7 @@ body {
       box-shadow: var(--sh-hard);
     }
 
-    .dock-btn:active {
-      transform: translate(1px, 3px);
-      box-shadow: none;
-    }
+    
 
     .dock-icon {
       font-size: 1.25rem;
@@ -954,18 +841,7 @@ body {
     /* ==========================================
        角色與小人 NPC (開羅像素主角 - 始終頂層可見)
        ========================================== */
-    .character-wrapper {
-      position: absolute;
-      width: 42px;
-      height: 70px;
-      z-index: 25;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      transition: left 2s linear, top 2s linear, transform 2s linear;
-      transform-origin: bottom center;
-      filter: drop-shadow(0 4px 3px rgba(var(--rgb-black),0.35));
-    }
+    
 
     /* 2.5D 角色地面投影 */
     .character-wrapper::after {
@@ -1077,34 +953,9 @@ body {
     }
 
     /* 開羅像素對話氣泡 */
-    .bubble {
-      position: absolute;
-      top: -30px;
-      background: var(--paper);
-      border: 2px solid var(--cocoa);
-      border-radius: var(--r-card);
-      padding: 3px 8px;
-      font-size: 0.69rem;
-      font-weight: 700;
-      color: var(--cocoa);
-      white-space: nowrap;
-      box-shadow: var(--sh-hard);
-      z-index: 30;
-      animation: float-bubble 1.5s infinite alternate ease-in-out;
-    }
+    
 
-    .bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%) rotate(45deg);
-      width: 6px;
-      height: 6px;
-      background: var(--paper);
-      border-right: 2px solid var(--cocoa);
-      border-bottom: 2px solid var(--cocoa);
-    }
+    
 
     /* NPC 小氣泡 */
     .bubble-mini {
@@ -1371,18 +1222,7 @@ body {
     /* ==========================================
        蘋果懸浮遊戲主介面 (Immersive Overlay UI)
        ========================================== */
-    .floating-header {
-      position: fixed;
-      top: max(20px, env(safe-area-inset-top));
-      left: max(20px, env(safe-area-inset-left));
-      right: max(20px, env(safe-area-inset-right));
-      z-index: 50;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
+    
 
     .floating-header>* {
       pointer-events: auto;
@@ -1418,21 +1258,7 @@ body {
     }
 
     /* 蘋果 Widget 式日曆 */
-    .calendar-badge {
-      background: rgba(var(--rgb-sky), 0.12);
-      /* 亮藍磨砂 */
-      
-      
-      border: 1px solid rgba(var(--rgb-sky), 0.35);
-      border-radius: var(--r-win);
-      padding: 10px 22px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      box-shadow: none;
-    }
+    
 
     .cal-day {
       font-size: 0.78rem;
@@ -1461,16 +1287,7 @@ body {
     }
 
     /* iOS Segmented Control 速度控制器 */
-    .speed-control-mini {
-      display: flex;
-      background: var(--glass-bg);
-      
-      
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r-win);
-      padding: 4px;
-      box-shadow: none;
-    }
+    
 
     .speed-control-mini .speed-btn {
       background: transparent;
@@ -1497,28 +1314,14 @@ body {
     }
 
     /* 蘋果彩虹果凍按鈕 */
-    .btn-exam-mini {
-      background: linear-gradient(135deg, var(--rose), var(--rose));
-      color: white;
-      font-size: 0.875rem;
-      padding: 10px 18px;
-      border: 1px solid rgba(var(--rgb-white), 0.2);
-      border-radius: var(--r-win);
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: none;
-      transition: all 0.3s var(--ease-pop);
-    }
+    
 
     .btn-exam-mini:hover {
       transform: scale(1.05) translateY(-2px);
       box-shadow: none;
     }
 
-    .btn-exam-mini:active {
-      transform: scale(0.95) translateY(0);
-      box-shadow: var(--sh-soft);
-    }
+    
 
     /* 懸浮控制 FAB 氣泡 */
     .floating-controls {
@@ -1531,25 +1334,7 @@ body {
       gap: 20px;
     }
 
-    .control-fab {
-      width: 60px;
-      height: 60px;
-      border-radius: var(--r-pill);
-      background: var(--glass-bg);
-      
-      
-      border: 1px solid var(--glass-border);
-      box-shadow: none;
-      font-size: 1.25rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      outline: none;
-      transition: all 0.4s var(--ease-pop);
-    }
+    
 
     .control-fab:hover {
       transform: scale(1.1) translateY(-4px);
@@ -1557,52 +1342,16 @@ body {
       background: rgba(var(--rgb-white), 0.6);
     }
 
-    .control-fab:active {
-      transform: scale(0.9) translateY(0);
-      box-shadow: var(--sh-soft);
-    }
+    
 
-    .fab-lbl {
-      position: absolute;
-      bottom: -16px;
-      font-size: 0.69rem;
-      font-weight: 700;
-      color: var(--ink2);
-      background: rgba(var(--rgb-white), 0.75);
-      
-      
-      padding: 2px 8px;
-      border-radius: var(--r-card);
-      border: 1px solid rgba(var(--rgb-white), 0.5);
-      white-space: nowrap;
-      box-shadow: var(--sh-soft);
-    }
+    
 
     /* ==========================================
        蘋果磨砂玻璃側邊抽屜 (Drawer Panel)
        ========================================== */
-    .drawer-panel {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 380px;
-      background: rgba(var(--rgb-white), 0.45);
-      
-      
-      border-left: 1px solid rgba(var(--rgb-white), 0.5);
-      border-radius: var(--r-win) 0 0 var(--r-win);
-      z-index: 100;
-      box-shadow: var(--sh-win);
-      display: flex;
-      flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.4s var(--ease-std);
-    }
+    
 
-    .drawer-panel.open {
-      transform: translateX(0);
-    }
+    
 
     @media (max-width: 480px) {
       .drawer-panel {
@@ -1778,22 +1527,7 @@ body {
     }
 
     /* 磨砂極簡版號頁尾 */
-    .floating-footer {
-      position: fixed;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      left: max(18px, env(safe-area-inset-left));
-      z-index: 70;
-      font-size: 0.69rem;
-      color: var(--muted);
-      background: rgba(var(--rgb-white), 0.45);
-      
-      
-      padding: 4px 10px;
-      border-radius: var(--r-card);
-      border: 1px solid rgba(var(--rgb-white), 0.4);
-      pointer-events: none;
-      white-space: nowrap;
-    }
+    
 
     /* ==========================================
        進度條與生理數值條填充樣式 (iOS 漸層風格)
@@ -1842,19 +1576,7 @@ body {
     }
 
     /* ❓ 遊戲說明 CSS */
-    .help-tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--ink2);
-      opacity: 0.65;
-      padding: 6px 12px;
-      font-size: 0.875rem;
-      font-weight: 700;
-      cursor: pointer;
-      border-radius: var(--r-card) var(--r-card) 0 0;
-      transition: all 0.2s;
-      border-bottom: 2px solid transparent;
-    }
+    
 
     .help-tab-btn:hover {
       opacity: 0.9;
@@ -1969,35 +1691,13 @@ body {
       pointer-events: auto;
     }
 
-    .game-modal {
-      background: rgba(var(--rgb-white), 0.55);
-      
-      
-      border: 1px solid rgba(var(--rgb-white), 0.5);
-      border-radius: var(--r-win);
-      padding: 28px;
-      width: 340px;
-      max-width: 90%;
-      box-sizing: border-box;
-      box-shadow: none;
-      text-align: center;
-      transform: scale(0.9);
-      transition: transform 0.4s var(--ease-std);
-    }
+    
 
     .overlay.active .game-modal {
       transform: scale(1);
     }
 
-    .game-modal-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--ink2);
-      margin-bottom: 16px;
-      border-bottom: 1px solid rgba(var(--rgb-black), 0.08);
-      padding-bottom: 10px;
-      display: block;
-    }
+    
 
     .game-modal-content {
       font-size: 0.875rem;
@@ -2655,17 +2355,7 @@ body {
       margin-right: 8px;
     }
 
-    .rebirth-stat-row button {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--r-card);
-      border: 1px solid var(--border-color);
-      background: rgba(var(--rgb-white), 0.5);
-      font-weight: 900;
-      cursor: pointer;
-      font-size: 0.875rem;
-      transition: all 0.15s;
-    }
+    
 
     .rebirth-stat-row button:hover {
       background: var(--amber);
@@ -3034,7 +2724,7 @@ body, button, input, select, textarea {
 button { border-radius: var(--r-pill) !important; }
 input, select, textarea { border-radius: var(--r-card) !important; }
 
-.map-viewport { touch-action: none; }
+
 
 /* 頂部 HUD 徽章 */
 .status-badge, .btn-help {
@@ -3049,23 +2739,27 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 .calendar-badge {
   background: var(--paper) !important;
-  border: 2.5px solid var(--ink) !important;
-  box-shadow: var(--sh-hard) !important;
+  /* 亮藍磨砂 */
+      
+      
+      border: 1px solid rgba(var(--rgb-sky), 0.35);
   border-radius: var(--r-win) !important;
+  padding: 10px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: var(--sh-hard) !important;
+  border: 2.5px solid var(--ink) !important;
   color: var(--ink) !important;
   font-weight: 700 !important;
 }
-#stage-board {
-  background: rgba(var(--rgb-white),0.55) !important;
-  border: 2px solid var(--ink) !important;
-  border-radius: var(--r-pill) !important;
-  color: var(--ink) !important;
-  box-shadow: var(--sh-hard-sm) !important;
-  padding: 3px 10px !important;
-  font-size: 0.78rem !important;
-  font-weight: 700 !important;
+
+#stage-board span {
+  color: #ff5d8f !important;
+  font-weight: 700;
 }
-#stage-board span { color: #ff5d8f !important; }
 
 /* 速度鈕 */
 .speed-btn {
@@ -3095,58 +2789,73 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .status-bar-fill.stress { background: #e74c3c !important; }
 
 /* 底部 Dock (若有使用) */
-.bottom-dock {
-  background: rgba(255,253,245,.96) !important;
-  border: 3px solid var(--ink) !important;
-  box-shadow: var(--sh-hard) !important;
-  border-radius: var(--r-pill) !important;
-  padding: 8px 14px !important;
+
+
+.dock-btn:active {
+  transform: translate(1px, 2px) !important;
+  box-shadow: none !important;
+  background: #ffe9a8 !important;
 }
-.dock-btn {
-  background: var(--white) !important;
-  border: 2px solid var(--ink) !important;
-  border-radius: var(--r-pill) !important;
-  box-shadow: var(--sh-hard-sm) !important;
-  color: var(--ink) !important;
-  font-weight: 700 !important;
-  padding: 6px 12px !important;
-}
-.dock-btn:active { transform: translate(1px, 2px) !important; box-shadow: none !important; background: #ffe9a8 !important; }
 
 /* 右下功能 FAB：圓鈕 + 粗框硬陰影，與全站統一 */
-.control-fab {
-  border: 2.5px solid var(--ink) !important;
-  box-shadow: var(--sh-hard) !important;
-  
-  
+
+.control-fab:active {
+  transform: scale(.92) !important;
+  box-shadow: var(--sh-hard-sm) !important;
 }
-.control-fab:active { transform: scale(.92) !important; box-shadow: var(--sh-hard-sm) !important; }
 .fab-lbl {
-  border: 2px solid var(--ink) !important;
-  border-radius: var(--r-pill) !important;
-  background: var(--paper) !important;
+  position: absolute;
+  bottom: -16px;
+  font-size: 0.69rem;
   font-weight: 700 !important;
   color: var(--ink) !important;
+  background: var(--paper) !important;
+  padding: 2px 8px;
+  border-radius: var(--r-pill) !important;
+  border: 2px solid var(--ink) !important;
+  white-space: nowrap;
   box-shadow: var(--sh-hard-sm) !important;
 }
 
 /* 建築底座：圓角 + 柔和深色框 (像素房間內容不變) */
 .island-tag {
-  border: 2.5px solid var(--ink) !important;
-  border-radius: var(--r-pill) !important;
+  position: absolute;
+  bottom: -19px;
+  /* v9.14.3 全島統一：名牌吊在框框下方，不擋室內（v9.63 烘焙後由 -27 改 -19，視覺位置不變） */
+      left: 50%;
+  transform: translateX(-50%);
   background: var(--sun) !important;
   color: var(--ink) !important;
+  font-size: 0.69rem;
   font-weight: 900 !important;
-  box-shadow: var(--sh-hard-sm) !important;
+  border-radius: var(--r-pill) !important;
   padding: 3px 12px !important;
+  border: 2.5px solid var(--ink) !important;
+  box-shadow: var(--sh-hard-sm) !important;
+  white-space: nowrap;
+  z-index: 28;
+  transition: all 0.2s ease;
+  pointer-events: none;
 }
 .island-lv-badge {
-  border: 2.5px solid var(--ink) !important;
-  border-radius: var(--r-pill) !important;
+  position: absolute;
+  top: -27px;
+  /* v9.14.3 全島統一：徽章在框框上方 */
+      right: -6px;
+  z-index: 30;
   background: var(--white) !important;
   color: var(--ink) !important;
+  font-size: 0.69rem;
   font-weight: 900 !important;
+  padding: 2px 8px;
+  border-radius: var(--r-pill) !important;
+  border: 2.5px solid var(--ink) !important;
   box-shadow: var(--sh-hard-sm) !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s var(--ease-std);
 }
 .iso-island.nav-pulse { animation: navPulse .5s ease 3; }
 @keyframes navPulse {
@@ -3159,20 +2868,15 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 
 /* 彈窗 / 抽屜 */
-.game-modal {
-  background: var(--paper) !important;
-  border: 3px solid var(--ink) !important;
-  border-radius: var(--r-win) !important;
-  box-shadow: var(--sh-hard) !important;
-  color: var(--ink) !important;
-  padding: 22px !important;
-}
+
 .game-modal-title {
+  font-size: 1.25rem;
+  font-weight: 900 !important;
   color: var(--ink) !important;
+  margin-bottom: 14px !important;
   border-bottom: 3.5px solid var(--sun) !important;
   padding-bottom: 8px !important;
-  margin-bottom: 14px !important;
-  font-weight: 900 !important;
+  display: block;
 }
 .drawer-content, .drawer-panel {
   background: var(--paper) !important;
@@ -3181,29 +2885,53 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   box-shadow: var(--sh-win) !important;
   color: var(--ink) !important;
 }
-.btn-exam-mini {
-  border: 2.5px solid var(--ink) !important;
-  border-radius: var(--r-pill) !important;
-  box-shadow: var(--sh-hard-sm) !important;
-  font-weight: 700 !important;
+
+.btn-exam-mini:active {
+  transform: translate(1px, 2px) !important;
+  box-shadow: none !important;
 }
-.btn-exam-mini:active { transform: translate(1px, 2px) !important; box-shadow: none !important; }
-.help-tab-btn { border-radius: var(--r-pill) !important; border: 2px solid var(--ink) !important; font-weight: 700 !important; }
+.help-tab-btn {
+  background: transparent;
+  border: 2px solid var(--ink) !important;
+  color: var(--ink2);
+  opacity: 0.65;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-weight: 700 !important;
+  cursor: pointer;
+  border-radius: var(--r-pill) !important;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
 
 /* 對話泡泡 / 浮動提示 */
 .bubble {
+  position: absolute;
+  top: -30px;
   background: var(--paper) !important;
   border: 2.5px solid var(--ink) !important;
   border-radius: var(--r-win) !important;
-  box-shadow: var(--sh-hard) !important;
-  color: var(--ink) !important;
+  padding: 3px 8px;
+  font-size: 0.69rem;
   font-weight: 700 !important;
+  color: var(--ink) !important;
+  white-space: nowrap;
+  box-shadow: var(--sh-hard) !important;
+  z-index: 30;
+  animation: float-bubble 1.5s infinite alternate ease-in-out;
 }
 .bubble::after {
-  border-radius: var(--r-card) !important;
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 6px;
+  height: 6px;
+  background: var(--paper) !important;
   border-right: 2.5px solid var(--ink) !important;
   border-bottom: 2.5px solid var(--ink) !important;
-  background: var(--paper) !important;
+  border-radius: var(--r-card) !important;
 }
 .floating-text-bubble {
   background: var(--ink) !important;
@@ -3214,7 +2942,18 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   box-shadow: var(--sh-win) !important;
 }
 .floating-footer {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: max(18px, env(safe-area-inset-left));
+  z-index: 70;
+  font-size: 0.69rem;
   color: rgba(var(--rgb-ink),.75) !important;
+  background: rgba(var(--rgb-white), 0.45);
+  padding: 4px 10px;
+  border-radius: var(--r-card);
+  border: 1px solid rgba(var(--rgb-white), 0.4);
+  pointer-events: none;
+  white-space: nowrap;
   text-shadow: none !important;
   font-weight: 700 !important;
 }
@@ -3274,7 +3013,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 
 /* ================= v8.3 紙娃娃修復層 ================= */
-#pixel-canvas-container { touch-action: none; }
+
 #pixel-canvas-container.hide-guide .silhouette-hair,
 #pixel-canvas-container.hide-guide .silhouette-skin,
 #pixel-canvas-container.hide-guide .silhouette-clothes,
@@ -3282,7 +3021,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #wardrobe-preview-slot svg, #editor-preview-slot svg { display: block; }
 
 /* ================= v8.5 衣櫃高解析層 ================= */
-#pixel-canvas-container { aspect-ratio: 16 / 25; }
+
 
 /* ================= v8.6 地圖舞台適應層 ================= */
 @media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
@@ -3297,16 +3036,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* ================= v8.7 抽屜陰影外洩修復 ================= */
 /* 5 個關閉中的抽屜面板藏在右側螢幕外 (translateX(100%))，但 box-shadow 會往左洩進螢幕，
    5 層疊起來變成右緣一條黑影。關閉時拔掉陰影並 visibility:hidden，開啟時才恢復。 */
-.drawer-panel {
-  visibility: hidden;
-  box-shadow: none !important;
-  transition: transform .4s var(--ease-std), visibility 0s linear .4s, box-shadow .3s ease !important;
-}
-.drawer-panel.open {
-  visibility: visible;
-  box-shadow: var(--sh-win) !important;
-  transition: transform .4s var(--ease-std), visibility 0s, box-shadow .3s ease !important;
-}
+
+
 
 /* ================= v8.8 全面體檢修復層 ================= */
 /* 1) 頂部中列溢出：行事曆徽章 + 自動按鈕在 390px 寬會互相擠爆 (左邊星期被切、右邊按鈕出界)。
@@ -3326,7 +3057,17 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* ================= v8.9.1 體檢第二批 (逐項驗證後修復) ================= */
 /* 輪迴加點的 +/- 是主要操作鈕，28px 太小 → 40px */
-.rebirth-stat-row button { width: 40px !important; height: 40px !important; }
+.rebirth-stat-row button {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: var(--r-card);
+  border: 1px solid var(--border-color);
+  background: rgba(var(--rgb-white), 0.5);
+  font-weight: 900;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s;
+}
 @media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
   /* 所有彈窗在手機上限制高度可捲動 (輪迴彈窗內容 ~900px，矮螢幕原本會切掉確認鈕) */
   .overlay .game-modal { max-height: 92dvh !important; overflow-y: auto !important; }
@@ -3343,7 +3084,18 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* 根因：.town-map 是 .map-viewport (flex) 的子元素，被 flex-shrink 壓成容器寬
    (直向 390 / 橫向 844，而非 960)，底圖 SVG (width:100%) 跟著被壓縮，
    但絕對定位的建築用的是真 960 座標 → 底圖永遠對不齊建築。禁止地圖本體被壓縮。 */
-.town-map { flex: none !important; }
+.town-map {
+  width: 1715px;
+  height: 695px;
+  /* v9.64 投影後世界尺寸（OY 215） */
+      position: relative;
+  margin: 0 auto;
+  overflow: visible;
+  transform-origin: center center;
+  transition: transform 0.25s var(--ease-std);
+  user-select: none;
+  flex: none !important;
+}
 
 @media (max-width: 820px), (orientation: landscape) and (max-height: 520px) {
   /* v9.39 一行化後：左側時間塊本就第一位 */
@@ -3409,8 +3161,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 
 /* ================= v9.1 編輯器友善化 ================= */
-#pixel-canvas-container { width: 320px; aspect-ratio: 32 / 50; }
-#pixel-canvas-container.zoomed { width: 620px; }
+
+
 .palette-group-label { font-size: 0.69rem; font-weight: 700; color: var(--muted); margin: 2px 0 4px; }
 .template-chip { height: 32px; padding: 0 12px; font-size: 0.78rem; }
 @media (max-width: 820px) {
@@ -3462,22 +3214,10 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   transition: opacity 0.35s ease;
 }
 #sheet-backdrop.show { opacity: 1; pointer-events: auto; }
-.drawer-panel {
-  position: fixed !important;
-  left: 0 !important; right: 0 !important;
-  top: auto !important; bottom: 0 !important;
-  width: auto !important; height: auto !important;
-  max-height: 86dvh;
-  margin-left: auto; margin-right: auto;
-  border-left: none !important;
-  border-top: 1px solid rgba(var(--rgb-white), 0.55);
-  border-radius: var(--r-win) var(--r-win) 0 0 !important;
-  transform: translateY(106%);
-  box-shadow: none !important;
-  transition: transform 0.48s var(--ease-press), visibility 0s linear 0.48s, box-shadow 0.3s ease !important;
-}
+
 .drawer-panel.open {
   transform: translateY(0);
+  visibility: visible;
   box-shadow: var(--sh-win) !important;
   transition: transform 0.48s var(--ease-press), visibility 0s, box-shadow 0.3s ease !important;
 }
@@ -3540,7 +3280,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 
 /* ================= v9.4 介面重構 ================= */
-.floating-header { flex-wrap: wrap; }
+
 .hud-vitals { flex: 1 1 100%; display: flex; gap: 12px; justify-content: center; padding-top: 6px; }
 .hv { display: inline-flex; align-items: center; gap: 4px; }
 .hv-ico { font-size: 0.78rem; }
@@ -3558,7 +3298,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #glance-quest { left: 10px; }
 #glance-rival { right: 10px; }
 .glance-card:active { transform: scale(0.96); }
-.control-fab { position: relative; }
+
 .fab-dot { position: absolute; top: 1px; right: 1px; width: 12px; height: 12px; border-radius: var(--r-pill); background: var(--rose); border: 2px solid var(--white); z-index: 2; pointer-events: none; }
 @keyframes exam-pulse { 0%, 100% { box-shadow: var(--sh-hard-sm); } 50% { box-shadow: var(--sh-hard-sm); } }
 .btn-exam-mini.exam-hot { animation: exam-pulse 1.2s ease-in-out infinite; }
@@ -3616,7 +3356,16 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 
 /* ================= v9.5 速度控制縮小 ================= */
-.speed-control-mini { position: relative; flex: none !important; background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important;   } /* v9.12.11 容器不再佔位，只剩速度膠囊本身 */
+.speed-control-mini {
+  display: flex;
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--r-win);
+  padding: 0 !important;
+  box-shadow: none !important;
+  position: relative;
+  flex: none !important;
+} /* v9.12.11 容器不再佔位，只剩速度膠囊本身 */
 .speed-trigger {
   cursor: pointer; border: 1.5px solid var(--border-color); border-radius: var(--r-pill);
   background: rgba(var(--rgb-white),0.85); padding: 6px 12px; font-size: 0.78rem; font-weight: 700;
@@ -3637,8 +3386,11 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .npc { position: absolute; width: 44px; margin-left: -22px; text-align: center; pointer-events: auto; cursor: pointer; transition: opacity 0.4s; z-index: 20; }
 .npc-hidden { opacity: 0; pointer-events: none; }
 .npc-name { display: block; font-size: 10.5px; font-weight: 700; color: var(--white); text-shadow: 0 1px 3px rgba(var(--rgb-black),0.7); background: rgba(var(--rgb-navy),0.45); border-radius: var(--r-pill); padding: 1px 5px; white-space: nowrap; }
-.npc-flip { display: block; }
-.npc-flip { display: block; text-align: center; }
+
+.npc-flip {
+  display: block;
+  text-align: center;
+}
 .npc-sprite { display: block; margin: 0 auto; }
 .npc-walking .npc-flip { animation: npc-bob 0.55s ease-in-out infinite alternate; }
 .npc-zzz-tag { position: absolute; top: -4px; right: 0; font-size: 0.78rem; filter: drop-shadow(0 1px 2px rgba(var(--rgb-black),0.4)); }
@@ -3652,12 +3404,12 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* ===== v9.17 超商大場景（比照住家 stage） ===== */
 #store-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#fdf0f5; cursor:grab; touch-action:none; }
 #store-stage:active { cursor:grabbing; }
-#store-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+
 .store-chip { position:absolute; z-index:980; background:#fff6e8; border:2px solid var(--ink2); border-radius: var(--r-pill); padding:3px 12px; font-size: 0.78rem; font-weight:900; color:#a15c72; box-shadow: var(--sh-hard-sm); cursor:pointer; white-space:nowrap; }
 /* ===== v9.18 餐廳大場景（比照住家/超商 stage） ===== */
 #rest-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#d98a68; cursor:grab; touch-action:none; }
 #rest-stage:active { cursor:grabbing; }
-#rest-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+
 #rest-rooms #teppan-fx { left:246px; top:50px; width:110px; height:46px; z-index:940; }
 /* ===== v9.21 學校大場景（比照超商/餐廳 stage） ===== */
 #school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#fdf0f5; cursor:grab; touch-action:none; }
@@ -3667,13 +3419,13 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #school-stage, #lib-stage, #club-stage, #study-stage, #home-stage, #home2-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
 #gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#5ec96f; cursor:grab; touch-action:none; }
 #gym-stage:active { cursor:grabbing; }
-#gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+
 #gym-sky, #gym-floods { transition: opacity 1.2s ease; }
 .shot-ball { position:absolute; width:20px; height:20px; font-size: 1rem; line-height:20px; text-align:center; z-index:990; pointer-events:none; }
 .gym-shoot-btn { position:absolute; left:1006px; top:212px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#ffd43b; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
 .gym-shoot-btn:active { transform: translateY(2px); box-shadow: none; }
 #lib-stage:active { cursor:grabbing; }
-#lib-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+
 #lib-shaft-w, #lib-shaft-e, #lib-lamps { transition: opacity 1.2s ease; }
 .lib-mote { animation: moteFloat 5s ease-in-out infinite; }
 @keyframes moteFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
@@ -3681,7 +3433,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .lib-rec-book:active { transform: translateY(2px); box-shadow: none; }
 @keyframes libGlow { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.18); } }
 #school-stage:active { cursor:grabbing; }
-#school-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+
 /* ===== v9.19 桌上餐點＋超商拿貨互動 ===== */
 .dish-plate { position:absolute; width:20px; height:20px; font-size: 0.875rem; line-height:20px; text-align:center; background:rgba(var(--rgb-white),0.92); border:1.5px solid var(--ink2); border-radius: var(--r-pill); pointer-events:none; }
 .pick-pop { position:absolute; z-index:990; font-size: 0.875rem; pointer-events:none; animation: pick-float 1.9s ease-out forwards; }
@@ -3703,7 +3455,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* v9.10.5: pin the character wrapper height — in the portrait layout
    it collapsed to ~40px, breaking the y-70 feet anchor and sinking the
    seated pose. Landscape was already 70px; this normalizes both. */
-.character-wrapper { height: 70px !important; }
+
 #char-wrap.seated #student-sprite .pixel-feet, #char-wrap.seated #student-sprite > rect { display: none; }
 .npc.seated .npc-sprite { margin-top: 6px; }
 .npc.seated .npc-sprite .pixel-feet, .npc.seated .npc-sprite > rect { display: none; }
@@ -3720,7 +3472,18 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .npc-speech { position: absolute; transform: translate(-50%, 0); background: rgba(var(--rgb-white),0.6); border: 1.5px solid var(--border-color); border-radius: var(--r-card); padding: 5px 9px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; z-index: 999; box-shadow: var(--sh-soft); pointer-events: none; }
 
 /* v9.10.6: pin char wrapper height at file end (top level, all viewports) */
-.character-wrapper { height: 70px !important; }
+.character-wrapper {
+  position: absolute;
+  width: 42px;
+  height: 70px !important;
+  z-index: 25;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transition: left 2s linear, top 2s linear, transform 2s linear;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 4px 3px rgba(var(--rgb-black),0.35));
+}
 
 /* ===== v9.11 說明改版：diagram-design 骨架 × 學霸黃（紙色/細線/無陰影/單一重點色） ===== */
 .dd-manual { --dd-paper:#f5f0e6; --dd-ink:#26324b; --dd-muted:#8d7f9e; --dd-soft:#8d7f9e; --dd-accent:var(--sun); --dd-deep:#a15c72; --dd-tint:rgba(var(--rgb-yellow),.16); --dd-hair:rgba(45,49,66,.28);
@@ -3794,14 +3557,29 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 @keyframes steam-drift { 0% { transform: translateY(0); opacity: 0; } 35% { opacity: 0.85; } 100% { transform: translateY(-7px); opacity: 0; } }
 
 /* ===== v9.14 捲動式室內 ===== */
-#home-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#3c2415; }
+
 #home2-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f5e6da; cursor:grab; touch-action:none; } /* v9.66 住家 2F */ /* v9.41 室內底色公式：該場景地板色壓暗一階（木地板→深棕），不再用半夜藍例外 */
-#home-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
+
 .sleep-form { position:absolute; z-index:150; pointer-events:none; }
 
 /* v9.14.3：升級飾品全島統一在框框上方；室內可拖曳（滑鼠+觸控） */
-.island-up-deco { top:-17px !important; } /* v9.63 烘焙補償（原 -24 的 0.7 倍） */
-#home-stage { cursor:grab; touch-action:none; }
+.island-up-deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 18;
+  display: none;
+  animation: float-deco 2.5s ease-in-out infinite;
+  top: -17px !important;
+} /* v9.63 烘焙補償（原 -24 的 0.7 倍） */
+#home-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 30;
+  background: #3c2415;
+  cursor: grab;
+  touch-action: none;
+}
 #home-stage:active { cursor:grabbing; }
 
 /* ================= v9.29 衣櫃編輯器：固定工作區＋工具塢＋收合面板 ================= */
@@ -3811,11 +3589,23 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .editor-bar-btn.primary { background: var(--sky-blue, var(--sky)); color: var(--white); border: none; }
 #editor-skin-name { flex: 1; min-width: 100px; padding: 9px 12px; border-radius: var(--r-card); border: 1px solid var(--border-color); background: rgba(var(--rgb-white),0.6); font-family: inherit; font-size: 0.875rem; font-weight: 700; color: var(--ink2); }
 .editor-type-seg { display: flex; gap: 4px; width: 100%; }
-.editor-type-seg .help-tab-btn { flex: 1; }
-.editor-type-seg .help-tab-btn { padding: 8px 10px; cursor: pointer; text-align: center; white-space: nowrap; }
+
+.editor-type-seg .help-tab-btn {
+  flex: 1;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
 .editor-stage { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; container-type: size; }
-#pixel-canvas-container { width: min(320px, 86vw); width: min(320px, 92cqw, 62cqh); }
-#pixel-canvas-container.zoomed { width: 620px; }
+#pixel-canvas-container {
+  touch-action: none;
+  aspect-ratio: 32 / 50;
+  width: min(320px, 92cqw, 62cqh);
+}
+#pixel-canvas-container.zoomed {
+  width: 620px;
+}
 .editor-preview-chip { position: absolute; top: 4px; right: 4px; background: rgba(var(--rgb-white),0.55); border: 1px solid var(--border-color); border-radius: var(--r-card); padding: 4px 6px 2px; text-align: center; pointer-events: none; z-index: 5; }
 .editor-preview-lbl { font-size: 0.69rem; font-weight: 700; color: var(--muted); }
 .editor-dock { display: flex; gap: 6px; align-items: center; padding-top: 10px; flex-shrink: 0; }
@@ -3850,9 +3640,36 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 
 /* ================= v9.39 頂欄一行化 ================= */
-.floating-header { flex-wrap: nowrap; }
+.floating-header {
+  position: fixed;
+  top: max(20px, env(safe-area-inset-top));
+  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
 .header-center { flex: 1 1 auto; min-width: 0; text-align: center; }
-#stage-board { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#stage-board {
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+  margin-top: 6px;
+  padding: 3px 10px !important;
+  background: rgba(var(--rgb-white),0.55) !important;
+  border-radius: var(--r-pill) !important;
+  border: 2px solid var(--ink) !important;
+  box-shadow: var(--sh-hard-sm) !important;
+  display: inline-block;
+  pointer-events: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .hv-num { font-size: 0.69rem; font-weight: 700; margin-left: 4px; }
 .floating-controls #btn-lock-mode {   box-shadow: var(--sh-soft); }
 .floating-controls #btn-lock-mode.locked { color: #ffffff; }
@@ -3893,9 +3710,20 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* ================= v9.46 寬版設計層（實機報告 A1/A3/A4） ================= */
 .map-viewport {
-  top: var(--chrome-top, 0px);
-  bottom: var(--chrome-bottom, 0px);
+  background: linear-gradient(180deg, #8fd8ff, #ffeef7);
+  width: 100vw;
   height: auto;
+  overflow: hidden;
+  position: absolute;
+  top: var(--chrome-top, 0px);
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: none;
+  bottom: var(--chrome-bottom, 0px);
 }
 @media (min-width: 821px) {
   .floating-header {
@@ -3924,23 +3752,88 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 
 /* v9.51 餐廳 2.5D：投影後場景寬 1340（鏡頭/拖曳以 REST_PW 計） */
-#rest-rooms { width: 1340px; }
+#rest-rooms {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1340px;
+  height: 300px;
+  transform-origin: 0 0;
+  transition: transform .15s linear;
+}
 
 /* v9.52 住家 2.5D：投影後場景寬 1340（鏡頭/拖曳以 HOME_PW 計） */
-#home-rooms { width: 1340px; }
+#home-rooms {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1340px;
+  height: 300px;
+  transform-origin: 0 0;
+  transition: transform .15s linear;
+}
 
 /* v9.53 學校/圖書館 2.5D：投影後場景寬 1340（鏡頭/拖曳以 SCHOOL_PW/LIB_PW 計） */
-#school-rooms { width: 1340px; }
-#lib-rooms { width: 1340px; }
+#school-rooms {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1340px;
+  height: 300px;
+  transform-origin: 0 0;
+  transition: transform .15s linear;
+}
+#lib-rooms {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1340px;
+  height: 300px;
+  transform-origin: 0 0;
+  transition: transform .15s linear;
+}
 
 /* v9.54 超商/操場 2.5D：投影後場景寬 1340（鏡頭/拖曳以 STORE_PW/GYM_PW 計） */
-#store-rooms { width: 1340px; }
-#gym-rooms { width: 1340px; }
+#store-rooms {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1340px;
+  height: 300px;
+  transform-origin: 0 0;
+  transition: transform .15s linear;
+}
+#gym-rooms {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1340px;
+  height: 300px;
+  transform-origin: 0 0;
+  transition: transform .15s linear;
+}
 
 /* ============================================================
    v9.58 UI 換代元件（世界聖經 §4：FAB 單色系／關閉鈕單一元件／按鈕工具類／遮罩單一值）
    ============================================================ */
-.control-fab { background: var(--paper); color: var(--ink2); border: 2px solid var(--cocoa); box-shadow: var(--sh-hard-sm); }
+.control-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  border: 2.5px solid var(--ink) !important;
+  box-shadow: var(--sh-hard) !important;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  outline: none;
+  transition: all 0.4s var(--ease-pop);
+  color: var(--ink2);
+}
 .modal-close, .drawer-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; min-width: 40px; min-height: 40px; padding: 8px; color: var(--ink2); border-radius: var(--r-pill); }
 .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
 .btn-xs { padding: 6px 10px; font-size: 0.78rem; }
@@ -3992,48 +3885,151 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     /* ---- v9.67 爆炸圖 chrome（R1）：導引線/屋頂幽靈/樓層標籤/島框溢出解放 ---- */
     .island-mount.explode-open { overflow: visible; }
     .roof-ghost, .explode-guides { transition: opacity 0.35s ease, transform 0.35s ease; }
-    .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #fff5f9; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
-    .floor-label.active { background: var(--sun); color: var(--ink); }
+    
+    
     .floor-label.peeking { background: rgba(38, 50, 75, 0.45); border: 1.5px dashed #fff5f9; box-shadow: none; } /* R2-2 peek 態：虛線描邊，與實際樓層的實心高亮區分 */
 
     /* v9.69 全屏室內呈現層（R3）：深色底、整疊入框；z 45 恆在 HUD（header 50／controls 60）之下 */
     #fs-view { position: fixed; inset: 0; z-index: 45; background: #2a1836; display: none; }
     #fs-view.on { display: block; }
-    .fs-plate { border-radius: var(--r-card); }
+    
     .fs-plate.fs-active { outline: 2px solid var(--sun); outline-offset: -2px; }
     .fs-plate > [id$="-stage"] { border-radius: var(--r-card); }
     body.fs-on .floor-label { left: 6px; top: 6px; }
 
     /* v9.71 FS 檢視性退出鈕（fs-view 內、高於疊層）＋回室內小鈕（島上） */
-    #fs-exit-btn { position: absolute; left: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: var(--sun); color: #5c2e3e; border: none; border-radius: var(--r-pill); padding: 10px 18px; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: var(--sh-hard); } /* v9.75 R3：左下角＋實心黃底大字（主行動語言）——深藍半透明浮近黑底＋top 96px 半空位置真人找不到（Y1 可見性失效重開） */
+     /* v9.75 R3：左下角＋實心黃底大字（主行動語言）——深藍半透明浮近黑底＋top 96px 半空位置真人找不到（Y1 可見性失效重開） */
     body.fs-on #spot-bar { bottom: calc(var(--chrome-bottom, 16px) + 64px); } /* v9.75 R3：FS 中地點條上移一排，避免窄屏與左下退出鈕同列重疊 */
-    .fs-reenter-btn { position: absolute; top: 8px; right: 8px; z-index: 65; background: rgba(20, 28, 48, 0.88); color: #fff; border: 1.5px solid var(--sun); border-radius: var(--r-pill); padding: 6px 12px; font-size: 0.78rem; font-weight: 900; cursor: pointer; }
+    
 
 /* v9.73 室內地點條：主角在建築內時顯示該棟地點 chips（FS 內外皆可見，z 47 在 fs-view 之上、HUD 之下） */
-#spot-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--chrome-bottom, 16px) + 10px); z-index:47; display:none; gap:6px; padding:5px 7px; background:rgba(20,28,48,0.85); border-radius:var(--r-pill); }
+
 #spot-bar .spot-chip { border:1.5px solid rgba(255,255,255,0.35); background:transparent; color:#e8eefc; font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); cursor:pointer; font-family:inherit; }
-#spot-bar .spot-chip.on { background:var(--sun); color:#5c2e3e; border-color:var(--sun); }
+
 
 /* ===== v9.78 V1 紙感繪本：紙紋 + UI 殼紙卡化（規格 scholar-idle-visual-redesign-spec） ===== */
 #paper-grain { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0.05; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='240' height='240' filter='url(%23n)' opacity='0.6'/></svg>"); }
 .calendar-badge, .status-badge { background: var(--card); border: 2px solid var(--stroke); color: var(--ink); box-shadow: var(--sh-hard-sm); }
-.game-modal { background: var(--card); border: 2.5px solid var(--stroke); color: var(--ink); }
+.game-modal {
+  background: var(--paper) !important;
+  border: 3px solid var(--ink) !important;
+  border-radius: var(--r-win) !important;
+  padding: 22px !important;
+  width: 340px;
+  max-width: 90%;
+  box-sizing: border-box;
+  box-shadow: var(--sh-hard) !important;
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.4s var(--ease-std);
+  color: var(--ink) !important;
+}
 .game-modal h2, .game-modal h3, .modal-title { font-family: var(--font-display); }
-.drawer-panel { background: var(--card); border: 2px solid var(--stroke); color: var(--ink); }
-.bottom-dock { background: var(--card) !important; border: 3px solid var(--stroke) !important; }
+.drawer-panel {
+  position: fixed !important;
+  right: 0 !important;
+  top: auto !important;
+  bottom: 0 !important;
+  width: auto !important;
+  background: var(--card);
+  border-left: none !important;
+  border-radius: var(--r-win) var(--r-win) 0 0 !important;
+  z-index: 100;
+  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(106%);
+  transition: transform 0.48s var(--ease-press), visibility 0s linear 0.48s, box-shadow 0.3s ease !important;
+  visibility: hidden;
+  left: 0 !important;
+  height: auto !important;
+  max-height: 86dvh;
+  margin-left: auto;
+  margin-right: auto;
+  border-top: 1px solid rgba(var(--rgb-white), 0.55);
+  border: 2px solid var(--stroke);
+  color: var(--ink);
+}
+.bottom-dock {
+  position: fixed;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px !important;
+  background: var(--card) !important;
+  border: 3px solid var(--stroke) !important;
+  border-radius: var(--r-pill) !important;
+  box-shadow: var(--sh-hard) !important;
+  max-width: 96vw;
+  user-select: none;
+}
 .modal-close { color: var(--ink); border-color: var(--stroke); }
-#spot-bar { background: rgba(58, 39, 24, 0.92); }
-#spot-bar .spot-chip.on { color: var(--ink); }
-.floor-label { background: rgba(58, 39, 24, 0.78); }
-.floor-label.active { color: var(--ink); }
-#fs-exit-btn { color: var(--ink); }
-.fs-reenter-btn { background: rgba(58, 39, 24, 0.88); }
+#spot-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--chrome-bottom, 16px) + 10px);
+  z-index: 47;
+  display: none;
+  gap: 6px;
+  padding: 5px 7px;
+  background: rgba(58, 39, 24, 0.92);
+  border-radius: var(--r-pill);
+}
+#spot-bar .spot-chip.on {
+  background: var(--sun);
+  color: var(--ink);
+  border-color: var(--sun);
+}
+
+.floor-label.active {
+  background: var(--sun);
+  color: var(--ink);
+}
+#fs-exit-btn {
+  position: absolute;
+  left: 12px;
+  bottom: calc(var(--chrome-bottom, 16px) + 12px);
+  z-index: 48;
+  background: var(--sun);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: var(--sh-hard);
+}
+.fs-reenter-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 65;
+  background: rgba(58, 39, 24, 0.88);
+  color: #fff;
+  border: 1.5px solid var(--sun);
+  border-radius: var(--r-pill);
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
 
 /* ===== v9.79 V2 人物繪本化：平滑渲染 + 墨褐剪影描邊（主角/NPC/預覽共用同一 sprite） ===== */
 .student-svg, .npc-sprite { image-rendering: auto; filter: drop-shadow(0 0 1.1px rgba(93, 64, 40, 0.9)) drop-shadow(0 0 1.1px rgba(93, 64, 40, 0.9)); }
 
 /* ===== v9.80 V3 FS 正面疊層：紙片樓層框（水平紙層＋墨褐框） ===== */
-.fs-plate { background: #f3c48d; border: 2.5px solid #a9714b; box-shadow: var(--sh-hard-sm); } /* R3 模型托盤：木托本體取代紙框 */
+.fs-plate {
+  border-radius: var(--r-card);
+  background: #f3c48d;
+  border: 2.5px solid #a9714b;
+  box-shadow: var(--sh-hard-sm);
+} /* R3 模型托盤：木托本體取代紙框 */
 
 /* ===== v9.81 V4 夜晚亮窗光：營業/住家窗由奶油玻璃轉暖琥珀＋微光暈（night-on 時） ===== */
 #town-map.night-on .bld-ext polygon[fill="#fff3d6"] { fill: #ffcf7d; filter: drop-shadow(0 0 6px rgba(255, 190, 90, 0.9)); }
@@ -4050,10 +4046,58 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .fb-float { position: absolute; left: 50%; top: -6px; transform: translate(-50%, 2px); color: var(--moss); font-weight: 900; pointer-events: none; animation: fb-float-up 0.95s ease-out forwards; white-space: nowrap; }
 
 /* ===== v9.85 終局 F2：次級點擊區提升至 >=40px（僅 padding/min-height，不動字體與座標） ===== */
-.dock-btn { min-height: 40px; }
-.btn-exam-mini { min-height: 40px; }
+.dock-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 6px 12px !important;
+  border: 2px solid var(--ink) !important;
+  background: var(--white) !important;
+  border-radius: var(--r-pill) !important;
+  box-shadow: var(--sh-hard-sm) !important;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-family: inherit;
+  color: var(--ink) !important;
+  outline: none;
+  font-weight: 700 !important;
+  min-height: 40px;
+}
+.btn-exam-mini {
+  background: linear-gradient(135deg, var(--rose), var(--rose));
+  color: white;
+  font-size: 0.875rem;
+  padding: 10px 18px;
+  border: 2.5px solid var(--ink) !important;
+  border-radius: var(--r-pill) !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  box-shadow: var(--sh-hard-sm) !important;
+  transition: all 0.3s var(--ease-pop);
+  min-height: 40px;
+}
 .spot-chip { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
-.floor-label { min-height: 40px; display: inline-flex; align-items: center; }
+.floor-label {
+  position: absolute;
+  left: 10px;
+  top: 12px;
+  z-index: 60;
+  pointer-events: auto;
+  border: none;
+  cursor: pointer;
+  background: rgba(58, 39, 24, 0.78);
+  color: #fff5f9;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  box-shadow: var(--sh-hard-sm);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
 
 /* ===== R2 公仔底座：人物站在模型板上的淺色圓座（隨公仔同行） ===== */
 .doll-base { position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); width: 30px; height: 11px; border-radius: var(--r-pill); background: rgba(255,250,240,0.65); border: 1.5px solid rgba(124,74,99,0.35); box-shadow: var(--sh-soft); pointer-events: none; z-index: 0; }

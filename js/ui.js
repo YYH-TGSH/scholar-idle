@@ -91,7 +91,7 @@
       closeAllDrawers();
 
       if (!isOpen) {
-        target.classList.add("open");
+        if (window.Screens) Screens.open(target.id); else target.classList.add("open"); // R6 收編
         syncSheetBackdrop(); // v9.2
         if (id === 'friends' && typeof renderFriendsList === 'function') {
           renderFriendsList();
@@ -104,7 +104,7 @@
 
     function closeAllDrawers() {
       document.querySelectorAll(".drawer-panel").forEach(drawer => {
-        drawer.classList.remove("open");
+        if (window.Screens) Screens.close(drawer.id); else drawer.classList.remove("open"); // R6 收編
       });
       syncSheetBackdrop(); // v9.2
     }
@@ -550,7 +550,7 @@
     function openWardrobeModal(event) {
       if (event) event.stopPropagation();
       playSound('click');
-      document.getElementById('wardrobe-overlay').classList.add('active');
+      scrOpen('wardrobe-overlay');
       syncWardrobePreview();
       switchWardrobeTab(currentWardrobeTab);
       applyEquippedSkins();
@@ -558,7 +558,7 @@
 
     function closeWardrobeModal() {
       playSound('click');
-      document.getElementById('wardrobe-overlay').classList.remove('active');
+      scrClose('wardrobe-overlay');
       saveGameData();
     }
 
@@ -625,6 +625,10 @@
       }
     };
     window.Screens = Screens;
+    // R6 Screens 全面收編：所有 overlay/抽屜開關一律走此二助手（Screens 缺席時退回 classList）
+    function scrOpen(id) { if (window.Screens && Screens.open(id)) return true; const el = document.getElementById(id); if (el) { el.classList.add('active'); return true; } return false; }
+    function scrClose(id) { if (window.Screens && Screens.close(id)) return true; const el = document.getElementById(id); if (el) { el.classList.remove('active'); return true; } return false; }
+    window.scrOpen = scrOpen; window.scrClose = scrClose;
     // Esc 統一（收編 v9.77 A 批 modal 規則與抽屜/FAB 兩條舊 listener 至單一入口）：
     // modal 走註冊表關最上層一張（走自己的關閉鈕、副作用照原路徑）；抽屜/FAB 維持既有
     // 「Esc 全清」行為（v9.49 契約）。輸入框聚焦不攔截。
@@ -1397,7 +1401,7 @@
         const btnClose = document.getElementById("btn-modal-close");
 
         if (overlay) {
-          overlay.classList.add("active");
+          scrOpen(overlay.id);
         }
         if (pb) {
           pb.style.width = "0%";
@@ -1603,7 +1607,7 @@
       }
       ov.classList.add('active');
     }
-    function closeSemesterCard() { const ov = document.getElementById('semester-overlay'); if (ov) ov.classList.remove('active'); if (typeof playSound === 'function') playSound('click'); }
+    function closeSemesterCard() { const ov = document.getElementById('semester-overlay'); if (ov) scrClose(ov.id); if (typeof playSound === 'function') playSound('click'); }
 
     // v9.32 主修科目：玩家指定讀書優先科（分科決策），不再只有自動補最弱一條路
     function setFocusSubject(key) {
@@ -1671,7 +1675,7 @@
 
     function closeExamModal() {
       playSound('click');
-      document.getElementById("exam-overlay").classList.remove("active");
+      scrClose("exam-overlay");
     }
 
     // ❓ 說明 Modal 控制函數
@@ -1681,7 +1685,7 @@
         playSound('click');
         const overlay = document.getElementById("help-overlay");
         if (overlay) {
-          overlay.classList.add("active");
+          scrOpen(overlay.id);
         }
       } catch (e) {
         console.error("顯示說明失敗:", e);
@@ -1690,7 +1694,7 @@
 
     function closeHelpModal() {
       playSound('click');
-      document.getElementById("help-overlay").classList.remove("active");
+      scrClose("help-overlay");
     }
 
     // 👨‍👩‍👦 父母事件 Modal 控制
@@ -1715,14 +1719,14 @@
         reasonEl.innerText = gameState.parentsRebornReason || "父母平安回來了！";
       }
 
-      overlay.classList.add("active");
+      scrOpen(overlay.id);
     }
 
     function closeParentsEventModal() {
       playSound('click');
       const overlay = document.getElementById("parents-event-overlay");
       if (overlay) {
-        overlay.classList.remove("active");
+        scrClose(overlay.id);
       }
     }
 
@@ -1873,7 +1877,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.92.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.93.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2442,7 +2446,7 @@
       gameState.miniGamePlays[loc] = (gameState.miniGamePlays[loc] || 0) + 1;
 
       const overlay = document.getElementById('minigame-overlay');
-      overlay.classList.add('active');
+      scrOpen(overlay.id);
       document.getElementById('mg-close-btn').style.display = 'none';
 
       switch (loc) {
@@ -2490,7 +2494,7 @@
     function closeMinigame() {
       window._minigameOpen = false; // v9.15.2 時間恢復流動
       playSound('click');
-      document.getElementById('minigame-overlay').classList.remove('active');
+      scrClose('minigame-overlay');
       if (mgTimerInterval) { clearInterval(mgTimerInterval); mgTimerInterval = null; }
       currentMinigame = null;
     }
@@ -3425,8 +3429,8 @@
       renderLoginBtn();
     }
     function loginCycleDay() { const L = ensureLogin(); return ((Math.max(1, L.streak || 1) - 1) % 7) + 1; }
-    function openLoginModal() { const ov = document.getElementById('login-overlay'); if (!ov) return; renderLoginModal(); ov.classList.add('active'); }
-    function closeLoginModal() { const ov = document.getElementById('login-overlay'); if (ov) ov.classList.remove('active'); }
+    function openLoginModal() { const ov = document.getElementById('login-overlay'); if (!ov) return; renderLoginModal(); scrOpen(ov.id); }
+    function closeLoginModal() { const ov = document.getElementById('login-overlay'); if (ov) scrClose(ov.id); }
     function renderLoginModal() {
       const L = ensureLogin(); const day = loginCycleDay();
       const grid = document.getElementById('login-grid');
