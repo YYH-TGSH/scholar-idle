@@ -14,9 +14,78 @@
     let _fs = null;
     let _fsSig = '';
     let _fsSuppressed = null; // v9.71 使用者手動關閉 FS 的建物 key（檢視與主角 inside 解耦）
+    // ===== v9.98 FS 手勢層：pinch 縮放／flick 切層／雙擊重置（觀察式監聽、不攔截既有點擊與拖曳） =====
+    const _fsPtrs = new Map();
+    let _pinch0 = null, _flickCand = null, _tapLast = { t: 0, x: 0, y: 0 }, _fsEatClick = false;
+    function fsEatNextClick() { _fsEatClick = true; setTimeout(() => { _fsEatClick = false; }, 150); }
+    function fsFlick(dir) { // dir>0 左滑進一層、dir<0 右滑退一層；順序＝盤面由下而上（標籤序）；邊界不循環、無動作
+      if (!_fs) return;
+      const floors = _fs.def.plates.filter(p => p.kind === 'stage').map(p => p.loc).reverse();
+      const cur = _fs.activeLoc || (typeof currentLoc !== 'undefined' ? currentLoc : null);
+      const i = floors.indexOf(cur); if (i < 0) return;
+      const j = i + dir; if (j < 0 || j >= floors.length) return;
+      const target = floors[j];
+      if (_fs.key === 'school') switchFloor(target);
+      else if (_fs.key === 'home') { _homeViewFloor = target === 'home2' ? 2 : 1; applyHomeFloors(_homeDerivedPrev); }
+    }
+    function fsGestureInit(view) {
+      if (view.dataset.gestureInit) return;
+      view.dataset.gestureInit = '1';
+      view.addEventListener('click', (e) => { if (_fsEatClick) { e.stopPropagation(); e.preventDefault(); _fsEatClick = false; } }, true);
+      view.addEventListener('dblclick', () => { if (_fs && _fs.u !== 1) { _fs.u = 1; _fsSig = ''; fsLayout(); } });
+      view.addEventListener('pointerdown', (e) => {
+        if (!_fs) return;
+        _fsPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (_fsPtrs.size === 2) {
+          const pts = [..._fsPtrs.values()];
+          _pinch0 = { d: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1, u: _fs.u || 1 };
+          _flickCand = null;
+        } else if (_fsPtrs.size === 1) {
+          _flickCand = { id: e.pointerId, x: e.clientX, y: e.clientY, t: Date.now() };
+        }
+      });
+      view.addEventListener('pointermove', (e) => {
+        if (!_fs || !_fsPtrs.has(e.pointerId)) return;
+        _fsPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (_pinch0 && _fsPtrs.size === 2) {
+          const pts = [..._fsPtrs.values()];
+          const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+          const u = Math.max(0.5, Math.min(2.2, _pinch0.u * d / _pinch0.d));
+          if (Math.abs(u - _fs.u) > 0.004) {
+            _fs.u = u;
+            _fs.zoomAnchor = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+            _fsSig = ''; fsLayout();
+          }
+        }
+      });
+      const endPtr = (e) => {
+        const wasPinch = !!_pinch0 && _fsPtrs.size >= 2;
+        _fsPtrs.delete(e.pointerId);
+        if (_fsPtrs.size < 2 && _pinch0) { _pinch0 = null; fsEatNextClick(); }
+        if (!_fs) { _flickCand = null; return; }
+        if (_flickCand && e.pointerId === _flickCand.id) {
+          const dt = Date.now() - _flickCand.t;
+          const dx = e.clientX - _flickCand.x, dy = e.clientY - _flickCand.y;
+          _flickCand = null;
+          if (!wasPinch && dt <= 350 && Math.abs(dx) >= 56 && Math.abs(dx) > 1.6 * Math.abs(dy)) {
+            fsFlick(dx < 0 ? 1 : -1);
+            fsEatNextClick();
+          } else if (!wasPinch && dt < 300 && Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+            const now = Date.now();
+            if (now - _tapLast.t < 350 && Math.hypot(e.clientX - _tapLast.x, e.clientY - _tapLast.y) < 40) {
+              if (_fs.u !== 1) { _fs.u = 1; _fsSig = ''; fsLayout(); }
+              fsEatNextClick();
+              _tapLast = { t: 0, x: 0, y: 0 };
+            } else _tapLast = { t: now, x: e.clientX, y: e.clientY };
+          }
+        }
+      };
+      view.addEventListener('pointerup', endPtr);
+      view.addEventListener('pointercancel', endPtr);
+    }
     function fsViewEl() {
       let v = document.getElementById('fs-view');
-      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const shd = document.createElement('div'); shd.id = 'fs-shade'; v.appendChild(shd); v.appendChild(xb); const mg = document.createElement('button'); mg.id = 'fs-mg-btn'; mg.type = 'button'; mg.textContent = '\uD83C\uDFAE \u73A9\u5C0F\u904A\u6232\uFF01'; mg.style.display = 'none'; mg.addEventListener('click', e => { e.stopPropagation(); if (typeof startMinigame === 'function' && typeof currentLoc !== 'undefined' && currentLoc) startMinigame(currentLoc); }); mg.addEventListener('pointerdown', e => { e.stopPropagation(); }); v.appendChild(mg); document.body.appendChild(v); }
+      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const shd = document.createElement('div'); shd.id = 'fs-shade'; v.appendChild(shd); v.appendChild(xb); const mg = document.createElement('button'); mg.id = 'fs-mg-btn'; mg.type = 'button'; mg.textContent = '\uD83C\uDFAE \u73A9\u5C0F\u904A\u6232\uFF01'; mg.style.display = 'none'; mg.addEventListener('click', e => { e.stopPropagation(); if (typeof startMinigame === 'function' && typeof currentLoc !== 'undefined' && currentLoc) startMinigame(currentLoc); }); mg.addEventListener('pointerdown', e => { e.stopPropagation(); }); v.appendChild(mg); document.body.appendChild(v); fsGestureInit(v); }
       return v;
     }
     const FS_ROOMS_ID = { home: 'home-rooms', home2: 'home2-rooms', school: 'school-rooms', study: 'study-rooms', club: 'club-rooms', store: 'store-rooms', restaurant: 'rest-rooms', library: 'lib-rooms' };
@@ -77,26 +146,36 @@
       let ai = _fs.plates.findIndex(pl => pl.loc && pl.loc === _fs.activeLoc);
       if (ai < 0) ai = _fs.plates.length - 1;
       _fs.activeIdx = ai;
-      let s, stackW, stackH, left, top;
+      let baseS, stackW, stackH, left, top;
       if (focus) {
-        s = availH / 300;
+        baseS = availH / 300;
+      } else {
+        baseS = Math.min(availW / 1340, availH / _fs.totalUnits);
+      }
+      const s = baseS * (_fs.u || 1); // v9.98 pinch 有效比例（base × 使用者倍率 u）
+      if (focus) {
         stackW = 1340 * s; stackH = 300 * s; top = topIn;
         if (_fs.camX == null) { const px0 = fsPlayerStackX(); _fs.camX = Math.max(Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), Math.min(FS_MARGIN_X, (px0 == null ? (vw - stackW) / 2 : vw / 2 - px0))); }
         left = _fs.camX;
       } else {
-        s = Math.min(availW / 1340, availH / _fs.totalUnits);
         stackW = 1340 * s; stackH = _fs.totalUnits * s;
         left = (vw - stackW) / 2; top = topIn + (availH - stackH) / 2;
       }
+      if (_fs.zoomAnchor && _fs.prevS && Math.abs(s - _fs.prevS) > 0.0001) { // pinch 錨點：指下那一點不動
+        const ratio = s / _fs.prevS, za = _fs.zoomAnchor;
+        if (focus) { _fs.camX = za.x - (za.x - _fs.camX) * ratio; _fs.camX = Math.max(Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), Math.min(FS_MARGIN_X, _fs.camX)); left = _fs.camX; }
+        else { left = za.x - (za.x - left) * ratio; top = za.y - (za.y - top) * ratio; }
+      }
+      _fs.zoomAnchor = null;
       const sig = [s.toFixed(4), left.toFixed(1), top.toFixed(1), focus ? 'F' + ai : 'W'].join('/');
       if (sig === _fsSig) return;
-      _fsSig = sig; _fs.s = s;
+      _fsSig = sig; _fs.s = s; _fs.prevS = s;
       const stack = view.firstChild;
       stack.style.cssText = 'position:absolute; left:' + left.toFixed(1) + 'px; top:' + top.toFixed(1) + 'px; width:' + stackW.toFixed(1) + 'px; height:' + stackH.toFixed(1) + 'px;';
       const stepPx = (300 + _fs.def.gap) * s;
       _fs.plates.forEach((pl, i) => { pl.wrap.style.cssText = 'position:absolute; left:0; width:' + stackW.toFixed(1) + 'px; height:' + (300 * s).toFixed(1) + 'px; top:' + ((focus ? i - ai : i) * stepPx).toFixed(1) + 'px;'; });
       if (_fs.guidesEl) { _fs.guidesEl.style.position = 'absolute'; _fs.guidesEl.style.left = '0px'; _fs.guidesEl.style.top = '0px'; }
-      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: focus ? 60 : 50, plates: _fs.plates.length, focus: focus };
+      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: Math.max(44, Math.min(300, Math.round(0.37 * 300 * s))), plates: _fs.plates.length, focus: focus, u: _fs.u || 1 }; // v9.98 personPx 改盤面比例制（0.37×300×s，夾 44..300）
       syncFsShade();
     }
     function fsEnter(key) {
@@ -115,7 +194,7 @@
       });
       const gd = document.getElementById(def.guides);
       if (gd) { moved.push({ el: gd, parent: gd.parentNode, next: gd.nextSibling }); gd.style.transformOrigin = '0 0'; stack.appendChild(gd); }
-      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0, camX: null, activeLoc: null, focus: false };
+      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0, camX: null, activeLoc: null, focus: false, u: 1, prevS: 0, zoomAnchor: null };
       _fsSig = '';
       if (typeof Screens !== 'undefined' && Screens.open('fs-view')) { /* R3：FS 開關改走 Screen Manager */ } else { view.classList.add('on'); document.body.classList.add('fs-on'); }
       fsLayout();

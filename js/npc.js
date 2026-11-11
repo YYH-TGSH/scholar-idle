@@ -867,7 +867,7 @@
           // v9.17.1：室內人物補償場景縮放，與大地圖同尺寸（腳底為原點）
           if (_tgt && (_tgt.id === 'home-rooms' || _tgt.id === 'store-rooms' || _tgt.id === 'rest-rooms' || _tgt.id === 'school-rooms' || _tgt.id === 'lib-rooms' || _tgt.id === 'gym-rooms' || _tgt.id === 'club-rooms' || _tgt.id === 'home2-rooms')) {
             const _st = _tgt.parentNode;
-            const _pf = (window.__FS_FIT && window.__FS_FIT.active && window.__FS_FIT.personPx) ? window.__FS_FIT.personPx / 50 : 1;
+            const _pf = (window.__FS_FIT && window.__FS_FIT.active && window.__FS_FIT.personPx && _st && _st.closest && _st.closest('#fs-view')) ? window.__FS_FIT.personPx / 50 : 1; // v9.98 personPx 因子只作用於真的在 FS 內的 stage（島上 NPC 不受 FS 發布值污染）
             const _tf = 'scale(' + ((300 / ((_st && _st.clientHeight) || 179)) * _pf).toFixed(3) + ')'; // v9.97 聚焦模式與主角同 personPx
             if (el.style.transform !== _tf) { el.style.transform = _tf; el.style.transformOrigin = '50% 100%'; }
           } else if (el.style.transform) { el.style.transform = ''; el.style.transformOrigin = ''; }
