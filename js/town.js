@@ -2489,10 +2489,10 @@
     // ===== v9.64 多樓層外觀（批次 A）：建築規格單一真相——外觀生成、夜間挖孔、北側淡化共用本表 =====
     const BLD_FLOOR_H = 88; // 層高定版 ≈ 人物高 50 x 1.8
     const BLD3D = {
-      home: { fx: 123, fz: 76, fw: 150, fd: 95, floors: 2, wall: '#ffe9f4', accent: '#ff8fab', roof: 'gable', doorX: 198, pos: [177.6, 190.5] },
-      store: { fx: 491, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#eef4fb', accent: '#2fd48c', roof: 'signband', sign: '便利商店', doorX: 571, pos: [559.5, 190.5], winW: 40, winH: 34 },
+      home: { fx: 123, fz: 76, fw: 150, fd: 95, floors: 2, wall: '#ffe9f4', accent: '#ff8fab', roof: 'gable', winRows: [1, 2], doorX: 198, pos: [177.6, 190.5] },
+      store: { fx: 491, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#eef4fb', accent: '#2fd48c', roof: 'signband', glass: true, sign: '便利商店', doorX: 571, pos: [559.5, 190.5], winW: 40, winH: 34 },
       restaurant: { fx: 871, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#f7e8e0', accent: '#ff5d8f', roof: 'flat', sign: '餐廳', doorX: 951, pos: [946.5, 190.5] },
-      school: { fx: 98, fz: 556, fw: 185, fd: 115, floors: 3, wall: '#ece5d3', accent: '#6ec3ff', roof: 'flat', sign: '台東女中', tower: true, bell: true, doorX: 198, pos: [475.5, 422.5] },
+      school: { fx: 98, fz: 556, fw: 185, fd: 115, floors: 3, wall: '#ece5d3', accent: '#6ec3ff', roof: 'flat', sign: '台東女中', winRows: [5, 3, 2], tower: true, bell: true, doorX: 198, pos: [475.5, 422.5] },
       library: { fx: 488, fz: 561, fw: 165, fd: 105, floors: 1, wall: '#e6efe4', accent: '#b79ced', roof: 'flat', sign: '圖書館', doorX: 571, pos: [855.5, 422.5] },
       gym: { fx: 898, fz: 516, fw: 120, fd: 40, floors: 1, wall: '#f0e6da', accent: '#ffd43b', roof: 'flat', doorX: 958, pos: [1237.6, 422.5], overlay: true, holeRect: [1235.6, 420.5, 202.8, 133.5] }
     };
@@ -2511,51 +2511,114 @@
         const b = BLD3D[loc];
         const pr = PROJ.make(PROJ.K_TOWN, 8 - b.pos[0], 215 - b.pos[1]);
         const P = pr.P, pts = pr.pts, sh = PROJ.shade, FH = BLD_FLOOR_H, H = b.floors * FH;
+        // R2.5 正面主導微縮文法：前臉（南面）完整主導、東面壓縮至真投影深度 38%、屋頂板/斜頂帶出簷
+        const DEPTH_K = 0.38;
+        const fdE = Math.max(16, Math.round(b.fd * DEPTH_K));
+        const zB = b.fz + b.fd - fdE; // 背面 z（前臉平面 fz+fd 不變，佔地/門位/PLOT 不動）
+        function faces(x, z, w, d, h0, h1, color, top) {
+          return {
+            east: '<polygon points="' + pts([P(x + w, z, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x + w, z, h1)]) + '" fill="' + sh(color, 0.6) + '" stroke="#7c4a63" stroke-width="2" stroke-linejoin="round"/>',
+            south: '<polygon points="' + pts([P(x, z + d, h0), P(x + w, z + d, h0), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + color + '" stroke="#7c4a63" stroke-width="2" stroke-linejoin="round"/>',
+            top: top ? '<polygon points="' + pts([P(x, z, h1), P(x + w, z, h1), P(x + w, z + d, h1), P(x, z + d, h1)]) + '" fill="' + sh(color, 1.24) + '"/>' : ''
+          };
+        }
         let g = '';
         g += '<polygon points="' + pts([P(b.fx + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + 4, 0), P(b.fx + b.fw + 7, b.fz + b.fd + 4, 0), P(b.fx + 7, b.fz + b.fd + 4, 0)]) + '" fill="rgba(92,46,62,0.16)"/>';
-        for (let f = 0; f < b.floors; f++) {
-          if (f > 0) g += segBox(pr, b.fx - 3, b.fz - 3, b.fw + 6, b.fd + 6, f * FH - 3, f * FH + 3, sh(b.accent, 0.8), false);
-          g += segBox(pr, b.fx, b.fz, b.fw, b.fd, f * FH, (f + 1) * FH, b.wall, false);
-        }
-        const winW = b.winW || 20, winH = b.winH || 26;
+        let S = '', E = '', R = '', F = '';
         const sx0 = P(b.fx, b.fz + b.fd, 0).x, sx1 = P(b.fx + b.fw, b.fz + b.fd, 0).x;
         const doorCx = P(b.doorX, b.fz + b.fd, 0).x, groundY = P(b.fx, b.fz + b.fd, 0).y;
-        const nWin = b.fw >= 170 ? 5 : (b.fw >= 150 ? 4 : 3);
-        for (let f = 0; f < b.floors; f++) {
-          const wy = P(b.fx, b.fz + b.fd, f * FH + 30).y;
-          for (let i = 0; i < nWin; i++) {
-            const wx = sx0 + 16 + (nWin === 1 ? 0 : i * ((sx1 - sx0 - 32 - winW) / (nWin - 1)));
-            if (f === 0 && Math.abs(wx + winW / 2 - doorCx) < 30) continue;
-            g += '<rect x="' + wx.toFixed(1) + '" y="' + (wy - winH).toFixed(1) + '" width="' + winW + '" height="' + winH + '" fill="#fff3d6" stroke="#7c4a63" stroke-width="1.5"/>';
-          }
-        }
-        g += '<rect x="' + (doorCx - 17).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="34" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#7c4a63" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#ffd43b"/>';
-        if (loc === 'restaurant') g += segBox(pr, b.fx - 2, b.fz, b.fw + 4, b.fd + 12, 54, 59, b.accent, false);
-        if (b.roof === 'gable') {
-          const midZ = b.fz + b.fd / 2, rc = '#ff5d8f';
-          g += '<polygon points="' + pts([P(b.fx - 6, b.fz - 6, H), P(b.fx + b.fw + 6, b.fz - 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.78) + '"/>';
-          g += '<polygon points="' + pts([P(b.fx + b.fw + 6, b.fz - 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.6) + '"/>';
-          g += '<polygon points="' + pts([P(b.fx - 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + rc + '"/>';
-        } else if (b.roof === 'signband') {
-          g += '<g class="bld-sign">' + segBox(pr, b.fx - 4, b.fz - 4, b.fw + 8, b.fd + 8, H - 30, H, b.accent, true);
-          const bx0 = P(b.fx - 4, b.fz + b.fd + 4, 0).x, bx1 = P(b.fx + b.fw + 4, b.fz + b.fd + 4, 0).x, byC = P(b.fx, b.fz + b.fd + 4, H - 15).y;
-          g += '<text x="' + ((bx0 + bx1) / 2).toFixed(1) + '" y="' + byC.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="#5c2e3e" stroke="#ffffff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">' + b.sign + '</text></g>';
+        if (loc === 'gym') {
+          // 操場：球場線場地（平面模型）＋奶油黃器材室小模型
+          const court = faces(836, 566, 216, 118, 0, 4, '#7ede8f', true);
+          E += court.east; S += court.south;
+          let lines = '<polygon points="' + pts([P(848, 576, 4), P(1040, 576, 4), P(1040, 674, 4), P(848, 674, 4)]) + '" fill="none" stroke="#ffffff" stroke-width="3"/>';
+          lines += '<line x1="' + P(944, 578, 4).x.toFixed(1) + '" y1="' + P(944, 578, 4).y.toFixed(1) + '" x2="' + P(944, 672, 4).x.toFixed(1) + '" y2="' + P(944, 672, 4).y.toFixed(1) + '" stroke="#ffffff" stroke-width="3"/>';
+          const circ = [];
+          for (let a = 0; a < 12; a++) { const t = a / 12 * Math.PI * 2; circ.push(P(944 + Math.cos(t) * 26, 625 + Math.sin(t) * 17, 4)); }
+          lines += '<polygon points="' + pts(circ) + '" fill="none" stroke="#ffffff" stroke-width="3"/>';
+          R += court.top + lines;
+          const shedH = 62;
+          const shed = faces(b.fx, b.fz + b.fd - fdE, b.fw, fdE, 0, shedH, b.wall, false);
+          E += shed.east; S += shed.south;
+          const slab = faces(b.fx - 4, b.fz + b.fd - fdE - 4, b.fw + 8, fdE + 8, shedH, shedH + 8, b.accent, true);
+          E += slab.east; S += slab.south; R += slab.top;
+          S += '<rect x="' + (doorCx - 15).toFixed(1) + '" y="' + (groundY - 40).toFixed(1) + '" width="30" height="40" fill="' + sh(b.accent, 0.62) + '" stroke="#7c4a63" stroke-width="2"/>';
+          g += '<g data-part="side">' + E + '</g><g data-part="front">' + S + '</g><g data-part="court">' + R + '</g>';
         } else {
-          g += segBox(pr, b.fx - 4, b.fz - 4, b.fw + 8, b.fd + 8, H, H + 9, b.wall, true);
-          if (b.tower) {
-            g += segBox(pr, b.fx + b.fw - 52, b.fz + 8, 30, 30, H + 9, H + 42, '#5b7fa6', false);
-            g += segBox(pr, b.fx + b.fw - 55, b.fz + 5, 36, 36, H + 42, H + 47, '#7d8fc9', true);
+          for (let f = 0; f < b.floors; f++) {
+            if (f > 0) { const band = faces(b.fx - 3, zB - 3, b.fw + 6, fdE + 6, f * FH - 3, f * FH + 3, sh(b.accent, 0.8), false); S += band.south; E += band.east; }
+            const body = faces(b.fx, zB, b.fw, fdE, f * FH, (f + 1) * FH, b.wall, false); S += body.south; E += body.east;
           }
+          const winW = b.winW || 20, winH = b.winH || 26;
+          const nWin = b.fw >= 170 ? 5 : (b.fw >= 150 ? 4 : 3);
+          for (let f = 0; f < b.floors; f++) {
+            const wy = P(b.fx, b.fz + b.fd, f * FH + 30).y;
+            if (b.glass && f === 0) {
+              S += '<rect x="' + (sx0 + 14).toFixed(1) + '" y="' + (groundY - 62).toFixed(1) + '" width="' + (sx1 - sx0 - 92).toFixed(1) + '" height="56" fill="#aee6fa" opacity="0.92" stroke="#7c4a63" stroke-width="2"/>';
+              S += '<line x1="' + ((sx0 + sx1) / 2 - 14).toFixed(1) + '" y1="' + (groundY - 62).toFixed(1) + '" x2="' + ((sx0 + sx1) / 2 - 14).toFixed(1) + '" y2="' + (groundY - 6).toFixed(1) + '" stroke="#7c4a63" stroke-width="1.5"/>';
+              continue;
+            }
+            const cnt = (b.winRows && b.winRows[f] != null) ? b.winRows[f] : nWin;
+            for (let i = 0; i < cnt; i++) {
+              const wx = cnt === 1 ? sx0 + (sx1 - sx0) * 0.25 - winW / 2 : sx0 + 16 + i * ((sx1 - sx0 - 32 - winW) / (cnt - 1)); // 單窗靠左上構圖（對照施工圖住家一樓窗位，避門跳過規則）
+              if (f === 0 && Math.abs(wx + winW / 2 - doorCx) < 30) continue;
+              S += '<rect x="' + wx.toFixed(1) + '" y="' + (wy - winH).toFixed(1) + '" width="' + winW + '" height="' + winH + '" fill="#fff3d6" stroke="#7c4a63" stroke-width="1.5"/>';
+            }
+          }
+        S += '<rect x="' + (doorCx - 17).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="34" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#7c4a63" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#ffd43b"/>';
+          if (loc === 'home') {
+            F += '<circle cx="' + doorCx.toFixed(1) + '" cy="' + (groundY - 60).toFixed(1) + '" r="11" fill="#ff8fab" stroke="#7c4a63" stroke-width="1.5"/><text x="' + doorCx.toFixed(1) + '" y="' + (groundY - 59).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#ffffff">♥</text>';
+          }
+          if (loc === 'library') {
+            F += '<circle cx="' + doorCx.toFixed(1) + '" cy="' + (groundY - 62).toFixed(1) + '" r="12" fill="#ffd43b" stroke="#7c4a63" stroke-width="1.5"/><use href="#i-book" x="' + (doorCx - 9).toFixed(1) + '" y="' + (groundY - 71).toFixed(1) + '" width="18" height="18"/>';
+          }
+          if (loc === 'school') {
+            const ccx = (sx0 + sx1) / 2, ccy = P(b.fx, b.fz + b.fd, H - 46).y;
+            F += '<g data-clock="1"><circle cx="' + ccx.toFixed(1) + '" cy="' + ccy.toFixed(1) + '" r="13" fill="#ffffff" stroke="#7c4a63" stroke-width="2"/><line x1="' + ccx.toFixed(1) + '" y1="' + ccy.toFixed(1) + '" x2="' + ccx.toFixed(1) + '" y2="' + (ccy - 8).toFixed(1) + '" stroke="#5c2e3e" stroke-width="2"/><line x1="' + ccx.toFixed(1) + '" y1="' + ccy.toFixed(1) + '" x2="' + (ccx + 6).toFixed(1) + '" y2="' + (ccy + 3).toFixed(1) + '" stroke="#5c2e3e" stroke-width="2"/></g>';
+          }
+          if (loc === 'restaurant') {
+            const ay0 = P(b.fx, b.fz + b.fd, 68).y, ay1 = P(b.fx, b.fz + b.fd, 52).y;
+            for (let x = sx0 - 2, k = 0; x < sx1 + 2; x += 16, k++) {
+              F += '<rect x="' + x.toFixed(1) + '" y="' + ay0.toFixed(1) + '" width="' + Math.min(16, sx1 + 2 - x).toFixed(1) + '" height="' + (ay1 - ay0).toFixed(1) + '" fill="' + (k % 2 ? '#ffffff' : '#ff8fab') + '"/>';
+            }
+            E += '<polygon points="' + pts([P(b.fx + b.fw + 2, b.fz + b.fd, 52), P(b.fx + b.fw + 2, b.fz + b.fd, 68), P(b.fx + b.fw + 2, zB + 8, 68), P(b.fx + b.fw + 2, zB + 8, 52)]) + '" fill="' + sh('#ff8fab', 0.6) + '"/>';
+            const chim = faces(b.fx + b.fw - 36, zB + 4, 15, 13, H + 9, H + 32, '#e8906f', true);
+            E += chim.east; R += chim.south + chim.top;
+            const smk = P(b.fx + b.fw - 28, zB + 10, H + 42);
+            R += '<circle cx="' + smk.x.toFixed(1) + '" cy="' + smk.y.toFixed(1) + '" r="6" fill="#ffffff" opacity="0.75"/>';
+          }
+          if (b.roof === 'gable') {
+            const rc = '#ff5d8f', midZ = zB + fdE / 2, apex = P(b.fx + b.fw / 2, midZ, H + 36);
+            R += '<polygon points="' + pts([P(b.fx - 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), apex]) + '" fill="' + sh(rc, 0.92) + '" stroke="#7c4a63" stroke-width="2" stroke-linejoin="round"/>';
+            R += '<polygon points="' + pts([P(b.fx - 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, midZ, H + 36), P(b.fx - 6, midZ, H + 36)]) + '" fill="' + rc + '" stroke="#7c4a63" stroke-width="2" stroke-linejoin="round"/>';
+            R += '<polygon points="' + pts([P(b.fx + b.fw + 6, b.fz + b.fd + 6, H), P(b.fx + b.fw + 6, zB - 6, H), P(b.fx + b.fw + 6, midZ, H + 36)]) + '" fill="' + sh(rc, 0.6) + '" stroke="#7c4a63" stroke-width="2" stroke-linejoin="round"/>';
+          } else if (b.roof === 'signband') {
+            const band = faces(b.fx - 4, zB - 4, b.fw + 8, fdE + 8, H - 30, H, b.accent, true);
+            R += '<g class="bld-sign">' + band.east + band.south + band.top + '</g>';
+            const bx0 = P(b.fx - 4, b.fz + b.fd + 4, 0).x, bx1 = P(b.fx + b.fw + 4, b.fz + b.fd + 4, 0).x, byC = P(b.fx, b.fz + b.fd + 4, H - 15).y;
+            R += '<text x="' + ((bx0 + bx1) / 2).toFixed(1) + '" y="' + byC.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="#ffffff">超商 24H</text>';
+          } else {
+            const slab = faces(b.fx - 4, zB - 4, b.fw + 8, fdE + 8, H, H + 9, b.wall, true);
+            E += slab.east; S += slab.south; R += slab.top;
+            if (b.tower) {
+              const tw = faces(b.fx + b.fw - 52, zB + 8, 30, 26, H + 9, H + 42, '#5b7fa6', false);
+              E += tw.east; S += tw.south;
+              const cap = faces(b.fx + b.fw - 55, zB + 5, 36, 32, H + 42, H + 47, '#7d8fc9', true);
+              E += cap.east; S += cap.south; R += cap.top;
+            }
           if (b.sign) {
             const sw2 = b.sign.length * 19 + 26, scx = P(b.fx + b.fw / 2, b.fz + b.fd + 4, 0).x, stopY = P(b.fx, b.fz + b.fd + 4, H + 9).y;
-            g += '<rect x="' + (scx + 6).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#7c4a63"/><rect x="' + (scx + sw2 - 10).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#7c4a63"/>';
-            g += '<rect x="' + scx.toFixed(1) + '" y="' + (stopY - 32).toFixed(1) + '" width="' + sw2 + '" height="24" fill="' + b.accent + '" stroke="#7c4a63" stroke-width="1.5"/>';
-            g += '<text x="' + (scx + sw2 / 2).toFixed(1) + '" y="' + (stopY - 20).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#5c2e3e" stroke="#ffffff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">' + b.sign + '</text>';
+            F += '<rect x="' + (scx + 6).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#7c4a63"/><rect x="' + (scx + sw2 - 10).toFixed(1) + '" y="' + (stopY - 8).toFixed(1) + '" width="4" height="8" fill="#7c4a63"/>';
+            F += '<rect x="' + scx.toFixed(1) + '" y="' + (stopY - 32).toFixed(1) + '" width="' + sw2 + '" height="24" fill="' + b.accent + '" stroke="#7c4a63" stroke-width="1.5"/>';
+            F += '<text x="' + (scx + sw2 / 2).toFixed(1) + '" y="' + (stopY - 20).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#5c2e3e" stroke="#ffffff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">' + b.sign + '</text>';
           }
-        }
+          }
         if (b.bell) {
-          const bx = P(b.fx + b.fw - 37, b.fz + 38, 0).x - 10, by = P(b.fx, b.fz + 38, H + 16).y;
-          g += '<g id="school-bell"><use href="#i-bell" x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="20" height="20"/></g>';
+          const bx = P(b.fx + b.fw - 37, b.fz + b.fd, 0).x - 10, by = P(b.fx, b.fz + b.fd, H + 16).y;
+          F += '<g id="school-bell"><use href="#i-bell" x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="20" height="20"/></g>';
+        }
+          const sideW = (P(b.fx + b.fw, b.fz + b.fd, 0).x - P(b.fx + b.fw, zB, 0).x).toFixed(1);
+          g += '<g data-part="side" data-sw="' + sideW + '">' + E + '</g><g data-part="front">' + S + '</g><g data-part="roof">' + R + '</g><g data-part="feat">' + F + '</g>';
         }
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('class', 'bld-ext'); svg.setAttribute('data-loc', loc); svg.setAttribute('aria-hidden', 'true');
