@@ -145,6 +145,7 @@
       }
       syncFloorStack(); // v9.65 樓層疊層/膠囊跟著每 tick 同步
       syncTownTVs(false); // v9.96 電視直播（內部 250ms 節流）
+      if (typeof fsCamFollow === 'function') fsCamFollow(); // v9.97 直向聚焦鏡頭跟隨
     }
     // ===== v9.96 小鎮電視直播（規格 scholar-idle-town-tv-spec）：非主角所在棟的室內改由門前電視呈現 =====
     const TV_DEFS = [

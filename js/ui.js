@@ -1877,7 +1877,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.96.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.97.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2434,6 +2434,13 @@
           if (trigger) trigger.style.display = 'none';
         }
       });
+      // v9.97：FS 全屏內同款小遊戲入口（徽章本體在小鎮島上、FS 搬移清單不含它，故 FS 內另置固定鈕，規則與鎮上一致：冷卻到＋所在棟＋非通勤才顯示）
+      const fsBtn = document.getElementById('fs-mg-btn');
+      if (fsBtn) {
+        const fsOn = !!(window.__FS_FIT && window.__FS_FIT.active);
+        const readyFs = fsOn && !!currentLoc && (gameState.miniGameCooldowns[currentLoc] || 0) <= 0 && !gameState.isCommuting;
+        fsBtn.style.display = readyFs ? 'block' : 'none';
+      }
     }
 
     function startMinigame(loc) {

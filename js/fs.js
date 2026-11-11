@@ -16,8 +16,37 @@
     let _fsSuppressed = null; // v9.71 使用者手動關閉 FS 的建物 key（檢視與主角 inside 解耦）
     function fsViewEl() {
       let v = document.getElementById('fs-view');
-      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const shd = document.createElement('div'); shd.id = 'fs-shade'; v.appendChild(shd); v.appendChild(xb); document.body.appendChild(v); }
+      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const shd = document.createElement('div'); shd.id = 'fs-shade'; v.appendChild(shd); v.appendChild(xb); const mg = document.createElement('button'); mg.id = 'fs-mg-btn'; mg.type = 'button'; mg.textContent = '\uD83C\uDFAE \u73A9\u5C0F\u904A\u6232\uFF01'; mg.style.display = 'none'; mg.addEventListener('click', e => { e.stopPropagation(); if (typeof startMinigame === 'function' && typeof currentLoc !== 'undefined' && currentLoc) startMinigame(currentLoc); }); mg.addEventListener('pointerdown', e => { e.stopPropagation(); }); v.appendChild(mg); document.body.appendChild(v); }
       return v;
+    }
+    const FS_ROOMS_ID = { home: 'home-rooms', home2: 'home2-rooms', school: 'school-rooms', study: 'study-rooms', club: 'club-rooms', store: 'store-rooms', restaurant: 'rest-rooms', library: 'lib-rooms' };
+    function fsPlayerStackX() { // 主角在 FS stack 座標中的 x（聚焦鏡頭用）
+      if (!_fs || typeof gameState === 'undefined') return null;
+      const loc = _fs.activeLoc || (typeof currentLoc !== 'undefined' ? currentLoc : null);
+      const rid = FS_ROOMS_ID[loc]; if (!rid || typeof PROJ === 'undefined') return null;
+      const pr = PROJ.forRooms(rid); if (!pr) return null;
+      return pr.P(gameState.currentX || 0, gameState.currentY || 0, 0).x * (_fs.s || 1);
+    }
+    function fsCamFollow() { // v9.97 聚焦模式水平鏡頭：死區 [30%,70%]＋夾邊＋平滑趨近（比照小鎮鏡頭語言）
+      if (!_fs || !_fs.focus) return;
+      const view = fsViewEl();
+      const vw = view.clientWidth || window.innerWidth || 390;
+      const px = fsPlayerStackX(); if (px == null) return;
+      const stackW = 1340 * _fs.s;
+      const lo = Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), hi = FS_MARGIN_X;
+      let cam = (_fs.camX == null ? hi : _fs.camX);
+      const scr = cam + px;
+      let target = cam;
+      if (scr < vw * 0.30) target = vw * 0.30 - px;
+      else if (scr > vw * 0.70) target = vw * 0.70 - px;
+      target = Math.max(lo, Math.min(hi, target));
+      const next = cam + (target - cam) * 0.25;
+      if (Math.abs(next - cam) > 0.05) {
+        _fs.camX = next;
+        const stack = view.firstChild;
+        if (stack) stack.style.left = next.toFixed(1) + 'px';
+        if (window.__FS_FIT) window.__FS_FIT.left = next;
+      }
     }
     function fsDefs(key) {
       if (key === 'school') return { gap: EXPLODE_GAP, guides: 'school-guides', plates: [{ id: 'school-roof', kind: 'roof', loc: null }, { id: 'club-stage', kind: 'stage', loc: 'club' }, { id: 'study-stage', kind: 'stage', loc: 'study' }, { id: 'school-stage', kind: 'stage', loc: 'school' }] };
@@ -43,18 +72,31 @@
       const botIn = parseFloat(cs.getPropertyValue('--chrome-bottom')) || 16;
       const availW = Math.max(200, vw - FS_MARGIN_X * 2);
       const availH = Math.max(200, vh - topIn - botIn);
-      const s = Math.min(availW / 1340, availH / _fs.totalUnits);
-      const stackW = 1340 * s, stackH = _fs.totalUnits * s;
-      const left = (vw - stackW) / 2, top = topIn + (availH - stackH) / 2;
-      const sig = [s.toFixed(4), left.toFixed(1), top.toFixed(1)].join('/');
+      const focus = vw <= 820 && vh > vw; // v9.97 直向窄屏：單層聚焦（橫向/寬屏維持全疊層 fit)
+      _fs.focus = focus;
+      let ai = _fs.plates.findIndex(pl => pl.loc && pl.loc === _fs.activeLoc);
+      if (ai < 0) ai = _fs.plates.length - 1;
+      _fs.activeIdx = ai;
+      let s, stackW, stackH, left, top;
+      if (focus) {
+        s = availH / 300;
+        stackW = 1340 * s; stackH = 300 * s; top = topIn;
+        if (_fs.camX == null) { const px0 = fsPlayerStackX(); _fs.camX = Math.max(Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), Math.min(FS_MARGIN_X, (px0 == null ? (vw - stackW) / 2 : vw / 2 - px0))); }
+        left = _fs.camX;
+      } else {
+        s = Math.min(availW / 1340, availH / _fs.totalUnits);
+        stackW = 1340 * s; stackH = _fs.totalUnits * s;
+        left = (vw - stackW) / 2; top = topIn + (availH - stackH) / 2;
+      }
+      const sig = [s.toFixed(4), left.toFixed(1), top.toFixed(1), focus ? 'F' + ai : 'W'].join('/');
       if (sig === _fsSig) return;
       _fsSig = sig; _fs.s = s;
       const stack = view.firstChild;
       stack.style.cssText = 'position:absolute; left:' + left.toFixed(1) + 'px; top:' + top.toFixed(1) + 'px; width:' + stackW.toFixed(1) + 'px; height:' + stackH.toFixed(1) + 'px;';
       const stepPx = (300 + _fs.def.gap) * s;
-      _fs.plates.forEach((pl, i) => { pl.wrap.style.cssText = 'position:absolute; left:0; width:' + stackW.toFixed(1) + 'px; height:' + (300 * s).toFixed(1) + 'px; top:' + (i * stepPx).toFixed(1) + 'px;'; });
+      _fs.plates.forEach((pl, i) => { pl.wrap.style.cssText = 'position:absolute; left:0; width:' + stackW.toFixed(1) + 'px; height:' + (300 * s).toFixed(1) + 'px; top:' + ((focus ? i - ai : i) * stepPx).toFixed(1) + 'px;'; });
       if (_fs.guidesEl) { _fs.guidesEl.style.position = 'absolute'; _fs.guidesEl.style.left = '0px'; _fs.guidesEl.style.top = '0px'; }
-      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: 50, plates: _fs.plates.length };
+      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: focus ? 60 : 50, plates: _fs.plates.length, focus: focus };
       syncFsShade();
     }
     function fsEnter(key) {
@@ -73,7 +115,7 @@
       });
       const gd = document.getElementById(def.guides);
       if (gd) { moved.push({ el: gd, parent: gd.parentNode, next: gd.nextSibling }); gd.style.transformOrigin = '0 0'; stack.appendChild(gd); }
-      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0 };
+      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0, camX: null, activeLoc: null, focus: false };
       _fsSig = '';
       if (typeof Screens !== 'undefined' && Screens.open('fs-view')) { /* R3：FS 開關改走 Screen Manager */ } else { view.classList.add('on'); document.body.classList.add('fs-on'); }
       fsLayout();
@@ -120,6 +162,7 @@
     }
     function fsMarkActive(locKey) {
       if (!_fs) return;
+      if (locKey && _fs.activeLoc !== locKey) { _fs.activeLoc = locKey; _fsSig = ''; fsLayout(); }
       _fs.plates.forEach(pl => pl.wrap.classList.toggle('fs-active', !!locKey && pl.loc === locKey));
     }
     function fsInside(floors) { // 同棟內換層通勤（commuteStart 與 commuteTarget 都在本棟）仍算在建物內；跨棟通勤不算

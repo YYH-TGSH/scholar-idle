@@ -4114,3 +4114,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .town-tv[data-state="idle"] .tv-standby { opacity: 0.5; }
 .town-tv[data-state="idle"] .tv-live { display: none; }
 #town-map.night-on .town-tv .tv-screen { filter: drop-shadow(0 0 7px rgba(165, 216, 255, 0.65)); }
+
+/* ===== v9.97 FS 室內小遊戲入口（與島上 .mg-badge 同款；FS 右下固定可及、不擋地點條/離開鈕） ===== */
+#fs-mg-btn { position: absolute; right: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: linear-gradient(135deg, var(--rose), var(--amber)); color: #ffffff; font-size: 1rem; font-weight: 900; padding: 6px 14px; border-radius: var(--r-win); border: 2px solid rgba(var(--rgb-white), 0.6); box-shadow: var(--sh-win); cursor: pointer; }
