@@ -1663,7 +1663,7 @@
     let _fsSuppressed = null; // v9.71 使用者手動關閉 FS 的建物 key（檢視與主角 inside 解耦）
     function fsViewEl() {
       let v = document.getElementById('fs-view');
-      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); v.appendChild(xb); document.body.appendChild(v); }
+      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const shd = document.createElement('div'); shd.id = 'fs-shade'; v.appendChild(shd); v.appendChild(xb); document.body.appendChild(v); }
       return v;
     }
     function fsDefs(key) {
@@ -1673,6 +1673,12 @@
       if (key === 'rest') return { gap: EXPLODE_GAP_SINGLE, guides: 'rest-guides', plates: [{ id: 'rest-roof', kind: 'roof', loc: null }, { id: 'rest-stage', kind: 'stage', loc: 'restaurant' }] };
       if (key === 'library') return { gap: EXPLODE_GAP_SINGLE, guides: 'library-guides', plates: [{ id: 'library-roof', kind: 'roof', loc: null }, { id: 'lib-stage', kind: 'stage', loc: 'library' }] };
       return null;
+    }
+    function syncFsShade() { // v9.74 R2 H3：FS 夜色 = 該棟島嶼 shade 現值（同一公式同一層色，不另算、不雙重壓暗）
+      const shd = document.getElementById('fs-shade'); if (!shd) return;
+      if (!_fs) { shd.style.opacity = '0'; return; }
+      const isl = document.getElementById(FS_LANDMARK[_fs.key]); const g = isl ? isl.querySelector('.island-shade') : null;
+      shd.style.opacity = g ? (g.style.opacity || '0') : '0';
     }
     function fsLayout() {
       if (!_fs) return;
@@ -1696,6 +1702,7 @@
       _fs.plates.forEach((pl, i) => { pl.wrap.style.cssText = 'position:absolute; left:0; width:' + stackW.toFixed(1) + 'px; height:' + (300 * s).toFixed(1) + 'px; top:' + (i * stepPx).toFixed(1) + 'px;'; });
       if (_fs.guidesEl) { _fs.guidesEl.style.position = 'absolute'; _fs.guidesEl.style.left = '0px'; _fs.guidesEl.style.top = '0px'; }
       window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: 50, plates: _fs.plates.length };
+      syncFsShade();
     }
     function fsEnter(key) {
       const def = fsDefs(key); if (!def) return;
@@ -2432,7 +2439,8 @@
       });
     }
     // v9.41 光源清單（單一光影心智模型）：路燈位置以本表為準——地面 SVG 的燈柱畫在同座標、光暈由本表生成，不再手調
-    const TOWN_LAMPS = [{ x: 180, y: 318 }, { x: 480, y: 318 }, { x: 780, y: 318 }, { x: 1080, y: 318 }, { x: 270, y: 696, gy: 760 }, { x: 660, y: 696, gy: 760 }, { x: 1050, y: 696, gy: 760 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
+    // v9.74 R2 H4：光池中心（gy）對齊燈柱基座（原 A 列偏北 26 單位、B 列偏南 38）
+    const TOWN_LAMPS = [{ x: 180, y: 318, gy: 344 }, { x: 480, y: 318, gy: 344 }, { x: 780, y: 318, gy: 344 }, { x: 1080, y: 318, gy: 344 }, { x: 270, y: 696, gy: 722 }, { x: 660, y: 696, gy: 722 }, { x: 1050, y: 696, gy: 722 }, { x: 1092, y: 696, r: 40, c: '190, 220, 255' }]; // 末項是 B 街自動販賣機（冷色小光暈，v9.48 半徑縮小避免與東燈疊成一坨——光3）
     // ===== v9.64 多樓層外觀（批次 A）：建築規格單一真相——外觀生成、夜間挖孔、北側淡化共用本表 =====
     const BLD_FLOOR_H = 88; // 層高定版 ≈ 人物高 50 x 1.8
     const BLD3D = {
@@ -2653,7 +2661,7 @@
       const weekday = dow >= 1 && dow <= 5;
       const ramp = (o, c) => (h < o || h >= c) ? 0 : Math.min(1, Math.min((h - o) * 2, (c - h) * 2, 1));
       return {
-        home: ramp(6, 23), store: 1, restaurant: ramp(7, 22),
+        home: (() => { let w = ramp(6, 23); if (h >= 17 && h < 23) w = Math.max(w, 0.55); else if (h >= 23 || h < 6) w = Math.max(w, 0.25); return w; })(), store: 1, restaurant: ramp(7, 22), // v9.74 R2 H2：住家不是商店——晚間活動時段保底亮度、深夜留夜燈級暗度，不壓成全黑
         school: weekday ? ramp(8, 16) : 0, library: ramp(8, 21), gym: ramp(6, 22),
       };
     }
@@ -2694,6 +2702,8 @@
       if (blossom) { const m = new Date().getMonth() + 1; const on = m >= 3 && m <= 5; const want = on ? '' : 'none'; if (blossom.style.display !== want) blossom.style.display = want; }
       const r3 = v => String(Math.round(v * 1000) / 1000);
       _skyEls.sn.style.opacity = r3(nf * 0.9);
+      if (_skyEls.map) _skyEls.map.style.setProperty('--doll-night', r3(1 - nf * 0.5)); // v9.74 R2 H1：街上人物同暗（連續值，與夜色同步）
+      syncFsShade(); // v9.74 R2 H3
       _skyEls.sw.style.opacity = r3(wf);
       _skyEls.shades.forEach(g => { g.style.opacity = r3(nf * (1 - (weights[g.dataset.loc] || 0)) * 0.9); }); // v9.48 局部夜色：營業中 0、關店與街道同暗、邊界連續過渡；室內共用同一層（光7）
       if (_skyEls.map) _skyEls.map.classList.toggle('night-on', nf > 0.5); // 光10：夜裡上鎖建築停用 brightness，避免暗上加暗

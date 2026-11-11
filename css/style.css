@@ -3699,6 +3699,9 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .dish-plate { position:absolute; width:20px; height:20px; font-size: 0.875rem; line-height:20px; text-align:center; background:rgba(var(--rgb-white),0.92); border:1.5px solid var(--ink2); border-radius: var(--r-pill); pointer-events:none; }
 .pick-pop { position:absolute; z-index:990; font-size: 0.875rem; pointer-events:none; animation: pick-float 1.9s ease-out forwards; }
 @keyframes pick-float { 0% { transform: translateY(6px) scale(0.6); opacity: 0; } 18% { transform: translateY(0) scale(1.15); opacity: 1; } 35% { transform: translateY(-3px) scale(1); opacity: 1; } 100% { transform: translateY(-16px) scale(1); opacity: 0; } }
+/* v9.74 R2 H1：街道人物與場景同暗——#sky-night(z91) 蓋不到 z 序更高的街上人物（主角 500／NPC 深度序），改以 --doll-night 連續亮度補償；僅直屬街道層（室內人物由 .island-shade 處理，不重複壓暗） */
+#town-map > #char-wrap, #town-map > #npc-layer .npc-doll { filter: brightness(var(--doll-night, 1)); }
+#fs-shade { position: absolute; inset: 0; z-index: 44; pointer-events: none; background: rgba(6,10,38,0.62); opacity: 0; transition: opacity 0.9s linear; } /* v9.74 R2 H3：FS 夜色與島嶼同值同步 */
 .island-shade { position: absolute; inset: 0; z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(6,10,38,0.62); } /* v9.48 每島局部夜色（取代 island-glow 雙重打亮——光6）：opacity 由 updateSkyLighting 依營業權重連續寫入 */
 #town-map.night-on .iso-island.light-off { filter: grayscale(0.5); } /* v9.48 夜裡上鎖只留灰階語意、停用 brightness（光10） */
 .special-sign { position: absolute; left: 10px; top: 190px; z-index: 20; background: #fff6e8; border: 2px solid var(--ink2); border-radius: var(--r-card); padding: 2px 8px; font-size: 0.69rem; font-weight: 700; color: #8a6248; box-shadow: var(--sh-hard-sm); pointer-events: none; }
