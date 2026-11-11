@@ -4032,7 +4032,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 } /* R3 模型托盤：木托本體取代紙框 */
 
 /* ===== v9.81 V4 夜晚亮窗光：營業/住家窗由奶油玻璃轉暖琥珀＋微光暈（night-on 時） ===== */
-#town-map.night-on .bld-ext polygon[fill="#fff3d6"] { fill: #ffcf7d; filter: drop-shadow(0 0 6px rgba(255, 190, 90, 0.9)); }
+#town-map.night-on .bld-ext .win { fill: #ffcf7d; filter: drop-shadow(0 0 6px rgba(255, 190, 90, 0.9)); } /* v9.95 夜間亮窗改命中美術 .win（日間藍玻璃 #a5d8ff，夜間琥珀＋光暈同舊效） */
 
 /* ===== v9.82 B 批 FB 回饋動畫（class 觸發、播完移除、元素必回原狀） ===== */
 @keyframes fb-pop { 0% { transform: scale(1); } 40% { transform: scale(var(--fb-s, 1.1)); } 100% { transform: scale(1); } }
