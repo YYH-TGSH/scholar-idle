@@ -81,7 +81,9 @@
       // v9.17.1：室內場景（住家/超商）被框框縮小，人物補償回大地圖同尺寸（腳底為原點）
       const par = elCharWrap.parentNode;
       if (par && (par.id === 'home-rooms' || par.id === 'store-rooms' || par.id === 'rest-rooms' || par.id === 'school-rooms' || par.id === 'lib-rooms' || par.id === 'gym-rooms' || par.id === 'club-rooms' || par.id === 'home2-rooms')) { // v9.21；v9.66 home2 補入 學校場景同尺寸補償；v9.26 圖書館；v9.27 操場
-        scale *= (window.BIBLE ? BIBLE.SCALE.INDOOR_SCALE : 1.676); // v9.60：定版常數（廢 300/clientHeight 浮動反推——版面一改人物就跟著變尺寸）
+        let _cs = (window.BIBLE ? BIBLE.SCALE.INDOOR_SCALE : 1.676); // v9.60：定版常數（廢 300/clientHeight 浮動反推——版面一改人物就跟著變尺寸）
+        if (window.__FS_FIT && window.__FS_FIT.active && window.__FS_FIT.s > 0) _cs = 1 / window.__FS_FIT.s; // v9.69 全屏層：主角比照 NPC 的舞臺高反推，與 NPC 同尺寸（站規 v9.17.1）
+        scale *= _cs;
         elCharWrap.style.transformOrigin = '50% 100%';
       } else if (elCharWrap.style.transformOrigin) {
         elCharWrap.style.transformOrigin = '';

@@ -4005,3 +4005,11 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
     .floor-label.active { background: var(--yellow); color: var(--ink); }
     .floor-label.peeking { background: rgba(38, 50, 75, 0.45); border: 1.5px dashed #eef2f0; box-shadow: none; } /* R2-2 peek 態：虛線描邊，與實際樓層的實心高亮區分 */
+
+    /* v9.69 全屏室內呈現層（R3）：深色底、整疊入框；z 45 恆在 HUD（header 50／controls 60）之下 */
+    #fs-view { position: fixed; inset: 0; z-index: 45; background: #141c30; display: none; }
+    #fs-view.on { display: block; }
+    .fs-plate { border-radius: var(--r-card); }
+    .fs-plate.fs-active { outline: 2px solid var(--yellow); outline-offset: -2px; }
+    .fs-plate > [id$="-stage"] { border-radius: var(--r-card); }
+    body.fs-on .floor-label { left: 6px; top: 6px; }

@@ -1652,6 +1652,90 @@
     let _homeViewFloor = null; // v9.67 標籤 peek 的暫時檢視層（睡/醒狀態一變就清除）
     let _homeDerivedPrev = 1;
     let _homeExplodeMode = 'out';
+    // v9.69 全屏室內呈現層（R3 F）：進建物把該棟疊層搬進 #fs-view 整疊入框；離場原位復原
+    const FS_BG = '#141c30';
+    const FS_MARGIN_X = 8;
+    const _fsWants = {};
+    let _fs = null;
+    let _fsSig = '';
+    function fsViewEl() {
+      let v = document.getElementById('fs-view');
+      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); document.body.appendChild(v); }
+      return v;
+    }
+    function fsDefs(key) {
+      if (key === 'school') return { gap: EXPLODE_GAP, guides: 'school-guides', plates: [{ id: 'school-roof', kind: 'roof', loc: null }, { id: 'club-stage', kind: 'stage', loc: 'club' }, { id: 'lib-stage', kind: 'stage', loc: 'library' }, { id: 'school-stage', kind: 'stage', loc: 'school' }] };
+      if (key === 'home') return { gap: EXPLODE_GAP, guides: 'home-guides', plates: [{ id: 'home-roof', kind: 'roof', loc: null }, { id: 'home2-stage', kind: 'stage', loc: 'home2' }, { id: 'home-stage', kind: 'stage', loc: 'home' }] };
+      if (key === 'store') return { gap: EXPLODE_GAP_SINGLE, guides: 'store-guides', plates: [{ id: 'store-roof', kind: 'roof', loc: null }, { id: 'store-stage', kind: 'stage', loc: 'store' }] };
+      if (key === 'rest') return { gap: EXPLODE_GAP_SINGLE, guides: 'rest-guides', plates: [{ id: 'rest-roof', kind: 'roof', loc: null }, { id: 'rest-stage', kind: 'stage', loc: 'restaurant' }] };
+      return null;
+    }
+    function fsLayout() {
+      if (!_fs) return;
+      const view = fsViewEl();
+      const vw = view.clientWidth || window.innerWidth || 390;
+      const vh = view.clientHeight || window.innerHeight || 844;
+      const cs = getComputedStyle(document.documentElement);
+      const topIn = parseFloat(cs.getPropertyValue('--chrome-top')) || 84;
+      const botIn = parseFloat(cs.getPropertyValue('--chrome-bottom')) || 16;
+      const availW = Math.max(200, vw - FS_MARGIN_X * 2);
+      const availH = Math.max(200, vh - topIn - botIn);
+      const s = Math.min(availW / 1340, availH / _fs.totalUnits);
+      const stackW = 1340 * s, stackH = _fs.totalUnits * s;
+      const left = (vw - stackW) / 2, top = topIn + (availH - stackH) / 2;
+      const sig = [s.toFixed(4), left.toFixed(1), top.toFixed(1)].join('/');
+      if (sig === _fsSig) return;
+      _fsSig = sig; _fs.s = s;
+      const stack = view.firstChild;
+      stack.style.cssText = 'position:absolute; left:' + left.toFixed(1) + 'px; top:' + top.toFixed(1) + 'px; width:' + stackW.toFixed(1) + 'px; height:' + stackH.toFixed(1) + 'px;';
+      const stepPx = (300 + _fs.def.gap) * s;
+      _fs.plates.forEach((pl, i) => { pl.wrap.style.cssText = 'position:absolute; left:0; width:' + stackW.toFixed(1) + 'px; height:' + (300 * s).toFixed(1) + 'px; top:' + (i * stepPx).toFixed(1) + 'px;'; });
+      if (_fs.guidesEl) { _fs.guidesEl.style.position = 'absolute'; _fs.guidesEl.style.left = '0px'; _fs.guidesEl.style.top = '0px'; }
+      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: 50, plates: _fs.plates.length };
+    }
+    function fsEnter(key) {
+      const def = fsDefs(key); if (!def) return;
+      const view = fsViewEl(); const stack = view.firstChild;
+      stack.innerHTML = '';
+      const moved = []; const plates = [];
+      def.plates.forEach(pd => {
+        const wrap = document.createElement('div'); wrap.className = 'fs-plate'; wrap.dataset.loc = pd.loc || ''; stack.appendChild(wrap);
+        const el = document.getElementById(pd.id);
+        if (el) { moved.push({ el: el, parent: el.parentNode, next: el.nextSibling }); if (pd.kind === 'stage') el.style.transform = ''; el.style.transformOrigin = '0 0'; wrap.appendChild(el); }
+        plates.push({ wrap: wrap, kind: pd.kind, loc: pd.loc, id: pd.id });
+      });
+      const gd = document.getElementById(def.guides);
+      if (gd) { moved.push({ el: gd, parent: gd.parentNode, next: gd.nextSibling }); gd.style.transformOrigin = '0 0'; stack.appendChild(gd); }
+      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0 };
+      _fsSig = '';
+      view.classList.add('on'); document.body.classList.add('fs-on');
+      fsLayout();
+      const stepPx = (300 + def.gap) * (_fs.s || 0.3);
+      let ai = plates.findIndex(pl => pl.loc && pl.loc === (typeof currentLoc !== 'undefined' ? currentLoc : null));
+      if (ai < 0) ai = plates.length - 1;
+      plates.forEach((pl, i) => { if (i !== ai) { pl.wrap.style.transition = 'transform 350ms ease'; pl.wrap.style.transform = 'translateY(' + ((ai - i) * stepPx).toFixed(1) + 'px)'; } });
+      requestAnimationFrame(() => { plates.forEach(pl => { pl.wrap.style.transform = ''; }); });
+    }
+    function fsExit() {
+      if (!_fs) return;
+      for (let i = _fs.moved.length - 1; i >= 0; i--) { const m = _fs.moved[i]; if (!m.parent) continue; m.el.style.transformOrigin = ''; if (m.next && m.next.parentNode === m.parent) m.parent.insertBefore(m.el, m.next); else m.parent.appendChild(m.el); }
+      fsViewEl().classList.remove('on'); document.body.classList.remove('fs-on');
+      _fs = null; _fsSig = ''; window.__FS_FIT = null;
+    }
+    function fsMarkActive(locKey) {
+      if (!_fs) return;
+      _fs.plates.forEach(pl => pl.wrap.classList.toggle('fs-active', !!locKey && pl.loc === locKey));
+    }
+    function fsWant(key, on) {
+      if (on) { for (const k in _fsWants) if (k !== key) _fsWants[k] = false; }
+      _fsWants[key] = !!on;
+      let target = null;
+      for (const k in _fsWants) if (_fsWants[k]) target = k;
+      if (target === (_fs ? _fs.key : null)) { if (target) fsLayout(); return; }
+      if (_fs) fsExit();
+      if (target) fsEnter(target);
+    }
+    window.addEventListener('resize', () => { if (_fs) { _fsSig = ''; fsLayout(); } });
     function applyHomeFloors(derived) { // v9.67 爆炸圖版（原 v9.66 疊層）：位移量放大為整層步進、加屋頂/導引線/標籤
       const inB = (typeof currentLoc !== 'undefined') && currentLoc === 'home';
       if (!inB) _homeViewFloor = null; // R2-2：離開住家即清 peek，不得殘留到下次進屋
@@ -1661,6 +1745,7 @@
       const modeFlip = _homeExplodeMode !== mode; _homeExplodeMode = mode;
       const dur = modeFlip ? (inB ? 350 : 200) : 250;
       const sc = explodeSc(document.getElementById('home-stage'));
+      const fsOn = _fs && _fs.key === 'home';
       const step = (300 + EXPLODE_GAP) * sc;
       const spec = [['home-stage', 1, '1F 客餐廳'], ['home2-stage', 2, '2F 臥室']];
       for (const [id, f, name] of spec) {
@@ -1673,7 +1758,7 @@
           st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
           st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
           st.style.zIndex = rel === 0 ? '32' : '29';
-          st.style.transform = inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '';
+          st.style.transform = fsOn ? '' : (inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '');
           st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
         }
         let lb = st.querySelector('.floor-label');
@@ -1690,10 +1775,12 @@
         const pan = active === 2 ? _home2PanCur : _homePanCur;
         const topOff = -(2 - (active - 1)) * step;
         const roof = document.getElementById('home-roof');
-        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
         const gd = document.getElementById('home-guides');
-        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
+      fsWant('home', inB && !(typeof gameState !== 'undefined' && gameState.isCommuting));
+      if (_fs && _fs.key === 'home') fsMarkActive(active === 2 ? 'home2' : 'home');
     }
     function syncMiniExplode(key, loc, pr, panCur) { // v9.67 單層建物迷你爆炸（餐廳/超商：地板層＋屋頂層、GAP_SINGLE）
       const inside = (typeof currentLoc !== 'undefined') && currentLoc === loc && !gameState.isCommuting;
@@ -1703,11 +1790,14 @@
       const plat = document.querySelector('#landmark-' + loc + ' .island-platform');
       if (plat) plat.classList.toggle('explode-open', inside);
       const sc = explodeSc(document.getElementById(key + '-stage'));
+      const fsOn = _fs && _fs.key === key;
       const step = (300 + EXPLODE_GAP_SINGLE) * sc;
       const roof = document.getElementById(key + '-roof');
-      if (roof) { const ry = inside ? -step : 0; const rk = ry.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.opacity = inside ? '0.55' : '0'; roof.style.transform = 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + ry.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+      if (roof) { const ry = inside ? -step : 0; const rk = ry.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.opacity = inside ? '0.55' : '0'; roof.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + ry.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       const gd = document.getElementById(key + '-guides');
-      if (gd) { const gy = inside ? -step : 0; const gk = gy.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.opacity = inside ? '1' : '0'; gd.style.transform = 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + gy.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+      if (gd) { const gy = inside ? -step : 0; const gk = gy.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.opacity = inside ? '1' : '0'; gd.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + gy.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+      fsWant(key, inside);
+      if (_fs && _fs.key === key) fsMarkActive(loc);
     }
     function updateHome2Stage() {
       ensureHome2Interior();
@@ -2406,6 +2496,7 @@
       const dur = modeFlip ? (inB ? 350 : 200) : 250; // E2：進場展開 350ms、離場收合 200ms、切層 250ms
       const anchorStage = document.getElementById(FLOOR_STAGE[inB ? cur : 'school']);
       const sc = explodeSc(anchorStage);
+      const fsOn = _fs && _fs.key === 'school';
       const step = (300 + EXPLODE_GAP) * sc;
       for (const loc in SCHOOL_GROUP) {
         const st = document.getElementById(FLOOR_STAGE[loc]);
@@ -2418,7 +2509,7 @@
           st.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
           st.style.opacity = rel === 0 ? '1' : (rel < 0 ? '0.35' : '0.22');
           st.style.zIndex = rel === 0 ? '32' : String(30 - Math.abs(rel));
-          st.style.transform = inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '';
+          st.style.transform = fsOn ? '' : (inB ? 'translateY(' + (-rel * step).toFixed(1) + 'px)' : '');
           st.style.pointerEvents = rel === 0 ? 'auto' : 'none';
         }
         let lb = st.querySelector('.floor-label');
@@ -2434,10 +2525,12 @@
         const pan = inB ? (({ school: _schoolPanCur, library: _libPanCur, club: _clubPanCur })[cur] || 0) : 0;
         const topOff = -(3 - (active - 1)) * step;
         const roof = document.getElementById('school-roof');
-        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
         const gd = document.getElementById('school-guides');
-        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
+        if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
+      fsWant('school', inB && !(typeof gameState !== 'undefined' && gameState.isCommuting));
+      if (_fs && _fs.key === 'school') fsMarkActive(inB ? cur : null);
     }
     function switchFloor(loc) {
       if (!SCHOOL_GROUP[loc]) return;
