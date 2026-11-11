@@ -6,42 +6,42 @@ window.BIBLE = {
   // ---- 色票總表（全遊戲相異 hex 上限 120；新色先進表） ----
   PALETTE: {
     // UI 核心（承 v9.37 :root 美術憲法）
-    paper: '#fdf6e3', ink: '#4a3220', ink2: '#3a2718', sun: '#f2b544', stroke: '#5d4028', card: '#fffaf0', terra: '#c96f4a', brick: '#c2452d', sage: '#7fa663', sage2: '#a8bf8a', moss: '#5f7d5a', amber: '#ff9f0a',
-    tang: '#e65c00', skyBlue: '#5b8fd6', leaf: '#6faf62', rose: '#c2452d', grape: '#b07cc6',
-    cocoa: '#3c2415', muted: '#5f5f66', white: '#ffffff', cream: '#efe9e0',
+    paper: '#fff5f9', ink: '#5c2e3e', ink2: '#4a2432', sun: '#ffd43b', stroke: '#7c4a63', card: '#ffffff', terra: '#ffb08a', brick: '#ff5d8f', sage: '#5ec96f', sage2: '#a8bf8a', moss: '#2f8f57', amber: '#ff9f0a',
+    tang: '#e65c00', skyBlue: '#5aa9e6', leaf: '#5ec96f', rose: '#ff5d8f', grape: '#c39bf0',
+    cocoa: '#3c2415', muted: '#8d7f9e', white: '#ffffff', cream: '#fdf0f5',
     // v9.61 靜音表面色（大面積表面專用；鮮色只留識別與重點）＋鮮豔度量測定義：vivid = HSV 的 s×v > 0.35（感知彩度）
-    woodMut: '#8a6248', leafMut: '#7fa663', steel: '#5b7fa6',
+    woodMut: '#a15c72', leafMut: '#5ec96f', steel: '#5b7fa6',
     // 光影
-    glowWarm: '#ffc86e', glowCool: '#bedcfe', spray: '#f7e8c9', moon: '#ffe9b8',
+    glowWarm: '#ffc86e', glowCool: '#bedcfe', spray: '#fff3d6', moon: '#ffe9b8',
     starlight: '#ffe9a8', deep: '#0f1428', navy: '#232f47',
     // 地表
-    grassLight: '#a4c68a', grass: '#8cb877', grassDeep: '#7fa663', parkLight: '#9cbd8b',
-    park: '#8fae6b', dirt: '#c9a06a', sand: '#e8d8a8', road: '#4a4a55', roadLine: '#f2b544',
-    sidewalk: '#cfc4b0', water: '#7d9dbd', waterDeep: '#4a7ca5', pond: '#a8c8bc',
+    grassLight: '#a4c68a', grass: '#8fe3a8', grassDeep: '#5ec96f', parkLight: '#9cbd8b',
+    park: '#8fe3a8', dirt: '#c9a06a', sand: '#ffe9a8', road: '#4a4a55', roadLine: '#ffd43b',
+    sidewalk: '#e8d8ee', water: '#8fc9f2', waterDeep: '#5aa9e6', pond: '#a8c8bc',
     // 材質
-    woodDark: '#6d4c41', wood: '#8d5a2c', woodLight: '#a9743f', plank: '#b0743e',
-    counter: '#795548', metal: '#9a8d7a', glass: '#cfe8f5', floorHome: '#d9a066',
+    woodDark: '#6d4c41', wood: '#a15c72', woodLight: '#d98a68', plank: '#b0743e',
+    counter: '#795548', metal: '#b8a6c9', glass: '#ffeef7', floorHome: '#d9a066',
     // 建築識別（同棟同色：一棟一色，名牌＝晶片＝招牌＝accent）
-    home: '#e67e22', store: '#2ed573', restaurant: '#c2452d', school: '#2c3e50',
-    library: '#1e8449', gym: '#ca6f1e',
+    home: '#ff8fab', store: '#2fd48c', restaurant: '#ff5d8f', school: '#7d8fc9',
+    library: '#b79ced', gym: '#ffd43b',
     // 角色
     skin: '#fed7aa', skinShade: '#f0b98a', clothesRed: '#cd5f43', clothesBlue: '#527fa8',
-    clothesPurple: '#9a6bb5', clothesPink: '#ff8fab', clothesYellow: '#f2b544',
-    clothesGreen: '#6faf62', clothesBlack: '#2a2320', denim: '#4a6f8f',
+    clothesPurple: '#a678e0', clothesPink: '#ff8fab', clothesYellow: '#ffd43b',
+    clothesGreen: '#5ec96f', clothesBlack: '#3a2430', denim: '#4a6f8f',
     // 食物
-    rice: '#f5f0e6', curry: '#d98e32', noodle: '#f2b544', meat: '#b04a32', tea: '#b0743e', milk: '#fff6e8',
+    rice: '#f5f0e6', curry: '#f0a832', noodle: '#ffd43b', meat: '#ff8fab', tea: '#b0743e', milk: '#fff6e8',
     // 狀態（語意色，玩法辨識優先，不可被色票收斂犧牲）
-    energy: '#e09a3e', xp: '#9a6bb5', heart: '#e0685f', coin: '#f2b544', danger: '#c2452d', info: '#527fa8',
+    energy: '#ffb08a', xp: '#a678e0', heart: '#ff6b8a', coin: '#ffd43b', danger: '#ff5d8f', info: '#527fa8',
     // 場景 staples（家具/陳設常用，批次 4 收斂時以此為準）
-    board: '#2f5d3a', sofaRed: '#b04a3a', sofaBlue: '#527fa8', bookA: '#c2452d', bookB: '#4a7ca5',
-    bookC: '#6faf62', bookD: '#e09a3e', bookE: '#9a6bb5', blanketBlue: '#7d9dbd', blanketPink: '#e89bb0',
-    plantGreen: '#5f8f52', plantPot: '#a15c33', lampShade: '#f5c86a', curtain: '#f3e2c7',
-    tileWhite: '#f7f1e3', tileLine: '#d8cdb4', deskTop: '#c98d54', chairWood: '#9c6b43'
+    board: '#8a6bc9', sofaRed: '#b04a3a', sofaBlue: '#527fa8', bookA: '#ff5d8f', bookB: '#5aa9e6',
+    bookC: '#5ec96f', bookD: '#ffb08a', bookE: '#a678e0', blanketBlue: '#8fc9f2', blanketPink: '#ffb3c9',
+    plantGreen: '#5f8f52', plantPot: '#a15c33', lampShade: '#ffcf5c', curtain: '#ffe9f4',
+    tileWhite: '#fff5f9', tileLine: '#d8cdb4', deskTop: '#c98d54', chairWood: '#9c6b43'
   },
   // ---- 同棟同色（批次 2/4/6 引用） ----
   BUILDING: {
-    home: { identity: '#e67e22' }, store: { identity: '#2ed573' }, restaurant: { identity: '#c0392b' },
-    school: { identity: '#2c3e50' }, library: { identity: '#1e8449' }, gym: { identity: '#ca6f1e' }
+    home: { identity: '#ff8fab' }, store: { identity: '#2fd48c' }, restaurant: { identity: '#ffb08a' },
+    school: { identity: '#6ec3ff' }, library: { identity: '#b79ced' }, gym: { identity: '#ffd43b' }
   },
   // ---- 比例定版（批次 3 引用） ----
   SCALE: {

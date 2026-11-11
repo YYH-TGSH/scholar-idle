@@ -177,11 +177,11 @@
     function parsePixelStr(str) {
       const colorMap = {
         '.': null,
-        'K': '#5d4028', 'R': '#c2452d', 'r': '#c2452d', 'W': '#ffffff',
-        'Y': '#f2b544', 'y': '#f2b544', 'B': '#7d9dbd', 'b': '#46586a',
-        'N': '#fed7aa', 'H': '#3c2415', 'G': '#79a95c', 'g': '#5f7d5a',
-        'P': '#b07cc6', 'p': '#9a6bb5', 'O': '#e08a3c', 'A': '#9a8d7a',
-        'C': '#f7e8c9', 'D': '#8d5a2c', 'E': '#3c2415'
+        'K': '#7c4a63', 'R': '#ff5d8f', 'r': '#ff5d8f', 'W': '#ffffff',
+        'Y': '#ffd43b', 'y': '#ffd43b', 'B': '#8fc9f2', 'b': '#7d8fc9',
+        'N': '#fed7aa', 'H': '#3c2415', 'G': '#4fce7e', 'g': '#2f8f57',
+        'P': '#c39bf0', 'p': '#a678e0', 'O': '#ffb08a', 'A': '#b8a6c9',
+        'C': '#fff3d6', 'D': '#a15c72', 'E': '#3c2415'
       };
       const lines = str.trim().split('\n').map(l => l.trim());
       const pixels = new Array(SKIN_N).fill(null);
@@ -541,7 +541,7 @@
     let editorMirror = false;
     let editorZoom = false;
     let editorRecentColors = [];
-    let editorSelectedColor = '#c2452d';
+    let editorSelectedColor = '#ff5d8f';
     let editorCanvasPixels = new Array(SKIN_N).fill(null);
     let editorHistory = [];
     let editorFuture = [];
@@ -628,7 +628,7 @@
           <div style="font-size:0.75rem; font-weight:700; margin-bottom:6px; color:var(--ink2); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</div>
           <div style="display:flex; gap:4px; width:100%;">
             <button onclick="equipSkin('${type}', '${item.id}', event)" style="flex:1; font-size:0.7rem; padding:9px 3px; border:none; border-radius:6px; background:var(--amber); color:white; font-weight:700; cursor:pointer;">裝備</button>
-            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#79a95c; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--rose); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
+            ${!item.id.startsWith('preset_') ? `<button onclick="editCustomSkin('${type}', '${item.id}', event)" title="編輯" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#0a84ff; color:white; font-weight:700; cursor:pointer;">✏️</button><button onclick="downloadSkinById('${type}', '${item.id}', event)" title="下載 PNG 分享" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:#4fce7e; color:white; font-weight:700; cursor:pointer;">📥</button><button onclick="deleteCustomSkin('${type}', '${item.id}', event)" style="font-size:0.7rem; padding:9px 8px; border:none; border-radius:6px; background:var(--rose); color:white; font-weight:700; cursor:pointer;">🗑️</button>` : ''}
           </div>
         `;
 
@@ -902,9 +902,9 @@
 
     const PALETTE_GROUPS = [
       { label: '🕘 最近用色', colors: [] }, // 由 editorRecentColors 動態填入
-      { label: '🧑 膚色', colors: ['#ffe9b8', '#fed7aa', '#f0b98a', '#d9a066', '#c98d54', '#8d5a2c'] },
-      { label: '💇 髮色', colors: ['#1a1a24', '#3c2415', '#6d4c41', '#8d5a2c', '#b0743e', '#f0b98a', '#efe9e0', '#c2452d'] },
-      { label: '🎨 常用色', colors: ['#4a3220', '#c2452d', '#c2452d', '#ffffff', '#ffcc00', '#5b7fa6', '#2c3e50', '#79a95c', '#7fa663', '#ff9f0a', '#bf5af2', '#8e44ad', '#aee6fa', '#9a8d7a', '#ff8fab', '#ffcc00', '#0a84ff', '#e89bb0', '#1a1a24', '#79bd67'] },
+      { label: '🧑 膚色', colors: ['#ffe9b8', '#fed7aa', '#f0b98a', '#d9a066', '#c98d54', '#a15c72'] },
+      { label: '💇 髮色', colors: ['#1a1a24', '#3c2415', '#6d4c41', '#a15c72', '#b0743e', '#f0b98a', '#fdf0f5', '#ff5d8f'] },
+      { label: '🎨 常用色', colors: ['#5c2e3e', '#ff5d8f', '#ff5d8f', '#ffffff', '#ffcc00', '#5b7fa6', '#7d8fc9', '#4fce7e', '#5ec96f', '#ff9f0a', '#bf5af2', '#8e44ad', '#aee6fa', '#b8a6c9', '#ff8fab', '#ffcc00', '#0a84ff', '#ffb3c9', '#1a1a24', '#79bd67'] },
     ];
     function initEditorPalette() {
       const container = document.getElementById('palette-groups');
@@ -944,7 +944,7 @@
     // ---- 部件範本 (16x25 字串圖，展開成 32x50；'.' = 不動) ----
     const SKIN_TEMPLATES = {
       hat: [
-        { name: '經典紅棒球帽', map: { R: '#c2452d', D: '#c2452d', W: '#ffffff' }, rows: [
+        { name: '經典紅棒球帽', map: { R: '#ff5d8f', D: '#ff5d8f', W: '#ffffff' }, rows: [
           '................','....RRRRRRR.....','..RRRRRRRRRRR...','.RRRRRRRRRRRRR..','.DDDDDDDDDDDDDD.','....WWWW........','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
         { name: '毛帽', map: { T: '#27ae60', B: '#1e8449', W: '#ffffff' }, rows: [
           '................','...TTTTTTTTTT...','..TTTTTTTTTTTT..','..TTTTTTTTTTTT..','.TTTTTTTTTTTTTT.','.BBBBBBBBBBBBBB.','.BWBWBWBWBWBWB..','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
@@ -952,15 +952,15 @@
           '................','.KKKKKKKKKKKKKK.','..KKKKKKKKKKKK..','....KKKKKKKK....','....KKKKKKKK....','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................'] },
       ],
       clothes: [
-        { name: '學霸制服', map: { N: '#2c3e50', W: '#ffffff', R: '#c2452d', D: '#4a3220' }, rows: [
+        { name: '學霸制服', map: { N: '#7d8fc9', W: '#ffffff', R: '#ff5d8f', D: '#5c2e3e' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','...NNNNNNNNNN...','..NNNNNNNNNNNN..','..NNWWNNNNWWNN..','..NNWWNNRRNNNN..','..NNNWNRRNNNNN..','..NNNWWNNNNNNN..','..SSNNNNNNNSS...','..SSNNNNNNNSS...','....NNNNNNNN....','....NNNNNNNN....','....DDDDDDDD....','................','................','................','................'] },
-        { name: '連帽T', map: { G: '#7fa663', D: '#1e8449', W: '#f7f1e3' }, rows: [
+        { name: '連帽T', map: { G: '#5ec96f', D: '#1e8449', W: '#fff5f9' }, rows: [
           '................','................','................','................','................','................','................','................','................','....GGGGGGGG....','..GGGGGGGGGGGG..','.GGGGGGGGGGGGGG.','.GGGGGGGGGGGGGG.','.GGGGGGGGGGGGGG.','.GGGGGDDDDGGGGG.','.GGGGGDDDDGGGGG.','..SSGGGGGGSS....','..SSGGGGGGSS....','....GGGGGGGG....','....GGGGGGGG....','....DDDDDDDD....','................','................','................','................'] },
-        { name: '背心紳士', map: { W: '#ffffff', B: '#8d5a2c', D: '#6d4c41', G: '#ffcc00' }, rows: [
+        { name: '背心紳士', map: { W: '#ffffff', B: '#a15c72', D: '#6d4c41', G: '#ffcc00' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','...WWBBBBBBWW...','..WWWBBBBBBWWW..','..WWBBBBBBBBWW..','..WWBBBGGBBBB...','..WWBBBBBBBBWW..','..WWBBBBBBBBWW..','..SSBBBBBBBBSS..','..SSBBBBBBBBSS..','....BBBBBBB.....','....BBBBBBB.....','....DDDDDDD.....','................','................','................','................'] },
       ],
       shoes: [
-        { name: '紅白球鞋', map: { W: '#ffffff', R: '#c2452d', D: '#c2452d' }, rows: [
+        { name: '紅白球鞋', map: { W: '#ffffff', R: '#ff5d8f', D: '#ff5d8f' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...WWWW..WWWW...','..WWWWWWWWWWWW..','...RRRR..RRRR...','................'] },
         { name: '紳士皮鞋', map: { B: '#3c2415', D: '#1a1a24', G: '#ffcc00' }, rows: [
           '................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','................','...BBBB..BBBB...','..BBBBBBBBBBBB..','...DDDD..DDDD...','................'] },
@@ -1512,7 +1512,7 @@
         ['最親近的好友', bestFriend]
       ];
       const sum = document.getElementById('semester-summary');
-      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #c8d2cc;"><span style="color:var(--muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
+      if (sum) sum.innerHTML = rows.map(r => `<div style="display:flex; justify-content:space-between; padding:5px 2px; border-bottom:1px dashed #dcebf5;"><span style="color:var(--muted); font-weight:700;">${r[0]}</span><b>${r[1]}</b></div>`).join('');
       const cv = document.getElementById('semester-canvas');
       const dl = document.getElementById('semester-download');
       if (cv && dl) {
@@ -1520,7 +1520,7 @@
         try {
           const ctx = cv.getContext('2d');
           if (ctx) {
-            const g = ctx.createLinearGradient(0, 0, 0, 400); g.addColorStop(0, '#fff6e8'); g.addColorStop(1, '#f3e2c7');
+            const g = ctx.createLinearGradient(0, 0, 0, 400); g.addColorStop(0, '#fff6e8'); g.addColorStop(1, '#ffe9f4');
             ctx.fillStyle = g; ctx.fillRect(0, 0, 640, 400);
             ctx.strokeStyle = '#c98d54'; ctx.lineWidth = 6; ctx.strokeRect(8, 8, 624, 384);
             ctx.fillStyle = '#3c2415'; ctx.textAlign = 'center';
@@ -1802,7 +1802,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.85.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.86.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -1933,13 +1933,13 @@
         elBtnExam.disabled = true;
         elBtnExam.style.opacity = '0.55';
         elBtnExam.style.cursor = 'not-allowed';
-        elBtnExam.style.background = 'linear-gradient(135deg, #9a8d7a, #5f5f66)';
+        elBtnExam.style.background = 'linear-gradient(135deg, #b8a6c9, #8d7f9e)';
       } else {
         elBtnExam.innerText = `參加考試（預估 ${expScore} 分）${(gameState.examAttempts || 0) === 0 ? '（首次免費）' : '（$50）'}${gameState.mockBuff ? ' 模擬+' + gameState.mockBuff + '分' : ''}`; // v9.32 分數制：按鈕顯示預估成績
         elBtnExam.disabled = false;
         elBtnExam.style.opacity = '1';
         elBtnExam.style.cursor = 'pointer';
-        elBtnExam.style.background = 'linear-gradient(135deg, #c2452d, #c2452d)';
+        elBtnExam.style.background = 'linear-gradient(135deg, #d6336c, #d6336c)';
       }
     }
 
@@ -1953,13 +1953,13 @@
     }
 
     // v9.1 知識光點：學到哪一科，就冒哪一科顏色的光點
-    const SUBJECT_COLORS = { cn: '#c2452d', en: '#5b7fa6', ma: '#7fa663', sc: '#8e44ad', so: '#e09a3e' };
+    const SUBJECT_COLORS = { cn: '#ff5d8f', en: '#5b7fa6', ma: '#5ec96f', sc: '#8e44ad', so: '#ffb08a' };
     function spawnKnowledgeOrb(subKey) {
       const wrap = document.getElementById('char-wrap');
       if (!wrap) return;
       const orb = document.createElement('div');
       orb.className = 'knowledge-orb';
-      orb.style.background = SUBJECT_COLORS[subKey] || '#f2b544';
+      orb.style.background = SUBJECT_COLORS[subKey] || '#ffd43b';
       orb.style.left = (14 + Math.random() * 16) + 'px';
       wrap.appendChild(orb);
       setTimeout(() => orb.remove(), 1300);
@@ -2279,7 +2279,7 @@
       floatTxt.style.left = "50%";
       floatTxt.style.transform = "translateX(-50%)";
       floatTxt.style.background = "rgba(74, 55, 40, 0.95)";
-      floatTxt.style.color = "#f5c86a";
+      floatTxt.style.color = "#ffcf5c";
       floatTxt.style.border = "2px solid #3c2415";
       floatTxt.style.borderRadius = "8px";
       floatTxt.style.padding = "4px 10px";
@@ -2653,10 +2653,10 @@
 
       const balloonColors = [
         'linear-gradient(135deg, #e74c3c, #ff5b6a)',
-        'linear-gradient(135deg, #0a84ff, #7fd4e8)',
-        'linear-gradient(135deg, #79a95c, #8fd07a)',
+        'linear-gradient(135deg, #0a84ff, #8fd8ff)',
+        'linear-gradient(135deg, #4fce7e, #8fd07a)',
         'linear-gradient(135deg, #ff9f0a, #ffcc00)',
-        'linear-gradient(135deg, #bf5af2, #e89bb0)'
+        'linear-gradient(135deg, #bf5af2, #ffb3c9)'
       ];
       const totalBalloons = 3;
       let currentBalloonIdx = 0;
@@ -2992,7 +2992,7 @@
       const el = document.createElement('button');
       el.className = 'combo-bubble';
       el.textContent = COMBO_SUBJECT_CHARS[sub];
-      el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#f2b544';
+      el.style.background = (typeof SUBJECT_COLORS !== 'undefined' && SUBJECT_COLORS[sub]) || '#ffd43b';
       // v9.25 使用者指定：泡泡出現在建築「框架內」的隨機位置——大、好點、不被家具擋、也不會疊到老師
       const frameIds = { school: 'school-stage', store: 'store-stage', restaurant: 'rest-stage', home: 'home-stage', library: 'lib-stage' };
       const frame = document.getElementById(frameIds[currentLoc] || '') || document.getElementById('landmark-' + currentLoc) || wrap;
@@ -3117,7 +3117,7 @@
       const item = mockList[mockIdx];
       const ok = i === item.a;
       if (ok) mockScore++;
-      btn.style.background = ok ? '#79a95c' : '#ff5b6a';
+      btn.style.background = ok ? '#4fce7e' : '#ff5b6a';
       btn.style.color = '#ffffff';
       playSound(ok ? 'levelUp' : 'examFail');
       setTimeout(() => { mockIdx++; mockLock = false; if (mockIdx >= mockList.length) finishMockExam(); else renderMockQ(); }, 260);
@@ -3415,11 +3415,11 @@
     const HAT_TOP = ['................','................','................','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','.....KKKKKK.....','....GGGGGGGG....','..KKKKKKKKKKKK..','..KKKKKKKKKKKK..','................','................','................','................','................','................','................','................','................','................','................','................','................','................'];
     const GACHA_PARTS = [
       { id: 'star-hat', set: 'star', type: 'hat', name: '星空法帽', map: { T: '#26324b', B: '#2e5f8a', W: '#ffcc00' }, rows: HAT_B },
-      { id: 'star-clothes', set: 'star', type: 'clothes', name: '星空法袍', map: { N: '#26324b', W: '#f7f1e3', R: '#ffcc00', D: '#4a3220' }, rows: TOP_A },
-      { id: 'star-shoes', set: 'star', type: 'shoes', name: '星塵跑鞋', map: { W: '#f7f1e3', R: '#3a6ea5', D: '#2c3e50' }, rows: SHOE_A },
-      { id: 'sport-hat', set: 'sport', type: 'hat', name: '火焰鴨舌帽', map: { R: '#e09a3e', D: '#e65c00', W: '#ffffff' }, rows: HAT_A },
-      { id: 'sport-clothes', set: 'sport', type: 'clothes', name: '火焰背心', map: { W: '#ffffff', B: '#e09a3e', D: '#e65c00', G: '#ffe9a8' }, rows: TOP_B },
-      { id: 'sport-shoes', set: 'sport', type: 'shoes', name: '火焰跑鞋', map: { W: '#ffffff', R: '#e09a3e', D: '#e65c00' }, rows: SHOE_A },
+      { id: 'star-clothes', set: 'star', type: 'clothes', name: '星空法袍', map: { N: '#26324b', W: '#fff5f9', R: '#ffcc00', D: '#5c2e3e' }, rows: TOP_A },
+      { id: 'star-shoes', set: 'star', type: 'shoes', name: '星塵跑鞋', map: { W: '#fff5f9', R: '#3a6ea5', D: '#7d8fc9' }, rows: SHOE_A },
+      { id: 'sport-hat', set: 'sport', type: 'hat', name: '火焰鴨舌帽', map: { R: '#ffb08a', D: '#e65c00', W: '#ffffff' }, rows: HAT_A },
+      { id: 'sport-clothes', set: 'sport', type: 'clothes', name: '火焰背心', map: { W: '#ffffff', B: '#ffb08a', D: '#e65c00', G: '#ffe9a8' }, rows: TOP_B },
+      { id: 'sport-shoes', set: 'sport', type: 'shoes', name: '火焰跑鞋', map: { W: '#ffffff', R: '#ffb08a', D: '#e65c00' }, rows: SHOE_A },
       { id: 'noble-hat', set: 'noble', type: 'hat', name: '貴族禮帽', map: { K: '#1a1a24', G: '#ffcc00' }, rows: HAT_TOP },
       { id: 'noble-clothes', set: 'noble', type: 'clothes', name: '貴族西裝', map: { W: '#fff6e8', B: '#1a1a24', D: '#0f1428', G: '#ffcc00' }, rows: TOP_B },
       { id: 'noble-shoes', set: 'noble', type: 'shoes', name: '貴族皮鞋', map: { B: '#1a1a24', D: '#0f1428', G: '#ffcc00' }, rows: SHOE_B },

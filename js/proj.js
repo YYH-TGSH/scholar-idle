@@ -57,7 +57,7 @@
     }
     function box3(x, z, w, d, h, color) {
       var b = boxPolys(x, z, w, d, h);
-      var sk = '" stroke="rgba(93,64,40,0.45)" stroke-width="1.6" stroke-linejoin="round"/>';
+      var sk = '" stroke="rgba(124,74,99,0.45)" stroke-width="1.6" stroke-linejoin="round"/>';
       return '<polygon points="' + pts(b.east) + '" fill="' + shade(color, 0.6) + sk
         + '<polygon points="' + pts(b.south) + '" fill="' + color + sk
         + '<polygon points="' + pts(b.top) + '" fill="' + shade(color, 1.24) + sk;
