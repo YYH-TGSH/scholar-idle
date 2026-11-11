@@ -4060,3 +4060,14 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* ===== v9.81 V4 夜晚亮窗光：營業/住家窗由奶油玻璃轉暖琥珀＋微光暈（night-on 時） ===== */
 #town-map.night-on .bld-ext polygon[fill="#f7e8c9"] { fill: #ffcf7d; filter: drop-shadow(0 0 4px rgba(255, 190, 90, 0.85)); }
+
+/* ===== v9.82 B 批 FB 回饋動畫（class 觸發、播完移除、元素必回原狀） ===== */
+@keyframes fb-pop { 0% { transform: scale(1); } 40% { transform: scale(var(--fb-s, 1.1)); } 100% { transform: scale(1); } }
+@keyframes fb-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
+@keyframes fb-shake-l { 0%, 100% { transform: translateX(0); } 15% { transform: translateX(-9px); } 40% { transform: translateX(8px); } 65% { transform: translateX(-5px); } 85% { transform: translateX(3px); } }
+@keyframes fb-float-up { 0% { opacity: 0; transform: translate(-50%, 2px); } 18% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -26px); } }
+.fb-pop-s, .fb-pop-m, .fb-pop-l { animation: fb-pop 0.3s var(--ease-std); }
+.fb-shake-s { animation: fb-shake 0.32s linear; }
+.fb-shake-l { animation: fb-shake-l 0.45s linear; }
+.fb-anchor { position: relative; }
+.fb-float { position: absolute; left: 50%; top: -6px; transform: translate(-50%, 2px); color: var(--moss); font-weight: 900; pointer-events: none; animation: fb-float-up 0.95s ease-out forwards; white-space: nowrap; }

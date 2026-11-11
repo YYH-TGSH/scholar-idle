@@ -30,6 +30,15 @@
       if (typeof createFloatingText === 'function') createFloatingText(soundEnabled ? '🔊 音效已開啟' : '🔇 音效已關閉');
     }
 
+    // ✨ 特效開關 (v9.82 B 批，設定抽屜可切換；與 FB 中央回饋層共用 SafeStore 旗標)
+    function toggleFx() {
+      const now = SafeStore.get('scholar_fx_enabled') !== 'off';
+      SafeStore.set('scholar_fx_enabled', now ? 'off' : 'on');
+      const btn = document.getElementById('btn-fx-toggle');
+      if (btn) btn.innerText = !now ? '✨ 特效：開' : '✨ 特效：關';
+      if (typeof createFloatingText === 'function') createFloatingText(!now ? '✨ 特效已開啟' : '✨ 特效已關閉');
+    }
+
     // 🎓 v8.2 新手引導：只對全新玩家顯示一次
     function maybeShowOnboarding() {
       try {
@@ -1230,6 +1239,7 @@
         const reward = (ach.category === 'academic' ? 120 : (ach.category === 'economy' ? 150 : 80)) + (ach.hidden ? 70 : 0);
         if (typeof gameState !== 'undefined' && gameState) { gameState.money = (gameState.money || 0) + reward; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + reward; }
         showAchievementToast(ach, reward);
+        if (typeof FB !== 'undefined' && FB.achievement) FB.achievement();
       }
     }
 

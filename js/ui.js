@@ -1381,6 +1381,52 @@
       }
     }
 
+    // ===== v9.82 B 批 game-feel 中央回饋層 FB：事件→tier 分級回饋（class 動畫、必回原狀、可全關） =====
+    const FB = (() => {
+      let lastMoney = null;
+      const on = () => { try { return SafeStore.get('scholar_fx_enabled') !== 'off'; } catch (e) { return true; } };
+      function fire(el, cls, ms) {
+        if (!el || !on()) return false;
+        el.classList.remove('fb-pop-s', 'fb-pop-m', 'fb-pop-l', 'fb-shake-s', 'fb-shake-l');
+        void el.offsetWidth;
+        el.classList.add(cls);
+        setTimeout(() => { el.classList.remove(cls); el.style.removeProperty('--fb-s'); }, ms || 480);
+        return true;
+      }
+      function pop(el, tier) {
+        if (!el) return false;
+        el.style.setProperty('--fb-s', tier === 'L' ? '1.22' : tier === 'M' ? '1.14' : '1.08');
+        return fire(el, 'fb-pop-' + (tier || 'S').toLowerCase(), 480);
+      }
+      function shake(el, tier) { return fire(el, tier === 'L' ? 'fb-shake-l' : 'fb-shake-s', 520); }
+      function floatAt(el, text) {
+        if (!el || !on()) return false;
+        el.classList.add('fb-anchor');
+        const sp = document.createElement('span');
+        sp.className = 'fb-float'; sp.textContent = text;
+        el.appendChild(sp);
+        setTimeout(() => sp.remove(), 980);
+        return true;
+      }
+      function freeze(ms) { if (!on()) return false; window.__FB_FREEZE_UNTIL = Date.now() + Math.min(ms || 100, 130); return true; }
+      function moneyTick(v) {
+        if (lastMoney === null) { lastMoney = v; return; }
+        const d = v - lastMoney; lastMoney = v;
+        if (d > 0 && on()) { const b = elMoneyVal ? elMoneyVal.closest('.status-badge') : null; pop(b, 'S'); floatAt(b, '+$' + d); }
+      }
+      function exam(passed, distinction) {
+        const card = document.getElementById('modal-desc') ? document.getElementById('modal-desc').closest('.game-modal') : null;
+        if (!card) return;
+        if (passed) { pop(card, 'M'); if (distinction) { freeze(110); shake(card, 'L'); } }
+        else shake(card, 'S');
+      }
+      function achievement() {
+        const t = document.querySelectorAll('.achievement-toast');
+        if (t.length) pop(t[t.length - 1], 'M');
+      }
+      return { on, pop, shake, floatAt, freeze, moneyTick, exam, achievement };
+    })();
+
     function finishExam(passRate, nextGradeName) {
       gameState.mockBuff = 0; // v9.3 模擬考加成：用於本次考試後失效
       const score = rollExamScore(); // v9.32 分數制：成績由知識決定
@@ -1442,6 +1488,7 @@
         gameState.examCooldownEndMinute = gameState.minute;
       }
 
+      if (typeof FB !== 'undefined') FB.exam(score >= passMark, score >= passMark + 25);
       if (btnClose) btnClose.style.display = "inline-block";
       updateUI();
       saveGameData();
@@ -1681,6 +1728,7 @@
       if (typeof refreshMoneySinks === 'function') refreshMoneySinks();
       elGradeTitle.innerHTML = icoText(GRADES[gameState.gradeIndex].name);
       elMoneyVal.innerText = '$' + gameState.money;
+      if (typeof FB !== 'undefined') FB.moneyTick(gameState.money);
 
       // 更新背包顯示（含心靈書）
       elBagChicken.innerText = gameState.bag.chicken;
@@ -1754,7 +1802,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.81.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.82.0) | 上次存檔：${ts}`);
       }
     }
 
