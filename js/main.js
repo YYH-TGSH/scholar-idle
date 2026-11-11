@@ -309,6 +309,24 @@
       if (layoutMapInsets._last !== top + '/' + bottom) { layoutMapInsets._last = top + '/' + bottom; rootEl.style.setProperty('--chrome-top', top + 'px'); rootEl.style.setProperty('--chrome-bottom', bottom + 'px'); } // v9.77 A批：值沒變不寫（resize 連續觸發時避免重複 style 寫入）
     }
 
+    // R1 版面系統（remake-layout 定版）：模式判定與基準縮放的單一來源。
+    // phone＝跟隨鏡頭約兩棟；wide＝六棟全入鏡；ultrawide＝置中＋柔底延伸（縮放封頂、不拉伸）。
+    const Layout = {
+      mode: 'phone',
+      fit(availW, availH) {
+        const vw = window.innerWidth || availW, vh = window.innerHeight || availH;
+        const landscapePhone = vw > vh && vh <= 520;
+        const wide = vw > 820 && !landscapePhone;
+        this.mode = !wide ? 'phone' : (vw >= 2200 || vw / Math.max(vh, 1) >= 2.1) ? 'ultrawide' : 'wide';
+        try { document.body.dataset.layout = this.mode; } catch (e) { }
+        const _ww = (typeof WORLD_PW !== 'undefined') ? WORLD_PW : 1715;
+        const _wh = (typeof WORLD_PH !== 'undefined') ? WORLD_PH : 650;
+        const f = wide ? Math.min(availW / _ww, availH / _wh, 1.25) : Math.min(availW / 980, availH / 520, 1.25);
+        window.__LAYOUT__ = { mode: this.mode, fit: f };
+        return f;
+      }
+    };
+    window.Layout = Layout;
     function resizeMapScale() {
       layoutMapInsets();
       const vp = document.getElementById("map-viewport");
@@ -323,10 +341,7 @@
       // 不再放大溢出。想看細節用雙指縮放，或點底部房間膠囊直接放大跳到那一間。
       // v9.0 橫向捲軸：基準縮放讓畫面約涵蓋 720px 寬的世界 (約 2.3 棟建築)，其餘靠跟隨相機/拖曳探索
       // v9.46 寬版改 fit-to-world（實機報告 A2）：舊公式分母停在舊世界 720x560，新世界 1150x920 在寬螢幕被系統性放大裁切（1600x900 開局裁掉約 27% 高度）
-      const _wideFit = window.innerWidth > 820 && !(window.innerWidth > window.innerHeight && window.innerHeight <= 520);
-      const _ww = (typeof WORLD_PW !== 'undefined') ? WORLD_PW : 1715; // v9.55 fit 以投影後尺寸重算（R2）
-      const _wh = (typeof WORLD_PH !== 'undefined') ? WORLD_PH : 650;
-      const fit = _wideFit ? Math.min(availW / _ww, availH / _wh, 1.25) : Math.min(availW / 980, availH / 520, 1.25); // v9.55 非寬版基準改投影尺度（約涵蓋 2 棟建築寬）
+      const fit = Layout.fit(availW, availH);
       let scale = Math.max(Math.min(fit, 1.25), 0.15);
       window.__baseMapScale = scale;
       try { if (mapZoom === 1) { mapPanX = 0; mapPanY = 0; } } catch (e) { }
@@ -1431,7 +1446,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.86.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.87.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

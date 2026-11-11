@@ -897,20 +897,6 @@ body {
         display: none !important;
       }
 
-      /* 確保 overlay 完全貼合視窗可視範圍，解決大寬度文檔引起的偏位跑出螢幕問題 */
-      .overlay {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        z-index: 99999 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-      }
 
       /* 限制 game-modal 在手機上的最大寬度與內邊距，防止跑出螢幕 */
       .game-modal {
@@ -1961,20 +1947,23 @@ body {
     /* ==========================================
        升學考試挑戰 Modal (Glassmorphism Overlay)
        ========================================== */
+    /* R1 CSS 手術：.overlay 三規則合併為一（原 901 行 !important 定位＋此處 opacity 機制＋尾端背景覆寫） */
     .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(var(--rgb-black), 0.3);
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 99999 !important;
+      background: var(--overlay);
       /* 蘋果風半透明黑色遮罩 */
       
       
-      z-index: 200;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.4s var(--ease-std);
@@ -3963,7 +3952,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
    v9.58 UI 換代元件（世界聖經 §4：FAB 單色系／關閉鈕單一元件／按鈕工具類／遮罩單一值）
    ============================================================ */
 .control-fab { background: var(--paper); color: var(--ink2); border: 2px solid var(--cocoa); box-shadow: var(--sh-hard-sm); }
-.overlay { background: var(--overlay); }
 .modal-close, .drawer-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; min-width: 40px; min-height: 40px; padding: 8px; color: var(--ink2); border-radius: var(--r-pill); }
 .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
 .btn-xs { padding: 6px 10px; font-size: 0.78rem; }

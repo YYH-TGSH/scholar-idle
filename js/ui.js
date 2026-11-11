@@ -66,7 +66,6 @@
       const c = document.querySelector('.floating-controls');
       if (c && c.classList.contains('fab-open')) { c.classList.remove('fab-open'); fabMenuSync(false); }
     }
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFabMenu(); });
     function toggleFabMenu(e) {
       if (e) e.stopPropagation();
       const c = document.querySelector('.floating-controls');
@@ -116,7 +115,6 @@
       if (!bd) return;
       bd.classList.toggle("show", !!document.querySelector(".drawer-panel.open"));
     }
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAllDrawers(); });
 
 
     // ==========================================
@@ -564,19 +562,51 @@
       saveGameData();
     }
 
-    // v9.77 A批（game-ui-ux 堆疊修正）：Escape 關最上層「可自由關閉」的 modal
-    // ——只有內含 .modal-close（使用者可自行關閉）的 overlay 才處理；事件/登入/引導類
-    // overlay 沒有該鈕、必須做完選擇，Escape 不介入。走該 modal 自己的關閉鈕，
-    // 讓存檔等副作用照原路徑執行。輸入框聚焦時不攔截。
+    // R1 Screen Manager：畫面註冊表——14 overlay＋5 抽屜＋FS 全登記，疊序/開關/Esc 統一於此。
+    // esc:'close' 僅限內含 .modal-close 的 overlay（可自由關閉）；決策/強制型一律 ignore。
+    const Screens = {
+      entries: [],
+      build() {
+        this.entries = [];
+        document.querySelectorAll('.overlay').forEach(el => {
+          this.entries.push({ id: el.id, el, kind: 'overlay', esc: el.querySelector('.modal-close') ? 'close' : 'ignore' });
+        });
+        ['drawer-status', 'drawer-build', 'drawer-friends', 'drawer-shop', 'drawer-settings'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) this.entries.push({ id, el, kind: 'drawer', esc: 'ignore' });
+        });
+        const fsEl = document.getElementById('fs-view');
+        if (fsEl) this.entries.push({ id: 'fs-view', el: fsEl, kind: 'layer', esc: 'ignore' });
+        return this.entries;
+      },
+      list() { if (!this.entries.length) this.build(); return this.entries; },
+      isOpen(en) { return en.kind === 'drawer' ? en.el.classList.contains('open') : en.el.classList.contains('active'); },
+      closeTop() {
+        // 可關條件：overlay 開著、且其 .modal-close 此刻可見（minigame 的完成鈕未完賽前是
+        // d-none——A 批的「存在即算」會誤點隱藏鈕，此處以可見性為準）。
+        const open = this.list().filter(en => {
+          if (en.esc !== 'close' || !this.isOpen(en)) return false;
+          const b = en.el.querySelector('.modal-close');
+          return b && !b.classList.contains('d-none');
+        });
+        if (!open.length) return false;
+        const top = open[open.length - 1];
+        const btn = top.el.querySelector('.modal-close');
+        if (btn) btn.click(); else top.el.classList.remove('active');
+        return true;
+      }
+    };
+    window.Screens = Screens;
+    // Esc 統一（收編 v9.77 A 批 modal 規則與抽屜/FAB 兩條舊 listener 至單一入口）：
+    // modal 走註冊表關最上層一張（走自己的關閉鈕、副作用照原路徑）；抽屜/FAB 維持既有
+    // 「Esc 全清」行為（v9.49 契約）。輸入框聚焦不攔截。
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      const open = [...document.querySelectorAll('.overlay.active')];
-      for (let i = open.length - 1; i >= 0; i--) {
-        const btn = open[i].querySelector('.modal-close');
-        if (btn) { btn.click(); return; }
-      }
+      Screens.closeTop();
+      if (document.querySelector('.drawer-panel.open')) closeAllDrawers();
+      closeFabMenu();
     });
 
     function switchWardrobeTab(type) {
@@ -1802,7 +1832,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.86.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.87.0) | 上次存檔：${ts}`);
       }
     }
 
