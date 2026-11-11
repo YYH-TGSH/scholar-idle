@@ -137,6 +137,8 @@
       if (currentLoc === 'restaurant' && targetLoc !== 'restaurant') { gameState.currentX = DOOR_X.restaurant; gameState.currentY = DOOR_FRONT_Y.restaurant; } // v9.18：離開餐廳先回到門口再出發
       if (currentLoc === 'school' && targetLoc !== 'school') { gameState.currentX = DOOR_X.school; gameState.currentY = DOOR_FRONT_Y.school; } // v9.25.1：離開學校先回到校門口再出發（v9.21 室內化漏了這條——主角原本從教室座位座標瞬移，把教室座標當世界座標走出幽靈路徑）
       if (currentLoc === 'library' && targetLoc !== 'library') { gameState.currentX = DOOR_X.library; gameState.currentY = DOOR_FRONT_Y.library; } // v9.26：離開圖書館先回到門口再出發（新室內上線清單）
+      if (currentLoc === 'club' && targetLoc !== 'club') { gameState.currentX = DOOR_X.school; gameState.currentY = DOOR_FRONT_Y.school; } // v9.73：離開社團室先回學校大門（補 v9.25.1 同型缺口）
+      if (currentLoc === 'study' && targetLoc !== 'study') { gameState.currentX = DOOR_X.school; gameState.currentY = DOOR_FRONT_Y.school; } // v9.73：離開自習室同規
       if (currentLoc === 'gym' && targetLoc !== 'gym') { gameState.currentX = DOOR_X.gym; gameState.currentY = DOOR_FRONT_Y.gym; } // v9.27：離開操場先回到門口再出發（新室內上線清單）
       if (gameState.isCommuting) return; // v9.1：通勤中不改道——大腦每 tick 都在決策，沒這道防線會半路重建路徑、把小人拉回起點門口 (測試實測會半路改去別棟)
       const pts = buildCommutePath(currentLoc, targetLoc);
@@ -519,6 +521,7 @@
       if (typeof updateLibraryStage === 'function') updateLibraryStage(); // v9.26
       if (typeof updateClubStage === 'function') updateClubStage(); // v9.65 學校 3F
       if (typeof updateStudyStage === 'function') updateStudyStage(); // v9.72 學校 2F 自習室
+      if (typeof syncSpotBar === 'function') syncSpotBar(); // v9.73 室內地點條
       if (typeof updateGymStage === 'function') updateGymStage(); // v9.27
 
       // 4. 行為決策
@@ -577,6 +580,65 @@
     // ------------------------------------------
     // 作息大腦
     // ------------------------------------------
+    // ================= v9.73 室內互動（體驗巡迴 R1 §7 P4）：地點覆寫 + 校內跨層步行 =================
+    const SPOT_GROUP = { school: ['school', 'study', 'club'], home: ['home'], gym: ['gym'], library: ['library'] };
+    function spotPhaseKey() { return (gameState.totalGameDays || 0) + '|' + (gameState.hour || 0) + '|' + (typeof schoolPhaseNow === 'function' ? (schoolPhaseNow() || '') : ''); }
+    const SPOT_DEFS = {
+      classroom: { group: 'school', label: '教室', loc: 'school', state: 'studying', pt: () => COORDS['school-class'] },
+      studyroom: { group: 'school', label: '自習室', loc: 'study', state: 'studying', pt: () => COORDS['study-study'] },
+      clubroom: { group: 'school', label: '社團室', loc: 'club', state: 'idle', pt: () => ({ x: 560, y: 208 }) },
+      rest: { group: 'school', label: '休息', loc: 'school', state: 'idle', pt: () => { const bs = (typeof BREAK_SPOTS !== 'undefined' && (BREAK_SPOTS.find(b => b.mode === 'rest') || BREAK_SPOTS[0])) || { x: 575, y: 252 }; return { x: bs.x, y: bs.y }; } },
+      eat: { group: 'home', label: '吃飯', loc: 'home', state: 'dinner', floor: 1, pt: () => COORDS['home-dinner'] },
+      bed: { group: 'home', label: '我的床', loc: 'home', state: 'sleeping', floor: 2, pt: () => COORDS['home-sleep'] },
+      parents: { group: 'home', label: '爸媽房', loc: 'home', state: 'idle', floor: 2, pt: () => ({ x: 165, y: 208 }) },
+      run: { group: 'gym', label: '跑步', loc: 'gym', state: 'sports', pt: () => COORDS['gym-run'] },
+      shoot: { group: 'gym', label: '投籃', loc: 'gym', state: 'idle', shoot: true, pt: () => ({ x: 900, y: 215 }) },
+      read: { group: 'library', label: '閱覽座位', loc: 'library', state: 'studying', pt: () => COORDS['library-study'] }
+    };
+    function setSpot(key) {
+      const def = SPOT_DEFS[key];
+      if (!def) return;
+      if (!SPOT_GROUP[def.group].includes(currentLoc) || gameState.isCommuting) return;
+      const p = def.pt();
+      gameState._spot = { key: key, group: def.group, loc: def.loc, state: def.state, floor: def.floor || 0, shoot: !!def.shoot, shotDone: false, x: p.x, y: p.y, phaseKey: spotPhaseKey(), oa: gameState.overrideAction || null };
+      if (def.loc !== currentLoc) playerIndoorGo(def.loc, p);
+      if (typeof playSound === 'function') playSound('click');
+      if (typeof syncSpotBar === 'function') syncSpotBar();
+    }
+    window.setSpot = setSpot;
+    function playerIndoorGo(targetLoc, destPt) {
+      const steps = [];
+      const inSch = (typeof SCHOOL_GROUP !== 'undefined') && SCHOOL_GROUP[currentLoc] && SCHOOL_GROUP[targetLoc];
+      if (inSch && currentLoc !== targetLoc) {
+        steps.push({ loc: currentLoc, x: STAIR_PT.x, y: STAIR_PT.y });
+        steps.push({ loc: targetLoc, x: STAIR_PT.x, y: STAIR_PT.y });
+      }
+      steps.push({ loc: targetLoc, x: destPt.x, y: destPt.y });
+      gameState._go = { steps: steps, i: 0, at: 0, target: targetLoc };
+    }
+    function stepIndoorGo() {
+      const go = gameState._go;
+      if (!go) return;
+      const now = performance.now();
+      if (now < go.at) return;
+      const st = go.steps[go.i];
+      if (!st) { gameState._go = null; gameState._goSpot = null; return; }
+      if (st.loc !== currentLoc) currentLoc = st.loc;
+      gameState._goSpot = { loc: st.loc, x: st.x, y: st.y };
+      go.i++;
+      go.at = now + 620;
+      if (go.i >= go.steps.length) { gameState._go = null; gameState._goSpot = null; }
+    }
+    function spotTick() {
+      stepIndoorGo();
+      const sp = gameState._spot;
+      if (!sp) return;
+      if (sp.phaseKey !== spotPhaseKey()) { gameState._spot = null; gameState._go = null; gameState._goSpot = null; return; }
+      if ((gameState.overrideAction || null) !== sp.oa) { gameState._spot = null; gameState._go = null; gameState._goSpot = null; return; }
+      if (!SPOT_GROUP[sp.group].includes(currentLoc) && !gameState.isCommuting) { gameState._spot = null; gameState._go = null; gameState._goSpot = null; return; } // 離棟（含步行途中被派遣帶走）即清，連帶取消室內步行
+      if (sp.shoot && !sp.shotDone && currentLoc === 'gym' && !gameState._go) { sp.shotDone = true; if (typeof playerShoot === 'function') playerShoot(); }
+    }
+
     function decideLocationAndState() {
       const isWeekend = (gameState.dayOfWeek === 6 || gameState.dayOfWeek === 7);
       let targetLoc = currentLoc;
@@ -717,6 +779,8 @@
         targetLoc = "school"; // 平日上課時間強制去學校
       }
 
+      spotTick(); // v9.73 室內互動：覆寫清查（課表切段/新派遣/離棟）與室內步行推進
+      if (gameState._spot && SPOT_GROUP[gameState._spot.group].includes(currentLoc)) targetLoc = gameState._spot.loc; // v9.73 地點覆寫優先於排程
       if (gameState.isCommuting) {
         currentState = "commuting";
         return;
@@ -728,7 +792,10 @@
       }
       if (gameState.noodleUntil) targetLoc = 'store'; // v9.16 吃泡麵中：留在超商
       if (currentLoc === targetLoc) {
-        if (currentLoc === "school") {
+        if (gameState._spot && gameState._spot.loc === currentLoc && !gameState._go) {
+          currentState = gameState._spot.state; // v9.73 室內互動：覆寫行為
+        }
+        else if (currentLoc === "school") {
           currentState = (gameState.stress >= 85) ? "angry" : ((typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') ? "idle" : "studying"); // v9.12 下課離席放鬆
         }
         else if (currentLoc === "gym") {
@@ -754,11 +821,18 @@
       }
       else {
         // v9.0：通勤時間由真實路徑長度決定 (出門→馬路→進門)，見 startCommuteTo
-        startCommuteTo(targetLoc);
+        if ((typeof SCHOOL_GROUP !== 'undefined') && SCHOOL_GROUP[currentLoc] && SCHOOL_GROUP[targetLoc] && (!gameState._go || gameState._go.target !== targetLoc)) {
+          const _dp = (gameState._spot && gameState._spot.loc === targetLoc) ? { x: gameState._spot.x, y: gameState._spot.y } : (COORDS[targetLoc + '-idle'] || COORDS['home-idle']);
+          playerIndoorGo(targetLoc, _dp); // v9.73 學校棟內換層走樓梯，不出門繞路
+        } else if (!(typeof SCHOOL_GROUP !== 'undefined' && SCHOOL_GROUP[currentLoc] && SCHOOL_GROUP[targetLoc])) {
+          startCommuteTo(targetLoc);
+        }
       }
     }
 
     function getCharacterCoords(loc, state) {
+      if (gameState._goSpot && gameState._goSpot.loc === loc) return { x: gameState._goSpot.x, y: gameState._goSpot.y }; // v9.73 室內步行中
+      if (gameState._spot && gameState._spot.loc === loc && !gameState._go) return { x: gameState._spot.x, y: gameState._spot.y }; // v9.73 地點覆寫
       if (loc === 'home') {
         if (state === 'sleeping') return COORDS['home-sleep'];
         if (state === 'dinner') return COORDS['home-dinner']; // v9.13
@@ -1355,7 +1429,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.72.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.73.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

@@ -1462,7 +1462,7 @@
       if (!stage) return;
       const rooms = document.getElementById('home-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && !gameState.isCommuting;
-      const playerHere = playerIn && currentState !== 'sleeping'; // v9.66 睡覺時主角本人在 2F（updateHome2Stage 接手）
+      const playerHere = playerIn && currentState !== 'sleeping' && !(gameState._spot && gameState._spot.floor === 2); // v9.66 睡覺時主角本人在 2F（updateHome2Stage 接手）；v9.73 爸媽房覆寫同理
       if (playerIn !== _homeWasIn) { _homePanManual = null; _homeWasIn = playerIn; } // 進出家門 → 回到自動跟隨
       const cw = document.getElementById('char-wrap');
       if (playerHere) {
@@ -1504,7 +1504,7 @@
         const want = anySleep ? 'block' : 'none';
         if (parBlanket.style.display !== want) parBlanket.style.display = want;
       }
-      applyHomeFloors((playerIn && currentState === 'sleeping') ? 2 : 1); // v9.66 樓層疊層跟著主角睡/醒切換
+      applyHomeFloors((playerIn && (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2))) ? 2 : 1); // v9.66 樓層疊層跟著主角睡/醒；v9.73 爸媽房覆寫錨 2F切換
     }
 
     // ================= v9.66 住家 2F 臥室層（多樓層批次 B2：平面圖同 1F，臥室上樓、棉被隨遷） =================
@@ -1766,6 +1766,45 @@
       if (gameState.isCommuting) return floors.indexOf(gameState.commuteStart) >= 0 && floors.indexOf(gameState.commuteTarget) >= 0;
       return floors.indexOf(currentLoc) >= 0;
     }
+    // ================= v9.73 室內地點條（體驗巡迴 R1 §7 P4） =================
+    const SPOT_BAR_DEFS = [
+      { group: 'school', keys: ['classroom', 'studyroom', 'clubroom', 'rest'] },
+      { group: 'home', keys: ['eat', 'bed', 'parents'] },
+      { group: 'gym', keys: ['run', 'shoot'] },
+      { group: 'library', keys: ['read'] }
+    ];
+    function syncSpotBar() {
+      let bar = document.getElementById('spot-bar');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'spot-bar';
+        bar.dataset.g = '';
+        bar.addEventListener('click', (e) => { const b = e.target.closest('[data-spot]'); if (b) { e.stopPropagation(); if (typeof setSpot === 'function') setSpot(b.dataset.spot); } });
+        bar.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+        document.body.appendChild(bar);
+      }
+      const grp = (typeof SPOT_GROUP !== 'undefined' && typeof currentLoc !== 'undefined') ? Object.keys(SPOT_GROUP).find(g => SPOT_GROUP[g].includes(currentLoc)) : null;
+      const show = !!grp && !gameState.isCommuting;
+      if (!show) { if (bar.dataset.g !== '') { bar.dataset.g = ''; bar.style.display = 'none'; bar.innerHTML = ''; } return; }
+      let activeKey = gameState._spot ? gameState._spot.key : null;
+      if (!activeKey) {
+        if (currentLoc === 'school' && currentState === 'studying') activeKey = 'classroom';
+        else if (currentLoc === 'study') activeKey = 'studyroom';
+        else if (currentLoc === 'club') activeKey = 'clubroom';
+        else if (currentLoc === 'home' && currentState === 'dinner') activeKey = 'eat';
+        else if (currentLoc === 'home' && currentState === 'sleeping') activeKey = 'bed';
+        else if (currentLoc === 'gym' && currentState === 'sports') activeKey = 'run';
+        else if (currentLoc === 'library' && currentState === 'studying') activeKey = 'read';
+      }
+      const def = SPOT_BAR_DEFS.find(d => d.group === grp);
+      if (!def || typeof SPOT_DEFS === 'undefined') return;
+      const sig = grp + '|' + (activeKey || '');
+      if (bar.dataset.g === sig) return;
+      bar.dataset.g = sig;
+      bar.style.display = 'flex';
+      bar.innerHTML = def.keys.map(k => '<button type="button" class="spot-chip' + (k === activeKey ? ' on' : '') + '" data-spot="' + k + '">' + SPOT_DEFS[k].label + '</button>').join('');
+    }
+
     function fsWant(key, on) {
       if (!on) {
         _fsWants[key] = false;
@@ -1849,7 +1888,7 @@
       const stage = document.getElementById('home2-stage');
       if (!stage) return;
       const rooms = document.getElementById('home2-rooms');
-      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && currentState === 'sleeping' && !gameState.isCommuting;
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2)) && !gameState.isCommuting; // v9.73 爸媽房覆寫也在 2F
       if (playerIn !== _home2WasIn) { _home2PanManual = null; _home2WasIn = playerIn; }
       const cw = document.getElementById('char-wrap');
       if (playerIn) {
