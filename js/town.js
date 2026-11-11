@@ -625,21 +625,21 @@
 
     // ================= v9.8 精緻化：座位池＋門口排隊＋全員步行職員＋爸媽 =================
     const NPC_DEFS = [
-      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 300, speed: 68, palette: { hair: '#e3ac2e', outfit: '#4a7ca5', shorts: '#46586a', skin: '#fed7aa' }, say: ['「這週的獎學金，我先預約了。」', '「我準備好了，你呢？」'] },
-      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 820, speed: 62, palette: { hair: '#e2a0b4', outfit: '#e0685f', shorts: '#5a5049', skin: '#fed7aa', hairStyle: 'long' }, say: ['「嘻嘻，我好像比較快喔～」', '「我隨時可以考囉！」'] },
-      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1080, speed: 58, palette: { hair: '#2f5d3a', outfit: '#7fa663', shorts: '#2f5d3a', skin: '#c98d54' }, say: ['「一步一腳印，我先到了。」', '「準備完成，等你一起考。」'] },
-      { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#2a2320', outfit: '#527fa8', shorts: '#9a6bb5', skin: '#fed7aa', hairStyle: 'long' }, spots: ['school', 'library'], say: ['「一起加油！」', '「今天也要坐第一排！」'] },
-      { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#6d4c41', skin: '#d9a066', cap: ['#e67e22', '#e65c00', '#a93226'] }, spots: ['gym', 'restaurant'], say: ['「打完球吃雞排最爽！」', '「要不要一起跑兩圈？」'] },
-      { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#6d4c41', outfit: '#9a6bb5', shorts: '#4a4038', skin: '#f0b98a', hairStyle: 'bun' }, spots: ['library', 'store'], say: ['「圖書館角落最安靜。」', '「送你一句讀書秘訣。」'] },
-      { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#a93226', skin: '#f0b98a', cap: ['#f2b544', '#d98e32', '#ca6f1e'] }, spots: ['restaurant', 'store'], say: ['「這家超好吃！」', '「我請客，別客氣！」'] },
-      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 560, speed: 62, palette: { hair: '#6b5d4f', outfit: '#46586a', shorts: '#46586a', skin: '#f0b98a' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: ['「上課認真！」', '「這題考試會考。」'] },
-      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 950, speed: 60, palette: { hair: '#3c2415', outfit: '#79a95c', shorts: '#5f7d5a', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: ['「叮咚！歡迎光臨！」', '「關東煮很好吃喔！」'] },
-      { key: 'librarian', kind: 'staff', name: '小林', homeX: 430, speed: 60, palette: { hair: '#2a2320', outfit: '#7d9dbd', shorts: '#4a6f8f', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: ['「請保持安靜喔。」', '「這本書很推薦！」'] },
-      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 700, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#b04a32', skin: '#d9a066', cap: ['#ffffff', '#c8d2cc', '#cfc4b0'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: ['「拉麵現煮中！」', '「鐵板燒好了！」'] },
-      { key: 'coach', kind: 'staff', name: '阿力', homeX: 880, speed: 85, palette: { hair: '#3c2415', outfit: '#c2452d', shorts: '#46586a', skin: '#c98d54', headband: '#c2452d' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: ['「跑起來！」', '「再兩圈！」'] },
-      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1010, speed: 60, palette: { hair: '#2a2320', outfit: '#9a6bb5', shorts: '#3c2415', skin: '#d9a066', headband: '#9a6bb5' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: ['「大夜班，歡迎光臨。」', '「關東煮還有喔。」', '「泡麵配窗邊，深夜限定。」'] },
-      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2a2320', outfit: '#46586a', shorts: '#6d4c41', skin: '#f0b98a' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: ['「早點睡，別熬夜。」', '「考試加油！」'] },
-      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#9a6bb5', outfit: '#c2452d', shorts: '#9a6bb5', skin: '#fed7aa', hairStyle: 'bun' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: ['「飯煮好了，快來吃。」', '「天冷了多穿點。」'] },
+      { key: 'jie', kind: 'rival', name: '王子傑', homeX: 300, speed: 68, palette: { hair: '#e3ac2e', outfit: '#4a7ca5', shorts: '#46586a', skin: '#fed7aa' }, say: DLG.npc.jie },
+      { key: 'kui', kind: 'rival', name: '陳小葵', homeX: 820, speed: 62, palette: { hair: '#e2a0b4', outfit: '#e0685f', shorts: '#5a5049', skin: '#fed7aa', hairStyle: 'long' }, say: DLG.npc.kui },
+      { key: 'shu', kind: 'rival', name: '高大樹', homeX: 1080, speed: 58, palette: { hair: '#2f5d3a', outfit: '#7fa663', shorts: '#2f5d3a', skin: '#c98d54' }, say: DLG.npc.shu },
+      { key: 'xiaoxuan', kind: 'friend', name: '林曉萱', speed: 60, palette: { hair: '#2a2320', outfit: '#527fa8', shorts: '#9a6bb5', skin: '#fed7aa', hairStyle: 'long' }, spots: ['school', 'library'], say: DLG.npc.xiaoxuan },
+      { key: 'dameng', kind: 'friend', name: '陳大猛', speed: 72, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#6d4c41', skin: '#d9a066', cap: ['#e67e22', '#e65c00', '#a93226'] }, spots: ['gym', 'restaurant'], say: DLG.npc.dameng },
+      { key: 'yuqing', kind: 'friend', name: '蘇語晴', speed: 55, palette: { hair: '#6d4c41', outfit: '#9a6bb5', shorts: '#4a4038', skin: '#f0b98a', hairStyle: 'bun' }, spots: ['library', 'store'], say: DLG.npc.yuqing },
+      { key: 'xiaohao', kind: 'friend', name: '王小豪', speed: 58, palette: { hair: '#3c2415', outfit: '#e67e22', shorts: '#a93226', skin: '#f0b98a', cap: ['#f2b544', '#d98e32', '#ca6f1e'] }, spots: ['restaurant', 'store'], say: DLG.npc.xiaohao },
+      { key: 'teacher', kind: 'staff', name: '王老師', homeX: 560, speed: 62, palette: { hair: '#6b5d4f', outfit: '#46586a', shorts: '#46586a', skin: '#f0b98a' }, work: 'school', spot: { x: 575, y: 134 }, shift: { days: 'weekday', start: 480, end: 960 }, say: DLG.npc.teacher },
+      { key: 'clerk', kind: 'staff', name: '小惠', homeX: 950, speed: 60, palette: { hair: '#3c2415', outfit: '#79a95c', shorts: '#5f7d5a', skin: '#fed7aa', hairStyle: 'bun' }, work: 'store', spot: { x: 880, y: 150 }, shift: { days: 'daily', start: 480, end: 1320 }, say: DLG.npc.clerk },
+      { key: 'librarian', kind: 'staff', name: '小林', homeX: 430, speed: 60, palette: { hair: '#2a2320', outfit: '#7d9dbd', shorts: '#4a6f8f', skin: '#fed7aa', hairStyle: 'bun' }, work: 'library', spot: { x: 575, y: 138 }, shift: { days: 'daily', start: 480, end: 1260 }, say: DLG.npc.librarian },
+      { key: 'chef', kind: 'staff', name: '阿火師', homeX: 700, speed: 62, palette: { hair: '#1a1a24', outfit: '#ffffff', shorts: '#b04a32', skin: '#d9a066', cap: ['#ffffff', '#c8d2cc', '#cfc4b0'] }, work: 'restaurant', spot: { x: 300, y: 143 }, shift: { days: 'daily', start: 420, end: 1320 }, say: DLG.npc.chef },
+      { key: 'coach', kind: 'staff', name: '阿力', homeX: 880, speed: 85, palette: { hair: '#3c2415', outfit: '#c2452d', shorts: '#46586a', skin: '#c98d54', headband: '#c2452d' }, work: 'gym', spot: { x: 620, y: 120 }, shift: { days: 'daily', oncall: true }, say: DLG.npc.coach },
+      { key: 'clerk2', kind: 'staff', name: '阿哲', homeX: 1010, speed: 60, palette: { hair: '#2a2320', outfit: '#9a6bb5', shorts: '#3c2415', skin: '#d9a066', headband: '#9a6bb5' }, work: 'store', spot: { x: 990, y: 150 }, shift: { days: 'daily', start: 1320, end: 480 }, say: DLG.npc.clerk2 },
+      { key: 'dad', kind: 'parent', name: '爸爸', speed: 60, palette: { hair: '#2a2320', outfit: '#46586a', shorts: '#6d4c41', skin: '#f0b98a' }, sleepSpot: { x: 118, y: 158 }, homeSpot: { x: 480, y: 215 }, say: DLG.npc.dad },
+      { key: 'mom', kind: 'parent', name: '媽媽', speed: 60, palette: { hair: '#9a6bb5', outfit: '#c2452d', shorts: '#9a6bb5', skin: '#fed7aa', hairStyle: 'bun' }, sleepSpot: { x: 206, y: 158 }, homeSpot: { x: 530, y: 215 }, say: DLG.npc.mom },
     ];
     const NPC_STREET_Y = 300; // A 街步行線（spawn/預設用；跨棟路徑一律走 streetYOf/streetLegs）
     const NPC_DOOR_Y = 245;
@@ -684,7 +684,7 @@
     const windowSeatTaken = [false, false, false];
     function claimWindowSeat() { const i = windowSeatTaken.indexOf(false); if (i < 0) return -1; windowSeatTaken[i] = true; return i; }
     function freeWindowSeat(i) { if (i != null && i >= 0) windowSeatTaken[i] = false; }
-    const NOODLE_NIGHT_LINES = ['「深夜的泡麵，特別好吃。」', '「呼…整天累都散了。」', '「窗外沒人，只有這間店還亮著。」', '「明天…再加油吧。」', '「阿哲的關東煮也不錯。」', '「這個時間還醒著的，都是有故事的人。」'];
+    const NOODLE_NIGHT_LINES = DLG.noodle; // v9.83 C 批：本體移至 DLG
     const NPC_SEAT_POOLS = {
       school: { activity: 'study', grid: [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]] }, // v9.22 教室中間 6 張課桌
       library: { activity: 'study', grid: [[240, 208], [350, 208], [460, 208], [740, 208], [850, 208], [960, 208]] }, // v9.26 圖書館室內閱讀桌
@@ -1177,16 +1177,13 @@
       bubble.style.left = (_anB ? _anB.x : npc.x) + 'px';
       bubble.style.top = ((_anB ? _anB.y : npc.y) - 78) + 'px';
       bubble.style.zIndex = '995'; // v9.20 圖層總檢：泡泡永遠在最上層
-      bubble.textContent = customText || def.say[Math.floor(Math.random() * def.say.length)];
+      bubble.textContent = customText || dlgPick('npc.' + def.key, def.say);
       layer.appendChild(bubble);
       setTimeout(() => bubble.remove(), 2600);
     }
     // ================= v9.13 住家精緻化：晚餐同桌 =================
     const DINNER_SEATS = { dad: { x: 624, y: 162 }, mom: { x: 685, y: 162 } }; // v9.23.1 坐進桌北側的椅子（椅心 624/685）
-    const DINNER_SAY = {
-      mom: ['多吃點，看你瘦的。', '今天在學校好嗎？', '這道是你最愛吃的。', '慢點吃，鍋裡還有。'],
-      dad: ['吃慢點，沒人跟你搶。', '功課有不懂的，晚上問我。', '最近考試順利嗎？', '嗯，好吃，你媽手藝越來越好了。']
-    };
+    const DINNER_SAY = DLG.dinner; // v9.83 C 批：本體移至 DLG
     let _dinnerChatAt = -99;
     function dinnerPhaseNow() {
       const h = gameState.hour || 0, m = gameState.minute || 0;
@@ -1945,13 +1942,13 @@
             _dinnerChatAt = absMin;
             const sp = seated[Math.floor(Math.random() * seated.length)];
             const lines = DINNER_SAY[sp.key] || [];
-            if (lines.length) npcSay(sp, lines[Math.floor(Math.random() * lines.length)]);
+            if (lines.length) npcSay(sp, dlgPick('dinner.' + sp.key, lines));
           }
         }
       }
     }
-    const PARK_CHAT_OPEN = ['今天天氣也太好了吧！', '你們晚餐想吃什麼？', '我昨天打電動打到半夜，超爽', '欸欸，聽說食堂明天有新菜單', '最近有什麼好看的影片推薦嗎？', '假日一起去打球啦', '我跟你們說，我昨天做了一個超怪的夢', '這邊風好涼，超舒服的', '你們複習得怎麼樣了？', '走啦，等下一起去超商買冰'];
-    const PARK_CHAT_REPLY = ['真的！我也這麼覺得', '哈哈哈你也太好笑', '好啊好啊，算我一個', '我懂我懂，那個超讚的', '蛤？真的假的', '對啊，我媽也這樣說', '那走啊，現在就去', '噓——小聲一點啦', '我上次也是這樣！', '好主意，揪！'];
+    const PARK_CHAT_OPEN = DLG.parkOpen; // v9.83 C 批：本體移至 DLG
+    const PARK_CHAT_REPLY = DLG.parkReply; // v9.83 C 批：本體移至 DLG
     function parkJoinCluster(npc) { // v9.15：到公園自動湊到別人的圈圈旁邊
       if (npc.dest !== 'park' || npc._parkJoined) return;
       const others = (gameState.npcs || []).filter(n => n !== npc && n.dest === 'park' && n.state === 'idle');
@@ -1981,11 +1978,11 @@
       const cx = c.reduce((sum, m) => sum + m.x, 0) / c.length;
       c.forEach(m => { m.dir = cx >= m.x ? 1 : -1; }); // 面對彼此
       const sp = c[Math.floor(Math.random() * c.length)];
-      npcSay(sp, PARK_CHAT_OPEN[Math.floor(Math.random() * PARK_CHAT_OPEN.length)]);
+      npcSay(sp, dlgPick('park.open', PARK_CHAT_OPEN));
       if (Math.random() < 0.65) {
         const others = c.filter(m => m !== sp);
         const rp = others[Math.floor(Math.random() * others.length)];
-        gameState._parkReply = { at: absMin + 2 + Math.random() * 3, key: rp.key, line: PARK_CHAT_REPLY[Math.floor(Math.random() * PARK_CHAT_REPLY.length)] };
+        gameState._parkReply = { at: absMin + 2 + Math.random() * 3, key: rp.key, line: dlgPick('park.reply', PARK_CHAT_REPLY) };
       }
       gameState._parkChatAt = absMin + 16 + Math.random() * 22;
     }
@@ -2151,7 +2148,7 @@
               if (npc.state === 'seated' && atPost) {
                 const pt = TEACHER_ROAM_POINTS[Math.floor(Math.random() * TEACHER_ROAM_POINTS.length)];
                 npc.path = [{ x: pt.x, y: pt.y }]; npc.arrive = 'idle'; npc.state = 'path'; npc._roaming = true;
-                if (Math.random() < 0.4) npcSay(npc, TEACHER_ROAM_LINES[Math.floor(Math.random() * TEACHER_ROAM_LINES.length)]);
+                if (Math.random() < 0.4) npcSay(npc, dlgPick('teacher.roam', TEACHER_ROAM_LINES));
               } else if (npc._roaming && npc.state === 'idle') {
                 npc.path = [{ x: post.x, y: post.y }]; npc.arrive = 'post'; npc.state = 'path'; npc._roaming = false;
               }
@@ -2269,7 +2266,7 @@
             } else if (npc.state === 'seated' && npc.windowSeat != null) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
               setIco(dishEl, '🍜');
-              if (Math.random() < 0.002) npcSay(npc, NOODLE_NIGHT_LINES[Math.floor(Math.random() * NOODLE_NIGHT_LINES.length)]); // v9.16 深夜窗邊對話
+              if (Math.random() < 0.002) npcSay(npc, dlgPick('noodle', NOODLE_NIGHT_LINES)); // v9.16 深夜窗邊對話
               syncDishPlate(npc, npc.insideLoc === 'store', '🍜', npc.x - 9, npc.y - 40, 'store-rooms', Z_LAYER.FOOD); // v9.19 泡麵碗放窗邊吧台上；v9.20 食物置頂
             } else if (npc.state === 'seated' && npc.dest === 'store' && npc.windowSeat == null && !(npc.kind === 'staff' && npcDef(npc.key) && npcDef(npc.key).work === 'store')) {
               if (dishEl.style.display !== 'block') dishEl.style.display = 'block';
@@ -4192,8 +4189,8 @@
       { x: 155, y: 152, mode: 'tea', arrive: 'seat' },
       { x: 252, y: 162, mode: 'print', arrive: 'idle' }
     ];
-    const BREAK_CHAT_LINES = ['昨天的卡通超好看！', '等一下要不要去福利社？', '我跟你說喔…', '下節課要小考欸', '你午餐想吃什麼？', '假日我去打球了', '這本漫畫超推！', '老師剛剛講的我有聽懂'];
-    const BREAK_CHAT_REPLIES = ['真的假的！', '好啊好啊', '哈哈哈', '我也是！', '蛤～真的喔', '借我看！', '讚喔'];
+    const BREAK_CHAT_LINES = DLG.breakLines; // v9.83 C 批：本體移至 DLG
+    const BREAK_CHAT_REPLIES = DLG.breakReplies; // v9.83 C 批：本體移至 DLG
     function spawnNpcPop(npc, emoji) {
       const el = document.getElementById('npc-' + npc.key);
       const layer = el && el.parentNode;
@@ -4208,7 +4205,7 @@
       setTimeout(() => { if (pop.parentNode) pop.parentNode.removeChild(pop); }, 2000);
     }
     const TEACHER_ROAM_POINTS = [ { x: 575, y: 168 }, { x: 510, y: 216 }, { x: 672, y: 216 }, { x: 368, y: 218 }, { x: 790, y: 218 } ]; // v9.25 老師巡堂點（教室前方＋走道）
-    const TEACHER_ROAM_LINES = ['都坐好，老師看一下', '嗯，這組很認真', '安靜一點點就好', '有問題舉手問老師', '寫完的先檢查一遍'];
+    const TEACHER_ROAM_LINES = DLG.teacherRoam; // v9.83 C 批：本體移至 DLG
     function tickBreakAmbiance(npc, progressMinutes) {
       if (typeof schoolPhaseNow !== 'function' || schoolPhaseNow() !== 'break') return;
       npc.breakActCd = (npc.breakActCd == null ? 1 + Math.random() * 3 : npc.breakActCd) - progressMinutes;
@@ -4216,9 +4213,9 @@
       npc.breakActCd = 3 + Math.random() * 5;
       const mode = npc.breakMode;
       if (mode === 'chat') {
-        npcSay(npc, BREAK_CHAT_LINES[Math.floor(Math.random() * BREAK_CHAT_LINES.length)]);
+        npcSay(npc, dlgPick('break.lines', BREAK_CHAT_LINES));
         const partner = (gameState.npcs || []).find(o => o !== npc && o.breakMode === 'chat' && Math.abs(o.x - npc.x) < 140 && Math.abs(o.y - npc.y) < 60);
-        if (partner && Math.random() < 0.5) { partner._sayUntil = 0; npcSay(partner, BREAK_CHAT_REPLIES[Math.floor(Math.random() * BREAK_CHAT_REPLIES.length)]); }
+        if (partner && Math.random() < 0.5) { partner._sayUntil = 0; npcSay(partner, dlgPick('break.replies', BREAK_CHAT_REPLIES)); }
       }
       else if (mode === 'read') spawnNpcPop(npc, '📖');
       else if (mode === 'rest') spawnNpcPop(npc, '💤');
