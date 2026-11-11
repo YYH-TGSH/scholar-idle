@@ -2481,7 +2481,7 @@
             g += '<rect x="' + wx.toFixed(1) + '" y="' + (wy - winH).toFixed(1) + '" width="' + winW + '" height="' + winH + '" fill="#f7e8c9" stroke="#5d4028" stroke-width="1.5"/>';
           }
         }
-        g += '<rect x="' + (doorCx - 13).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="26" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#5d4028" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#f2b544"/>';
+        g += '<rect x="' + (doorCx - 17).toFixed(1) + '" y="' + (groundY - 44).toFixed(1) + '" width="34" height="44" fill="' + sh(b.accent, 0.62) + '" stroke="#5d4028" stroke-width="2"/><circle cx="' + (doorCx + 7).toFixed(1) + '" cy="' + (groundY - 21).toFixed(1) + '" r="2.2" fill="#f2b544"/>';
         if (loc === 'restaurant') g += segBox(pr, b.fx - 2, b.fz, b.fw + 4, b.fd + 12, 54, 59, b.accent, false);
         if (b.roof === 'gable') {
           const midZ = b.fz + b.fd / 2, rc = '#c2452d';

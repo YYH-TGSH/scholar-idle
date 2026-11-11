@@ -4071,3 +4071,9 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .fb-shake-l { animation: fb-shake-l 0.45s linear; }
 .fb-anchor { position: relative; }
 .fb-float { position: absolute; left: 50%; top: -6px; transform: translate(-50%, 2px); color: var(--moss); font-weight: 900; pointer-events: none; animation: fb-float-up 0.95s ease-out forwards; white-space: nowrap; }
+
+/* ===== v9.85 終局 F2：次級點擊區提升至 >=40px（僅 padding/min-height，不動字體與座標） ===== */
+.dock-btn { min-height: 40px; }
+.btn-exam-mini { min-height: 40px; }
+.spot-chip { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+.floor-label { min-height: 40px; display: inline-flex; align-items: center; }
