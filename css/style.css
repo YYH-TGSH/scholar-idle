@@ -4051,3 +4051,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .floor-label.active { color: var(--ink); }
 #fs-exit-btn { color: var(--ink); }
 .fs-reenter-btn { background: rgba(58, 39, 24, 0.88); }
+
+/* ===== v9.79 V2 人物繪本化：平滑渲染 + 墨褐剪影描邊（主角/NPC/預覽共用同一 sprite） ===== */
+.student-svg, .npc-sprite { image-rendering: auto; filter: drop-shadow(0 0 1.1px rgba(93, 64, 40, 0.9)) drop-shadow(0 0 1.1px rgba(93, 64, 40, 0.9)); }

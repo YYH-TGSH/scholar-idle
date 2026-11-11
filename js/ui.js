@@ -177,11 +177,11 @@
     function parsePixelStr(str) {
       const colorMap = {
         '.': null,
-        'K': '#182042', 'R': '#c0392b', 'r': '#c0392b', 'W': '#ffffff',
-        'Y': '#ffcc00', 'y': '#ffcc00', 'B': '#5b7fa6', 'b': '#2c3e50',
-        'N': '#fed7aa', 'H': '#3c2415', 'G': '#2ed573', 'g': '#5da85f',
-        'P': '#bf5af2', 'p': '#8e44ad', 'O': '#ff9f0a', 'A': '#7d868f',
-        'C': '#aee6fa', 'D': '#8d5a2c', 'E': '#3c2415'
+        'K': '#5d4028', 'R': '#c2452d', 'r': '#c2452d', 'W': '#ffffff',
+        'Y': '#f2b544', 'y': '#f2b544', 'B': '#7d9dbd', 'b': '#46586a',
+        'N': '#fed7aa', 'H': '#3c2415', 'G': '#79a95c', 'g': '#5f7d5a',
+        'P': '#b07cc6', 'p': '#9a6bb5', 'O': '#e08a3c', 'A': '#9a8d7a',
+        'C': '#f7e8c9', 'D': '#8d5a2c', 'E': '#3c2415'
       };
       const lines = str.trim().split('\n').map(l => l.trim());
       const pixels = new Array(SKIN_N).fill(null);
@@ -1754,7 +1754,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.78.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.79.0) | 上次存檔：${ts}`);
       }
     }
 

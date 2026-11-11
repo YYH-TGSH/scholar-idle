@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>學霸養成記｜像素小鎮養成 (v9.78.0)</title>
+  <title>學霸養成記｜像素小鎮養成 (v9.79.0)</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ffcc00'/%3E%3Crect x='14' y='22' width='36' height='30' fill='%23fed7aa'/%3E%3Crect x='10' y='10' width='44' height='14' fill='%23ffcc00' stroke='%2326324b' stroke-width='3'/%3E%3Crect x='6' y='20' width='52' height='5' fill='%23b8860b'/%3E%3Ctext x='32' y='21' font-size='11' text-anchor='middle' fill='%2326324b' font-family='sans-serif' font-weight='900'%3E%E5%AD%B8%3C/text%3E%3Crect x='22' y='34' width='6' height='7' fill='%231a1a24'/%3E%3Crect x='36' y='34' width='6' height='7' fill='%231a1a24'/%3E%3Crect x='28' y='45' width='8' height='3' fill='%23c0392b'/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ffcc00'/%3E%3Crect x='14' y='22' width='36' height='30' fill='%23fed7aa'/%3E%3Crect x='10' y='10' width='44' height='14' fill='%23ffcc00' stroke='%2326324b' stroke-width='3'/%3E%3Crect x='6' y='20' width='52' height='5' fill='%23b8860b'/%3E%3Ctext x='32' y='21' font-size='11' text-anchor='middle' fill='%2326324b' font-family='sans-serif' font-weight='900'%3E%E5%AD%B8%3C/text%3E%3Crect x='22' y='34' width='6' height='7' fill='%231a1a24'/%3E%3Crect x='36' y='34' width='6' height='7' fill='%231a1a24'/%3E%3Crect x='28' y='45' width='8' height='3' fill='%23c0392b'/%3E%3C/svg%3E">
   <meta name="theme-color" content="#f2b544">
@@ -762,25 +762,25 @@
         <div id="particle-emitter" style="position: absolute; width: 100%; height: 100%;"></div>
 
         <!-- 32x50 雙倍放大純點陣學生人偶 (Pure SVG Pixel Art, Crisp Edges, Scaled 2x) -->
-        <svg id="student-sprite" class="sprite-pixel student-svg state-idle" viewBox="0 0 16 25" shape-rendering="crispEdges"
-          style="position:relative; width:32px; height:50px; transform-origin:bottom center; image-rendering:pixelated; overflow:visible;">
+        <svg id="student-sprite" class="sprite-pixel student-svg state-idle" viewBox="0 0 16 25"
+          style="position:relative; width:32px; height:50px; transform-origin:bottom center; image-rendering:auto; overflow:visible;">
           
 
           <!-- 地面微陰影 -->
-          <ellipse class="blob-shadow" cx="8" cy="24.4" rx="7" ry="1.2" fill="rgba(15,20,40,0.38)" />
+          <ellipse class="blob-shadow" cx="8" cy="24.4" rx="7" ry="1.2" fill="rgba(74,50,32,0.35)" />
 
           <!-- 雙腳與經典紅色球鞋組 (Shoes & Feet) -->
           <g class="avatar-feet pixel-feet">
             <!-- 左鞋（v9.40 分組：走路 2 幀動畫整組抬放） -->
             <g class="foot-l">
-            <rect class="pixel-foot-l" x="3" y="21" width="4" height="3" fill="#c0392b" stroke="#182042" stroke-width="0.8" />
-            <rect x="2" y="22" width="1" height="2" fill="#c0392b" />
+            <rect class="pixel-foot-l" x="3" y="21" width="4" height="3" fill="#c2452d" stroke="#5d4028" stroke-width="0.8" />
+            <rect x="2" y="22" width="1" height="2" fill="#c2452d" />
             <rect x="4" y="23" width="3" height="1" fill="#ffffff" />
             </g>
             <!-- 右鞋 -->
             <g class="foot-r">
-            <rect class="pixel-foot-r" x="9" y="21" width="4" height="3" fill="#c0392b" stroke="#182042" stroke-width="0.8" />
-            <rect x="13" y="22" width="1" height="2" fill="#c0392b" />
+            <rect class="pixel-foot-r" x="9" y="21" width="4" height="3" fill="#c2452d" stroke="#5d4028" stroke-width="0.8" />
+            <rect x="13" y="22" width="1" height="2" fill="#c2452d" />
             <rect x="9" y="23" width="3" height="1" fill="#ffffff" />
             </g>
           </g>
@@ -788,37 +788,37 @@
           <!-- 身體組 (Body & Clothes) -->
           <g class="avatar-body-group pixel-body-group clothes">
             <!-- 藍色短褲 (Shorts) -->
-            <rect x="4" y="17" width="8" height="4" fill="#5b7fa6" stroke="#182042" stroke-width="0.8" />
-            <rect x="7" y="19" width="2" height="2" fill="#2c3e50" />
+            <rect x="4" y="17" width="8" height="4" fill="#5b7fa6" stroke="#5d4028" stroke-width="0.8" />
+            <rect x="7" y="19" width="2" height="2" fill="#46586a" />
             
             <!-- 經典紅色訓練家外套 (Red Trainer Jacket) -->
-            <rect x="3" y="11" width="10" height="7" fill="#c0392b" stroke="#182042" stroke-width="0.8" />
+            <rect x="3" y="11" width="10" height="7" fill="#c2452d" stroke="#5d4028" stroke-width="0.8" />
             <rect x="5" y="11" width="6" height="7" fill="#ffffff" />
-            <rect x="7" y="11" width="2" height="7" fill="#2c3e50" />
+            <rect x="7" y="11" width="2" height="7" fill="#46586a" />
             
             <!-- 黃色雙肩背包肩帶 (Backpack Straps) -->
-            <rect x="4" y="11" width="2" height="7" fill="#ffcc00" />
-            <rect x="10" y="11" width="2" height="7" fill="#ffcc00" />
+            <rect x="4" y="11" width="2" height="7" fill="#f2b544" />
+            <rect x="10" y="11" width="2" height="7" fill="#f2b544" />
 
             <!-- 運動條紋 (Sport Pattern) -->
             <rect class="pixel-sport-pattern avatar-sport-pattern" x="7" y="11" width="2" height="7" fill="#ff8fab" style="display:none;" />
 
             <!-- 雙手手臂 (Hands & Arms) -->
-            <rect class="pixel-hand-l" x="2" y="12" width="2" height="5" fill="#c0392b" />
+            <rect class="pixel-hand-l" x="2" y="12" width="2" height="5" fill="#c2452d" />
             <rect x="2" y="16" width="2" height="2" fill="#fed7aa" />
-            <rect class="pixel-hand-r" x="12" y="12" width="2" height="5" fill="#c0392b" />
+            <rect class="pixel-hand-r" x="12" y="12" width="2" height="5" fill="#c2452d" />
             <rect x="12" y="16" width="2" height="2" fill="#fed7aa" />
 
             <!-- 讀書手持課本 (Studying state) -->
             <g class="avatar-book pixel-book" style="display:none;">
-              <rect x="5" y="14" width="6" height="4" fill="#3a6ea5" stroke="#182042" stroke-width="0.8" />
+              <rect x="5" y="14" width="6" height="4" fill="#3a6ea5" stroke="#5d4028" stroke-width="0.8" />
               <rect x="6" y="15" width="4" height="2" fill="#ffffff" />
             </g>
             
             <!-- 餐廳手持拉麵碗 (Eating state) -->
             <g class="avatar-bowl pixel-bowl" style="display:none;">
-              <rect x="5" y="14" width="6" height="4" fill="#e67e22" stroke="#182042" stroke-width="0.8" />
-              <rect x="6" y="13" width="4" height="1" fill="#ffcc00" />
+              <rect x="5" y="14" width="6" height="4" fill="#e67e22" stroke="#5d4028" stroke-width="0.8" />
+              <rect x="6" y="13" width="4" height="1" fill="#f2b544" />
             </g>
           </g>
 
@@ -836,43 +836,43 @@
             <rect x="11" y="9" width="1" height="1" fill="#e89bb0" />
 
             <!-- 運動頭巾 (Sports Headband) -->
-            <rect class="avatar-headband pixel-headband" x="3" y="6" width="10" height="2" fill="#ffd166" stroke="#182042" stroke-width="0.8" style="display:none;" />
+            <rect class="avatar-headband pixel-headband" x="3" y="6" width="10" height="2" fill="#f5c86a" stroke="#5d4028" stroke-width="0.8" style="display:none;" />
 
             <!-- 一般大眼睛 (Normal Eyes) -->
             <g class="avatar-eyes-normal pixel-eyes-normal eyes">
-              <rect x="5" y="7" width="2" height="2" fill="#1a1a24" />
+              <rect x="5" y="7" width="2" height="2" fill="#2a2320" />
               <rect x="5" y="7" width="1" height="1" fill="#ffffff" />
-              <rect x="9" y="7" width="2" height="2" fill="#1a1a24" />
+              <rect x="9" y="7" width="2" height="2" fill="#2a2320" />
               <rect x="9" y="7" width="1" height="1" fill="#ffffff" />
             </g>
 
             <!-- 一般嘴巴微笑 (Smile) -->
             <g class="avatar-mouth-normal pixel-mouth-normal">
-              <rect x="7" y="10" width="2" height="1" fill="#c0392b" />
+              <rect x="7" y="10" width="2" height="1" fill="#c2452d" />
             </g>
 
             <!-- 睡覺閉眼 (Sleeping Eyes) -->
             <g class="avatar-eyes-sleeping pixel-eyes-sleeping" style="display:none;">
-              <rect x="5" y="8" width="2" height="1" fill="#1a1a24" />
-              <rect x="9" y="8" width="2" height="1" fill="#1a1a24" />
+              <rect x="5" y="8" width="2" height="1" fill="#2a2320" />
+              <rect x="9" y="8" width="2" height="1" fill="#2a2320" />
             </g>
 
             <!-- 睡覺嘴巴 (Sleeping Mouth) -->
             <g class="avatar-mouth-sleeping pixel-mouth-sleeping" style="display:none;">
-              <rect x="7" y="10" width="2" height="1" fill="#2c3e50" />
+              <rect x="7" y="10" width="2" height="1" fill="#46586a" />
             </g>
 
             <!-- 飲食咀嚼嘴巴 (Eating Mouth) -->
             <g class="avatar-mouth-eating pixel-mouth-eating" style="display:none;">
-              <rect x="6" y="10" width="4" height="2" fill="#c0392b" />
+              <rect x="6" y="10" width="4" height="2" fill="#c2452d" />
             </g>
 
             <!-- 生氣/壓力大眼神 (Angry Eyes) -->
             <g class="avatar-eyes-angry pixel-eyes-angry" style="display:none;">
-              <rect x="5" y="7" width="2" height="2" fill="#c0392b" />
-              <rect x="9" y="7" width="2" height="2" fill="#c0392b" />
-              <line x1="4" y1="6" x2="7" y2="7" stroke="#1a1a24" stroke-width="1" />
-              <line x1="12" y1="6" x2="9" y2="7" stroke="#1a1a24" stroke-width="1" />
+              <rect x="5" y="7" width="2" height="2" fill="#c2452d" />
+              <rect x="9" y="7" width="2" height="2" fill="#c2452d" />
+              <line x1="4" y1="6" x2="7" y2="7" stroke="#2a2320" stroke-width="1" />
+              <line x1="12" y1="6" x2="9" y2="7" stroke="#2a2320" stroke-width="1" />
             </g>
 
             <!-- 前額棕色瀏海 (Bangs) -->
@@ -882,8 +882,8 @@
 
             <!-- 經典紅色寶可夢訓練家棒球帽 (Trainer Cap) -->
             <g class="pixel-cap-default">
-              <rect x="3" y="1" width="10" height="4" fill="#ffcc00" stroke="#182042" stroke-width="0.8" />
-              <rect x="2" y="3" width="12" height="2" fill="#f39c12" />
+              <rect x="3" y="1" width="10" height="4" fill="#f2b544" stroke="#5d4028" stroke-width="0.8" />
+              <rect x="2" y="3" width="12" height="2" fill="#d98e32" />
               <rect x="1" y="4" width="14" height="1" fill="#ca6f1e" />
               <!-- v9.43 品牌識別：黃帽正中央的「學」字徽章（取代借來的紅帽＋白徽章） -->
               <text class="cap-badge" x="8" y="3.8" font-size="3.2" text-anchor="middle" fill="#26324b" font-family="'DotGothic16', monospace" font-weight="900">學</text>
@@ -1586,7 +1586,7 @@
   <div class="overlay" id="help-overlay" onclick="if(event.target===this) closeHelpModal()">
     <div class="game-modal" style="width: 520px; text-align: left; padding: 24px; max-width: 90vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px;">
-        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;"><svg class="pix-ico" aria-hidden="true"><use href="#i-help"/></svg> 遊戲說明書 (v9.78.0)</span>
+        <span class="game-modal-title" style="margin: 0; border: none; padding: 0;"><svg class="pix-ico" aria-hidden="true"><use href="#i-help"/></svg> 遊戲說明書 (v9.79.0)</span>
         <button class="modal-close" onclick="closeHelpModal()"><svg class="pix-ico" aria-hidden="true"><use href="#i-close"/></svg></button>
       </div>
       <div class="help-tabs" style="display:flex; border-bottom:1px solid rgba(0,0,0,0.08); margin-bottom: 12px; gap:8px; flex-wrap: wrap;">
@@ -2008,7 +2008,7 @@
   </nav>
 
   <div class="floating-footer">
-    Copyright © 2026 葉大帥. All rights reserved. (v9.78.0)
+    Copyright © 2026 葉大帥. All rights reserved. (v9.79.0)
   </div>
 
   <!-- ==========================================================================
