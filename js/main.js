@@ -201,7 +201,7 @@
       // v9.55：回傳投影後螢幕座標（世界鏡頭活在 TOWN_PROJ 投影空間）；邏輯座標只在函式內部換算
       const _proj = lp => (typeof TOWN_PROJ !== 'undefined') ? TOWN_PROJ.P(lp.x, lp.y, 0) : lp;
       if (gameState.isCommuting && _visPos) return _proj(_visPos);
-      const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1 };
+      const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1, club: 1 }; // v9.71 補 club（學校 3F；DOOR_X/DOOR_FRONT_Y 皆有 club）
       if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return _proj({ x: DOOR_X[currentLoc], y: DOOR_FRONT_Y[currentLoc] });
       return _proj({ x: gameState.currentX || WORLD_W / 2, y: gameState.currentY || WORLD_H / 2 });
     }
@@ -268,7 +268,7 @@
           // 閒置跟隨：人物還在畫面中央 60% 內就不動，漂出去才跟
           const vx = vp.clientWidth / 2 + (cx - WORLD_W / 2) * s + mapPanX;
           const vy = vp.clientHeight / 2 + (cy - WORLD_H / 2) * s + mapPanY;
-          hasTarget = Math.abs(vx - vp.clientWidth / 2) > vp.clientWidth * 0.3 || Math.abs(vy - vp.clientHeight / 2) > vp.clientHeight * 0.3;
+          hasTarget = Math.abs(vx - vp.clientWidth / 2) > vp.clientWidth * 0.175 || Math.abs(vy - vp.clientHeight / 2) > vp.clientHeight * 0.175; // v9.71 死區定版 35%（原 60%）
         }
       }
       // 3) 彈簧積分 (pan 與程式化 zoom)，有變動才寫 transform
@@ -1347,7 +1347,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.70.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.71.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

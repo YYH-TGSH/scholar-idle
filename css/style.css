@@ -4013,3 +4013,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     .fs-plate.fs-active { outline: 2px solid var(--yellow); outline-offset: -2px; }
     .fs-plate > [id$="-stage"] { border-radius: var(--r-card); }
     body.fs-on .floor-label { left: 6px; top: 6px; }
+
+    /* v9.71 FS 檢視性退出鈕（fs-view 內、高於疊層）＋回室內小鈕（島上） */
+    #fs-exit-btn { position: absolute; left: 12px; top: 96px; z-index: 46; background: rgba(20, 28, 48, 0.88); color: #fff; border: 1.5px solid var(--yellow); border-radius: var(--r-pill); padding: 7px 14px; font-size: 0.78rem; font-weight: 900; cursor: pointer; }
+    .fs-reenter-btn { position: absolute; top: 8px; right: 8px; z-index: 65; background: rgba(20, 28, 48, 0.88); color: #fff; border: 1.5px solid var(--yellow); border-radius: var(--r-pill); padding: 6px 12px; font-size: 0.78rem; font-weight: 900; cursor: pointer; }

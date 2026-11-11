@@ -1658,9 +1658,10 @@
     const _fsWants = {};
     let _fs = null;
     let _fsSig = '';
+    let _fsSuppressed = null; // v9.71 使用者手動關閉 FS 的建物 key（檢視與主角 inside 解耦）
     function fsViewEl() {
       let v = document.getElementById('fs-view');
-      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); document.body.appendChild(v); }
+      if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); v.appendChild(xb); document.body.appendChild(v); }
       return v;
     }
     function fsDefs(key) {
@@ -1698,6 +1699,8 @@
       const view = fsViewEl(); const stack = view.firstChild;
       stack.innerHTML = '';
       const moved = []; const plates = [];
+      def.plates.forEach(pd0 => { const e0 = document.getElementById(pd0.id); if (e0) { delete e0.dataset.hf; delete e0.dataset.frel; delete e0.dataset.k; } });
+      const gd0 = document.getElementById(def.guides); if (gd0) delete gd0.dataset.k;
       def.plates.forEach(pd => {
         const wrap = document.createElement('div'); wrap.className = 'fs-plate'; wrap.dataset.loc = pd.loc || ''; stack.appendChild(wrap);
         const el = document.getElementById(pd.id);
@@ -1718,22 +1721,61 @@
     }
     function fsExit() {
       if (!_fs) return;
+      _fs.moved.forEach(m => { delete m.el.dataset.hf; delete m.el.dataset.frel; delete m.el.dataset.k; }); // P3(b)：清守衛鍵，次一 tick sync 全量重寫樣式
       for (let i = _fs.moved.length - 1; i >= 0; i--) { const m = _fs.moved[i]; if (!m.parent) continue; m.el.style.transformOrigin = ''; if (m.next && m.next.parentNode === m.parent) m.parent.insertBefore(m.el, m.next); else m.parent.appendChild(m.el); }
       fsViewEl().classList.remove('on'); document.body.classList.remove('fs-on');
       _fs = null; _fsSig = ''; window.__FS_FIT = null;
+      _camAnchor = null; _camHoldUntil = 0; // P2：FS 關閉後鏡頭回主角（清 anchor/hold 殘留）
+      if (typeof snapCameraToChar === 'function') snapCameraToChar();
+    }
+    function fsUserClose() { // P1 檢視性退出：只關檢視，不動主角狀態/派遣/inside
+      if (!_fs) return;
+      _fsSuppressed = _fs.key;
+      fsExit();
+      fsReenterBtn(_fsSuppressed);
+    }
+    function fsReenter(key) {
+      _fsSuppressed = null;
+      fsReenterBtn(null);
+      fsEnter(key);
+    }
+    const FS_LANDMARK = { school: 'landmark-school', home: 'landmark-home', store: 'landmark-store', rest: 'landmark-restaurant' };
+    function fsReenterBtn(key) {
+      const old = document.getElementById('fs-reenter-btn');
+      if (!key) { if (old) old.remove(); return; }
+      if (old && old.dataset.key === key) return;
+      if (old) old.remove();
+      const lm = document.getElementById(FS_LANDMARK[key]);
+      if (!lm) return;
+      const b = document.createElement('button');
+      b.id = 'fs-reenter-btn'; b.type = 'button'; b.dataset.key = key; b.className = 'fs-reenter-btn';
+      b.textContent = '\u56de\u5ba4\u5167';
+      b.addEventListener('click', e => { e.stopPropagation(); fsReenter(key); });
+      b.addEventListener('pointerdown', e => { e.stopPropagation(); });
+      lm.appendChild(b);
     }
     function fsMarkActive(locKey) {
       if (!_fs) return;
       _fs.plates.forEach(pl => pl.wrap.classList.toggle('fs-active', !!locKey && pl.loc === locKey));
     }
+    function fsInside(floors) { // 同棟內換層通勤（commuteStart 與 commuteTarget 都在本棟）仍算在建物內；跨棟通勤不算
+      if (typeof currentLoc === 'undefined' || typeof gameState === 'undefined') return false;
+      if (gameState.isCommuting) return floors.indexOf(gameState.commuteStart) >= 0 && floors.indexOf(gameState.commuteTarget) >= 0;
+      return floors.indexOf(currentLoc) >= 0;
+    }
     function fsWant(key, on) {
-      if (on) { for (const k in _fsWants) if (k !== key) _fsWants[k] = false; }
-      _fsWants[key] = !!on;
-      let target = null;
-      for (const k in _fsWants) if (_fsWants[k]) target = k;
-      if (target === (_fs ? _fs.key : null)) { if (target) fsLayout(); return; }
+      if (!on) {
+        _fsWants[key] = false;
+        if (_fsSuppressed === key) { _fsSuppressed = null; fsReenterBtn(null); }
+        if (_fs && _fs.key === key) fsExit();
+        return;
+      }
+      for (const k in _fsWants) if (k !== key) _fsWants[k] = false;
+      _fsWants[key] = true;
+      if (_fsSuppressed === key) { fsReenterBtn(key); return; }
+      if (_fs && _fs.key === key) { fsLayout(); return; }
       if (_fs) fsExit();
-      if (target) fsEnter(target);
+      fsEnter(key);
     }
     window.addEventListener('resize', () => { if (_fs) { _fsSig = ''; fsLayout(); } });
     function applyHomeFloors(derived) { // v9.67 爆炸圖版（原 v9.66 疊層）：位移量放大為整層步進、加屋頂/導引線/標籤
@@ -1779,7 +1821,7 @@
         const gd = document.getElementById('home-guides');
         if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
-      fsWant('home', inB && !(typeof gameState !== 'undefined' && gameState.isCommuting));
+      fsWant('home', fsInside(['home']));
       if (_fs && _fs.key === 'home') fsMarkActive(active === 2 ? 'home2' : 'home');
     }
     function syncMiniExplode(key, loc, pr, panCur) { // v9.67 單層建物迷你爆炸（餐廳/超商：地板層＋屋頂層、GAP_SINGLE）
@@ -2576,7 +2618,7 @@
         const gd = document.getElementById('school-guides');
         if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
-      fsWant('school', inB && !(typeof gameState !== 'undefined' && gameState.isCommuting));
+      fsWant('school', fsInside(['school', 'library', 'club']));
       if (_fs && _fs.key === 'school') fsMarkActive(inB ? cur : null);
     }
     function switchFloor(loc) {
