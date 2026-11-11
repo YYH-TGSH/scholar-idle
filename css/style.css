@@ -22,7 +22,7 @@
       --amber: #ff9f0a;
       --tang: #e65c00;
       --sky: #0a84ff;
-      --leaf: #2ed573;
+      --leaf: #79a95c;
       --rose: #c2452d;
       --grape: #bf5af2;
       --cocoa: #3c2415;
@@ -767,7 +767,7 @@ body {
     }
 
     .btn-upgrade-island:disabled {
-      background: #b8bcc4;
+      background: #cfc4b0;
       box-shadow: var(--sh-hard-sm);
       cursor: not-allowed;
       opacity: 0.7;
@@ -2239,7 +2239,7 @@ body {
        博士轉生完結畫面
        ========================================== */
     #clear-overlay {
-      background: radial-gradient(ellipse at center, #1a1a24 0%, #182042 50%, #232f47 100%);
+      background: radial-gradient(ellipse at center, #1a1a24 0%, #4a3220 50%, #232f47 100%);
       z-index: 10000;
       flex-direction: column;
     }
@@ -3080,7 +3080,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   font-size: 0.78rem !important;
   font-weight: 700 !important;
 }
-#stage-board span { color: #c0392b !important; }
+#stage-board span { color: #c2452d !important; }
 
 /* 速度鈕 */
 .speed-btn {
@@ -3105,7 +3105,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
   overflow: hidden !important;
 }
 .status-bar-fill { border-radius: var(--r-pill) !important; box-shadow: none !important; }
-.status-bar-fill.energy { background: #2ed573 !important; }
+.status-bar-fill.energy { background: #79a95c !important; }
 .status-bar-fill.hunger { background: #ff9f0a !important; }
 .status-bar-fill.stress { background: #e74c3c !important; }
 
@@ -3543,7 +3543,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 @keyframes bubble-in { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes bubble-bob { from { margin-top: 0; } to { margin-top: -4px; } }
 .rival-row { display: flex; align-items: center; gap: 7px; padding: 5px 8px; margin-bottom: 4px; background: rgba(var(--rgb-white),0.55); border: 1.5px solid var(--border-color); border-radius: var(--r-card); font-size: 0.78rem; font-weight: 700; }
-.rival-row.is-you { background: rgba(var(--rgb-yellow), 0.22); border-color: #f39c12; }
+.rival-row.is-you { background: rgba(var(--rgb-yellow), 0.22); border-color: #e09a3e; }
 .rival-row .rival-emoji { font-size: 1rem; }
 .rival-row .rival-name { min-width: 74px; }
 .rival-row .rival-bar { flex: 1; height: 9px; background: rgba(var(--rgb-navy),0.12); border-radius: var(--r-card); overflow: hidden; }
@@ -3556,7 +3556,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .login-cell .login-reward { font-size: 0.78rem; font-weight: 900; margin-top: 2px; }
 .login-cell .login-state { font-size: 0.69rem; font-weight: 700; margin-top: 2px; }
 .login-cell.past { opacity: 0.55; }
-.login-cell.today { border-color: #f39c12; background: rgba(var(--rgb-yellow), 0.2); box-shadow: var(--sh-hard-sm); }
+.login-cell.today { border-color: #e09a3e; background: rgba(var(--rgb-yellow), 0.2); box-shadow: var(--sh-hard-sm); }
 .mock-opt { text-align: left; padding: 12px 14px; font-size: 1rem; }
 
 
@@ -3614,8 +3614,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .dm-bar .f3 { background: #ff5b6a; animation: dm-fill2 2.6s ease-in-out 0.2s infinite; }
 @keyframes dm-fill1 { 0%, 100% { width: 35%; } 50% { width: 92%; } }
 @keyframes dm-fill2 { 0%, 100% { width: 88%; } 50% { width: 30%; } }
-.dm-bubble { width: 34px; height: 34px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-weight: 900; color: var(--white); background: #c0392b; border: 2px solid rgba(var(--rgb-white),0.9); box-shadow: none; animation: dm-pop 1.8s ease-in-out infinite; }
-.dm-bubble.b2 { background: #5da85f; animation-delay: 0.35s; }
+.dm-bubble { width: 34px; height: 34px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-weight: 900; color: var(--white); background: #c2452d; border: 2px solid rgba(var(--rgb-white),0.9); box-shadow: none; animation: dm-pop 1.8s ease-in-out infinite; }
+.dm-bubble.b2 { background: #7fa663; animation-delay: 0.35s; }
 .dm-bubble.b3 { background: #2980b9; animation-delay: 0.7s; }
 @keyframes dm-pop { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.25); } 55% { transform: scale(0.6); opacity: 0.4; } 70% { transform: scale(1); opacity: 1; } }
 .dm-exam { width: 66%; }
@@ -3686,19 +3686,19 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #club-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ead9; cursor:grab; touch-action:none; }
 #study-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
 #school-stage, #lib-stage, #club-stage, #study-stage, #home-stage, #home2-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
-#gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#5da85f; cursor:grab; touch-action:none; }
+#gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#7fa663; cursor:grab; touch-action:none; }
 #gym-stage:active { cursor:grabbing; }
 #gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #gym-sky, #gym-floods { transition: opacity 1.2s ease; }
 .shot-ball { position:absolute; width:20px; height:20px; font-size: 1rem; line-height:20px; text-align:center; z-index:990; pointer-events:none; }
-.gym-shoot-btn { position:absolute; left:1006px; top:212px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#f7d038; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
+.gym-shoot-btn { position:absolute; left:1006px; top:212px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#f2b544; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
 .gym-shoot-btn:active { transform: translateY(2px); box-shadow: none; }
 #lib-stage:active { cursor:grabbing; }
 #lib-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
 #lib-shaft-w, #lib-shaft-e, #lib-lamps { transition: opacity 1.2s ease; }
 .lib-mote { animation: moteFloat 5s ease-in-out infinite; }
 @keyframes moteFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-.lib-rec-book { position:absolute; left:1002px; top:232px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#f7d038; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
+.lib-rec-book { position:absolute; left:1002px; top:232px; z-index:980; padding:5px 10px; border-radius: var(--r-pill); border:2px solid var(--ink2); background:#f2b544; color:var(--ink2); font-family:inherit; font-weight:900; font-size: 0.78rem; cursor:pointer; box-shadow: var(--sh-hard-sm); animation: libGlow 2.2s ease-in-out infinite; }
 .lib-rec-book:active { transform: translateY(2px); box-shadow: none; }
 @keyframes libGlow { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.18); } }
 #school-stage:active { cursor:grabbing; }
@@ -3858,7 +3858,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* v9.32 主修科目鈕 */
 .focus-subj-btn { margin-left: auto; font-size: 0.69rem; font-weight: 700; padding: 3px 10px; border-radius: var(--r-card); border: 2px solid #c8d2cc; background: var(--white); cursor: pointer; }
-.focus-subj-btn.active { background: #f7d038; border-color: #f39c12; }
+.focus-subj-btn.active { background: #f2b544; border-color: #e09a3e; }
 
 /* v9.33 無障礙地板：焦點可見（鍵盤/切換導覽時不再無跡可尋） */
 :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; box-shadow: var(--sh-hard-sm); }
@@ -3893,8 +3893,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .iso-island.landmark-library .island-tag { background: #1e8449 !important; color: #ffffff !important; }
 .iso-island.landmark-gym .island-tag { background: #ca6f1e !important; color: #ffffff !important; }
 .room-chip[data-loc="home"] { border-left: 8px solid #e67e22; }
-.room-chip[data-loc="store"] { border-left: 8px solid #2ed573; }
-.room-chip[data-loc="restaurant"] { border-left: 8px solid #c0392b; }
+.room-chip[data-loc="store"] { border-left: 8px solid #79a95c; }
+.room-chip[data-loc="restaurant"] { border-left: 8px solid #c2452d; }
 .room-chip[data-loc="school"] { border-left: 8px solid #2c3e50; }
 .room-chip[data-loc="library"] { border-left: 8px solid #1e8449; }
 .room-chip[data-loc="gym"] { border-left: 8px solid #ca6f1e; }
@@ -4014,12 +4014,12 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     /* ---- v9.67 爆炸圖 chrome（R1）：導引線/屋頂幽靈/樓層標籤/島框溢出解放 ---- */
     .island-platform.explode-open { overflow: visible; }
     .roof-ghost, .explode-guides { transition: opacity 0.35s ease, transform 0.35s ease; }
-    .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
+    .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #f7f1e3; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
     .floor-label.active { background: var(--sun); color: var(--ink); }
-    .floor-label.peeking { background: rgba(38, 50, 75, 0.45); border: 1.5px dashed #eef2f0; box-shadow: none; } /* R2-2 peek 態：虛線描邊，與實際樓層的實心高亮區分 */
+    .floor-label.peeking { background: rgba(38, 50, 75, 0.45); border: 1.5px dashed #f7f1e3; box-shadow: none; } /* R2-2 peek 態：虛線描邊，與實際樓層的實心高亮區分 */
 
     /* v9.69 全屏室內呈現層（R3）：深色底、整疊入框；z 45 恆在 HUD（header 50／controls 60）之下 */
-    #fs-view { position: fixed; inset: 0; z-index: 45; background: #141c30; display: none; }
+    #fs-view { position: fixed; inset: 0; z-index: 45; background: #26190f; display: none; }
     #fs-view.on { display: block; }
     .fs-plate { border-radius: var(--r-card); }
     .fs-plate.fs-active { outline: 2px solid var(--sun); outline-offset: -2px; }
@@ -4027,14 +4027,14 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     body.fs-on .floor-label { left: 6px; top: 6px; }
 
     /* v9.71 FS 檢視性退出鈕（fs-view 內、高於疊層）＋回室內小鈕（島上） */
-    #fs-exit-btn { position: absolute; left: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: var(--sun); color: #182042; border: none; border-radius: var(--r-pill); padding: 10px 18px; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: var(--sh-hard); } /* v9.75 R3：左下角＋實心黃底大字（主行動語言）——深藍半透明浮近黑底＋top 96px 半空位置真人找不到（Y1 可見性失效重開） */
+    #fs-exit-btn { position: absolute; left: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: var(--sun); color: #4a3220; border: none; border-radius: var(--r-pill); padding: 10px 18px; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: var(--sh-hard); } /* v9.75 R3：左下角＋實心黃底大字（主行動語言）——深藍半透明浮近黑底＋top 96px 半空位置真人找不到（Y1 可見性失效重開） */
     body.fs-on #spot-bar { bottom: calc(var(--chrome-bottom, 16px) + 64px); } /* v9.75 R3：FS 中地點條上移一排，避免窄屏與左下退出鈕同列重疊 */
     .fs-reenter-btn { position: absolute; top: 8px; right: 8px; z-index: 65; background: rgba(20, 28, 48, 0.88); color: #fff; border: 1.5px solid var(--sun); border-radius: var(--r-pill); padding: 6px 12px; font-size: 0.78rem; font-weight: 900; cursor: pointer; }
 
 /* v9.73 室內地點條：主角在建築內時顯示該棟地點 chips（FS 內外皆可見，z 47 在 fs-view 之上、HUD 之下） */
 #spot-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--chrome-bottom, 16px) + 10px); z-index:47; display:none; gap:6px; padding:5px 7px; background:rgba(20,28,48,0.85); border-radius:var(--r-pill); }
 #spot-bar .spot-chip { border:1.5px solid rgba(255,255,255,0.35); background:transparent; color:#e8eefc; font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); cursor:pointer; font-family:inherit; }
-#spot-bar .spot-chip.on { background:var(--sun); color:#182042; border-color:var(--sun); }
+#spot-bar .spot-chip.on { background:var(--sun); color:#4a3220; border-color:var(--sun); }
 
 /* ===== v9.78 V1 紙感繪本：紙紋 + UI 殼紙卡化（規格 scholar-idle-visual-redesign-spec） ===== */
 #paper-grain { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0.05; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='240' height='240' filter='url(%23n)' opacity='0.6'/></svg>"); }
@@ -4054,3 +4054,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* ===== v9.79 V2 人物繪本化：平滑渲染 + 墨褐剪影描邊（主角/NPC/預覽共用同一 sprite） ===== */
 .student-svg, .npc-sprite { image-rendering: auto; filter: drop-shadow(0 0 1.1px rgba(93, 64, 40, 0.9)) drop-shadow(0 0 1.1px rgba(93, 64, 40, 0.9)); }
+
+/* ===== v9.80 V3 FS 正面疊層：紙片樓層框（水平紙層＋墨褐框） ===== */
+.fs-plate { background: var(--card); border: 2.5px solid var(--stroke); box-shadow: var(--sh-hard-sm); }

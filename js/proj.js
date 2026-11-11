@@ -57,9 +57,10 @@
     }
     function box3(x, z, w, d, h, color) {
       var b = boxPolys(x, z, w, d, h);
-      return '<polygon points="' + pts(b.east) + '" fill="' + shade(color, 0.6) + '"/>'
-        + '<polygon points="' + pts(b.south) + '" fill="' + color + '"/>'
-        + '<polygon points="' + pts(b.top) + '" fill="' + shade(color, 1.24) + '"/>';
+      var sk = '" stroke="rgba(93,64,40,0.45)" stroke-width="1.6" stroke-linejoin="round"/>';
+      return '<polygon points="' + pts(b.east) + '" fill="' + shade(color, 0.6) + sk
+        + '<polygon points="' + pts(b.south) + '" fill="' + color + sk
+        + '<polygon points="' + pts(b.top) + '" fill="' + shade(color, 1.24) + sk;
     }
     // 躺在平面上的圓：沿投影取樣 20 邊形（自動變斜橢圓）
     function planeCirclePts(x, z, h, r) {

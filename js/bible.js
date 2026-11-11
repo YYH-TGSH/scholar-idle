@@ -7,36 +7,36 @@ window.BIBLE = {
   PALETTE: {
     // UI 核心（承 v9.37 :root 美術憲法）
     paper: '#fdf6e3', ink: '#4a3220', ink2: '#3a2718', sun: '#f2b544', stroke: '#5d4028', card: '#fffaf0', terra: '#c96f4a', brick: '#c2452d', sage: '#7fa663', sage2: '#a8bf8a', moss: '#5f7d5a', amber: '#ff9f0a',
-    tang: '#e65c00', skyBlue: '#0a84ff', leaf: '#30d158', rose: '#ff2d55', grape: '#bf5af2',
+    tang: '#e65c00', skyBlue: '#5b8fd6', leaf: '#6faf62', rose: '#c2452d', grape: '#b07cc6',
     cocoa: '#3c2415', muted: '#5f5f66', white: '#ffffff', cream: '#efe9e0',
     // v9.61 靜音表面色（大面積表面專用；鮮色只留識別與重點）＋鮮豔度量測定義：vivid = HSV 的 s×v > 0.35（感知彩度）
-    woodMut: '#8a6248', leafMut: '#5da85f', steel: '#5b7fa6',
+    woodMut: '#8a6248', leafMut: '#7fa663', steel: '#5b7fa6',
     // 光影
-    glowWarm: '#ffc86e', glowCool: '#bedcfe', spray: '#aee6fa', moon: '#ffe9b8',
+    glowWarm: '#ffc86e', glowCool: '#bedcfe', spray: '#f7e8c9', moon: '#ffe9b8',
     starlight: '#ffe9a8', deep: '#0f1428', navy: '#232f47',
     // 地表
-    grassLight: '#8fd07a', grass: '#79bd67', grassDeep: '#5da85f', parkLight: '#85c173',
-    park: '#6fbb72', dirt: '#c9a06a', sand: '#e8d8a8', road: '#4a4a55', roadLine: '#f7d038',
-    sidewalk: '#b8bcc4', water: '#4aa3df', waterDeep: '#2980b9', pond: '#7fd4e8',
+    grassLight: '#a4c68a', grass: '#8cb877', grassDeep: '#7fa663', parkLight: '#9cbd8b',
+    park: '#8fae6b', dirt: '#c9a06a', sand: '#e8d8a8', road: '#4a4a55', roadLine: '#f2b544',
+    sidewalk: '#cfc4b0', water: '#7d9dbd', waterDeep: '#4a7ca5', pond: '#a8c8bc',
     // 材質
     woodDark: '#6d4c41', wood: '#8d5a2c', woodLight: '#a9743f', plank: '#b0743e',
-    counter: '#795548', metal: '#7d868f', glass: '#cfe8f5', floorHome: '#d9a066',
+    counter: '#795548', metal: '#9a8d7a', glass: '#cfe8f5', floorHome: '#d9a066',
     // 建築識別（同棟同色：一棟一色，名牌＝晶片＝招牌＝accent）
-    home: '#e67e22', store: '#2ed573', restaurant: '#c0392b', school: '#2c3e50',
+    home: '#e67e22', store: '#2ed573', restaurant: '#c2452d', school: '#2c3e50',
     library: '#1e8449', gym: '#ca6f1e',
     // 角色
-    skin: '#fed7aa', skinShade: '#f0b98a', clothesRed: '#e74c3c', clothesBlue: '#3498db',
-    clothesPurple: '#9b59b6', clothesPink: '#ff8fab', clothesYellow: '#f1c40f',
-    clothesGreen: '#27ae60', clothesBlack: '#1a1a24', denim: '#2e5f8a',
+    skin: '#fed7aa', skinShade: '#f0b98a', clothesRed: '#cd5f43', clothesBlue: '#527fa8',
+    clothesPurple: '#9a6bb5', clothesPink: '#ff8fab', clothesYellow: '#f2b544',
+    clothesGreen: '#6faf62', clothesBlack: '#2a2320', denim: '#4a6f8f',
     // 食物
-    rice: '#f5f0e6', curry: '#d98e32', noodle: '#f7d038', meat: '#a93226', tea: '#b0743e', milk: '#fff6e8',
+    rice: '#f5f0e6', curry: '#d98e32', noodle: '#f2b544', meat: '#b04a32', tea: '#b0743e', milk: '#fff6e8',
     // 狀態（語意色，玩法辨識優先，不可被色票收斂犧牲）
-    energy: '#f39c12', xp: '#8e44ad', heart: '#ff5b6a', coin: '#f1c40f', danger: '#e74c3c', info: '#3498db',
+    energy: '#e09a3e', xp: '#9a6bb5', heart: '#e0685f', coin: '#f2b544', danger: '#c2452d', info: '#527fa8',
     // 場景 staples（家具/陳設常用，批次 4 收斂時以此為準）
-    board: '#2f5d3a', sofaRed: '#b04a3a', sofaBlue: '#3a6ea5', bookA: '#c0392b', bookB: '#2980b9',
-    bookC: '#27ae60', bookD: '#f39c12', bookE: '#8e44ad', blanketBlue: '#5b84c4', blanketPink: '#e89bb0',
-    plantGreen: '#3f9142', plantPot: '#a15c33', lampShade: '#ffd166', curtain: '#f3e2c7',
-    tileWhite: '#eef2f0', tileLine: '#c8d2cc', deskTop: '#c98d54', chairWood: '#9c6b43'
+    board: '#2f5d3a', sofaRed: '#b04a3a', sofaBlue: '#527fa8', bookA: '#c2452d', bookB: '#4a7ca5',
+    bookC: '#6faf62', bookD: '#e09a3e', bookE: '#9a6bb5', blanketBlue: '#7d9dbd', blanketPink: '#e89bb0',
+    plantGreen: '#5f8f52', plantPot: '#a15c33', lampShade: '#f5c86a', curtain: '#f3e2c7',
+    tileWhite: '#f7f1e3', tileLine: '#d8cdb4', deskTop: '#c98d54', chairWood: '#9c6b43'
   },
   // ---- 同棟同色（批次 2/4/6 引用） ----
   BUILDING: {
