@@ -187,27 +187,22 @@ body {
     }
 
     /* 開羅經典 2.5D 正向點陣建築框架 (Kairosoft 2.5D Dollhouse) */
-    .island-platform {
+    /* R2 模型化：島框退役——掛載層只負責定位與裁切（無邊框/無底色/無陰影；世界只有一塊模型底板） */
+    .island-mount {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      border-radius: var(--r-card);
-      background: var(--paper);
-      border: 3px solid var(--cocoa);
-      box-shadow: var(--sh-hard);
       overflow: hidden;
     }
 
-    .island-platform-top {
+    .island-mount-top {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: var(--white);
-      border-radius: var(--r-card);
       overflow: hidden;
     }
 
@@ -3136,12 +3131,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 }
 
 /* 建築底座：圓角 + 柔和深色框 (像素房間內容不變) */
-.island-platform {
-  border: 3px solid #7d8fc9 !important;
-  border-radius: var(--r-win) !important;
-  box-shadow: var(--sh-hard) !important;
-  background: var(--paper) !important;
-}
 .island-tag {
   border: 2.5px solid var(--ink) !important;
   border-radius: var(--r-pill) !important;
@@ -3656,7 +3645,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #sky-night { position: absolute; left: 0; top: 0; width: 1715px; height: 650px; z-index: 91; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: rgba(43,26,54,0.62); } /* v9.48 夜色改均勻單值（舊垂直漸層讓北排無理由地比南排暗——光8）；島嶼由靜態 clip 全挖＋各島 .island-shade 連續決定暗度 */
 #sky-warm { position: absolute; left: 0; top: 0; width: 1715px; height: 695px; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.9s linear; background: linear-gradient(180deg, rgba(255,150,120,0.40), rgba(255,120,160,0.20) 55%, rgba(120,70,110,0.20)); }
 #street-glows { position: absolute; left: 0; top: 0; width: 1715px; height: 695px; z-index: 92; pointer-events: none; opacity: 0; transition: opacity 0.9s linear;  }
-#landmark-store .island-platform-top { transition: filter 0.9s linear; }
+#landmark-store .island-mount-top { transition: filter 0.9s linear; }
 #landmark-store .facade-roof { transition: filter 0.9s linear; }
 #landmark-store.night-lit .bld-sign { filter: brightness(1.3) drop-shadow(0 0 7px rgba(255, 200, 110, 0.9)); } /* v9.64 招牌燈箱發光改掛新外觀招牌帶（店面本體的亮度改由 #sky-night 挖空達成） */
 .npc-role { position: absolute; top: -5px; left: 0; font-size: 0.78rem; line-height: 1; text-shadow: 0 1px 2px rgba(var(--rgb-black),0.45); } /* v9.16.1 值班職位小標 */
@@ -4001,7 +3990,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 
     /* ---- v9.67 爆炸圖 chrome（R1）：導引線/屋頂幽靈/樓層標籤/島框溢出解放 ---- */
-    .island-platform.explode-open { overflow: visible; }
+    .island-mount.explode-open { overflow: visible; }
     .roof-ghost, .explode-guides { transition: opacity 0.35s ease, transform 0.35s ease; }
     .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #fff5f9; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
     .floor-label.active { background: var(--sun); color: var(--ink); }
@@ -4033,7 +4022,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .drawer-panel { background: var(--card); border: 2px solid var(--stroke); color: var(--ink); }
 .bottom-dock { background: var(--card) !important; border: 3px solid var(--stroke) !important; }
 .modal-close { color: var(--ink); border-color: var(--stroke); }
-.island-platform-top { background: var(--card); }
 #spot-bar { background: rgba(58, 39, 24, 0.92); }
 #spot-bar .spot-chip.on { color: var(--ink); }
 .floor-label { background: rgba(58, 39, 24, 0.78); }
@@ -4048,7 +4036,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .fs-plate { background: var(--card); border: 2.5px solid var(--stroke); box-shadow: var(--sh-hard-sm); }
 
 /* ===== v9.81 V4 夜晚亮窗光：營業/住家窗由奶油玻璃轉暖琥珀＋微光暈（night-on 時） ===== */
-#town-map.night-on .bld-ext polygon[fill="#fff3d6"] { fill: #ffcf7d; filter: drop-shadow(0 0 4px rgba(255, 190, 90, 0.85)); }
+#town-map.night-on .bld-ext polygon[fill="#fff3d6"] { fill: #ffcf7d; filter: drop-shadow(0 0 6px rgba(255, 190, 90, 0.9)); }
 
 /* ===== v9.82 B 批 FB 回饋動畫（class 觸發、播完移除、元素必回原狀） ===== */
 @keyframes fb-pop { 0% { transform: scale(1); } 40% { transform: scale(var(--fb-s, 1.1)); } 100% { transform: scale(1); } }
@@ -4066,3 +4054,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .btn-exam-mini { min-height: 40px; }
 .spot-chip { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
 .floor-label { min-height: 40px; display: inline-flex; align-items: center; }
+
+/* ===== R2 公仔底座：人物站在模型板上的淺色圓座（隨公仔同行） ===== */
+.doll-base { position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); width: 30px; height: 11px; border-radius: var(--r-pill); background: rgba(255,250,240,0.65); border: 1.5px solid rgba(124,74,99,0.35); box-shadow: var(--sh-soft); pointer-events: none; z-index: 0; }
+#char-wrap > svg, .npc > .npc-flip { position: relative; z-index: 1; }

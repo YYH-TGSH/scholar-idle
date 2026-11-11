@@ -1145,6 +1145,7 @@
           applySilhouette(svg, d);
           el.innerHTML = `<span class="npc-name">${d.name}</span><span class="npc-role" style="display:none;"></span><span class="npc-zzz-tag" style="display:none;"><svg class="pix-ico" aria-hidden="true"><use href="#i-zzz"/></svg></span><span class="npc-flip"></span><span class="npc-dish" style="display:none;"></span>`;
           el.querySelector('.npc-flip').appendChild(svg);
+          const base = document.createElement('div'); base.className = 'doll-base'; base.setAttribute('aria-hidden', 'true'); el.insertBefore(base, el.firstChild); // R2 公仔底座
           el.addEventListener('click', () => npcSay(gameState.npcs.find(n => n.key === d.key)));
           layer.appendChild(el);
         });
@@ -1350,7 +1351,7 @@
     }
     function ensureHomeInterior() {
       if (document.getElementById('home-stage')) return;
-      const host = document.querySelector('#landmark-home .island-platform-top') || document.querySelector('#landmark-home .island-platform') || document.getElementById('landmark-home');
+      const host = document.querySelector('#landmark-home .island-mount-top') || document.querySelector('#landmark-home .island-mount') || document.getElementById('landmark-home');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'home-stage';
@@ -1605,7 +1606,7 @@
     }
     function ensureHome2Interior() {
       if (document.getElementById('home2-stage')) return;
-      const host = document.querySelector('#landmark-home .island-platform-top') || document.querySelector('#landmark-home .island-platform') || document.getElementById('landmark-home');
+      const host = document.querySelector('#landmark-home .island-mount-top') || document.querySelector('#landmark-home .island-mount') || document.getElementById('landmark-home');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'home2-stage';
@@ -1855,9 +1856,9 @@
         lb.classList.toggle('active', f === derived); // R2-2：實心高亮＝實際所在樓層
         lb.classList.toggle('peeking', _homeViewFloor !== null && f === active && f !== derived); // R2-2：虛線描邊＝只是 peek 的樓層
       }
-      const plat = document.querySelector('#landmark-home .island-platform');
+      const plat = document.querySelector('#landmark-home .island-mount');
       if (plat) plat.classList.toggle('explode-open', inB);
-      const host = document.querySelector('#landmark-home .island-platform-top');
+      const host = document.querySelector('#landmark-home .island-mount-top');
       if (host) {
         ensureExplodeChrome('home', host, 'home', HOME_PROJ, 3, EXPLODE_GAP);
         const pan = active === 2 ? _home2PanCur : _homePanCur;
@@ -1872,10 +1873,10 @@
     }
     function syncMiniExplode(key, loc, pr, panCur) { // v9.67 單層建物迷你爆炸（餐廳/超商：地板層＋屋頂層、GAP_SINGLE）
       const inside = (typeof currentLoc !== 'undefined') && currentLoc === loc && !gameState.isCommuting;
-      const host = document.querySelector('#landmark-' + loc + ' .island-platform-top');
+      const host = document.querySelector('#landmark-' + loc + ' .island-mount-top');
       if (!host) return;
       ensureExplodeChrome(key, host, loc, pr, 2, EXPLODE_GAP_SINGLE);
-      const plat = document.querySelector('#landmark-' + loc + ' .island-platform');
+      const plat = document.querySelector('#landmark-' + loc + ' .island-mount');
       if (plat) plat.classList.toggle('explode-open', inside);
       const sc = explodeSc(document.getElementById(key + '-stage'));
       const fsOn = _fs && _fs.key === key;
@@ -2322,6 +2323,12 @@
       const circ = (xp, r, fill, extra) => '<circle cx="' + xp.x.toFixed(1) + '" cy="' + xp.y.toFixed(1) + '" r="' + r + '" fill="' + fill + '"' + (extra || '') + '/>';
       let s = '<defs><pattern id="grassPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#a5e8b5"/><rect width="24" height="24" fill="#7ede8f"/><rect x="24" y="24" width="24" height="24" fill="#7ede8f"/></pattern><pattern id="parkPat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#8fe3a8"/><rect x="24" y="24" width="24" height="24" fill="#5ec96f"/><rect width="24" height="24" fill="#5ec96f"/></pattern></defs>';
       s += '<g id="town-decor25">';
+      // R2 模型底板：世界唯一的模型板（木邊只在世界邊界）——接地影/木側/木面三層，草地蓋內圈留木 Rim
+      {
+        const bp = [[-30, -30], [1180, -30], [1180, 950], [-30, 950]].map(([x, z]) => pr.P(x, z, 0));
+        const ptsOf = (pts, dx, dy) => pts.map(p => (p.x + dx).toFixed(1) + ',' + (p.y + dy).toFixed(1)).join(' ');
+        s += '<g id="town-baseplate"><polygon points="' + ptsOf(bp, 14, 18) + '" fill="rgba(92,46,62,0.16)"/><polygon points="' + ptsOf(bp, 0, 13) + '" fill="#a9714b"/><polygon points="' + ptsOf(bp, 0, 0) + '" fill="#dfa06b"/></g>';
+      }
       // 地面＋公園帶
       s += quad(0, 0, 1150, 920, 'url(#grassPat)');
       s += quad(0, 336, 1150, 184, 'url(#parkPat)');
@@ -2515,7 +2522,7 @@
         isl.appendChild(svg);
         if (!b.overlay) {
           isl.classList.add('ext-mode');
-          const host = isl.querySelector('.island-platform-top');
+          const host = isl.querySelector('.island-mount-top');
           if (host) host.querySelectorAll(':scope > *').forEach(ch => { if (!(ch.id || '').endsWith('-stage')) ch.classList.add('dollhouse-art'); });
         }
       }
@@ -2609,9 +2616,9 @@
         lb.style.display = inB ? 'block' : 'none';
         lb.classList.toggle('active', rel === 0);
       }
-      const plat = document.querySelector('#landmark-school .island-platform');
+      const plat = document.querySelector('#landmark-school .island-mount');
       if (plat) plat.classList.toggle('explode-open', inB);
-      const host = document.querySelector('#landmark-school .island-platform-top');
+      const host = document.querySelector('#landmark-school .island-mount-top');
       if (host) {
         ensureExplodeChrome('school', host, 'school', SCHOOL_PROJ, 4, EXPLODE_GAP);
         const pan = inB ? (({ school: _schoolPanCur, study: _studyPanCur, club: _clubPanCur })[cur] || 0) : 0;
@@ -2787,7 +2794,7 @@
 
     function ensureStoreInterior() {
       if (document.getElementById('store-stage')) return;
-      const host = document.querySelector('#landmark-store .island-platform-top') || document.querySelector('#landmark-store .island-platform') || document.getElementById('landmark-store');
+      const host = document.querySelector('#landmark-store .island-mount-top') || document.querySelector('#landmark-store .island-mount') || document.getElementById('landmark-store');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'store-stage';
@@ -3031,7 +3038,7 @@
 
     function ensureSchoolInterior() {
       if (document.getElementById('school-stage')) return;
-      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
+      const host = document.querySelector('#landmark-school .island-mount-top') || document.querySelector('#landmark-school .island-mount') || document.getElementById('landmark-school');
       if (!host) return;
       const pf = document.getElementById('podium-fg'); if (pf) pf.remove(); // v9.21 舊講台前景層退役（新場景自帶講台前景）
       const stage = document.createElement('div');
@@ -3241,7 +3248,7 @@
     }
     function ensureGymInterior() {
       if (document.getElementById('gym-stage')) return;
-      const host = document.querySelector('#landmark-gym .island-platform-top') || document.querySelector('#landmark-gym .island-platform') || document.getElementById('landmark-gym');
+      const host = document.querySelector('#landmark-gym .island-mount-top') || document.querySelector('#landmark-gym .island-mount') || document.getElementById('landmark-gym');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'gym-stage';
@@ -3524,7 +3531,7 @@
     }
     function ensureLibraryInterior() {
       if (document.getElementById('lib-stage')) return;
-      const host = document.querySelector('#landmark-library .island-platform-top') || document.querySelector('#landmark-library .island-platform') || document.getElementById('landmark-library'); // v9.72 解綁：stage 回圖書館自己島
+      const host = document.querySelector('#landmark-library .island-mount-top') || document.querySelector('#landmark-library .island-mount') || document.getElementById('landmark-library'); // v9.72 解綁：stage 回圖書館自己島
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'lib-stage';
@@ -3707,7 +3714,7 @@
     }
     function ensureClubInterior() {
       if (document.getElementById('club-stage')) return;
-      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
+      const host = document.querySelector('#landmark-school .island-mount-top') || document.querySelector('#landmark-school .island-mount') || document.getElementById('landmark-school');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'club-stage';
@@ -3848,7 +3855,7 @@
     }
     function ensureStudyInterior() {
       if (document.getElementById('study-stage')) return;
-      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
+      const host = document.querySelector('#landmark-school .island-mount-top') || document.querySelector('#landmark-school .island-mount') || document.getElementById('landmark-school');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'study-stage';
@@ -3998,7 +4005,7 @@
     }
     function ensureRestInterior() {
       if (document.getElementById('rest-stage')) return;
-      const host = document.querySelector('#landmark-restaurant .island-platform-top') || document.querySelector('#landmark-restaurant .island-platform') || document.getElementById('landmark-restaurant');
+      const host = document.querySelector('#landmark-restaurant .island-mount-top') || document.querySelector('#landmark-restaurant .island-mount') || document.getElementById('landmark-restaurant');
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'rest-stage';
