@@ -4007,23 +4007,23 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     .island-platform.explode-open { overflow: visible; }
     .roof-ghost, .explode-guides { transition: opacity 0.35s ease, transform 0.35s ease; }
     .floor-label { position: absolute; left: 10px; top: 12px; z-index: 60; pointer-events: auto; border: none; cursor: pointer; background: rgba(38, 50, 75, 0.88); color: #eef2f0; font-size: 0.78rem; font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; box-shadow: var(--sh-hard-sm); }
-    .floor-label.active { background: var(--yellow); color: var(--ink); }
+    .floor-label.active { background: var(--sun); color: var(--ink); }
     .floor-label.peeking { background: rgba(38, 50, 75, 0.45); border: 1.5px dashed #eef2f0; box-shadow: none; } /* R2-2 peek 態：虛線描邊，與實際樓層的實心高亮區分 */
 
     /* v9.69 全屏室內呈現層（R3）：深色底、整疊入框；z 45 恆在 HUD（header 50／controls 60）之下 */
     #fs-view { position: fixed; inset: 0; z-index: 45; background: #141c30; display: none; }
     #fs-view.on { display: block; }
     .fs-plate { border-radius: var(--r-card); }
-    .fs-plate.fs-active { outline: 2px solid var(--yellow); outline-offset: -2px; }
+    .fs-plate.fs-active { outline: 2px solid var(--sun); outline-offset: -2px; }
     .fs-plate > [id$="-stage"] { border-radius: var(--r-card); }
     body.fs-on .floor-label { left: 6px; top: 6px; }
 
     /* v9.71 FS 檢視性退出鈕（fs-view 內、高於疊層）＋回室內小鈕（島上） */
-    #fs-exit-btn { position: absolute; left: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: var(--yellow); color: #182042; border: none; border-radius: var(--r-pill); padding: 10px 18px; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: var(--sh-hard); } /* v9.75 R3：左下角＋實心黃底大字（主行動語言）——深藍半透明浮近黑底＋top 96px 半空位置真人找不到（Y1 可見性失效重開） */
+    #fs-exit-btn { position: absolute; left: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: var(--sun); color: #182042; border: none; border-radius: var(--r-pill); padding: 10px 18px; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: var(--sh-hard); } /* v9.75 R3：左下角＋實心黃底大字（主行動語言）——深藍半透明浮近黑底＋top 96px 半空位置真人找不到（Y1 可見性失效重開） */
     body.fs-on #spot-bar { bottom: calc(var(--chrome-bottom, 16px) + 64px); } /* v9.75 R3：FS 中地點條上移一排，避免窄屏與左下退出鈕同列重疊 */
-    .fs-reenter-btn { position: absolute; top: 8px; right: 8px; z-index: 65; background: rgba(20, 28, 48, 0.88); color: #fff; border: 1.5px solid var(--yellow); border-radius: var(--r-pill); padding: 6px 12px; font-size: 0.78rem; font-weight: 900; cursor: pointer; }
+    .fs-reenter-btn { position: absolute; top: 8px; right: 8px; z-index: 65; background: rgba(20, 28, 48, 0.88); color: #fff; border: 1.5px solid var(--sun); border-radius: var(--r-pill); padding: 6px 12px; font-size: 0.78rem; font-weight: 900; cursor: pointer; }
 
 /* v9.73 室內地點條：主角在建築內時顯示該棟地點 chips（FS 內外皆可見，z 47 在 fs-view 之上、HUD 之下） */
 #spot-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--chrome-bottom, 16px) + 10px); z-index:47; display:none; gap:6px; padding:5px 7px; background:rgba(20,28,48,0.85); border-radius:var(--r-pill); }
 #spot-bar .spot-chip { border:1.5px solid rgba(255,255,255,0.35); background:transparent; color:#e8eefc; font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); cursor:pointer; font-family:inherit; }
-#spot-bar .spot-chip.on { background:var(--yellow); color:#182042; border-color:var(--yellow); }
+#spot-bar .spot-chip.on { background:var(--sun); color:#182042; border-color:var(--sun); }
