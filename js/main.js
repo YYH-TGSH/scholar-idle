@@ -201,7 +201,7 @@
       // v9.55：回傳投影後螢幕座標（世界鏡頭活在 TOWN_PROJ 投影空間）；邏輯座標只在函式內部換算
       const _proj = lp => (typeof TOWN_PROJ !== 'undefined') ? TOWN_PROJ.P(lp.x, lp.y, 0) : lp;
       if (gameState.isCommuting && _visPos) return _proj(_visPos);
-      const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1, club: 1 }; // v9.71 補 club（學校 3F；DOOR_X/DOOR_FRONT_Y 皆有 club）
+      const IN = { home: 1, store: 1, restaurant: 1, school: 1, library: 1, gym: 1, club: 1, study: 1 }; // v9.71 補 club；v9.72 補 study（學校 2F 自習室）
       if (typeof currentLoc !== 'undefined' && IN[currentLoc] && typeof DOOR_X !== 'undefined') return _proj({ x: DOOR_X[currentLoc], y: DOOR_FRONT_Y[currentLoc] });
       return _proj({ x: gameState.currentX || WORLD_W / 2, y: gameState.currentY || WORLD_H / 2 });
     }
@@ -363,13 +363,13 @@
     }
     // 房間快捷導覽 (手機底部膠囊列)：把該房間滑到畫面中央並脈衝提示，玩家再點大房間派遣
     function focusLandmark(loc) {
-      const centers = { home: [198, 122], store: [571, 122], restaurant: [951, 122], school: [191, 612], library: [191, 612], gym: [958, 612] }; // v9.55 六島邏輯中心；v9.65 圖書館併入學校棟，中心改學校
+      const centers = { home: [198, 122], store: [571, 122], restaurant: [951, 122], school: [191, 612], library: [571, 612], gym: [958, 612] }; // v9.72 圖書館焦點回自己島 // v9.55 六島邏輯中心；v9.65 圖書館併入學校棟，中心改學校
       const c = centers[loc];
       if (!c) return;
       const _cz = (window.BIBLE ? BIBLE.SCALE.CAM_INDOOR_ZOOM : 2.4); if (mapZoom < _cz) _camZoomTarget = _cz; // v9.0.1 膠囊縮放也走彈簧，滑順放大到房間（v9.56 島嶼視覺縮放 0.7 → 補償倍率；v9.60 數字收進聖經常數）
-      _camHoldUntil = Date.now() + 30000; // v9.14.4 手動操控後 30 秒不自動回追主角
+      _camHoldUntil = Date.now() + 8000; // v9.72 F-4 裁決：膠囊聚焦讓路 30s→8s // v9.14.4 手動操控後 30 秒不自動回追主角
       centerMapOn(c[0], c[1]);
-      const el = document.getElementById('landmark-' + (loc === 'library' ? 'school' : loc)); // v9.65 圖書館併入學校：聚焦與脈衝都對學校棟
+      const el = document.getElementById('landmark-' + loc); // v9.72 解綁：脈衝對本島
       if (el) { el.classList.remove('nav-pulse'); void el.offsetWidth; el.classList.add('nav-pulse'); }
       if (typeof playSound === 'function') playSound('click');
     }
@@ -518,6 +518,7 @@
       if (typeof updateSchoolStage === 'function') updateSchoolStage(); // v9.21
       if (typeof updateLibraryStage === 'function') updateLibraryStage(); // v9.26
       if (typeof updateClubStage === 'function') updateClubStage(); // v9.65 學校 3F
+      if (typeof updateStudyStage === 'function') updateStudyStage(); // v9.72 學校 2F 自習室
       if (typeof updateGymStage === 'function') updateGymStage(); // v9.27
 
       // 4. 行為決策
@@ -739,6 +740,9 @@
         else if (currentLoc === "library") {
           currentState = "studying";
         }
+        else if (currentLoc === "study") {
+          currentState = "studying"; // v9.72 自習室
+        }
         else if (currentLoc === "store") {
           currentState = gameState.noodleUntil ? "eating" : "working"; // v9.16 泡麵中不站櫃檯
         }
@@ -776,6 +780,10 @@
       }
       if (loc === 'club') {
         return COORDS['club-idle']; // v9.65 學校 3F 社團活動室
+      }
+      if (loc === 'study') {
+        if (state === 'studying') return COORDS['study-study']; // v9.72 學校 2F 自習室
+        return COORDS['study-idle'];
       }
       if (loc === 'gym') {
         if (state === 'sports') return COORDS['gym-run'];
@@ -1347,7 +1355,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.71.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.72.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

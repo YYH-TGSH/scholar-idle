@@ -650,7 +650,7 @@
     const NPC_PARK_Y = 440;
     const NPC_DOOR_X = DOOR_X; // v9.38 起門口 x 以 coords.js 註冊表為單一來源
     // 玩家專屬位子：座位池永遠保留，NPC 絕不坐上去跟玩家重疊
-    const PLAYER_RESERVED = { school: { x: 590, y: 250 }, library: { x: 140, y: 235 }, restaurant: { x: 440, y: 184 }, store: { x: 565, y: 252 }, gym: { x: 1652, y: 75 } };
+    const PLAYER_RESERVED = { school: { x: 590, y: 250 }, study: { x: 590, y: 250 }, library: { x: 140, y: 235 }, restaurant: { x: 440, y: 184 }, store: { x: 565, y: 252 }, gym: { x: 1652, y: 75 } };
     const SPECIAL_MENU = [
       { name: '招牌炒麵', emoji: '🍝' }, { name: '豚骨拉麵', emoji: '🍜' }, { name: '鐵板牛排', emoji: '🥩' },
       { name: '香煎雞腿', emoji: '🍗' }, { name: '海鮮炒飯', emoji: '🍚' }, { name: '麻婆豆腐', emoji: '🌶️' }, { name: '味噌鮭魚', emoji: '🐟' },
@@ -692,6 +692,7 @@
       store: { activity: 'browse', grid: [[420, 205], [500, 205], [580, 205], [660, 205], [460, 255], [620, 255]] }, // v9.17 室內貨架走道
       gym: { activity: 'sport', grid: [[240, 208], [390, 150], [540, 208], [800, 190], [900, 215], [980, 170]] }, // v9.27 操場場景內（前三跑道側、後三球場側）
       club: { activity: 'study', grid: [[330, 208], [445, 208], [560, 208], [675, 208], [790, 208], [905, 208]] }, // v9.65 社團活動室長桌南側
+      study: { activity: 'study', grid: [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]] }, // v9.72 自習室（同教室課桌格）
     };
     // v9.19 桌上餐點：開吃時把對應的菜放到桌上（不只頭上泡泡）
     const PICK_ITEMS = ['🍙', '🍞', '🥛', '🧃', '🍫', '🍩', '🍎', '🧴', '🥫', '🍮'];
@@ -808,12 +809,13 @@
       store: { roomsId: 'store-rooms', doorIn: STORE_DOOR_IN, doorOut: STORE_DOOR_OUT, worldDoorX: 571, inDoor: { x: 565, y: 278 } },
       restaurant: { roomsId: 'rest-rooms', doorIn: REST_DOOR_IN, doorOut: REST_DOOR_OUT, worldDoorX: 951, inDoor: { x: 610, y: 278 } },
       school: { roomsId: 'school-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } },
-      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } }, // v9.65 併入學校 2F：街口改學校大門（worldDoorX 571->198）
+      library: { roomsId: 'lib-rooms', doorIn: LIB_DOOR_IN, doorOut: LIB_DOOR_OUT, worldDoorX: 571, inDoor: { x: 575, y: 278 } }, // v9.72 解綁：圖書館回自己島（worldDoorX 復 571）
       club: { roomsId: 'club-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } }, // v9.65 學校 3F 社團活動室
+      study: { roomsId: 'study-rooms', doorIn: SCHOOL_DOOR_IN, doorOut: SCHOOL_DOOR_OUT, worldDoorX: 198, inDoor: { x: 575, y: 278 } }, // v9.72 學校 2F 自習室（代原圖書館層）
       gym: { roomsId: 'gym-rooms', doorIn: GYM_DOOR_IN, doorOut: GYM_DOOR_OUT, worldDoorX: 958, inDoor: { x: 575, y: 278 } }
     };
     // v9.65 學校多樓層：school=1F / library=2F / club=3F 同棟；樓梯點三層同座標（東北角），跨層必經此點換層，不瞬移穿牆
-    const SCHOOL_GROUP = { school: 1, library: 2, club: 3 };
+    const SCHOOL_GROUP = { school: 1, study: 2, club: 3 }; // v9.72 圖書館解綁獨立、2F 改自習室
     const STAIR_PT = { x: 1085, y: 70 };
     const stairWp = (loc) => ({ x: STAIR_PT.x, y: STAIR_PT.y, door: 'in', loc: loc, ix: STAIR_PT.x, iy: STAIR_PT.y });
     const HOME_STAIR_PT = { x: 539, y: 70 }; // v9.66 住家樓梯（中央區北側，三方臥室動線共用）
@@ -1012,9 +1014,9 @@
       }
       if (def.kind === 'rival') {
         if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away'; // v9.15 21:00 後陸續回家
-        else if (weekend) dest = ['library', 'gym', 'restaurant', 'store', 'park'][Math.floor(Math.random() * 5)];
+        else if (weekend) dest = ['library', 'study', 'gym', 'restaurant', 'store', 'park'][Math.floor(Math.random() * 6)]; // v9.72 自習室進週末池
         else if (hour >= 8 && hour < 16) dest = 'school';
-        else if (hour >= 17 && hour < 21) dest = ['library', 'club', 'park', 'gym'][Math.floor(Math.random() * 4)]; // v9.65 社團時間
+        else if (hour >= 17 && hour < 21) dest = ['library', 'club', 'study', 'park', 'gym'][Math.floor(Math.random() * 5)]; // v9.65 社團時段；v9.72 加自習室間
         else dest = ['restaurant', 'store', 'gym', 'park'][Math.floor(Math.random() * 4)];
       } else {
         if (hour < 7 || (hour * 60 + (gameState.minute || 0)) >= npcHomeTime(npc)) dest = 'away';
@@ -1665,10 +1667,11 @@
       return v;
     }
     function fsDefs(key) {
-      if (key === 'school') return { gap: EXPLODE_GAP, guides: 'school-guides', plates: [{ id: 'school-roof', kind: 'roof', loc: null }, { id: 'club-stage', kind: 'stage', loc: 'club' }, { id: 'lib-stage', kind: 'stage', loc: 'library' }, { id: 'school-stage', kind: 'stage', loc: 'school' }] };
+      if (key === 'school') return { gap: EXPLODE_GAP, guides: 'school-guides', plates: [{ id: 'school-roof', kind: 'roof', loc: null }, { id: 'club-stage', kind: 'stage', loc: 'club' }, { id: 'study-stage', kind: 'stage', loc: 'study' }, { id: 'school-stage', kind: 'stage', loc: 'school' }] };
       if (key === 'home') return { gap: EXPLODE_GAP, guides: 'home-guides', plates: [{ id: 'home-roof', kind: 'roof', loc: null }, { id: 'home2-stage', kind: 'stage', loc: 'home2' }, { id: 'home-stage', kind: 'stage', loc: 'home' }] };
       if (key === 'store') return { gap: EXPLODE_GAP_SINGLE, guides: 'store-guides', plates: [{ id: 'store-roof', kind: 'roof', loc: null }, { id: 'store-stage', kind: 'stage', loc: 'store' }] };
       if (key === 'rest') return { gap: EXPLODE_GAP_SINGLE, guides: 'rest-guides', plates: [{ id: 'rest-roof', kind: 'roof', loc: null }, { id: 'rest-stage', kind: 'stage', loc: 'restaurant' }] };
+      if (key === 'library') return { gap: EXPLODE_GAP_SINGLE, guides: 'library-guides', plates: [{ id: 'library-roof', kind: 'roof', loc: null }, { id: 'lib-stage', kind: 'stage', loc: 'library' }] };
       return null;
     }
     function fsLayout() {
@@ -1739,7 +1742,7 @@
       fsReenterBtn(null);
       fsEnter(key);
     }
-    const FS_LANDMARK = { school: 'landmark-school', home: 'landmark-home', store: 'landmark-store', rest: 'landmark-restaurant' };
+    const FS_LANDMARK = { school: 'landmark-school', home: 'landmark-home', store: 'landmark-store', rest: 'landmark-restaurant', library: 'landmark-library' };
     function fsReenterBtn(key) {
       const old = document.getElementById('fs-reenter-btn');
       if (!key) { if (old) old.remove(); return; }
@@ -2188,7 +2191,7 @@
           if (npc.atDinner && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.DINNER_CLIP); // v9.45 晚餐爸媽夾層：椅背(172)之後、桌前板(196)之前，臉不再被椅背蓋住
           else if (npc.insideLoc === 'store' && npc.state === 'seated' && !npc.shopStage) el.style.zIndex = String(npc.x >= 700 ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.45 超商坐姿分流：櫃檯崗位 945（櫃檯拆兩帶之間）、窗邊客 955（吧台兩帶之間）
           else if (npc.insideLoc === 'restaurant' && npc.state === 'seated') el.style.zIndex = String(npc.key === 'chef' ? Z_LAYER.POST_CLIP : Z_LAYER.SEATED_CLIP); // v9.47 廚師納入夾層 945（鐵板拆兩帶之間，臉不再被鐵板蓋住）
-          else if ((npc.insideLoc === 'school' || npc.insideLoc === 'club') && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.POST_CLIP); // v9.47 學校坐姿站前；v9.65 社團室同規板兩帶之間 945：臉在上帶之上、下帶只蓋腿（學生/講台老師/辦公室老師同規） // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
+          else if ((npc.insideLoc === 'school' || npc.insideLoc === 'club' || npc.insideLoc === 'study') && npc.state === 'seated') el.style.zIndex = String(Z_LAYER.POST_CLIP); // v9.47 學校坐姿站前；v9.65 社團室同規板兩帶之間 945：臉在上帶之上、下帶只蓋腿（學生/講台老師/辦公室老師同規） // v9.18 吧台客人夾在雙層前景之間（上身在廚師帶之上、腿被客人帶蓋住）
           else if (npc.insideLoc && npc.state !== 'seated') el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 室內走動/站立的人在傢俱前景之上——走過櫃檯前不再被切頭
           else if (npc.inside && npc.state !== 'seated' && npc.state !== 'sleeping') el.style.zIndex = String(Z_LAYER.WALK); // v9.30 住家同規：爸媽用舊 inside 旗標（insideLoc 為 null）原本沒被上條命中；走動/站立在傢俱前景之上，晚餐入座維持夾層深度、睡覺維持深度讓棉被（z260）蓋在上面
           else if (npc.insideLoc === 'store' && (npc.shopStage === 'queue' || npc.shopStage === 'pay')) el.style.zIndex = String(Z_LAYER.WALK); // v9.20.1 排隊結帳的人站在櫃檯南側，本來就該在櫃檯前面
@@ -2398,7 +2401,7 @@
       store: { fx: 491, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#eef4fb', accent: '#2ed573', roof: 'signband', sign: '便利商店', doorX: 571, pos: [559.5, 190.5], winW: 40, winH: 34 },
       restaurant: { fx: 871, fz: 73, fw: 160, fd: 100, floors: 1, wall: '#f7e8e0', accent: '#c0392b', roof: 'flat', sign: '餐廳', doorX: 951, pos: [946.5, 190.5] },
       school: { fx: 98, fz: 556, fw: 185, fd: 115, floors: 3, wall: '#ece5d3', accent: '#2c3e50', roof: 'flat', sign: '台東女中', tower: true, bell: true, doorX: 198, pos: [475.5, 422.5] },
-      library: { fx: 488, fz: 561, fw: 165, fd: 105, floors: 2, wall: '#e6efe4', accent: '#1e8449', roof: 'flat', sign: '圖書館', doorX: 571, pos: [855.5, 422.5] },
+      library: { fx: 488, fz: 561, fw: 165, fd: 105, floors: 1, wall: '#e6efe4', accent: '#1e8449', roof: 'flat', sign: '圖書館', doorX: 571, pos: [855.5, 422.5] },
       gym: { fx: 898, fz: 516, fw: 120, fd: 40, floors: 1, wall: '#f0e6da', accent: '#ca6f1e', roof: 'flat', doorX: 958, pos: [1237.6, 422.5], overlay: true, holeRect: [1235.6, 420.5, 202.8, 133.5] }
     };
     function bldHeight(b) { return b.floors * BLD_FLOOR_H + (b.roof === 'gable' ? 36 : 9); }
@@ -2474,53 +2477,7 @@
       }
     }
     // v9.70 R4：圖書館 annex 靜態閱覽室（純背景、零 NPC/座位/互動；視覺語言比照學校 2F 圖書館）
-    function ensureLibAnnexView() {
-      if (document.getElementById('lib-annex-view')) return;
-      const host = document.querySelector('#landmark-library .island-platform-top');
-      if (!host) return;
-      const pr = LIB_PROJ, WH = 160;
-      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
-      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
-      const PAL = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#2c3e50', '#c0392b', '#ffcc00'];
-      const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); const bh = (hTop - hBot) - ((i * 53) % 7); o += faceRect(cx, zF, bw, hBot, hBot + Math.max(10, bh), PAL[i % 10]); cx += bw + 2; i++; } return o; };
-      let g = '';
-      g += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#f5f0e6');
-      g += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#f5f0e6', 0.8));
-      g += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#c98d54');
-      g += floorBands(pr, poly, '#a9743f', 0.4, 38, 0, 1150, 0, 300);
-      g += poly([pr.P(176, 158, 0), pr.P(974, 158, 0), pr.P(974, 282, 0), pr.P(176, 282, 0)], 'rgba(142,59,70,0.30)');
-      [[176, 3], [702, 23]].forEach(([sx, seed]) => {
-        g += pr.box3(sx, 6, 272, 20, 150, '#6d4c41');
-        g += spineRow(sx + 8, sx + 264, 26.6, 104, 142, seed) + spineRow(sx + 8, sx + 264, 26.6, 58, 96, seed + 7);
-        g += faceRect(sx - 3, 26.6, 278, 99, 102, '#8a6248') + faceRect(sx - 3, 26.6, 278, 53, 56, '#8a6248');
-      });
-      g += pr.box3(486, 10, 178, 18, 124, '#6d4c41');
-      g += spineRow(494, 656, 28.6, 82, 116, 5) + spineRow(494, 656, 28.6, 44, 76, 13);
-      g += faceRect(483, 28.6, 184, 79, 82, '#8a6248');
-      const counter = pr.boxFaces(474, 106, 202, 22, 16, '#795548');
-      g += counter.back + counter.front;
-      const sp = pr.P(575, 100, 46);
-      g += '<text x="' + sp.x.toFixed(1) + '" y="' + sp.y.toFixed(1) + '" font-size="11" font-weight="900" fill="#6d4c41" text-anchor="middle">借 還 書 櫃 台</text>';
-      const ck = pr.P(575, 0, 158);
-      g += '<circle cx="' + ck.x.toFixed(1) + '" cy="' + ck.y.toFixed(1) + '" r="10" fill="#fff6e8" stroke="#182042" stroke-width="2"/>';
-      [176, 686].forEach(tx => {
-        const t = pr.boxFaces(tx, 166, 268, 20, 8, '#8a6248');
-        g += t.back + t.front;
-        g += pr.box3(tx + 40, 200, 26, 14, 22, '#6d4c41') + pr.box3(tx + 190, 200, 26, 14, 22, '#6d4c41');
-      });
-      const corners = [pr.P(0, 0, WH), pr.P(1150, 0, WH), pr.P(1150, 300, 0), pr.P(0, 300, 0)];
-      const xs = corners.map(c => c.x), ys = corners.map(c => c.y);
-      const vb = (Math.min(...xs) - 6).toFixed(0) + ' ' + (Math.min(...ys) - 6).toFixed(0) + ' ' + (Math.max(...xs) - Math.min(...xs) + 12).toFixed(0) + ' ' + (Math.max(...ys) - Math.min(...ys) + 12).toFixed(0);
-      const fit = ((host.clientWidth || 1150) / 1340).toFixed(3);
-      const view = document.createElement('div');
-      view.id = 'lib-annex-view';
-      view.style.cssText = 'position:absolute; inset:0; z-index:30; overflow:hidden; background:#f3e2c7; pointer-events:none;';
-      view.innerHTML = '<div class="lib-annex-rooms" style="width:1340px; height:300px; transform-origin:0 0; transform:scale(' + fit + ');"><svg width="1340" height="300" viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet">' + g + '</svg></div>';
-      host.appendChild(view);
-    }
-    window.addEventListener('resize', () => { const v = document.getElementById('lib-annex-view'); if (v) { const host = document.querySelector('#landmark-library .island-platform-top'); const r = v.querySelector('.lib-annex-rooms'); if (host && r) r.style.transform = 'scale(' + ((host.clientWidth || 1150) / 1340).toFixed(3) + ')'; } });
     function updateBuildingExteriors() {
-      ensureLibAnnexView(); // v9.70 R4：annex 靜態閱覽室（一次生成、之後守衛直接返回）
       buildExteriors();
       const cl = (typeof currentLoc !== 'undefined') ? currentLoc : null;
       const npcs = (typeof gameState !== 'undefined' && gameState.npcs) || [];
@@ -2539,8 +2496,8 @@
     // ===== v9.67 爆炸圖呈現層（R1 定版：GAP 120/單層 80、屋頂幽靈 0.55、四角導引線、左側樓層標籤；透明制 100/35/22 疊加） =====
     const EXPLODE_GAP = 120;
     const EXPLODE_GAP_SINGLE = 80;
-    const FLOOR_STAGE = { school: 'school-stage', library: 'lib-stage', club: 'club-stage' };
-    const FLOOR_NAME = { school: '1F 教室', library: '2F 圖書館', club: '3F 社團活動室' };
+    const FLOOR_STAGE = { school: 'school-stage', study: 'study-stage', club: 'club-stage' };
+    const FLOOR_NAME = { school: '1F 教室', study: '2F 自習室', club: '3F 社團活動室' };
     function explodeSc(stageEl) { return ((stageEl && stageEl.clientHeight) || 179) / 300; }
     function roofPlateSvg(kind, pr) {
       let inner;
@@ -2549,7 +2506,7 @@
           + '<polygon points="' + pr.pts([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 150, 46), pr.P(0, 150, 46)]) + '" fill="' + PROJ.shade('#c0392b', 0.82) + '"/>'
           + '<polygon points="' + pr.pts([pr.P(0, 150, 46), pr.P(1150, 150, 46), pr.P(1150, 300, 0), pr.P(0, 300, 0)]) + '" fill="#c0392b"/>';
       } else {
-        const col = kind === 'school' ? '#2c3e50' : kind === 'restaurant' ? '#c0392b' : '#2ed573';
+        const col = kind === 'school' ? '#2c3e50' : kind === 'restaurant' ? '#c0392b' : kind === 'library' ? '#1e8449' : '#2ed573';
         inner = pr.box3(-6, -6, 1162, 312, 10, col);
       }
       return '<svg viewBox="0 0 1340 300" style="width:1340px; height:300px; display:block;">' + inner + '</svg>';
@@ -2577,7 +2534,7 @@
     let _schExplodeMode = 'out';
     function syncFloorStack() {
       const cur = (typeof currentLoc !== 'undefined') ? currentLoc : null;
-      if (SCHOOL_GROUP[cur]) { ensureSchoolInterior(); ensureLibraryInterior(); ensureClubInterior(); }
+      if (SCHOOL_GROUP[cur]) { ensureSchoolInterior(); ensureStudyInterior(); ensureClubInterior(); }
       const inB = !!SCHOOL_GROUP[cur];
       const active = inB ? SCHOOL_GROUP[cur] : 1;
       const mode = inB ? 'in' : 'out';
@@ -2611,14 +2568,14 @@
       const host = document.querySelector('#landmark-school .island-platform-top');
       if (host) {
         ensureExplodeChrome('school', host, 'school', SCHOOL_PROJ, 4, EXPLODE_GAP);
-        const pan = inB ? (({ school: _schoolPanCur, library: _libPanCur, club: _clubPanCur })[cur] || 0) : 0;
+        const pan = inB ? (({ school: _schoolPanCur, study: _studyPanCur, club: _clubPanCur })[cur] || 0) : 0;
         const topOff = -(3 - (active - 1)) * step;
         const roof = document.getElementById('school-roof');
         if (roof) { const rk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (roof.dataset.k !== rk) { roof.dataset.k = rk; roof.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; roof.style.opacity = inB ? '0.55' : '0'; roof.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
         const gd = document.getElementById('school-guides');
         if (gd) { const gk = topOff.toFixed(1) + '/' + mode + '/' + Math.round(-pan * sc) + '/' + (fsOn ? 'F' : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease'; gd.style.opacity = inB ? '1' : '0'; gd.style.transform = fsOn ? 'scale(' + (_fs.s || 0.3).toFixed(3) + ')' : 'translate(' + (-pan * sc).toFixed(1) + 'px, ' + topOff.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       }
-      fsWant('school', fsInside(['school', 'library', 'club']));
+      fsWant('school', fsInside(['school', 'study', 'club']));
       if (_fs && _fs.key === 'school') fsMarkActive(inB ? cur : null);
     }
     function switchFloor(loc) {
@@ -3519,7 +3476,7 @@
     }
     function ensureLibraryInterior() {
       if (document.getElementById('lib-stage')) return;
-      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school'); // v9.65 圖書館併入學校 2F：stage 改住學校島
+      const host = document.querySelector('#landmark-library .island-platform-top') || document.querySelector('#landmark-library .island-platform') || document.getElementById('landmark-library'); // v9.72 解綁：stage 回圖書館自己島
       if (!host) return;
       const stage = document.createElement('div');
       stage.id = 'lib-stage';
@@ -3601,6 +3558,7 @@
       }
       updateLibraryPan(focus);
       updateLibraryLighting();
+      syncMiniExplode('library', 'library', LIB_PROJ, _libPanCur); // v9.72 解綁後比照單層建物：自己的爆炸屋頂/導引＋FS
     }
     function borrowBook() { // v9.26 新書推薦：每天可借一次（要人在圖書館裡）
       if (typeof currentLoc === 'undefined' || currentLoc !== 'library' || gameState.isCommuting) { queueFloatingText('要先進圖書館才能借書喔 📚'); return; }
@@ -3773,6 +3731,147 @@
         if (inner) focus = CLUB_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateClubPan(focus);
+    }
+
+    // ================= v9.72 學校 2F 自習室（圖書館解綁後補位：沿用教室課桌格與座位邏輯） =================
+    const STUDY_PROJ = PROJ.makeIndoor(PROJ.K_INDOOR, 24, 172);
+    const STUDY_PW = 1340;
+    PROJ.registerRooms('study-rooms', STUDY_PROJ);
+    function buildStudyRoomsHTML() {
+      const pr = STUDY_PROJ, WH = 156;
+      const poly = (list, fill, extra) => '<polygon points="' + pr.pts(list) + '" fill="' + fill + '"' + (extra || '') + '/>';
+      const faceRect = (x, z, w, h0, h1, fill) => poly([pr.P(x, z, h0), pr.P(x + w, z, h0), pr.P(x + w, z, h1), pr.P(x, z, h1)], fill);
+      const txt = (xp, str, size, fill, anchor) => '<text x="' + xp.x.toFixed(1) + '" y="' + xp.y.toFixed(1) + '" font-size="' + size + '" font-weight="900" fill="' + fill + '" text-anchor="' + (anchor || 'start') + '" style="paint-order:stroke;" stroke="rgba(24,32,66,0.25)" stroke-width="2">' + str + '</text>';
+      const PAL = ['#c0392b', '#5b7fa6', '#5da85f', '#f39c12', '#8e44ad', '#e65c00', '#27ae60', '#2c3e50', '#c0392b', '#ffcc00'];
+      const spineRow = (x0, x1, zF, hBot, hTop, seed) => { let o = ''; let cx = x0; let i = seed; while (cx < x1 - 10) { const bw = 9 + ((i * 37) % 5); o += faceRect(cx, zF, bw, hBot, hTop, PAL[i % PAL.length]); cx += bw + 2; i++; } return o; };
+      let bg = '', front = '';
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 0, WH), pr.P(0, 0, WH)], '#efe9e0');
+      bg += poly([pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(1150, 300, WH), pr.P(1150, 0, WH)], PROJ.shade('#efe9e0', 0.8));
+      bg += poly([pr.P(0, 0, 0), pr.P(1150, 0, 0), pr.P(1150, 300, 0), pr.P(0, 300, 0)], '#d9a066');
+      bg += floorBands(pr, poly, '#c98d54', 0.45, 44, 0, 1150, 0, 300);
+      bg += pr.wallDecoN(400, 750, 96, 150, '#2c3e50');
+      bg += txt(pr.P(575, 0, 132), '自 習 室', 15, '#ffffff', 'middle');
+      bg += txt(pr.P(575, 0, 112), 'STUDY ROOM ・ 2F', 9, '#aee6fa', 'middle');
+      bg += pr.wallDecoN(968, 1104, 66, 142, '#bedcfe');
+      const wx1 = pr.P(1036, 0, 66), wx2 = pr.P(1036, 0, 142), wy1 = pr.P(968, 0, 104), wy2 = pr.P(1104, 0, 104);
+      bg += '<line x1="' + wx1.x.toFixed(1) + '" y1="' + wx1.y.toFixed(1) + '" x2="' + wx2.x.toFixed(1) + '" y2="' + wx2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/><line x1="' + wy1.x.toFixed(1) + '" y1="' + wy1.y.toFixed(1) + '" x2="' + wy2.x.toFixed(1) + '" y2="' + wy2.y.toFixed(1) + '" stroke="#182042" stroke-width="2"/>';
+      bg += pr.box3(30, 6, 200, 20, 130, '#6d4c41');
+      bg += spineRow(38, 222, 26.6, 92, 122, 7) + spineRow(38, 222, 26.6, 48, 78, 3);
+      bg += faceRect(27, 26.6, 206, 86, 89, '#8a6248') + faceRect(27, 26.6, 206, 42, 45, '#8a6248');
+      const DESKS = [[430, 185], [590, 185], [750, 185], [430, 250], [590, 250], [750, 250]];
+      DESKS.forEach((dsk, i) => {
+        const sx = dsk[0], sy = dsk[1];
+        const dk = pr.boxFaces(sx - 28, sy - 40, 56, 26, 11, '#a9743f');
+        bg += dk.back; front += dk.front;
+        bg += pr.box3(sx - 11, sy - 38, 22, 12, 3, PAL[i % PAL.length]);
+        bg += pr.box3(sx - 14, sy - 6, 28, 12, 8, '#5b7fa6');
+      });
+      bg += txt(pr.P(575, 283, 4), '入 口', 11, '#ffe9b8', 'middle');
+      const svgOpen = (id, z) => '<svg id="' + id + '" viewBox="0 0 ' + STUDY_PW + ' 300" style="position:absolute; left:0; top:0; width:' + STUDY_PW + 'px; height:300px;' + (z ? ' z-index:' + z + ';' : '') + ' pointer-events:none;">';
+      return svgOpen('study-bg25', 0) + bg + '</svg>' + svgOpen('study-front25', 950) + front + '</svg>';
+    }
+    let _studyPanManual = null;
+    let _studyManualUntil = 0;
+    let _studyPanCur = 0; let _studyPanT = 0;
+    let _studyWasIn = false;
+    function applyStudyPan(pan, sc) {
+      const rooms = document.getElementById('study-rooms');
+      if (!rooms) return;
+      _studyPanCur = pan;
+      rooms.style.transform = 'translate(' + (-pan * sc).toFixed(1) + 'px, 0px) scale(' + sc.toFixed(3) + ')';
+    }
+    function updateStudyPan(focusX) {
+      const stage = document.getElementById('study-stage');
+      if (!stage) return;
+      const vpW = stage.clientWidth, vpH = stage.clientHeight;
+      if (!vpW || !vpH) return;
+      const sc = vpH / 300;
+      const visible = vpW / sc;
+      if (_studyPanManual !== null) {
+        if (Date.now() > _studyManualUntil) _studyPanManual = null;
+        else { applyStudyPan(_studyPanManual, sc); return; }
+      }
+      if (typeof focusX !== 'number') focusX = 575;
+      let pan;
+      if (visible >= STUDY_PW) pan = (STUDY_PW - visible) / 2;
+      else pan = Math.max(0, Math.min(STUDY_PW - visible, focusX - visible / 2));
+      const _nowStudy = performance.now(); const _dtStudy = _studyPanT ? (_nowStudy - _studyPanT) : 16; _studyPanT = _nowStudy;
+      applyStudyPan(smoothPanStep(_studyPanCur, pan, focusX, visible, _dtStudy), sc);
+    }
+    function ensureStudyInterior() {
+      if (document.getElementById('study-stage')) return;
+      const host = document.querySelector('#landmark-school .island-platform-top') || document.querySelector('#landmark-school .island-platform') || document.getElementById('landmark-school');
+      if (!host) return;
+      const stage = document.createElement('div');
+      stage.id = 'study-stage';
+      stage.innerHTML = '<div id="study-rooms">' + buildStudyRoomsHTML() + '</div>';
+      host.appendChild(stage);
+      let drag = null;
+      const activePtrs = new Set();
+      stage.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        activePtrs.add(e.pointerId);
+        if (activePtrs.size > 1) { drag = null; const rooms = document.getElementById('study-rooms'); if (rooms) rooms.style.transition = ''; return; }
+        drag = { x: e.clientX, pan: (_studyPanManual !== null ? _studyPanManual : _studyPanCur), moved: 0 };
+        _studyPanManual = drag.pan;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        const rooms = document.getElementById('study-rooms');
+        if (rooms) rooms.style.transition = 'none';
+      });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const sc = (stage.clientHeight || 179) / 300;
+        const visible = (stage.clientWidth || 278) / sc;
+        const maxPan = Math.max(0, STUDY_PW - visible);
+        const next = Math.max(0, Math.min(maxPan, drag.pan - (e.clientX - drag.x) / sc));
+        drag.moved += Math.abs(next - _studyPanManual);
+        _studyManualUntil = Date.now() + 30000;
+        _studyPanManual = next;
+        applyStudyPan(_studyPanManual, sc);
+      });
+      const endDrag = e => {
+        activePtrs.delete(e.pointerId);
+        _studyManualUntil = Date.now() + 30000;
+        if (!drag) return;
+        const wasDrag = drag.moved > 0.5;
+        drag = null;
+        const rooms = document.getElementById('study-rooms');
+        if (rooms) rooms.style.transition = '';
+        if (wasDrag) stage.addEventListener('click', ev2 => { ev2.stopPropagation(); ev2.preventDefault(); }, { capture: true, once: true });
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('dblclick', () => { _studyPanManual = null; });
+    }
+    function updateStudyStage() {
+      ensureStudyInterior();
+      const stage = document.getElementById('study-stage');
+      if (!stage) return;
+      const rooms = document.getElementById('study-rooms');
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'study' && !gameState.isCommuting;
+      if (playerIn !== _studyWasIn) { _studyPanManual = null; _studyWasIn = playerIn; }
+      const cw = document.getElementById('char-wrap');
+      if (playerIn) {
+        if (cw && rooms && cw.parentNode !== rooms) {
+          rooms.appendChild(cw);
+          cw.style.zIndex = '500';
+          if (typeof getCharacterCoords === 'function' && typeof updateCharacterPositionAndScale === 'function') {
+            const dc = getCharacterCoords(currentLoc, currentState);
+            updateCharacterPositionAndScale(dc.x, dc.y, false);
+          }
+        }
+      } else {
+        const map = document.getElementById('town-map');
+        if (cw && map && cw.parentNode === rooms) { map.appendChild(cw); cw.style.zIndex = '25'; }
+      }
+      if (cw && playerIn) cw.style.zIndex = '975';
+      let focus = STUDY_PROJ.P(575, 200, 0).x;
+      if (playerIn) focus = STUDY_PROJ.P(gameState.currentX || 560, gameState.currentY || 212, 0).x;
+      else {
+        const inner = (gameState.npcs || []).find(n => n.insideLoc === 'study');
+        if (inner) focus = STUDY_PROJ.P(inner.x, inner.y, 0).x;
+      }
+      updateStudyPan(focus);
     }
 
     // ================= v9.18 餐廳大場景（比照住家/超商：大室內塞框框、鐵板台前景層） =================

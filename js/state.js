@@ -1668,6 +1668,7 @@
 
           currentLoc = gameState.currentLoc || "home";
           currentState = gameState.currentState || "idle";
+          if (gameState.isCommuting && gameState.commuteTarget === 'library') { gameState.isCommuting = false; gameState.commutePath = null; } // v9.72 解綁：舊存檔往學校圖書館的通勤作廢，安全落地
           gameState.lastSaved = Date.now();
           // v8.2 離線收益冪等：載入後立刻把 lastSaved 回寫存檔，任何重複載入都不會再算第二次
           SafeStore.set(SAVE_KEY, JSON.stringify(gameState));

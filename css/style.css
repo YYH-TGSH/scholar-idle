@@ -3676,7 +3676,8 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #school-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
 #lib-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f3e2c7; cursor:grab; touch-action:none; }
 #club-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#f7ead9; cursor:grab; touch-action:none; }
-#school-stage, #lib-stage, #club-stage, #home-stage, #home2-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
+#study-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#efe9e0; cursor:grab; touch-action:none; }
+#school-stage, #lib-stage, #club-stage, #study-stage, #home-stage, #home2-stage { transition: opacity 0.25s ease, transform 0.25s ease; } /* v9.65 樓層淡換 */
 #gym-stage { position:absolute; inset:0; overflow:hidden; z-index:30; background:#5da85f; cursor:grab; touch-action:none; }
 #gym-stage:active { cursor:grabbing; }
 #gym-rooms { position:absolute; left:0; top:0; width:1150px; height:300px; transform-origin:0 0; transition:transform .15s linear; }
