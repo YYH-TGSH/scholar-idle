@@ -126,7 +126,7 @@
       if (!v) { v = document.createElement('div'); v.id = 'fs-view'; const stack = document.createElement('div'); stack.id = 'fs-stack'; v.appendChild(stack); const xb = document.createElement('button'); xb.id = 'fs-exit-btn'; xb.type = 'button'; xb.textContent = '\u2190 \u56de\u5927\u5730\u5716'; xb.addEventListener('click', e => { e.stopPropagation(); fsUserClose(); }); xb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const shd = document.createElement('div'); shd.id = 'fs-shade'; v.appendChild(shd); v.appendChild(xb); const mg = document.createElement('button'); mg.id = 'fs-mg-btn'; mg.type = 'button'; mg.textContent = '\uD83C\uDFAE \u73A9\u5C0F\u904A\u6232\uFF01'; mg.style.display = 'none'; mg.addEventListener('click', e => { e.stopPropagation(); if (typeof startMinigame === 'function' && typeof currentLoc !== 'undefined' && currentLoc) startMinigame(currentLoc); }); mg.addEventListener('pointerdown', e => { e.stopPropagation(); }); v.appendChild(mg); const vb = document.createElement('div'); vb.id = 'fs-view-btns'; const mb = document.createElement('button'); mb.id = 'fs-mode-btn'; mb.type = 'button'; mb.className = 'fs-vbtn'; mb.textContent = '總覽'; mb.addEventListener('click', e => { e.stopPropagation(); fsToggleMode(); }); mb.addEventListener('pointerdown', e => { e.stopPropagation(); }); const zo = document.createElement('button'); zo.id = 'fs-zoom-out'; zo.type = 'button'; zo.className = 'fs-vbtn'; zo.textContent = '－'; zo.addEventListener('click', e => { e.stopPropagation(); fsZoomBy(1 / 1.25); }); zo.addEventListener('pointerdown', e => { e.stopPropagation(); }); const zi = document.createElement('button'); zi.id = 'fs-zoom-in'; zi.type = 'button'; zi.className = 'fs-vbtn'; zi.textContent = '＋'; zi.addEventListener('click', e => { e.stopPropagation(); fsZoomBy(1.25); }); zi.addEventListener('pointerdown', e => { e.stopPropagation(); }); vb.appendChild(mb); vb.appendChild(zo); vb.appendChild(zi); v.appendChild(vb); document.body.appendChild(v); fsGestureInit(v); }
       return v;
     }
-    const FS_ROOMS_ID = { home: 'home-rooms', home2: 'home2-rooms', school: 'school-rooms', study: 'study-rooms', club: 'club-rooms', store: 'store-rooms', restaurant: 'rest-rooms', library: 'lib-rooms' };
+    const FS_ROOMS_ID = { home: 'home-rooms', home2: 'home2-rooms', school: 'school-rooms', study: 'study-rooms', club: 'club-rooms', store: 'store-rooms', restaurant: 'rest-rooms', library: 'lib-rooms', gym: 'gym-rooms' };
     function fsPlayerStackX() { // 主角在 FS stack 座標中的 x（聚焦鏡頭用）
       if (!_fs || typeof gameState === 'undefined') return null;
       const loc = _fs.activeLoc || (typeof currentLoc !== 'undefined' ? currentLoc : null);
@@ -204,6 +204,7 @@
       if (key === 'store') return { gap: EXPLODE_GAP_SINGLE, guides: 'store-guides', plates: [{ id: 'store-roof', kind: 'roof', loc: null }, { id: 'store-stage', kind: 'stage', loc: 'store' }] };
       if (key === 'rest') return { gap: EXPLODE_GAP_SINGLE, guides: 'rest-guides', plates: [{ id: 'rest-roof', kind: 'roof', loc: null }, { id: 'rest-stage', kind: 'stage', loc: 'restaurant' }] };
       if (key === 'library') return { gap: EXPLODE_GAP_SINGLE, guides: 'library-guides', plates: [{ id: 'library-roof', kind: 'roof', loc: null }, { id: 'lib-stage', kind: 'stage', loc: 'library' }] };
+      if (key === 'gym') return { gap: EXPLODE_GAP_SINGLE, guides: null, plates: [{ id: 'gym-stage', kind: 'stage', loc: 'gym' }] }; // v9.102 操場比照其他棟接 FS：單層、無屋頂/導引（露天場地）
       return null;
     }
     function syncFsShade() { // v9.74 R2 H3：FS 夜色 = 該棟島嶼 shade 現值（同一公式同一層色，不另算、不雙重壓暗）
@@ -309,7 +310,7 @@
       fsReenterBtn(null);
       fsEnter(key);
     }
-    const FS_LANDMARK = { school: 'landmark-school', home: 'landmark-home', store: 'landmark-store', rest: 'landmark-restaurant', library: 'landmark-library' };
+    const FS_LANDMARK = { school: 'landmark-school', home: 'landmark-home', store: 'landmark-store', rest: 'landmark-restaurant', library: 'landmark-library', gym: 'landmark-gym' };
     function fsReenterBtn(key) {
       const old = document.getElementById('fs-reenter-btn');
       if (!key) { if (old) old.remove(); return; }
@@ -450,6 +451,11 @@
       const gd = document.getElementById(key + '-guides');
       if (gd) { const gy = inside ? -step : 0; const gk = gy.toFixed(1) + '/' + inside + '/' + Math.round(-panCur * sc) + '/' + (fsOn ? 'F' + ((_fs && _fs.s) || 0).toFixed(3) : 'T'); if (gd.dataset.k !== gk) { gd.dataset.k = gk; gd.style.opacity = fsOn ? '1' : '0'; gd.style.transform = fsOn ? 'translate(' + (-panCur * ((_fs && _fs.s) || 0.3)).toFixed(1) + 'px, 0px) scale(' + ((_fs && _fs.s) || 0.3).toFixed(3) + ')' : 'translate(' + (-panCur * sc).toFixed(1) + 'px, ' + gy.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')'; } }
       if (_fs && _fs.key === key) fsMarkActive(loc);
+    }
+    function syncGymFs() { // v9.102 操場 FS 接線（無爆炸屋頂：只結算進/出 FS 與作用層標記）
+      const inside = (typeof currentLoc !== 'undefined') && currentLoc === 'gym' && !gameState.isCommuting;
+      fsWant('gym', fsInside(['gym']));
+      if (_fs && _fs.key === 'gym') fsMarkActive('gym');
     }
     function updateHome2Stage() {
       ensureHome2Interior();

@@ -1040,6 +1040,7 @@
       ensureGymInterior();
       const stage = document.getElementById('gym-stage');
       if (!stage) return;
+      { const fsHere = !!(window.__FS_FIT && window.__FS_FIT.active === 'gym'); const wo = fsHere ? '' : '0'; if (stage.style.opacity !== wo) stage.style.opacity = wo; stage.style.pointerEvents = fsHere ? '' : 'none'; } // v9.102 小鎮表面不攤操場（只在電視/FS 顯示，比照 v9.99 其他場景）
       const rooms = document.getElementById('gym-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'gym' && !gameState.isCommuting;
       if (playerIn !== _gymWasIn) { _gymPanManual = null; _gymWasIn = playerIn; }
@@ -1079,6 +1080,7 @@
         updateGymPan(focus);
       }
       updateGymLighting();
+      syncGymFs(); // v9.102 進/出 FS 結算（在樣式寫入後、次幀閘門反映）
     }
     function shootBallAnim(fromX, fromY, make, onText) { // v9.27 投籃動畫：拋物線到籃框，進→穿網落下，不進→彈框飛走
       const rooms = document.getElementById('gym-rooms');
