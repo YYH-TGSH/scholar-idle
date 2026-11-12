@@ -3893,7 +3893,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
     #fs-view { position: fixed; inset: 0; z-index: 45; background: #2a1836; display: none; }
     #fs-view.on { display: block; }
     
-    .fs-plate.fs-active { outline: 2px solid var(--sun); outline-offset: -2px; }
+    .fs-plate.fs-active { outline: none; } /* v9.100 去外框 */
     .fs-plate > [id$="-stage"] { border-radius: var(--r-card); }
     body.fs-on .floor-label { left: 6px; top: 6px; }
 
@@ -4025,11 +4025,11 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 
 /* ===== v9.80 V3 FS 正面疊層：紙片樓層框（水平紙層＋墨褐框） ===== */
 .fs-plate {
-  border-radius: var(--r-card);
-  background: #f3c48d;
-  border: 2.5px solid #a9714b;
-  box-shadow: var(--sh-hard-sm);
-} /* R3 模型托盤：木托本體取代紙框 */
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+} /* v9.100 去外框：樓層以不透明度階梯＋標籤辨識，不再用木托框住 */
 
 /* ===== v9.81 V4 夜晚亮窗光：營業/住家窗由奶油玻璃轉暖琥珀＋微光暈（night-on 時） ===== */
 #town-map.night-on .bld-ext .win { fill: #ffcf7d; filter: drop-shadow(0 0 6px rgba(255, 190, 90, 0.9)); } /* v9.95 夜間亮窗改命中美術 .win（日間藍玻璃 #a5d8ff，夜間琥珀＋光暈同舊效） */
@@ -4104,7 +4104,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #char-wrap > svg, .npc > .npc-flip { position: relative; z-index: 1; }
 
 /* ===== R3 FS 托盤木唇：每層托盤下緣的木唇 ===== */
-.fs-tray { position: absolute; left: 6px; right: 6px; bottom: -13px; height: 13px; background: linear-gradient(#c98d64, #a9714b); border-radius: 0 0 var(--r-card) var(--r-card); pointer-events: none; }
+.fs-tray { display: none; } /* v9.100 木托唇退役（去外框） */
 
 /* ===== v9.96 小鎮電視直播：門前立架電視（螢幕即時迷你室內＋LIVE/待機＋識別色名牌） ===== */
 #town-tvs { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
@@ -4116,4 +4116,6 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 #town-map.night-on .town-tv .tv-screen { filter: drop-shadow(0 0 7px rgba(165, 216, 255, 0.65)); }
 
 /* ===== v9.97 FS 室內小遊戲入口（與島上 .mg-badge 同款；FS 右下固定可及、不擋地點條/離開鈕） ===== */
+#fs-view-btns { position: absolute; top: calc(var(--chrome-top, 84px) + 8px); right: 12px; z-index: 48; display: flex; gap: 8px; }
+.fs-vbtn { background: var(--sun); color: var(--ink); font-size: 0.875rem; font-weight: 900; padding: 6px 12px; border-radius: var(--r-pill); border: 2px solid var(--stroke); box-shadow: var(--sh-hard-sm); cursor: pointer; }
 #fs-mg-btn { position: absolute; right: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: linear-gradient(135deg, var(--rose), var(--amber)); color: #ffffff; font-size: 1rem; font-weight: 900; padding: 6px 14px; border-radius: var(--r-win); border: 2px solid rgba(var(--rgb-white), 0.6); box-shadow: var(--sh-win); cursor: pointer; }

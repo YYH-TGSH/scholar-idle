@@ -181,10 +181,10 @@
         el.innerHTML = '<svg viewBox="0 0 84 74" style="display:block; width:84px; height:74px;">'
           + '<rect x="2" y="2" width="80" height="52" rx="6" fill="#3a2430"/>'
           + '<rect class="tv-screen" x="6" y="6" width="72" height="44" rx="3" fill="#fff5f9"/>'
+          + '<rect class="tv-standby" x="6" y="6" width="72" height="44" rx="3" fill="#2a1836"/>'
           + '<rect x="6" y="40" width="72" height="10" fill="#f3c48d" opacity="0.55"/>'
           + (TV_FURN[d.loc] || '')
           + '<g class="tv-dolls"></g>'
-          + '<rect class="tv-standby" x="6" y="6" width="72" height="44" rx="3" fill="#2a1836"/>'
           + '<g class="tv-live"><circle cx="72" cy="12" r="2.6" fill="#d6336c"/></g>'
           + '<rect x="40" y="54" width="4" height="10" fill="#3a2430"/><rect x="30" y="64" width="24" height="4" rx="2" fill="#3a2430"/>'
           + '</svg>'
