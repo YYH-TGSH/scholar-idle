@@ -18,6 +18,7 @@
     // ===== v9.98 FS 手勢層：pinch 縮放／flick 切層／雙擊重置（觀察式監聽、不攔截既有點擊與拖曳） =====
     const _fsPtrs = new Map();
     let _pinch0 = null, _flickCand = null, _tapLast = { t: 0, x: 0, y: 0 }, _fsEatClick = false;
+    let _dragPan = null; // v9.101 單指拖曳平移 stack（camX/panX/panY，硬夾邊）
     function fsEatNextClick() { _fsEatClick = true; setTimeout(() => { _fsEatClick = false; }, 150); }
     function fsFlick(dir) { // dir>0 左滑進一層、dir<0 右滑退一層；順序＝盤面由下而上（標籤序）；邊界不循環、無動作
       if (!_fs) return;
@@ -33,7 +34,7 @@
       if (view.dataset.gestureInit) return;
       view.dataset.gestureInit = '1';
       view.addEventListener('click', (e) => { if (_fsEatClick && !(e.target && e.target.closest && e.target.closest('button'))) { e.stopPropagation(); e.preventDefault(); _fsEatClick = false; } }, true); // v9.100 吞點擊只針對盤面，FS 鈕（模式/縮放/離開/小遊戲）不得被吞
-      view.addEventListener('dblclick', () => { if (_fs && _fs.u !== 1) { _fs.u = 1; _fsSig = ''; fsLayout(); } });
+      view.addEventListener('dblclick', () => { if (_fs) { if (_fs.u !== 1) { _fs.u = 1; _fsSig = ''; fsLayout(); } fsFramePlayer(); } });
     view.addEventListener('wheel', e => { if (!_fs) return; e.preventDefault(); fsZoomBy(Math.exp(-e.deltaY * 0.0012), { x: e.clientX, y: e.clientY }); }, { passive: false }); // v9.100 桌面滾輪縮放（游標錨點）
       view.addEventListener('pointerdown', (e) => {
         if (!_fs) return;
@@ -44,11 +45,23 @@
           _flickCand = null;
         } else if (_fsPtrs.size === 1) {
           _flickCand = { id: e.pointerId, x: e.clientX, y: e.clientY, t: Date.now() };
+          _dragPan = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: 0 };
         }
       });
       view.addEventListener('pointermove', (e) => {
         if (!_fs || !_fsPtrs.has(e.pointerId)) return;
         _fsPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (_dragPan && _dragPan.id === e.pointerId && _fsPtrs.size === 1 && !_pinch0) { // v9.101 拖曳平移（與 flick 候選並行計距，放開時二擇一）
+          const dx = e.clientX - _dragPan.x, dy = e.clientY - _dragPan.y;
+          _dragPan.x = e.clientX; _dragPan.y = e.clientY;
+          _dragPan.moved += Math.abs(dx) + Math.abs(dy);
+          if (_dragPan.moved > 6 && (dx || dy)) {
+            if (_fs.focus) { if (_fs.camX == null) _fs.camX = window.__FS_FIT ? window.__FS_FIT.left : 0; _fs.camX += dx; }
+            else _fs.panX = (_fs.panX || 0) + dx;
+            _fs.panY = (_fs.panY || 0) + dy;
+            fsClampPans(); _fsSig = ''; fsLayout();
+          }
+        }
         if (_pinch0 && _fsPtrs.size === 2) {
           const pts = [..._fsPtrs.values()];
           const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
@@ -62,6 +75,8 @@
       });
       const endPtr = (e) => {
         const wasPinch = !!_pinch0 && _fsPtrs.size >= 2;
+        const wasDragPan = !!(_dragPan && _dragPan.id === e.pointerId && _dragPan.moved > 120); // v9.101 長拖是平移、不是 flick/雙點
+        if (_dragPan && _dragPan.id === e.pointerId) _dragPan = null;
         _fsPtrs.delete(e.pointerId);
         if (_fsPtrs.size < 2 && _pinch0) { _pinch0 = null; fsEatNextClick(); }
         if (!_fs) { _flickCand = null; return; }
@@ -69,13 +84,14 @@
           const dt = Date.now() - _flickCand.t;
           const dx = e.clientX - _flickCand.x, dy = e.clientY - _flickCand.y;
           _flickCand = null;
-          if (!wasPinch && dt <= 350 && Math.abs(dx) >= 56 && Math.abs(dx) > 1.6 * Math.abs(dy)) {
+          if (!wasPinch && !wasDragPan && dt <= 350 && Math.abs(dx) >= 56 && Math.abs(dx) > 1.6 * Math.abs(dy)) {
             fsFlick(dx < 0 ? 1 : -1);
             fsEatNextClick();
-          } else if (!wasPinch && dt < 300 && Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+          } else if (!wasPinch && !wasDragPan && dt < 300 && Math.abs(dx) < 12 && Math.abs(dy) < 12) {
             const now = Date.now();
             if (now - _tapLast.t < 350 && Math.hypot(e.clientX - _tapLast.x, e.clientY - _tapLast.y) < 40) {
               if (_fs.u !== 1) { _fs.u = 1; _fsSig = ''; fsLayout(); }
+              fsFramePlayer();
               fsEatNextClick();
               _tapLast = { t: 0, x: 0, y: 0 };
             } else _tapLast = { t: now, x: e.clientX, y: e.clientY };
@@ -99,7 +115,7 @@
       _fs.modeManual = true;
       _fsModeMemo = { key: _fs.key, mode: _fs.mode };
       if (_fs.mode === 'single') _fs.camX = null;
-      _fsSig = ''; fsLayout();
+      _fsSig = ''; fsLayout(); fsFramePlayer();
     }
     function fsSyncChrome() {
       const mb = document.getElementById('fs-mode-btn');
@@ -118,25 +134,68 @@
       const pr = PROJ.forRooms(rid); if (!pr) return null;
       return pr.P(gameState.currentX || 0, gameState.currentY || 0, 0).x * (_fs.s || 1);
     }
-    function fsCamFollow() { // v9.97 聚焦模式水平鏡頭：死區 [30%,70%]＋夾邊＋平滑趨近（比照小鎮鏡頭語言）
-      if (!_fs || !_fs.focus) return;
+    function fsPlayerStackPos() { // v9.101 主角在 stack 內的相對座標（x 兩模式同；yRel 已按 focus/總覽的盤位換算）
+      if (!_fs || typeof gameState === 'undefined') return null;
+      const loc = _fs.activeLoc || (typeof currentLoc !== 'undefined' ? currentLoc : null);
+      const rid = FS_ROOMS_ID[loc]; if (!rid || typeof PROJ === 'undefined') return null;
+      const pr = PROJ.forRooms(rid); if (!pr) return null;
+      const q = pr.P(gameState.currentX || 0, gameState.currentY || 0, 0);
+      const ai = (_fs.activeIdx != null) ? _fs.activeIdx : Math.max(0, _fs.plates.findIndex(pl => pl.loc === loc));
+      const step = (300 + _fs.def.gap) * (_fs.s || 1);
+      return { x: q.x * (_fs.s || 1), yRel: (_fs.focus ? 0 : ai * step) + q.y * (_fs.s || 1) };
+    }
+    function fsClampPans() { // v9.101 硬夾邊：stack 至少 40%（以可視上限計）留在視口內，拖曳/框人共用
+      if (!_fs) return;
+      const fit = window.__FS_FIT; if (!fit) return;
+      const vw = window.innerWidth || 390, vh = window.innerHeight || 844;
+      const minW = Math.min(fit.stackW, vw), minH = Math.min(fit.stackH, vh);
+      const loL = 0.4 * minW - fit.stackW, hiL = vw - 0.4 * minW;
+      const loT = 0.4 * minH - fit.stackH, hiT = vh - 0.4 * minH;
+      if (_fs.focus) {
+        if (_fs.camX != null) _fs.camX = Math.max(loL, Math.min(hiL, _fs.camX));
+        const baseTop = fit.top - (_fs.panY || 0);
+        _fs.panY = Math.max(loT - baseTop, Math.min(hiT - baseTop, _fs.panY || 0));
+      } else {
+        const baseL = fit.left - (_fs.panX || 0), baseT = fit.top - (_fs.panY || 0);
+        _fs.panX = Math.max(loL - baseL, Math.min(hiL - baseL, _fs.panX || 0));
+        _fs.panY = Math.max(loT - baseT, Math.min(hiT - baseT, _fs.panY || 0));
+      }
+    }
+    function fsFramePlayer() { // v9.101 框人：主角螢幕位置進 [25%,75%]×[20%,80%] 帶（進場/換層/抵達/切換/雙擊共用）
+      if (!_fs || typeof gameState === 'undefined') return;
+      const fit = window.__FS_FIT; if (!fit) return;
+      const pos = fsPlayerStackPos(); if (!pos) return;
+      const vw = window.innerWidth || 390, vh = window.innerHeight || 844;
+      const sx = fit.left + pos.x, sy = fit.top + pos.yRel;
+      let moved = false;
+      if (sx < vw * 0.25 || sx > vw * 0.75) { const d = vw / 2 - sx; if (_fs.focus) _fs.camX = (_fs.camX == null ? fit.left : _fs.camX) + d; else _fs.panX = (_fs.panX || 0) + d; moved = true; }
+      if (sy < vh * 0.20 || sy > vh * 0.80) { _fs.panY = (_fs.panY || 0) + (vh / 2 - sy); moved = true; }
+      if (moved) { fsClampPans(); _fsSig = ''; fsLayout(); }
+    }
+    function fsCamFollow() { // v9.97 水平鏡頭；v9.101 推廣兩模式＋垂直：死區 [30%,70%]＋平滑趨近
+      if (!_fs) return;
       const view = fsViewEl();
       const vw = view.clientWidth || window.innerWidth || 390;
-      const px = fsPlayerStackX(); if (px == null) return;
-      const stackW = 1340 * _fs.s;
-      const lo = Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), hi = FS_MARGIN_X;
-      let cam = (_fs.camX == null ? hi : _fs.camX);
-      const scr = cam + px;
-      let target = cam;
-      if (scr < vw * 0.30) target = vw * 0.30 - px;
-      else if (scr > vw * 0.70) target = vw * 0.70 - px;
-      target = Math.max(lo, Math.min(hi, target));
-      const next = cam + (target - cam) * 0.25;
-      if (Math.abs(next - cam) > 0.05) {
-        _fs.camX = next;
+      const vh = view.clientHeight || window.innerHeight || 844;
+      const fit = window.__FS_FIT; if (!fit) return;
+      const pos = fsPlayerStackPos(); if (!pos) return;
+      let changed = false;
+      const scrX = fit.left + pos.x;
+      if (scrX < vw * 0.30 || scrX > vw * 0.70) {
+        const targetL = (scrX < vw * 0.30 ? vw * 0.30 : vw * 0.70) - pos.x;
+        const next = fit.left + (targetL - fit.left) * 0.25;
+        if (Math.abs(next - fit.left) > 0.05) { if (_fs.focus) _fs.camX = next; else _fs.panX = (_fs.panX || 0) + (next - fit.left); changed = true; }
+      }
+      const scrY = fit.top + pos.yRel;
+      if (scrY < vh * 0.30 || scrY > vh * 0.70) {
+        const targetT = (scrY < vh * 0.30 ? vh * 0.30 : vh * 0.70) - pos.yRel;
+        const next = fit.top + (targetT - fit.top) * 0.25;
+        if (Math.abs(next - fit.top) > 0.05) { _fs.panY = (_fs.panY || 0) + (next - fit.top); changed = true; }
+      }
+      if (changed) {
+        fsClampPans(); _fsSig = ''; fsLayout();
         const stack = view.firstChild;
-        if (stack) stack.style.left = next.toFixed(1) + 'px';
-        if (window.__FS_FIT) window.__FS_FIT.left = next;
+        if (stack && window.__FS_FIT) { stack.style.left = window.__FS_FIT.left.toFixed(1) + 'px'; stack.style.top = window.__FS_FIT.top.toFixed(1) + 'px'; }
       }
     }
     function fsDefs(key) {
@@ -177,17 +236,17 @@
       }
       const s = baseS * (_fs.u || 1); // v9.98 pinch 有效比例（base × 使用者倍率 u）
       if (focus) {
-        stackW = 1340 * s; stackH = 300 * s; top = topIn;
+        stackW = 1340 * s; stackH = 300 * s; top = topIn + (_fs.panY || 0);
         if (_fs.camX == null) { const px0 = fsPlayerStackX(); _fs.camX = Math.max(Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), Math.min(FS_MARGIN_X, (px0 == null ? (vw - stackW) / 2 : vw / 2 - px0))); }
         left = _fs.camX;
       } else {
         stackW = 1340 * s; stackH = _fs.totalUnits * s;
-        left = (vw - stackW) / 2; top = topIn + (availH - stackH) / 2;
+        left = (vw - stackW) / 2 + (_fs.panX || 0); top = topIn + (availH - stackH) / 2 + (_fs.panY || 0);
       }
       if (_fs.zoomAnchor && _fs.prevS && Math.abs(s - _fs.prevS) > 0.0001) { // pinch 錨點：指下那一點不動
         const ratio = s / _fs.prevS, za = _fs.zoomAnchor;
         if (focus) { _fs.camX = za.x - (za.x - _fs.camX) * ratio; _fs.camX = Math.max(Math.min(FS_MARGIN_X, vw - FS_MARGIN_X - stackW), Math.min(FS_MARGIN_X, _fs.camX)); left = _fs.camX; }
-        else { left = za.x - (za.x - left) * ratio; top = za.y - (za.y - top) * ratio; }
+        else { left = za.x - (za.x - left) * ratio; top = za.y - (za.y - top) * ratio; _fs.panX = left - (vw - stackW) / 2; _fs.panY = top - (topIn + (availH - stackH) / 2); }
       }
       _fs.zoomAnchor = null;
       const sig = [s.toFixed(4), left.toFixed(1), top.toFixed(1), focus ? 'F' + ai : 'W'].join('/');
@@ -199,7 +258,7 @@
       _fs.plates.forEach((pl, i) => { pl.wrap.style.cssText = 'position:absolute; left:0; width:' + stackW.toFixed(1) + 'px; height:' + (300 * s).toFixed(1) + 'px; top:' + ((focus ? i - ai : i) * stepPx).toFixed(1) + 'px;'; });
       if (_fs.guidesEl) { _fs.guidesEl.style.position = 'absolute'; _fs.guidesEl.style.left = '0px'; _fs.guidesEl.style.top = '0px'; }
       fsSyncChrome();
-      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: Math.max(44, Math.min(300, Math.round(0.37 * 300 * s))), plates: _fs.plates.length, focus: focus, u: _fs.u || 1, mode: _fs.mode }; // v9.98 personPx 改盤面比例制（0.37×300×s，夾 44..300）
+      window.__FS_FIT = { active: _fs.key, s: s, stackW: stackW, stackH: stackH, left: left, top: top, personPx: Math.max(44, Math.min(300, Math.round(0.37 * 300 * s))), plates: _fs.plates.length, focus: focus, u: _fs.u || 1, mode: _fs.mode, panX: _fs.panX || 0, panY: _fs.panY || 0 }; // v9.98 personPx 改盤面比例制（0.37×300×s，夾 44..300）
       syncFsShade();
     }
     function fsEnter(key) {
@@ -218,11 +277,12 @@
       });
       const gd = document.getElementById(def.guides);
       if (gd) { moved.push({ el: gd, parent: gd.parentNode, next: gd.nextSibling }); gd.style.transformOrigin = '0 0'; stack.appendChild(gd); }
-      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0, camX: null, activeLoc: null, focus: false, u: 1, prevS: 0, zoomAnchor: null, mode: null, modeManual: false };
+      _fs = { key: key, def: def, plates: plates, moved: moved, guidesEl: gd || null, totalUnits: def.plates.length * 300 + (def.plates.length - 1) * def.gap, s: 0, camX: null, activeLoc: null, focus: false, u: 1, prevS: 0, zoomAnchor: null, mode: null, modeManual: false, panX: 0, panY: 0 };
       if (_fsModeMemo.key === key) { _fs.mode = _fsModeMemo.mode; _fs.modeManual = true; } else if (_fsModeMemo.key) { _fsModeMemo = { key: null, mode: null }; } // v9.100 同棟手動模式保留、進別棟清除
       _fsSig = '';
       if (typeof Screens !== 'undefined' && Screens.open('fs-view')) { /* R3：FS 開關改走 Screen Manager */ } else { view.classList.add('on'); document.body.classList.add('fs-on'); }
       fsLayout();
+      fsFramePlayer();
       const stepPx = (300 + def.gap) * ((_fs && _fs.s) || 0.3);
       let ai = plates.findIndex(pl => pl.loc && pl.loc === (typeof currentLoc !== 'undefined' ? currentLoc : null));
       if (ai < 0) ai = plates.length - 1;
@@ -266,7 +326,7 @@
     }
     function fsMarkActive(locKey) {
       if (!_fs) return;
-      if (locKey && _fs.activeLoc !== locKey) { _fs.activeLoc = locKey; _fsSig = ''; fsLayout(); }
+      if (locKey && _fs.activeLoc !== locKey) { _fs.activeLoc = locKey; _fsSig = ''; fsLayout(); fsFramePlayer(); }
       _fs.plates.forEach(pl => pl.wrap.classList.toggle('fs-active', !!locKey && pl.loc === locKey));
     }
     function fsInside(floors) { // 同棟內換層通勤（commuteStart 與 commuteTarget 都在本棟）仍算在建物內；跨棟通勤不算
@@ -396,7 +456,7 @@
       const stage = document.getElementById('home2-stage');
       if (!stage) return;
       const rooms = document.getElementById('home2-rooms');
-      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2)) && !gameState.isCommuting; // v9.73 爸媽房覆寫也在 2F
+      const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && (gameState._go ? (gameState._goFloor || 1) === 2 : (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2))) && !gameState.isCommuting; // v9.73 爸媽房覆寫也在 2F；v9.101 步行中依 _goFloor 歸屬樓層
       if (playerIn !== _home2WasIn) { _home2PanManual = null; _home2WasIn = playerIn; }
       const cw = document.getElementById('char-wrap');
       if (playerIn) {
@@ -420,6 +480,7 @@
         if (par) focus = HOME_PROJ.P(par.x, par.y, 0).x;
       }
       updateHome2Pan(focus);
+      fsUnifyHomePan(); // v9.101 每幀最後統一兩層 pan（渲染對齊）
     }
 
     function checkHomeDinner() {
@@ -502,6 +563,21 @@
       host.appendChild(rf);
     }
     let _schExplodeMode = 'out';
+    function fsUnifyHomePan() { // v9.101 住家兩層共用作用層 pan（與屋頂同源，渲染對齊 §105.C）
+      if (!_fs || _fs.key !== 'home') return;
+      const st = document.getElementById('home-stage'); if (!st) return;
+      const sc = explodeSc(st);
+      const pan = (_homeDerivedPrev === 2 ? _home2PanCur : _homePanCur);
+      applyHomePan(pan, sc); applyHome2Pan(pan, sc);
+    }
+    function fsUnifySchoolPan() { // v9.101 學校三層共用作用層 pan（§105.C 抽驗同式）
+      if (!_fs || _fs.key !== 'school') return;
+      const st = document.getElementById('school-stage'); if (!st) return;
+      const sc = explodeSc(st);
+      const cur = (typeof currentLoc !== 'undefined' ? currentLoc : 'school');
+      const pan = ({ school: _schoolPanCur, study: _studyPanCur, club: _clubPanCur })[cur] || 0;
+      applySchoolPan(pan, sc); applyStudyPan(pan, sc); applyClubPan(pan, sc);
+    }
     function syncFloorStack() {
       const cur = (typeof currentLoc !== 'undefined') ? currentLoc : null;
       if (SCHOOL_GROUP[cur]) { ensureSchoolInterior(); ensureStudyInterior(); ensureClubInterior(); }

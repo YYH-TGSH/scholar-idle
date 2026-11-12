@@ -287,7 +287,7 @@
       if (!stage) return;
       const rooms = document.getElementById('home-rooms');
       const playerIn = (typeof currentLoc !== 'undefined') && currentLoc === 'home' && !gameState.isCommuting;
-      const playerHere = playerIn && currentState !== 'sleeping' && !(gameState._spot && gameState._spot.floor === 2); // v9.66 睡覺時主角本人在 2F（updateHome2Stage 接手）；v9.73 爸媽房覆寫同理
+      const playerHere = playerIn && currentState !== 'sleeping' && (gameState._go ? (gameState._goFloor || 1) === 1 : !(gameState._spot && gameState._spot.floor === 2)); // v9.66 睡覺時主角本人在 2F（updateHome2Stage 接手）；v9.73 爸媽房覆寫同理；v9.101 步行中依 _goFloor
       if (playerIn !== _homeWasIn) { _homePanManual = null; _homeWasIn = playerIn; } // 進出家門 → 回到自動跟隨
       const cw = document.getElementById('char-wrap');
       if (playerHere) {
@@ -329,7 +329,7 @@
         const want = anySleep ? 'block' : 'none';
         if (parBlanket.style.display !== want) parBlanket.style.display = want;
       }
-      applyHomeFloors((playerIn && (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2))) ? 2 : 1); // v9.66 樓層疊層跟著主角睡/醒；v9.73 爸媽房覆寫錨 2F切換
+      applyHomeFloors((playerIn && (gameState._go ? (gameState._goFloor || 1) === 2 : (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2)))) ? 2 : 1); // v9.66 樓層疊層跟著主角睡/醒；v9.73 爸媽房覆寫錨 2F切換；v9.101 步行中依 _goFloor
     }
 
     // ================= v9.66 住家 2F 臥室層（多樓層批次 B2：平面圖同 1F，臥室上樓、棉被隨遷） =================
@@ -1647,6 +1647,7 @@
         if (inner) focus = STUDY_PROJ.P(inner.x, inner.y, 0).x;
       }
       updateStudyPan(focus);
+      if (typeof fsUnifySchoolPan === 'function') fsUnifySchoolPan(); // v9.101 每幀最後統一三層 pan（渲染對齊）
     }
 
     // ================= v9.18 餐廳大場景（比照住家/超商：大室內塞框框、鐵板台前景層） =================

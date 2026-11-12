@@ -1877,7 +1877,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.100.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.101.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2095,7 +2095,7 @@
       if (currentState !== 'eating') { gameState.eatOrderLeft = null; gameState.eatPhase = null; gameState.eatServed = false; gameState._servedAtMin = null; const _pd2 = document.getElementById('player-dish'); if (_pd2) _pd2.style.display = 'none'; }
 
       // 3. 處理運動場繞操場跑步動畫切換 (CSS Animation 接管)
-      if (currentState === 'sports' && !gameState.isCommuting) {
+      if (currentState === 'sports' && !gameState.isCommuting && !(gameState._spot && gameState._spot.loc === currentLoc && gameState._spot.state !== 'sports')) { // v9.101 有待抵達的非運動地點覆寫時，跑步動畫讓位給走位定位（否則位置凍結、抵達閘門死鎖）
         elCharWrap.classList.add("running-on-track");
         stopZzzParticles();
         startSweatParticles();

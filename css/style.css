@@ -4111,11 +4111,13 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 .town-tv { position: absolute; width: 88px; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer; }
 .town-tv .tv-name { margin-top: 2px; padding: 1px 4px; border: 2px solid #7c4a63; border-radius: var(--r-pill); box-shadow: var(--sh-hard-sm); color: #5c2e3e; font-size: 0.69rem; font-weight: 700; text-align: center; }
 .town-tv .tv-standby { opacity: 0; transition: opacity 0.3s ease; }
-.town-tv[data-state="idle"] .tv-standby { opacity: 0.5; }
+.town-tv[data-state="idle"] .tv-standby { opacity: 0.22; } /* v9.101 待機只壓底色 ≤0.25，傢俱預覽要讀得到 */
 .town-tv[data-state="idle"] .tv-live { display: none; }
 #town-map.night-on .town-tv .tv-screen { filter: drop-shadow(0 0 7px rgba(165, 216, 255, 0.65)); }
 
 /* ===== v9.97 FS 室內小遊戲入口（與島上 .mg-badge 同款；FS 右下固定可及、不擋地點條/離開鈕） ===== */
+body.fs-on [id$="-stage"] { background: transparent !important; border-radius: 0 !important; } /* v9.101 FS 內樓層去長方形底：只呈房間形狀（比照屋頂），非 FS 不動 */
+body.fs-on #rotate-hint { top: calc(var(--chrome-top, 84px) + 54px); } /* v9.101 提示條下移至檢視鈕列下方，不重疊 */
 #fs-view-btns { position: absolute; top: calc(var(--chrome-top, 84px) + 8px); right: 12px; z-index: 48; display: flex; gap: 8px; }
 .fs-vbtn { background: var(--sun); color: var(--ink); font-size: 0.875rem; font-weight: 900; padding: 6px 12px; border-radius: var(--r-pill); border: 2px solid var(--stroke); box-shadow: var(--sh-hard-sm); cursor: pointer; }
 #fs-mg-btn { position: absolute; right: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: linear-gradient(135deg, var(--rose), var(--amber)); color: #ffffff; font-size: 1rem; font-weight: 900; padding: 6px 14px; border-radius: var(--r-win); border: 2px solid rgba(var(--rgb-white), 0.6); box-shadow: var(--sh-win); cursor: pointer; }

@@ -628,8 +628,23 @@
       if (!def) return;
       if (!SPOT_GROUP[def.group].includes(currentLoc) || gameState.isCommuting) return;
       const p = def.pt();
+      const curFloorHome = (currentState === 'sleeping' || (gameState._spot && gameState._spot.floor === 2)) ? 2 : 1; // v9.101 發起前所在樓層（住家）
       gameState._spot = { key: key, group: def.group, loc: def.loc, state: def.state, floor: def.floor || 0, shoot: !!def.shoot, shotDone: false, x: p.x, y: p.y, phaseKey: spotPhaseKey(), oa: gameState.overrideAction || null };
       if (def.loc !== currentLoc) playerIndoorGo(def.loc, p);
+      else if (def.group === 'home') { // v9.101 住家同棟換位一律走路：跨層經 HOME_STAIR_PT、同層直走；狀態抵達才生效（decide 側閘門）
+        const tgtF = def.floor || 1;
+        const sp = (typeof HOME_STAIR_PT !== 'undefined') ? HOME_STAIR_PT : { x: 539, y: 70 };
+        const dist0 = Math.hypot((gameState.currentX || 0) - p.x, (gameState.currentY || 0) - p.y);
+        if (tgtF !== curFloorHome) {
+          gameState._goFloor = curFloorHome;
+          gameState._go = { steps: [{ loc: 'home', x: sp.x, y: sp.y, floor: curFloorHome }, { loc: 'home', x: sp.x, y: sp.y, floor: tgtF }, { loc: 'home', x: p.x, y: p.y, floor: tgtF }], i: 0, at: 0, target: 'home' };
+        } else if (dist0 > 12) {
+          gameState._goFloor = tgtF;
+          gameState._go = { steps: [{ loc: 'home', x: p.x, y: p.y, floor: tgtF }], i: 0, at: 0, target: 'home' };
+        }
+      } else if (Math.hypot((gameState.currentX || 0) - p.x, (gameState.currentY || 0) - p.y) > 12) { // v9.101 其他同棟地點（操場/圖書館/學校同層）同規：走過去才生效
+        gameState._go = { steps: [{ loc: def.loc, x: p.x, y: p.y }], i: 0, at: 0, target: def.loc };
+      }
       if (typeof playSound === 'function') playSound('click');
       if (typeof syncSpotBar === 'function') syncSpotBar();
       if (window.Bus) Bus.emit('spot-changed', { key: key, loc: def.loc, group: def.group }); // R5
@@ -651,12 +666,18 @@
       const now = performance.now();
       if (now < go.at) return;
       const st = go.steps[go.i];
-      if (!st) { gameState._go = null; gameState._goSpot = null; return; }
+      if (!st) { gameState._go = null; gameState._goSpot = null; gameState._goFloor = null; return; }
+      if (gameState._goSpot && go.legAt && now - go.legAt < 4000) { // v9.101 目前航點還沒走到（>14 單位）先等——樓梯點鄰域才切樓層、步行連續不斷裂
+        const dd = Math.hypot((gameState.currentX || 0) - gameState._goSpot.x, (gameState.currentY || 0) - gameState._goSpot.y);
+        if (dd > 14) return;
+      }
       if (st.loc !== currentLoc) currentLoc = st.loc;
+      if (typeof st.floor === 'number') gameState._goFloor = st.floor;
       gameState._goSpot = { loc: st.loc, x: st.x, y: st.y };
       go.i++;
       go.at = now + 620;
-      if (go.i >= go.steps.length) { gameState._go = null; gameState._goSpot = null; }
+      go.legAt = now;
+      if (go.i >= go.steps.length) { gameState._go = null; gameState._goSpot = null; gameState._goFloor = null; if (typeof fsFramePlayer === 'function') fsFramePlayer(); } // v9.101 抵達後框人
     }
     function spotTick() {
       stepIndoorGo();
@@ -821,8 +842,8 @@
       }
       if (gameState.noodleUntil) targetLoc = 'store'; // v9.16 吃泡麵中：留在超商
       if (currentLoc === targetLoc) {
-        if (gameState._spot && gameState._spot.loc === currentLoc && !gameState._go) {
-          currentState = gameState._spot.state; // v9.73 室內互動：覆寫行為
+        if (gameState._spot && gameState._spot.loc === currentLoc && !gameState._go && !gameState._playerWalking && Math.hypot((gameState.currentX || 0) - gameState._spot.x, (gameState.currentY || 0) - gameState._spot.y) <= 14) {
+          currentState = gameState._spot.state; // v9.73 室內互動：覆寫行為；v9.101 抵達才生效（走位期間不翻狀態）
         }
         else if (currentLoc === "school") {
           currentState = (gameState.stress >= 85) ? "angry" : ((typeof schoolPhaseNow === 'function' && schoolPhaseNow() === 'break') ? "idle" : "studying"); // v9.12 下課離席放鬆
@@ -1460,7 +1481,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.100.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.101.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

@@ -161,12 +161,12 @@
       return [TV_SCREEN.x + (ix / 1150) * TV_SCREEN.w, TV_SCREEN.y + (iy / 300) * TV_SCREEN.h];
     }
     const TV_FURN = {
-      home: '<rect x="10" y="28" width="18" height="10" rx="2" fill="#ff8fab" opacity="0.65"/><rect x="50" y="30" width="16" height="8" rx="1" fill="#b09a72" opacity="0.8"/>',
-      store: '<rect x="12" y="16" width="13" height="22" fill="#2fd48c" opacity="0.45"/><rect x="33" y="16" width="13" height="22" fill="#2fd48c" opacity="0.45"/><rect x="54" y="16" width="13" height="22" fill="#2fd48c" opacity="0.45"/>',
-      restaurant: '<rect x="8" y="13" width="68" height="5" fill="#d98a68" opacity="0.8"/><ellipse cx="24" cy="36" rx="7" ry="3.5" fill="#ffb08a"/><ellipse cx="56" cy="36" rx="7" ry="3.5" fill="#ffb08a"/>',
-      school: '<rect x="28" y="11" width="28" height="13" fill="#6ec3ff" opacity="0.5"/><rect x="14" y="33" width="13" height="6" fill="#b09a72"/><rect x="36" y="33" width="13" height="6" fill="#b09a72"/><rect x="58" y="33" width="13" height="6" fill="#b09a72"/>',
-      library: '<rect x="12" y="16" width="6" height="22" fill="#b79ced"/><rect x="21" y="16" width="6" height="18" fill="#6ec3ff"/><rect x="30" y="16" width="6" height="24" fill="#ff8fab"/><rect x="57" y="16" width="6" height="20" fill="#ffd43b"/><rect x="66" y="16" width="6" height="22" fill="#2fd48c"/>',
-      gym: '<ellipse cx="42" cy="30" rx="19" ry="9" fill="none" stroke="#2fd48c" stroke-width="1.6"/><line x1="42" y1="21" x2="42" y2="39" stroke="#2fd48c" stroke-width="1.2"/><circle cx="42" cy="30" r="3" fill="none" stroke="#2fd48c" stroke-width="1.2"/>'
+      home: '<rect x="9" y="24" width="30" height="13" rx="3" fill="#ff8fab" opacity="0.95"/><rect x="47" y="26" width="17" height="11" rx="2" fill="#b09a72" opacity="0.9"/><rect x="67" y="13" width="4" height="15" fill="#ffd43b" opacity="0.9"/><rect x="8" y="38" width="56" height="5" rx="2" fill="#ff8fab" opacity="0.85"/>',
+      store: '<rect x="8" y="11" width="15" height="27" rx="2" fill="#2fd48c" opacity="0.92"/><rect x="29" y="11" width="15" height="27" rx="2" fill="#4fce7e" opacity="0.92"/><rect x="50" y="11" width="15" height="27" rx="2" fill="#2fd48c" opacity="0.92"/>',
+      restaurant: '<rect x="6" y="10" width="60" height="7" rx="2" fill="#ffb08a" opacity="0.92"/><rect x="10" y="24" width="17" height="11" rx="2" fill="#b09a72" opacity="0.9"/><rect x="45" y="24" width="17" height="11" rx="2" fill="#b09a72" opacity="0.9"/><rect x="31" y="26" width="9" height="9" rx="2" fill="#ffb08a" opacity="0.9"/>',
+      school: '<rect x="21" y="8" width="31" height="15" rx="2" fill="#5c2e3e" opacity="0.92"/><rect x="8" y="27" width="14" height="8" rx="2" fill="#6ec3ff" opacity="0.9"/><rect x="29" y="27" width="14" height="8" rx="2" fill="#6ec3ff" opacity="0.9"/><rect x="50" y="27" width="14" height="8" rx="2" fill="#6ec3ff" opacity="0.9"/>',
+      library: '<rect x="8" y="10" width="11" height="28" rx="2" fill="#8a6bc9"/><rect x="23" y="10" width="11" height="28" rx="2" fill="#b79ced"/><rect x="38" y="10" width="11" height="28" rx="2" fill="#8a6bc9"/><rect x="53" y="10" width="11" height="28" rx="2" fill="#b79ced"/>',
+      gym: '<rect x="13" y="27" width="46" height="10" rx="3" fill="#ffd43b" opacity="0.9"/><rect x="8" y="13" width="21" height="7" rx="2" fill="#b09a72" opacity="0.9"/><circle cx="57" cy="17" r="7" fill="#ffb08a" opacity="0.92"/><rect x="66" y="7" width="4" height="19" fill="#5c2e3e" opacity="0.9"/>'
     };
     function buildTownTVs() {
       const map = document.getElementById('town-map'); if (!map) return null;
