@@ -153,10 +153,10 @@
       const loT = 0.4 * minH - fit.stackH, hiT = vh - 0.4 * minH;
       if (_fs.focus) {
         if (_fs.camX != null) _fs.camX = Math.max(loL, Math.min(hiL, _fs.camX));
-        const baseTop = fit.top - (_fs.panY || 0);
+        const baseTop = fit.top - (fit.panY || 0); // v9.105 修：base 須以 fit 記錄的（產出該 fit 時的）pan 反推——呼叫端多已先把新位移加進 _fs.panY，沿用舊式會重複計入位移、夾邊失效（總覽拖曳可把整棟拖出畫面）
         _fs.panY = Math.max(loT - baseTop, Math.min(hiT - baseTop, _fs.panY || 0));
       } else {
-        const baseL = fit.left - (_fs.panX || 0), baseT = fit.top - (_fs.panY || 0);
+        const baseL = fit.left - (fit.panX || 0), baseT = fit.top - (fit.panY || 0); // v9.105 同上：以 fit.panX/panY 反推零 pan 基準
         _fs.panX = Math.max(loL - baseL, Math.min(hiL - baseL, _fs.panX || 0));
         _fs.panY = Math.max(loT - baseT, Math.min(hiT - baseT, _fs.panY || 0));
       }
@@ -164,6 +164,7 @@
     function fsFramePlayer() { // v9.101 框人：主角螢幕位置進 [25%,75%]×[20%,80%] 帶（進場/換層/抵達/切換/雙擊共用）
       if (!_fs || typeof gameState === 'undefined') return;
       const fit = window.__FS_FIT; if (!fit) return;
+      if (!_fs.focus && fit.stackW <= (window.innerWidth || 390) + 1 && fit.stackH <= (window.innerHeight || 844) + 1) { if (_fs.panX || _fs.panY) { _fs.panX = 0; _fs.panY = 0; _fsSig = ''; fsLayout(); } return; } // v9.105 總覽 fit（全棟已完整置中入畫）不框人平移——framing 動作改為回到置中（清 pan）；放大至超出視口後恢復框人
       const pos = fsPlayerStackPos(); if (!pos) return;
       const vw = window.innerWidth || 390, vh = window.innerHeight || 844;
       const sx = fit.left + pos.x, sy = fit.top + pos.yRel;
@@ -174,6 +175,7 @@
     }
     function fsCamFollow() { // v9.97 水平鏡頭；v9.101 推廣兩模式＋垂直：死區 [30%,70%]＋平滑趨近
       if (!_fs) return;
+      if (!_fs.focus && window.__FS_FIT && window.__FS_FIT.stackW <= (window.innerWidth || 390) + 1 && window.__FS_FIT.stackH <= (window.innerHeight || 844) + 1) return; // v9.105 同框人守衛：總覽 fit 時不跟隨平移，全棟保持置中
       const view = fsViewEl();
       const vw = view.clientWidth || window.innerWidth || 390;
       const vh = view.clientHeight || window.innerHeight || 844;
@@ -223,7 +225,7 @@
       const botIn = parseFloat(cs.getPropertyValue('--chrome-bottom')) || 16;
       const availW = Math.max(200, vw - FS_MARGIN_X * 2);
       const availH = Math.max(200, vh - topIn - botIn);
-      if (!_fs.mode) { const fitAll = Math.min(availW / 1340, availH / _fs.totalUnits); _fs.mode = (300 * fitAll < 260) ? 'single' : 'all'; } // v9.100 自動適應：全疊層 fit 的單盤高 <260px 預設單層，否則總覽（手動切換後以手動為準）
+      if (!_fs.mode) { const fitAll = Math.min(availW / 1340, availH / _fs.totalUnits); _fs.mode = (0.37 * 300 * fitAll >= 28) ? 'all' : 'single'; } // v9.105 進場 fit 公式（取代 v9.100 的 260px 規則）：s_fit=min(availW/總寬, availH/總高)；該比例下 personPx(0.37×300×s) ≥28 → 總覽 fit 全棟置中，否則單層＋框人（手動切換後以手動為準）
       const focus = _fs.mode === 'single';
       _fs.focus = focus;
       let ai = _fs.plates.findIndex(pl => pl.loc && pl.loc === _fs.activeLoc);
@@ -388,7 +390,7 @@
       if (_fs) fsExit();
       fsEnter(key);
     }
-    window.addEventListener('resize', () => { if (_fs) { _fsSig = ''; fsLayout(); } });
+    window.addEventListener('resize', () => { if (_fs) { if (!_fs.modeManual) _fs.mode = null; _fsSig = ''; fsLayout(); if (_fs.mode === 'single') fsFramePlayer(); } }); // v9.105 轉向/尺寸變化時依公式重算 framing（手動模式不覆寫；重算後落單層則框人）
     function applyHomeFloors(derived) { // v9.67 爆炸圖版（原 v9.66 疊層）：位移量放大為整層步進、加屋頂/導引線/標籤
       const inB = (typeof currentLoc !== 'undefined') && currentLoc === 'home';
       if (!inB) _homeViewFloor = null; // R2-2：離開住家即清 peek，不得殘留到下次進屋

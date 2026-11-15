@@ -160,14 +160,31 @@
     function tvMapPoint(ix, iy) { // 室內座標（1150x300）→ 螢幕內框：全遊戲單一出處
       return [TV_SCREEN.x + (ix / 1150) * TV_SCREEN.w, TV_SCREEN.y + (iy / 300) * TV_SCREEN.h];
     }
-    const TV_FURN = {
-      home: '<rect x="9" y="24" width="30" height="13" rx="3" fill="#ff8fab" opacity="0.95"/><rect x="47" y="26" width="17" height="11" rx="2" fill="#b09a72" opacity="0.9"/><rect x="67" y="13" width="4" height="15" fill="#ffd43b" opacity="0.9"/><rect x="8" y="38" width="56" height="5" rx="2" fill="#ff8fab" opacity="0.85"/>',
-      store: '<rect x="8" y="11" width="15" height="27" rx="2" fill="#2fd48c" opacity="0.92"/><rect x="29" y="11" width="15" height="27" rx="2" fill="#4fce7e" opacity="0.92"/><rect x="50" y="11" width="15" height="27" rx="2" fill="#2fd48c" opacity="0.92"/>',
-      restaurant: '<rect x="6" y="10" width="60" height="7" rx="2" fill="#ffb08a" opacity="0.92"/><rect x="10" y="24" width="17" height="11" rx="2" fill="#b09a72" opacity="0.9"/><rect x="45" y="24" width="17" height="11" rx="2" fill="#b09a72" opacity="0.9"/><rect x="31" y="26" width="9" height="9" rx="2" fill="#ffb08a" opacity="0.9"/>',
-      school: '<rect x="21" y="8" width="31" height="15" rx="2" fill="#5c2e3e" opacity="0.92"/><rect x="8" y="27" width="14" height="8" rx="2" fill="#6ec3ff" opacity="0.9"/><rect x="29" y="27" width="14" height="8" rx="2" fill="#6ec3ff" opacity="0.9"/><rect x="50" y="27" width="14" height="8" rx="2" fill="#6ec3ff" opacity="0.9"/>',
-      library: '<rect x="8" y="10" width="11" height="28" rx="2" fill="#8a6bc9"/><rect x="23" y="10" width="11" height="28" rx="2" fill="#b79ced"/><rect x="38" y="10" width="11" height="28" rx="2" fill="#8a6bc9"/><rect x="53" y="10" width="11" height="28" rx="2" fill="#b79ced"/>',
-      gym: '<rect x="13" y="27" width="46" height="10" rx="3" fill="#ffd43b" opacity="0.9"/><rect x="8" y="13" width="21" height="7" rx="2" fill="#b09a72" opacity="0.9"/><circle cx="57" cy="17" r="7" fill="#ffb08a" opacity="0.92"/><rect x="66" y="7" width="4" height="19" fill="#5c2e3e" opacity="0.9"/>'
-    };
+    // v9.105 電視改真・即時畫面：螢幕底圖 = 該棟各樓層真場景 bg（<use> 引用原場景 svg，零複製、零新形狀），樓層在螢幕內自分帶堆疊（1F 在下）
+    const TV_SCENE_BG = { home: 'home-bg25', home2: 'home2-bg25', school: 'school-bg25', study: 'study-bg25', club: 'club-bg25', store: 'store-bg25', restaurant: 'rest-bg25', library: 'lib-bg25', gym: 'gym-bg25' };
+    function tvBand(def, room) { // 回傳該房間在螢幕內的帶 [top, height]
+      const n = def.rooms.length;
+      let idx = def.rooms.indexOf(room);
+      if (idx < 0) idx = 0;
+      const h = 40 / n;
+      return [8 + (n - 1 - idx) * h, h];
+    }
+    function tvMapPointBand(ix, iy, def, room) {
+      const b = tvBand(def, room);
+      return [TV_SCREEN.x + (ix / 1150) * TV_SCREEN.w, b[0] + (iy / 300) * b[1]];
+    }
+    function tvSceneHtml(def) {
+      let out = '<g class="tv-scene">';
+      for (const room of def.rooms) {
+        const bgId = TV_SCENE_BG[room]; if (!bgId) continue;
+        const b = tvBand(def, room);
+        const k = Math.min(TV_SCREEN.w / 1340, b[1] / 300);
+        const tx = TV_SCREEN.x + (TV_SCREEN.w - 1340 * k) / 2;
+        const ty = b[0] + (b[1] - 300 * k) / 2;
+        out += '<use href="#' + bgId + '" width="1340" height="300" transform="translate(' + tx.toFixed(2) + ' ' + ty.toFixed(2) + ') scale(' + k.toFixed(4) + ')"/>';
+      }
+      return out + '</g>';
+    }
     function buildTownTVs() {
       const map = document.getElementById('town-map'); if (!map) return null;
       let wrap = document.getElementById('town-tvs');
@@ -182,8 +199,7 @@
           + '<rect x="2" y="2" width="80" height="52" rx="6" fill="#3a2430"/>'
           + '<rect class="tv-screen" x="6" y="6" width="72" height="44" rx="3" fill="#fff5f9"/>'
           + '<rect class="tv-standby" x="6" y="6" width="72" height="44" rx="3" fill="#2a1836"/>'
-          + '<rect x="6" y="40" width="72" height="10" fill="#f3c48d" opacity="0.55"/>'
-          + (TV_FURN[d.loc] || '')
+          + tvSceneHtml(d)
           + '<g class="tv-dolls"></g>'
           + '<g class="tv-live"><circle cx="72" cy="12" r="2.6" fill="#d6336c"/></g>'
           + '<rect x="40" y="54" width="4" height="10" fill="#3a2430"/><rect x="30" y="64" width="24" height="4" rx="2" fill="#3a2430"/>'
@@ -202,10 +218,10 @@
       for (const n of npcs) {
         if (!n.inside || def.rooms.indexOf(n.insideLoc) < 0) continue;
         const pal = (typeof npcDef === 'function' && npcDef(n.key) && npcDef(n.key).palette) || {};
-        out.push({ key: n.key, x: n.x, y: n.y, skin: pal.skin || '#fed7aa', outfit: pal.outfit || '#6ec3ff', hero: false });
+        out.push({ key: n.key, x: n.x, y: n.y, room: n.insideLoc, skin: pal.skin || '#fed7aa', outfit: pal.outfit || '#6ec3ff', hero: false });
       }
       if (typeof currentLoc !== 'undefined' && def.rooms.indexOf(currentLoc) >= 0 && !gameState.isCommuting) {
-        out.push({ key: 'hero', x: gameState.currentX || 0, y: gameState.currentY || 0, skin: '#fed7aa', outfit: '#6ec3ff', hero: true });
+        out.push({ key: 'hero', x: gameState.currentX || 0, y: gameState.currentY || 0, room: currentLoc, skin: '#fed7aa', outfit: '#6ec3ff', hero: true });
       }
       return out;
     }
@@ -218,12 +234,12 @@
       for (const d of TV_DEFS) {
         const el = wrap.querySelector('.town-tv[data-loc="' + d.loc + '"]'); if (!el) continue;
         const occ = tvOccupants(d);
-        const sig = occ.map(o => o.key + ':' + Math.round(o.x / 4) + ',' + Math.round(o.y / 4)).join('|');
+        const sig = occ.map(o => o.key + '@' + (o.room || '') + ':' + Math.round(o.x / 4) + ',' + Math.round(o.y / 4)).join('|');
         if (el.dataset.sig !== sig) {
           el.dataset.sig = sig;
           const g = el.querySelector('.tv-dolls');
           g.innerHTML = occ.map(o => {
-            const pt = tvMapPoint(o.x, o.y);
+            const pt = tvMapPointBand(o.x, o.y, d, o.room);
             const gold = o.hero ? ' stroke="#ffd43b" stroke-width="1.4"' : '';
             return '<g><circle cx="' + pt[0].toFixed(1) + '" cy="' + (pt[1] - 2.2).toFixed(1) + '" r="2.7" fill="' + o.skin + '"' + gold + '/><rect x="' + (pt[0] - 2.7).toFixed(1) + '" y="' + (pt[1] - 0.4).toFixed(1) + '" width="5.4" height="6.4" rx="1.6" fill="' + o.outfit + '"' + gold + '/></g>';
           }).join('');

@@ -3282,7 +3282,7 @@ input, select, textarea { border-radius: var(--r-card) !important; }
 /* ================= v9.4 介面重構 ================= */
 
 .hud-vitals { flex: 1 1 100%; display: flex; gap: 12px; justify-content: center; padding-top: 6px; }
-.hv { display: inline-flex; align-items: center; gap: 4px; }
+.hv { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 2px solid var(--stroke); border-radius: var(--r-pill); box-shadow: var(--sh-hard-sm); padding: 2px 9px; } /* v9.105 計量條加淺色膠囊底襯（比照其他 pill），深底上也可讀 */
 .hv-ico { font-size: 0.78rem; }
 .hv-bar { width: 52px; height: 7px; background: rgba(var(--rgb-navy),0.15); border-radius: var(--r-card); overflow: hidden; display: inline-block; }
 .hv-bar span { display: block; height: 100%; border-radius: var(--r-card); transition: width 0.4s ease; }
@@ -4133,3 +4133,16 @@ body.fs-on #rotate-hint { top: calc(var(--chrome-top, 84px) + 54px); } /* v9.101
 #coach-card .coach-btns { display: inline-flex; gap: 8px; }
 #coach-card .coach-skip { font-size: 0.78rem; background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px 4px; }
 #coach-card .coach-next { font-size: 0.875rem; font-weight: 900; background: var(--sun); color: var(--ink); border: 2px solid var(--ink); border-radius: var(--r-pill); padding: 6px 16px; cursor: pointer; }
+
+/* v9.105 橫向版面（平板橫向，高度 >520 的非矮橫向）：header 正常流動、pill 不直堆不截斷、左右平衡 */
+@media (orientation: landscape) and (min-height: 521px) {
+  .floating-header { flex-wrap: wrap !important; row-gap: 6px; width: min(1240px, calc(100vw - 24px)); }
+  .floating-header > * { flex: none !important; }
+  .header-center { flex: 1 1 auto !important; min-width: 0; }
+  .header-right { flex-wrap: nowrap; }
+  .status-badge, .btn-exam-mini, .speed-trigger, .calendar-badge, #newbie-badge { white-space: nowrap !important; flex: none !important; }
+  #stage-board { overflow: visible !important; text-overflow: clip !important; white-space: nowrap; }
+  .hud-vitals { flex: none !important; width: 100%; padding-top: 0; }
+}
+/* v9.105 FS 內收起小鎮層 chrome（底欄/選單鈕），避免與 FS 離開鈕/小遊戲鈕重疊或裁切 */
+body.fs-on .bottom-dock, body.fs-on .floating-controls { display: none !important; }
