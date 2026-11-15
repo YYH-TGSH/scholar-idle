@@ -146,7 +146,7 @@
       const total = pathTotalLength(pts);
       const shoesBonus = Math.max(0.4, 1 - (gameState.passive.shoes * 0.15));
       const speedsterMult = typeof getRebirthReduction === 'function' ? Math.max(0.3, 1 - ((rebirthData && rebirthData.bonuses ? rebirthData.bonuses.speedster : 0) || 0) * 0.10) : 1.0;
-      gameState.commuteSpeedMult = shoesBonus * speedsterMult * (typeof setMoveMult === 'function' ? setMoveMult() : 1);
+      gameState.commuteSpeedMult = shoesBonus * speedsterMult * (typeof setMoveMult === 'function' ? setMoveMult() : 1) * ((gameState.collectibles && gameState.collectibles.bike) ? 0.9 : 1); // v9.104 收藏：變速腳踏車 通勤時間 −10%
       gameState.commutePath = pts;
       gameState.commuteTotalPx = total;
       gameState.commuteDonePx = 0;
@@ -1141,7 +1141,7 @@
       } else { // v9.14.4 在家書桌：只有書本/平板加成
         mult = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3); type = 'library';
       }
-      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (typeof getComboStudyMult === 'function' ? getComboStudyMult() : 1) * (progressMinutes / 60) * ((gameState.collectibles && gameState.collectibles.stamp) ? 1.02 : 1) * (typeof knowMult === 'function' ? knowMult() : 1); // v9.103 新生適應 ×2 // v9.32 收藏：郵票冊 讀書 +2%／v9.33 學術特區 combo
+      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (typeof getComboStudyMult === 'function' ? getComboStudyMult() : 1) * (progressMinutes / 60) * ((gameState.collectibles && gameState.collectibles.stamp) ? 1.02 : 1) * ((gameState.collectibles && gameState.collectibles.encyclopedia) ? 1.03 : 1) * ((type !== 'school' && gameState.collectibles && gameState.collectibles.globe) ? 1.03 : 1) * (typeof knowMult === 'function' ? knowMult() : 1); // v9.104 收藏：百科全書 讀書 +3%、地球儀 複習 +3% // v9.103 新生適應 ×2 // v9.32 收藏：郵票冊 讀書 +2%／v9.33 學術特區 combo
       if (gameState._studyFrac < 1) return;
       const propKey = type === 'school' ? 'school' : 'home';
       const limit = type === 'school' ? 60 : 40;
@@ -1482,7 +1482,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.103.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.104.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

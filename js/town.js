@@ -612,8 +612,11 @@
     const COLLECTIBLES = {
       stamp: { name: '📮 郵票冊', price: 2000 },
       watch: { name: '⌚ 名錶', price: 8000 },
-      painting: { name: '🖼️ 名畫', price: 20000 }
-    };
+      painting: { name: '🖼️ 名畫', price: 20000 },
+      globe: { name: '🌍 地球儀', price: 1500 },
+      bike: { name: '🚲 變速腳踏車', price: 4000 },
+      encyclopedia: { name: '📚 絕版百科全書', price: 9000 }
+    }; // v9.104 QA P2-4：高價收藏擴充（自願型金錢目標，生存面價格不動）
     function buyCollectible(id) {
       const def = COLLECTIBLES[id];
       if (!def) return;

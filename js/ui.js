@@ -1681,6 +1681,7 @@
 
     // ❓ 說明 Modal 控制函數
     function showHelpModal() {
+      if (typeof ensureHelpManual === 'function') ensureHelpManual(); // v9.104 手冊改首次開啟才生成（DOM 回收）
       if (typeof manualGo === 'function') manualGo('help', 0); // v9.4
       try {
         playSound('click');
@@ -1840,7 +1841,7 @@
       const elTrophyOwned = document.getElementById('lbl-trophy-owned');
       if (elSofaOwned) elSofaOwned.innerText = `已擁有: ${gameState.passive.sofa || 0} / 3`;
       if (elTrophyOwned) elTrophyOwned.innerText = `已擁有: ${gameState.passive.trophy || 0} / 3`;
-      ['stamp', 'watch', 'painting'].forEach(cid => { const b = document.getElementById('btn-collect-' + cid); if (b) { const owned = !!(gameState.collectibles && gameState.collectibles[cid]); b.disabled = owned; b.textContent = owned ? '✓ 已收藏' : b.dataset.price; } });
+      ['stamp', 'watch', 'painting', 'globe', 'bike', 'encyclopedia'].forEach(cid => { const b = document.getElementById('btn-collect-' + cid); if (b) { const owned = !!(gameState.collectibles && gameState.collectibles[cid]); b.disabled = owned; b.textContent = owned ? '✓ 已收藏' : b.dataset.price; } });
 
       // 如果好友面板開啟中，同步更新按鈕與好感度狀態
       const friendsDrawer = document.getElementById('drawer-friends');
@@ -1879,7 +1880,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.103.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.104.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -3804,18 +3805,17 @@
       playSound('click');
       manualGo(prefix, st.idx + dir);
     }
-    function setupManuals() {
+    function ensureHelpManual() {
       const helpModal = document.querySelector('#help-overlay .game-modal');
       if (helpModal && !document.getElementById('help-manual')) {
-        const tabs = helpModal.querySelector('.help-tabs');
-        const scroller = tabs ? tabs.nextElementSibling : null;
-        if (tabs) tabs.remove();
-        if (scroller) scroller.remove();
         const wrap = document.createElement('div');
         wrap.id = 'help-manual';
         helpModal.appendChild(wrap);
         buildManualCarousel(wrap, 'help');
       }
+    }
+    function setupManuals() {
+      // v9.104：說明手冊改由 ensureHelpManual 於首次開啟時生成（開機不再常駐 152 個節點）；靜態舊 tabs 已自 index.html 移除
       buildManualCarousel(document.getElementById('onboarding-manual'), 'ob');
     }
     setupManuals();

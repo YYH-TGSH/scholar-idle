@@ -897,6 +897,63 @@
           { label: '🏆 上台領獎', sub: '獎金 +$60', exec: () => { gameState.money = (gameState.money || 0) + 60; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 60; return '🏅 掌聲之中領下 $60 獎金！'; } },
           { label: '😌 低調一點', sub: '獎金 +$60，壓力 −5', exec: () => { gameState.money = (gameState.money || 0) + 60; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 60; gameState.stress = Math.max(0, gameState.stress - 5); return '😌 獎金照領，心情平靜。'; } },
         ],
+      },
+      // v9.104 QA P2-6：七級各一專屬事件（minG=maxG 鎖級，量級比照既有事件）
+      {
+        title: '🖍️ 蠟筆畫比賽', badge: '校園活動', icon: '🖍️', minG: 0, maxG: 0,
+        desc: '幼兒園辦畫畫比賽，題目是「我的家人」。你的蠟筆盒裡有全班最齊的顏色！',
+        choices: [
+          { label: '🎨 認真畫完全家福', sub: '專注 +8，壓力 −5', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 8); gameState.stress = Math.max(0, gameState.stress - 5); return '🖍️ 全家福貼上佈告欄，老師還給你一顆星星貼紙！'; } },
+          { label: '🤝 把蠟筆借給同學', sub: '壓力 −8，專注 +3', exec: () => { gameState.stress = Math.max(0, gameState.stress - 8); gameState.focus = Math.min(100, (gameState.focus || 0) + 3); return '🤝 全班一起畫，教室變成彩虹色。'; } },
+        ],
+      },
+      {
+        title: '🦷 乳牙掉了', badge: '成長時刻', icon: '🦷', minG: 1, maxG: 1,
+        desc: '吃午餐咬到排骨 — 一顆搖了好久的乳牙終於掉下來了！',
+        choices: [
+          { label: '🧚 放在枕頭下等牙仙子', sub: '牙仙子謝禮 +$20', exec: () => { gameState.money = (gameState.money || 0) + 20; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 20; return '🧚 隔天枕頭下真的有 $20！牙仙子存在確認。'; } },
+          { label: '🗃️ 收進鐵盒當紀念', sub: '壓力 −5，專注 +5', exec: () => { gameState.stress = Math.max(0, gameState.stress - 5); gameState.focus = Math.min(100, (gameState.focus || 0) + 5); return '🗃️ 第一顆乳牙收藏完成，長大的證據 +1。'; } },
+        ],
+      },
+      {
+        title: '📱 第一支手機', badge: '成長時刻', icon: '📱', minG: 2, maxG: 2,
+        desc: '爸媽終於點頭：國中了，可以有自己的第一支手機，但要約法三章。',
+        choices: [
+          { label: '📏 乖乖遵守約定', sub: '專注 +10', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 10); return '📱 說好睡前交出來就交出來，自律從第一天開始。'; } },
+          { label: '🎮 先玩個過癮再說', sub: '壓力 −12，專注 −5', exec: () => { gameState.stress = Math.max(0, gameState.stress - 12); gameState.focus = Math.max(0, (gameState.focus || 0) - 5); return '🎮 新手機真香…只是眼睛有點酸。'; } },
+        ],
+      },
+      {
+        title: '🎸 社團成果發表', badge: '校園活動', icon: '🎸', minG: 3, maxG: 3,
+        desc: '高中社團成發在即，你的社團缺一個壓軸的人上台。',
+        choices: [
+          { label: '🎤 上台秀一手', sub: '演出酬勞 +$30，壓力 −10', exec: () => { gameState.money = (gameState.money || 0) + 30; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 30; gameState.stress = Math.max(0, gameState.stress - 10); return '🎸 全場安可！青春就是要這樣燒一次。'; } },
+          { label: '🎛️ 台下幫忙場務', sub: '精力 −8，專注 +8', exec: () => { gameState.energy = Math.max(0, gameState.energy - 8); gameState.focus = Math.min(100, (gameState.focus || 0) + 8); return '🎛️ 燈光音響一手包辦，幕後英雄也是英雄。'; } },
+        ],
+      },
+      {
+        title: '🎤 迎新宿營', badge: '大學生活', icon: '🎤', minG: 4, maxG: 4,
+        desc: '系上迎新宿營在招隊輔，學長姐說：就缺你這種嗨咖。',
+        choices: [
+          { label: '🙋 當隊輔帶氣氛', sub: '車馬費 +$50，精力 −12', exec: () => { gameState.money = (gameState.money || 0) + 50; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 50; gameState.energy = Math.max(0, gameState.energy - 12); return '🎤 帶完三天兩夜，嗓子啞了但人脈滿了。'; } },
+          { label: '🌙 安靜參加就好', sub: '壓力 −8，專注 +5', exec: () => { gameState.stress = Math.max(0, gameState.stress - 8); gameState.focus = Math.min(100, (gameState.focus || 0) + 5); return '🌙 星空下放空一晚，充電完成。'; } },
+        ],
+      },
+      {
+        title: '📑 研討會發表邀請', badge: '學術之路', icon: '📑', minG: 5, maxG: 5,
+        desc: '一封邀請函躺在信箱裡：國內研討會想邀請你發表正在進行的研究。',
+        choices: [
+          { label: '✅ 接下發表', sub: '知識補給 + 專注 +10', exec: () => { if (typeof gainKnowledge === 'function') gainKnowledge('school', 1.5); gameState.focus = Math.min(100, (gameState.focus || 0) + 10); return '📑 準備發表的過程，把研究又想通了一層。'; } },
+          { label: '🙏 婉拒，先磨好論文', sub: '壓力 −10', exec: () => { gameState.stress = Math.max(0, gameState.stress - 10); return '🙏 婉拒了邀請，心無旁騖回到論文。'; } },
+        ],
+      },
+      {
+        title: '🏛️ 學術講座邀請', badge: '榮譽時刻', icon: '🏛️', minG: 6, maxG: 6,
+        desc: '學會寄來燙金的邀請函：請你以博士身分做一場專題演講。',
+        choices: [
+          { label: '🎓 受邀演講', sub: '演講費 +$200，精力 −10', exec: () => { gameState.money = (gameState.money || 0) + 200; gameState.totalLifetimeEarnings = (gameState.totalLifetimeEarnings || 0) + 200; gameState.energy = Math.max(0, gameState.energy - 10); return '🏛️ 全場起立鼓掌，這就是學術地位的重量。'; } },
+          { label: '📖 閉關寫專書', sub: '專注 +15，知識補給', exec: () => { gameState.focus = Math.min(100, (gameState.focus || 0) + 15); if (typeof gainKnowledge === 'function') gainKnowledge('school', 1.5); return '📖 婉拒了講座，把時間留給即將完成的專書。'; } },
+        ],
       }
     ];
 
