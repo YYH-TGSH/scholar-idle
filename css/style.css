@@ -867,18 +867,35 @@ body {
     /* v9.27.1 操場室內化後，跑步動畫要走場景座標（原本的世界座標會把人甩出場景外看不見）；縮放含室內同尺寸補償 ×1.676 */
     #gym-rooms .character-wrapper.running-on-track {
       animation: track-loop-scene 3.4s infinite linear !important;
+      transform: scale(var(--run-scale, 1.55)) !important;
+    }
+    #gym-rooms .character-wrapper.running-on-track .sprite-pixel {
+      animation: run-flip-scene 3.4s infinite linear;
+    }
+    @keyframes run-flip-scene {
+      0% { transform: scaleX(1); }
+      40% { transform: scaleX(1); }
+      45% { transform: scaleX(-1); }
+      90% { transform: scaleX(-1); }
+      95% { transform: scaleX(1); }
+      100% { transform: scaleX(1); }
     }
 
     @keyframes track-loop-scene {
-      0% { left: 109px; top: 82px; transform: scaleX(1.475); }
-      22% { left: 669px; top: 82px; transform: scaleX(1.475); }
-      30% { left: 724px; top: 108px; transform: scaleX(1.475); }
-      38% { left: 731px; top: 148px; transform: scaleX(-1.55); }
-      50% { left: 669px; top: 192px; transform: scaleX(-1.642); }
-      72% { left: 109px; top: 192px; transform: scaleX(-1.642); }
-      80% { left: 52px; top: 162px; transform: scaleX(-1.55); }
-      88% { left: 45px; top: 112px; transform: scaleX(1.475); }
-      100% { left: 109px; top: 82px; transform: scaleX(1.475); }
+      0% { left: 198px; top: 72px; }
+      8.3% { left: 329px; top: 72px; }
+      16.7% { left: 461px; top: 72px; }
+      25% { left: 592px; top: 72px; }
+      33.3% { left: 724px; top: 72px; }
+      41.7% { left: 859px; top: 85px; }
+      50% { left: 851px; top: 120px; }
+      58.3% { left: 720px; top: 120px; }
+      66.7% { left: 588px; top: 120px; }
+      75% { left: 457px; top: 120px; }
+      83.3% { left: 325px; top: 120px; }
+      91.7% { left: 190px; top: 108px; }
+      100% { left: 198px; top: 72px; }
+    }
     }
 
     @keyframes track-loop {
@@ -4146,3 +4163,8 @@ body.fs-on #rotate-hint { top: calc(var(--chrome-top, 84px) + 54px); } /* v9.101
 }
 /* v9.105 FS 內收起小鎮層 chrome（底欄/選單鈕），避免與 FS 離開鈕/小遊戲鈕重疊或裁切 */
 body.fs-on .bottom-dock, body.fs-on .floating-controls { display: none !important; }
+
+/* v9.106 A: 操場無 ext-mode（overlay 棟），其舊版平面立面屋頂條在小鎮表面恆隱藏（其餘五棟由 ext-mode 同規則處理） */
+#landmark-gym .facade-roof { display: none !important; }
+/* v9.106 C: 電視真場景 <use> 以 style transform 驅動（fit/追隨共用），切換平滑過渡 */
+.town-tv .tv-scene use { transform-box: view-box; transform-origin: 0 0; transition: transform 0.3s linear; }

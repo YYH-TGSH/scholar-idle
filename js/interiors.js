@@ -1081,6 +1081,8 @@
       }
       updateGymLighting();
       syncGymFs(); // v9.102 進/出 FS 結算（在樣式寫入後、次幀閘門反映）
+      const _gr106 = document.getElementById('gym-rooms'); // v9.106 跑步縮放：FS 內走 personPx 恆等式（personPx/(50*s)＝2.22），出 FS 還原島上預設
+      if (_gr106) { const _want106 = (window.__FS_FIT && window.__FS_FIT.active === 'gym') ? '2.22' : ''; if (_gr106.dataset.rs !== _want106) { _gr106.dataset.rs = _want106; if (_want106) _gr106.style.setProperty('--run-scale', _want106); else _gr106.style.removeProperty('--run-scale'); } }
     }
     function shootBallAnim(fromX, fromY, make, onText) { // v9.27 投籃動畫：拋物線到籃框，進→穿網落下，不進→彈框飛走
       const rooms = document.getElementById('gym-rooms');

@@ -173,15 +173,23 @@
       const b = tvBand(def, room);
       return [TV_SCREEN.x + (ix / 1150) * TV_SCREEN.w, b[0] + (iy / 300) * b[1]];
     }
+    const TV_ROOMS_ID = { home: 'home-rooms', home2: 'home2-rooms', school: 'school-rooms', study: 'study-rooms', club: 'club-rooms', store: 'store-rooms', restaurant: 'rest-rooms', library: 'lib-rooms', gym: 'gym-rooms' };
+    function tvFitTransform(def, room) { // 整間 fit：該樓層帶的 style transform 字串（fit 模式與建置共用）
+      const b = tvBand(def, room);
+      const k = Math.min(TV_SCREEN.w / 1340, b[1] / 300);
+      const tx = TV_SCREEN.x + (TV_SCREEN.w - 1340 * k) / 2;
+      const ty = b[0] + (b[1] - 300 * k) / 2;
+      return 'translate(' + tx.toFixed(2) + 'px, ' + ty.toFixed(2) + 'px) scale(' + k.toFixed(4) + ')';
+    }
+    function tvScenePoint(room, ix, iy) { // 室內邏輯座標 → 該房間場景（bg 投影）座標
+      const pr = (typeof PROJ !== 'undefined') ? PROJ.forRooms(TV_ROOMS_ID[room]) : null;
+      return pr ? pr.P(ix, iy, 0) : { x: (ix / 1150) * 1340, y: iy };
+    }
     function tvSceneHtml(def) {
       let out = '<g class="tv-scene">';
       for (const room of def.rooms) {
         const bgId = TV_SCENE_BG[room]; if (!bgId) continue;
-        const b = tvBand(def, room);
-        const k = Math.min(TV_SCREEN.w / 1340, b[1] / 300);
-        const tx = TV_SCREEN.x + (TV_SCREEN.w - 1340 * k) / 2;
-        const ty = b[0] + (b[1] - 300 * k) / 2;
-        out += '<use href="#' + bgId + '" width="1340" height="300" transform="translate(' + tx.toFixed(2) + ' ' + ty.toFixed(2) + ') scale(' + k.toFixed(4) + ')"/>';
+        out += '<use href="#' + bgId + '" width="1340" height="300" data-room="' + room + '" style="transform: ' + tvFitTransform(def, room) + '"/>';
       }
       return out + '</g>';
     }
@@ -234,12 +242,34 @@
       for (const d of TV_DEFS) {
         const el = wrap.querySelector('.town-tv[data-loc="' + d.loc + '"]'); if (!el) continue;
         const occ = tvOccupants(d);
-        const sig = occ.map(o => o.key + '@' + (o.room || '') + ':' + Math.round(o.x / 4) + ',' + Math.round(o.y / 4)).join('|');
+        // v9.106 追隨鏡頭：有人→追隨（主角優先；NPC 黏性目標、離場才換）；沒人→整間 fit（v9.105 行為）
+        let target = null;
+        for (const o of occ) { if (o.hero) { target = o; break; } }
+        if (!target && el.dataset.follow) target = occ.find(o => o.key === el.dataset.follow) || null;
+        if (!target) target = occ[0] || null;
+        el.dataset.follow = target ? target.key : '';
+        const mode = target ? 'follow' : 'fit';
+        let tp = null, kF = 0, txF = 0, tyF = 0;
+        if (target) {
+          tp = tvScenePoint(target.room, target.x, target.y);
+          kF = Math.min(72 / 1340, 44 / 300) * 2.375; // 該樓層整層 fit 的 2.375 倍（規格 2–2.5 帶中值）
+          txF = Math.max(78 - 1340 * kF - 24, Math.min(6 + 24, 42 - tp.x * kF)); // 目標置中優先；夾界放寬（水平容許 24 單位外露）確保靠邊目標仍回中心帶
+          tyF = Math.max(50 - 300 * kF - 14, Math.min(6 + 14, 28 - tp.y * kF)); // 垂直同理（容許 14 單位）——室內人物多在場景下段，嚴格覆蓋夾界會把目標壓出中心帶
+        }
+        const sig = mode + '|' + (target ? target.key + ':' + Math.round(tp.x / 6) + ',' + Math.round(tp.y / 6) : '') + '|' + occ.map(o => o.key + '@' + (o.room || '') + ':' + Math.round(o.x / 4) + ',' + Math.round(o.y / 4)).join('|');
         if (el.dataset.sig !== sig) {
           el.dataset.sig = sig;
+          const scene = el.querySelector('.tv-scene');
+          if (scene) scene.querySelectorAll('use').forEach(u => {
+            if (mode === 'fit') { u.style.display = ''; u.style.transform = tvFitTransform(d, u.getAttribute('data-room')); }
+            else if (u.getAttribute('data-room') === target.room) { u.style.display = ''; u.style.transform = 'translate(' + txF.toFixed(2) + 'px, ' + tyF.toFixed(2) + 'px) scale(' + kF.toFixed(4) + ')'; }
+            else u.style.display = 'none';
+          });
           const g = el.querySelector('.tv-dolls');
-          g.innerHTML = occ.map(o => {
-            const pt = tvMapPointBand(o.x, o.y, d, o.room);
+          g.innerHTML = occ.filter(o => mode === 'fit' || o.room === target.room).map(o => {
+            let pt;
+            if (mode === 'fit') pt = tvMapPointBand(o.x, o.y, d, o.room);
+            else { const sp = tvScenePoint(o.room, o.x, o.y); pt = [sp.x * kF + txF, sp.y * kF + tyF]; }
             const gold = o.hero ? ' stroke="#ffd43b" stroke-width="1.4"' : '';
             return '<g><circle cx="' + pt[0].toFixed(1) + '" cy="' + (pt[1] - 2.2).toFixed(1) + '" r="2.7" fill="' + o.skin + '"' + gold + '/><rect x="' + (pt[0] - 2.7).toFixed(1) + '" y="' + (pt[1] - 0.4).toFixed(1) + '" width="5.4" height="6.4" rx="1.6" fill="' + o.outfit + '"' + gold + '/></g>';
           }).join('');
