@@ -24,6 +24,7 @@
 
       startTicker();
       snapCameraToChar(); // v9.0 開機鏡頭直接落在小人所在地
+      if (typeof maybeShowCoachCard === 'function') maybeShowCoachCard(); // v9.103 新手教練卡（首次遊玩限定）
       // v8.9.1：舊捲動相機 (開機/resize 自動捲到小人 + 滑鼠拖曳捲動) 全面退役——它與 transform 相機互打，會把置中的地圖整張捲走。相機只由 resizeMapScale/手勢引擎 (transform) 管理。
 
     }
@@ -1140,7 +1141,7 @@
       } else { // v9.14.4 在家書桌：只有書本/平板加成
         mult = 1 + (gameState.passive.book * 0.2) + ((gameState.passive.tablet || 0) * 0.3); type = 'library';
       }
-      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (typeof getComboStudyMult === 'function' ? getComboStudyMult() : 1) * (progressMinutes / 60) * ((gameState.collectibles && gameState.collectibles.stamp) ? 1.02 : 1); // v9.32 收藏：郵票冊 讀書 +2%／v9.33 學術特區 combo
+      gameState._studyFrac = (gameState._studyFrac || 0) + 3 * efficiency * focusMult * smartMult * studyMut * combo * setMult * coMult * mult * (typeof getComboStudyMult === 'function' ? getComboStudyMult() : 1) * (progressMinutes / 60) * ((gameState.collectibles && gameState.collectibles.stamp) ? 1.02 : 1) * (typeof knowMult === 'function' ? knowMult() : 1); // v9.103 新生適應 ×2 // v9.32 收藏：郵票冊 讀書 +2%／v9.33 學術特區 combo
       if (gameState._studyFrac < 1) return;
       const propKey = type === 'school' ? 'school' : 'home';
       const limit = type === 'school' ? 60 : 40;
@@ -1191,7 +1192,7 @@
       }
 
       const sub = gameState.subjects[targetKey];
-      const baseGain = Math.round((2 + Math.random() * 2) * efficiency);
+      const baseGain = Math.round((2 + Math.random() * 2) * efficiency * (typeof knowMult === 'function' ? knowMult() : 1)); // v9.103 新生適應 ×2
       if (baseGain <= 0) return;
 
       const gainLabel = type === 'school' ? '聽講' : '複習';
@@ -1481,7 +1482,7 @@ let __scholarBooted = false;
 window.addEventListener('DOMContentLoaded', () => {
   if (__scholarBooted) return;
   __scholarBooted = true;
-  console.log("🎮 放置學霸養成記 (v9.102.0) 正在開機啟動...");
+  console.log("🎮 放置學霸養成記 (v9.103.0) 正在開機啟動...");
   // v8.2 單一啟動路徑：patchedInitGame 內部會 loadGameData + startTicker，只跑一次
   if (typeof patchedInitGame === 'function') {
     patchedInitGame();

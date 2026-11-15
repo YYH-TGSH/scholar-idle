@@ -1044,6 +1044,7 @@
 
     // 永久轉世加成資料
     let rebirthData = {
+      everPromoted: false, // v9.103 新生適應：帳號史上是否已升學過（跨局持久、轉生不重發加成）
       totalRebirths: 0,
       totalLifetimeEarnings: 0,
       totalLifetimeDays: 0,
@@ -1136,6 +1137,10 @@
     function saveRebirthData() {
       SafeStore.set(REBIRTH_KEY, JSON.stringify(rebirthData));
     }
+
+    // v9.103 新生適應加成：帳號史上首次升學之前，知識獲得 ×2
+    function newbieBoostActive() { return !(typeof rebirthData !== 'undefined' && rebirthData.everPromoted); }
+    function knowMult() { return newbieBoostActive() ? 2 : 1; }
 
     function unlockAchievement(id) {
       if (achievementData[id]) return; // 已解鎖
@@ -1483,6 +1488,9 @@
     const SAVE_BAK_KEY = SAVE_KEY + "_bak";
     // R4 存檔版本制：信封 {version, savedAt, data}＋遷移鏈＋雙 key 備援（目標架構 Phase 2）
     const SAVE_FORMAT_VERSION = 1;
+    let coachSeenFlag = false; // v9.103 新手教練卡：只出一次（存檔信封頂層欄位）
+    function coachSeen() { return coachSeenFlag; }
+    function markCoachSeen() { coachSeenFlag = true; }
     const SAVE_MIGRATIONS = { 0: (d) => d }; // v0（舊裸存檔）→ v1：僅信封化；欄位預設由 loadGameData 既有修補鏈處理
     function validateSaveData(d) {
       return !!d && typeof d === 'object' && typeof d.money === 'number' && !!d.bag && typeof d.bag === 'object' && !!d.subjects && typeof d.subjects === 'object';
@@ -1500,7 +1508,7 @@
       const from = v;
       while (v < SAVE_FORMAT_VERSION) { const m = SAVE_MIGRATIONS[v]; if (!m) return null; data = m(data); v++; }
       if (!validateSaveData(data)) return null;
-      return { data, fromVersion: from };
+      return { data, fromVersion: from, coachSeen: !!obj.coachSeen };
     }
     function readSaveWithFallback() {
       const main = unwrapSave(SafeStore.get(SAVE_KEY));
@@ -1521,7 +1529,7 @@
       gameState.lastSaved = Date.now();
       gameState.currentLoc = currentLoc;
       gameState.currentState = currentState;
-      const payload = JSON.stringify({ version: SAVE_FORMAT_VERSION, savedAt: gameState.lastSaved, data: gameState });
+      const payload = JSON.stringify({ version: SAVE_FORMAT_VERSION, savedAt: gameState.lastSaved, coachSeen: coachSeenFlag, data: gameState }); // v9.103 教練卡旗標入信封頂層（跨局/轉生保留）
       // 雙 key 備援：先寫 bak 並驗證可解析，通過才寫主 key；主檔損毀時 load 自動走 bak
       SafeStore.set(SAVE_BAK_KEY, payload);
       if (unwrapSave(SafeStore.get(SAVE_BAK_KEY))) SafeStore.set(SAVE_KEY, payload);
@@ -1573,12 +1581,14 @@
     function loadGameData() {
       const loadedSave = readSaveWithFallback();
       if (loadedSave) {
+        if (loadedSave.coachSeen) coachSeenFlag = true;
         try {
           const parsed = loadedSave.data;
           if (loadedSave.fromVersion < SAVE_FORMAT_VERSION) window.__SAVE_MIGRATED_FROM__ = loadedSave.fromVersion;
           calculateOfflineIncome(parsed);
 
           gameState = { ...gameState, ...parsed };
+          if (!rebirthData.everPromoted && ((gameState.examsPassedTotal || 0) > 0 || (gameState.gradeIndex || 0) > 0)) { rebirthData.everPromoted = true; saveRebirthData(); } // v9.103 既有帳號種子：曾升學過就不發新生適應
           if (!gameState.parentsStatus) gameState.parentsStatus = 'alive';
           if (!gameState.equipped) gameState.equipped = { hat: null, clothes: null, shoes: null };
           if (!gameState.customSkins) gameState.customSkins = { hat: [], clothes: [], shoes: [] };
@@ -1804,10 +1814,10 @@
           let pool = 0, propT = null, limitT = 0;
           if (tempLoc === "school") {
             const multT = (1 + (tempState.passive.headphone || 0) * 0.10) * (tmpLv('school') === 3 ? 1.60 : (tmpLv('school') === 2 ? 1.25 : 1.0)) * [1.0, 1.10, 1.20, 1.35][tmpFriendLv('xiaoxuan')] * smartT * scholarT;
-            pool = 3 * efficiency * multT; propT = 'school'; limitT = 60;
+            pool = 3 * efficiency * multT * knowMult(); propT = 'school'; limitT = 60;
           } else if (tempLoc === "library") {
             const multT = (1 + (tempState.passive.book * 0.2) + ((tempState.passive.tablet || 0) * 0.3)) * (tmpLv('library') === 3 ? 1.75 : (tmpLv('library') === 2 ? 1.30 : 1.0)) * [1.0, 1.15, 1.30, 1.45][tmpFriendLv('yuqing')] * memT * scholarT;
-            pool = 3 * efficiency * multT; propT = 'home'; limitT = 40;
+            pool = 3 * efficiency * multT * knowMult(); propT = 'home'; limitT = 40;
           }
           if (propT) {
             const subKeysT = ['cn', 'en', 'ma', 'sc', 'so'];

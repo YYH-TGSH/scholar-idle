@@ -4121,3 +4121,15 @@ body.fs-on #rotate-hint { top: calc(var(--chrome-top, 84px) + 54px); } /* v9.101
 #fs-view-btns { position: absolute; top: calc(var(--chrome-top, 84px) + 8px); right: 12px; z-index: 48; display: flex; gap: 8px; }
 .fs-vbtn { background: var(--sun); color: var(--ink); font-size: 0.875rem; font-weight: 900; padding: 6px 12px; border-radius: var(--r-pill); border: 2px solid var(--stroke); box-shadow: var(--sh-hard-sm); cursor: pointer; }
 #fs-mg-btn { position: absolute; right: 12px; bottom: calc(var(--chrome-bottom, 16px) + 12px); z-index: 48; background: linear-gradient(135deg, var(--rose), var(--amber)); color: #ffffff; font-size: 1rem; font-weight: 900; padding: 6px 14px; border-radius: var(--r-win); border: 2px solid rgba(var(--rgb-white), 0.6); box-shadow: var(--sh-win); cursor: pointer; }
+
+/* v9.103 新手教練卡（單一可複用元素） */
+#coach-card { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--chrome-bottom, 16px) + 84px); width: min(92vw, 430px); background: var(--card-bg, #fff8ee); border: 2.5px solid var(--ink); border-radius: var(--r-card); box-shadow: var(--sh-soft); padding: 14px 16px 12px; z-index: 90; }
+#coach-card .coach-t { font-size: 1rem; font-weight: 900; margin-bottom: 6px; }
+#coach-card .coach-d { font-size: 0.875rem; line-height: 1.55; }
+#coach-card .coach-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+#coach-card .coach-dots { display: inline-flex; gap: 5px; }
+#coach-card .coach-dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--line, #d8c9b8); display: inline-block; }
+#coach-card .coach-dot.on { background: var(--sun); }
+#coach-card .coach-btns { display: inline-flex; gap: 8px; }
+#coach-card .coach-skip { font-size: 0.78rem; background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px 4px; }
+#coach-card .coach-next { font-size: 0.875rem; font-weight: 900; background: var(--sun); color: var(--ink); border: 2px solid var(--ink); border-radius: var(--r-pill); padding: 6px 16px; cursor: pointer; }

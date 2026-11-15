@@ -1516,6 +1516,7 @@
         }
         gameState.difficulty = parseFloat((gameState.difficulty + 0.15).toFixed(2));
         gameState.examsPassedTotal = (gameState.examsPassedTotal || 0) + 1; // v9.3
+        if (typeof rebirthData !== 'undefined' && !rebirthData.everPromoted) { rebirthData.everPromoted = true; if (typeof saveRebirthData === 'function') saveRebirthData(); } // v9.103 新生適應結束：帳號史上首次升學
         if (typeof bumpWeekly === 'function') bumpWeekly('exams');
         if (typeof onPlayerExamPassed === 'function') onPlayerExamPassed();
 
@@ -1794,6 +1795,7 @@
       }).join('');
     }
     function updateUI() {
+      { const nb = document.getElementById('newbie-badge'); if (nb) { const on = typeof newbieBoostActive === 'function' ? newbieBoostActive() : false; const d = on ? 'flex' : 'none'; if (nb.style.display !== d) nb.style.display = d; } } // v9.103 新生適應徽章
       renderDailyQuests();
       if (typeof renderRivals === 'function') renderRivals(); // v9.3
       if (typeof renderWeeklyGoal === 'function') renderWeeklyGoal(); // v9.3
@@ -1877,7 +1879,7 @@
       const footerEls = document.querySelectorAll(".floating-footer");
       if (footerEls) {
         const ts = gameState.lastSaved ? new Date(gameState.lastSaved).toLocaleTimeString('zh-TW', { hour12: false }) : '尚無紀錄';
-        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.102.0) | 上次存檔：${ts}`);
+        footerEls.forEach(el => el.innerText = `Copyright © 2026 葉大帥. All rights reserved. (v9.103.0) | 上次存檔：${ts}`);
       }
     }
 
@@ -2506,6 +2508,49 @@
       currentMinigame = null;
     }
 
+    // ================= v9.103 新手教練卡（首次遊玩限定、可跳過、只出一次） =================
+    const COACH_STEPS = [
+      { t: '👋 嗨，你是他的經理人', d: '他會自己上學、吃飯、睡覺，自動過日子。你不用一直操作，只要在關鍵時刻幫他做決定就好。' },
+      { t: '🏠 你可以隨時干預', d: '想改變他的行程？點小鎮上的建築，或進室內後用「地點條」指派他去讀書、運動、休息。' },
+      { t: '⏩ 加速與考試', d: '右上角 ⏩ 可以調時間速度；知識累積夠了，到學校點「參加考試」就能升學。祝他一路考上最高學歷！' }
+    ];
+    let _coachStep = 0;
+    function maybeShowCoachCard() {
+      if (typeof coachSeen === 'function' && coachSeen()) return;
+      setTimeout(() => {
+        if (document.querySelector('.overlay.active')) setTimeout(coachShow, 1600);
+        else coachShow();
+      }, 900);
+    }
+    function coachShow() {
+      if (typeof coachSeen === 'function' && coachSeen()) return;
+      let card = document.getElementById('coach-card');
+      if (!card) {
+        card = document.createElement('div');
+        card.id = 'coach-card';
+        document.body.appendChild(card);
+      }
+      const st = COACH_STEPS[_coachStep];
+      const last = _coachStep >= COACH_STEPS.length - 1;
+      card.innerHTML = '<div class="coach-t">' + st.t + '</div><div class="coach-d">' + st.d + '</div>' +
+        '<div class="coach-row"><span class="coach-dots">' + COACH_STEPS.map((_, i) => '<span class="coach-dot' + (i === _coachStep ? ' on' : '') + '"></span>').join('') + '</span>' +
+        '<span class="coach-btns"><button type="button" class="coach-skip" onclick="coachFinish()">跳過教學</button>' +
+        '<button type="button" class="coach-next" onclick="coachNext()">' + (last ? '開始吧！' : '下一步') + '</button></span></div>';
+      card.style.display = 'block';
+    }
+    function coachNext() {
+      playSound('click');
+      if (_coachStep >= COACH_STEPS.length - 1) { coachFinish(); return; }
+      _coachStep++;
+      coachShow();
+    }
+    function coachFinish() {
+      if (typeof markCoachSeen === 'function') markCoachSeen();
+      const card = document.getElementById('coach-card');
+      if (card) card.remove();
+      if (typeof saveGameData === 'function') saveGameData();
+    }
+    function mgReward(base) { return base + 2 * (gameState.gradeIndex || 0); } // v9.103 小遊戲獎勵縮放：基礎＋2×年級（全發獎點統一套用）
     function showMinigameResult(win, loc, score) {
       gameState.miniGameCooldowns[loc] = MG_COOLDOWN_SECONDS; // v8.9.1 完成才起算冷卻
       if (!gameState.miniGameWins) gameState.miniGameWins = { school: 0, restaurant: 0, gym: 0, library: 0, store: 0, home: 0 };
@@ -2526,11 +2571,12 @@
 
       const cfg = buffConfigs[loc];
       if (win) {
-        addBuff(cfg.type, cfg.winMult, cfg.winMin, cfg.icon, true, `${cfg.desc} x${cfg.winMult}`);
+        const winDur = mgReward(cfg.winMin); // v9.103 獎勵縮放：90＋2×年級
+        addBuff(cfg.type, cfg.winMult, winDur, cfg.icon, true, `${cfg.desc} x${cfg.winMult}`);
         area.innerHTML = `<div class="mg-result">
           <span class="result-icon">🎉</span>
           <div class="result-title" style="color:var(--leaf);">勝利！</div>
-          <div class="result-desc">${icoHtml(cfg.icon)} ${cfg.desc}速度 x${cfg.winMult}，持續 ${cfg.winMin} 秒！${score != null ? `<br>${icoSvg('star')} 本局得分 ${score}` : ''}</div>
+          <div class="result-desc">${icoHtml(cfg.icon)} ${cfg.desc}速度 x${cfg.winMult}，持續 ${winDur} 秒！${score != null ? `<br>${icoSvg('star')} 本局得分 ${score}` : ''}</div>
         </div>`;
         playSound('examSuccess');
       } else {
@@ -2686,7 +2732,7 @@
       const scoreEl = document.getElementById('cook-score');
       if (scoreEl) scoreEl.textContent = `⭐ ${G.score} 分 ・ 🔥 連擊 ${G.combo}`;
       const orderEl = document.getElementById('cook-order');
-      if (orderEl && G.order) orderEl.textContent = `訂單 ${G.order.food} ×${G.order.need}（${G.order.got}/${G.order.need}）獎勵 +4 ・ ${Math.max(0, Math.ceil(G.orderT))}s`;
+      if (orderEl && G.order) orderEl.textContent = `訂單 ${G.order.food} ×${G.order.need}（${G.order.got}/${G.order.need}）獎勵 +${mgReward(4)} ・ ${Math.max(0, Math.ceil(G.orderT))}s`;
       document.querySelectorAll('#cooking-belt .cooking-item').forEach((el, i) => {
         const s = G.slots[i]; if (!s) return;
         const ph = cookPhase(s);
@@ -2707,7 +2753,7 @@
         if (G.combo % 5 === 0) G.score += 1; // 連擊里程碑額外 +1
         if (G.order && s.food === G.order.food) {
           G.order.got++;
-          if (G.order.got >= G.order.need) { G.score += 4; G.t = Math.min(30, G.t + 2); window._cookNewOrder(); }
+          if (G.order.got >= G.order.need) { G.score += mgReward(4); G.t = Math.min(30, G.t + 2); window._cookNewOrder(); } // v9.103 獎勵縮放
         }
         s.food = null; s.cook = 0;
         playSound('click');
